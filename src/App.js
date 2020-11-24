@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
 import Video from './features/video';
-import './App.css';
+import Log from './features/log';
+import './App.scss';
 import { actions as appActions } from './features/app/appSlice';
 
 function App() {
@@ -15,11 +14,27 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        {/*<img src={logo} className="App-logo" alt="logo" />*/}
-        <Counter />
-        <Video />
-      </header>
+      <div className="page-section header">
+        <h1>Header</h1>
+      </div>
+      <div className="page-section body">
+        <div className="sidebar sidebar-1">
+          <h2>Sidebar 1</h2>
+        </div>
+        <div className="video">
+          <h2>Video</h2>
+          <Video />
+        </div>
+        <div className="sidebar sidebar-2">
+          <h2>Sidebar 2</h2>
+          <Log />
+        </div>
+      </div>
+
+      <div className="page-section footer">
+        <h2>Footer</h2>
+      </div>
+
     </div>
   );
 }
