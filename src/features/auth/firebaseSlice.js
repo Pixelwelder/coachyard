@@ -1,11 +1,10 @@
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
-import * as firebase from "firebase";
-import { actions as logActions, createLog } from "../../features/Log/logSlice";
-import firebaseConfig from "../../../__config__/firebase.json";
+import firebase from "firebase/app";
+import { actions as logActions, createLog } from "../../features/log/logSlice";
+import firebaseConfig from "../../__config__/firebase.json";
 import { ERROR } from "../log/logTypes";
 
 const initialState = {
-  firebaseStatus: UNINITIALIZED,
   isLoading: false,
   authUser: null
 };

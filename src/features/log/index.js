@@ -11,7 +11,6 @@ const Log = () => {
 
   return (
     <div className="page log">
-      <h2>Log</h2>
       <ul className="log-list">
         {messages.map((log, index) => <LogItem log={log} key={index} />)}
       </ul>
