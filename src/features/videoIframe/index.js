@@ -5,7 +5,7 @@ const Video = () => {
   useEffect(() => {
     const callFrame = DailyIframe.createFrame({
       iframeStyle: {
-        position: 'fixed',
+        position: 'absolute',
         border: '1px solid black',
         'background-color': 'white',
         width: `${window.innerWidth - 32}px`,
