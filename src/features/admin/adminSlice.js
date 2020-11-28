@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { actions as logActions, createLog } from '../log/logSlice';
+import app from 'firebase/app';
 
 const initialState = {};
 
-const init = createAsyncThunk(
-  'initAdmin',
-  async ({ firebase }, { dispatch }) => {
-    dispatch(logActions.log(createLog(`Admin initializing...` )));
-    const rooms = firebase.functions().httpsCallable('roomsFE');
+const fetchRooms = createAsyncThunk(
+  'fetchRooms',
+  async (_, { dispatch }) => {
+    const rooms = app.functions().httpsCallable('roomsFE');
     try {
       const result = await rooms({ message: 'hi' });
       console.log(result);
@@ -15,6 +15,14 @@ const init = createAsyncThunk(
       console.log(error);
       throw error;
     }
+  }
+);
+
+const init = createAsyncThunk(
+  'initAdmin',
+  async ({ firebase }, { dispatch }) => {
+    dispatch(logActions.log(createLog(`Admin initializing...` )));
+    await dispatch(fetchRooms());
     dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );

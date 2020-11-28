@@ -48,8 +48,6 @@ app.post('/', async (request, response) => {
 });
 
 const roomsFE = async (data, context) => {
-  console.log('CALLED', data, context);
-
   let message = '';
   if (!context.auth) {
     console.error('No logged-in user.');
@@ -62,7 +60,18 @@ const roomsFE = async (data, context) => {
 
     switch (method) {
       case 'get': {
-        return { message: 'done' };
+        const result = await fetch(
+          'https://api.daily.co/v1/rooms',
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${apiKey}`
+            }
+          }
+        );
+
+        const data = await result.json();
+        return { message: 'Done.', data };
       }
 
       default: {
