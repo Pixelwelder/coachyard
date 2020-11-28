@@ -9,15 +9,15 @@ const Video = () => {
         border: '1px solid black',
         'background-color': 'white',
         width: `${window.innerWidth - 32}px`,
-        height: `${window.innerHeight - 168}px`,
+        height: `${window.innerHeight - 308}px`,
         left: '16px',
         // right: '16px',
-        top: '150px',
+        top: '300px',
         // right: '1em',
         // bottom: '1em'
       }
     });
-    callFrame.join({ url: 'https://you.daily.co/hello' });
+    // callFrame.join({ url: 'https://you.daily.co/hello' });
 
     return () => {
       callFrame.destroy();
