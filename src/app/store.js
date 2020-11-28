@@ -8,7 +8,7 @@ import adminReducer from '../features/admin/adminSlice';
 export default configureStore({
   reducer: {
     app: appReducer,
-    counter: counterReducer,
+    counter2: counterReducer,
     log: logReducer,
     admin: adminReducer
   },
