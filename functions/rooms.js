@@ -48,20 +48,28 @@ app.post('/', async (request, response) => {
 });
 
 const roomsFE = async (data, context) => {
-  console.log('CALLED', data, context.auth);
+  console.log('CALLED', data, context);
+
   let message = '';
-  if (!context) {
-    console.log('No logged-in user.');
-    message += 'No logged-in user.';
+  if (!context.auth) {
+    console.error('No logged-in user.');
+    throw new functions.https.HttpsError('unauthenticated', 'No logged-in user', { sentData: data });
   } else {
     const { uid } = context.auth;
     const { name, email } = context.auth.token;
-    //
-    // // throw new functions.https.HttpsError('some-code', 'Some message', { details: '' });
-    message += `${name} ${email} ${uid}`;
-  }
+    const { method: _method = 'get' } = {} = data;
+    const method = _method.toLowerCase();
 
-  return { message };
+    switch (method) {
+      case 'get': {
+        return { message: 'done' };
+      }
+
+      default: {
+        throw new functions.https.HttpsError('unimplemented', `${method} is not implemented`, { sentData: data });
+      }
+    }
+  }
 };
 
 module.exports = {
