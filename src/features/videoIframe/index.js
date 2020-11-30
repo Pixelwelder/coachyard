@@ -1,7 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DailyIframe from '@daily-co/daily-js';
 
+import { selectors as videoSelectors } from './videoSlice';
+import { useSelector } from 'react-redux';
+
 const Video = () => {
+  const [callFrame, setCallFrame] = useState(null);
+  const { url } = useSelector(videoSelectors.select);
+
   useEffect(() => {
     const callFrame = DailyIframe.createFrame({
       iframeStyle: {
@@ -17,12 +23,20 @@ const Video = () => {
         // bottom: '1em'
       }
     });
-    // callFrame.join({ url: 'https://you.daily.co/hello' });
 
+    setCallFrame(callFrame);
     return () => {
       callFrame.destroy();
+      setCallFrame(null);
     }
   }, []);
+
+  useEffect(() => {
+    console.log('video: setting url!', url);
+    if (callFrame && url) {
+      callFrame.join({ url });
+    }
+  }, [url, callFrame]);
   return (
     <div>
 

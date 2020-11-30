@@ -70,8 +70,48 @@ const roomsFE = async (data, context) => {
           }
         );
 
-        const data = await result.json();
-        return { message: 'Done.', data };
+        const json = await result.json();
+        return { message: 'Done.', result: json, data };
+      }
+
+      case 'post' : {
+        const { name } = data;
+
+        const result = await fetch(
+          'https://api.daily.co/v1/rooms',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              name
+            })
+          }
+        );
+
+        const json = await result.json();
+        console.log(json);
+        return { message: 'Done.', result: json, data }
+      }
+
+      case 'delete': {
+        const { endpoint } = data;
+        console.log(`Deleting ${endpoint}...`);
+
+        // TODO Role-based auth here.
+
+        const result = await fetch(
+          `https://api.daily.co/v1/rooms/${endpoint}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${apiKey}`
+            }
+          }
+        );
+
+        return { message: 'Done.', data }
       }
 
       default: {
