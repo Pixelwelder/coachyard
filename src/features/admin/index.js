@@ -22,8 +22,9 @@ const Admin = () => {
   const dispatch = useDispatch();
   const rooms = useSelector(adminSelectors.selectRooms);
   const [showNewDialog, setShowNewDialog] = useState(false);
+
   const [newName, setNewName] = useState('');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [toDelete, setToDelete] = useState('');
 
   const columns = [
     { field: 'name', headerName: 'Name', width: 220 },
@@ -48,7 +49,7 @@ const Admin = () => {
             <Button
               onClick={() => {
                 const name = params.getValue('name');
-                dispatch(adminActions.deleteRoom({ name }));
+                setToDelete(name);
               }}
             >
               <DeleteIcon />
@@ -113,25 +114,25 @@ const Admin = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={showNewDialog} onClose={() => setShowNewDialog(false)} aria-labelledby="form-dialog-title">
+      <Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this Live Session?
+            Are you sure you want to delete Live Session '{toDelete}'?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowDeleteDialog(false)} color="primary">
+          <Button onClick={() => setToDelete('')} color="primary">
             Cancel
           </Button>
           <Button
             onClick={() => {
-              setShowNewDialog(false);
-              dispatch(adminActions.createRoom({ name: newName }));
+              dispatch(adminActions.deleteRoom({ name: toDelete }));
+              setToDelete('');
             }}
             color="primary"
           >
-            Create!
+            Delete!
           </Button>
         </DialogActions>
       </Dialog>
