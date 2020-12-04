@@ -7,10 +7,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const Nav = () => {
   const dispatch = useDispatch();
-  const { tab } = useSelector(navSelectors.select);
+  const { mainTab } = useSelector(navSelectors.select);
 
   return (
-    <Tabs value={tab} onChange={(event, newValue) => dispatch(navActions.setTab(newValue))}>
+    <Tabs value={mainTab} onChange={(event, newValue) => dispatch(navActions.setMainTab(newValue))}>
       <Tab label="Video" />
       <Tab label="Admin" />
       <Tab label="Dev" />

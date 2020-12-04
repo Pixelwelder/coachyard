@@ -7,7 +7,7 @@ import { actions as videoActions } from '../videoIframe/videoSlice';
 
 const initialState = {
   isLoading: true,
-  data: {
+  rooms: {
     total_count: 0,
     data: [
       // {
@@ -20,6 +20,10 @@ const initialState = {
         // uri: ''
       // }
     ]
+  },
+  recordings: {
+    total_count: 0,
+    data: []
   }
 };
 
@@ -48,6 +52,12 @@ const createRoom = createAsyncThunk(
     try {
       dispatch(logActions.log(createLog(`Creating room ${name}...`)));
       const result = await rooms({ method: 'post', name });
+      console.log('RESULT', result);
+      const { error, info } = result.data.result;
+      if (error) {
+        throw new Error(`${error} - ${info}`);
+      }
+
       dispatch(logActions.log(createLog(`Room ${name} created.`)));
       dispatch(fetchRooms());
     } catch (error) {
@@ -65,12 +75,47 @@ const deleteRoom = createAsyncThunk(
     try {
       dispatch(logActions.log(createLog(`Deleting room ${name}...`)));
       const result = await rooms({ method: 'delete', endpoint: name });
+      dispatch(logActions.log(createLog(`Room ${name} deleted.`)));
       dispatch(videoActions.setUrl(''));
       dispatch(fetchRooms());
-      dispatch(logActions.log(createLog(`Room ${name} deleted.`)));
     } catch (error) {
       dispatch(logActions.log(createLog(error.message, ERROR)));
       console.error(error);
+      throw error;
+    }
+  }
+);
+
+const mergeVideos = createAsyncThunk(
+  'mergeVideos',
+  async (_, { dispatch }) => {
+    try {
+      dispatch(logActions.log(createLog(`Attempting video merge...`)));
+      const processVideo = app.functions().httpsCallable('processVideo');
+      const result = await processVideo();
+      console.log(result);
+      dispatch(logActions.log(createLog(`Video merge successful: ${Math.floor(result.data.totalTime/1000)}`)));
+    } catch (error) {
+      dispatch(logActions.log(createLog(error.message, ERROR)));
+      console.error(error);
+      throw error;
+    }
+  }
+);
+
+const fetchRecordings = createAsyncThunk(
+  'fetchRecordings',
+  async (_, { dispatch }) => {
+    try {
+      dispatch(logActions.log(createLog(`Fetching recordings...`)));
+      const recordings = app.functions().httpsCallable('recordingsFE');
+      const result = await recordings({ method: 'get' });
+      console.log('recordings', result);
+      dispatch(logActions.log(createLog(`Recordings fetched`)));
+      return result;
+    } catch (error) {
+      console.error(error);
+      dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
     }
   }
@@ -81,6 +126,7 @@ const init = createAsyncThunk(
   async ({ firebase }, { dispatch }) => {
     dispatch(logActions.log(createLog(`Admin initializing...` )));
     await dispatch(fetchRooms());
+    await dispatch(fetchRecordings());
     dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );
@@ -91,31 +137,52 @@ const { reducer } = createSlice({
   extraReducers: {
     [fetchRooms.pending]: (state, action) => {
       state.isLoading = true;
-      state.data = initialState.data;
+      state.rooms = initialState.rooms;
     },
     [fetchRooms.rejected]: (state, action) => {
       state.isLoading = false;
     },
     [fetchRooms.fulfilled]: (state, action) => {
       const { data } = action.payload;
-      console.log('?', data.result);
       state.isLoading = false;
-      state.data = data.result;
+      state.rooms = data.result;
+    },
+    [createRoom.pending]: (state, action) => {
+      state.isLoading = true;
+    },
+    [createRoom.rejected]: (state, action) => {
+      state.isLoading = false;
+    },
+    [createRoom.fulfilled]: (state, action) => {
+      state.isLoading = false;
+    },
+    [fetchRecordings.pending]: (state, action) => {
+      state.isLoading = true;
+      state.recordings = initialState.recordings;
+    },
+    [fetchRecordings.rejected]: (state, action) => {
+      state.isLoading = false;
+    },
+    [fetchRecordings.fulfilled]: (state, action) => {
+      const { data } = action.payload;
+      state.isLoading = false;
+      state.recordings = data.result;
     }
   }
 });
 
-const actions = { init, fetchRooms, createRoom, deleteRoom };
+const actions = { init, fetchRooms, createRoom, deleteRoom, fetchRecordings, mergeVideos };
 
 const select = ({ admin }) => admin;
 const selectRooms = createSelector(
   select,
-  (admin) => admin?.data?.data || []
+  (admin) => admin.rooms.data || []
 );
-const selectors = {
+const selectRecordings = createSelector(
   select,
-  selectRooms
-};
+  (admin) => admin.recordings.data || []
+);
+const selectors = { select, selectRooms, selectRecordings };
 
 export { actions, selectors }
 export default reducer;

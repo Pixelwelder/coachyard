@@ -10,7 +10,7 @@ import { actions as appActions } from './features/app/appSlice';
 import Auth from './features/auth';
 import Admin from './features/admin';
 import Nav from './features/nav';
-import { selectors as navSelectors, TABS } from './features/nav/navSlice';
+import { selectors as navSelectors, MAIN_TABS } from './features/nav/navSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -18,7 +18,7 @@ function App() {
     dispatch(appActions.init());
   }, [dispatch]);
 
-  const { tab } = useSelector(navSelectors.select);
+  const { mainTab } = useSelector(navSelectors.select);
 
   return (
     <div className="App">
@@ -31,20 +31,20 @@ function App() {
       <Nav />
 
       <div className="page-section body">
-        {tab === 0 && (
+        {mainTab === 0 && (
           <>
             <div className="sidebar sidebar-1">
-              <Typography variant="h2">Videos</Typography>
+              <Typography variant="h2">Live Session</Typography>
             </div>
             <div className="video">
               <Video />
             </div>
           </>
         )}
-        {tab === 1 && (
+        {mainTab === 1 && (
           <Admin />
         )}
-        {tab === 2 && (
+        {mainTab === 2 && (
           <Log />
         )}
         {/*<div className="sidebar sidebar-2">*/}

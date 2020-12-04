@@ -2,7 +2,8 @@ const functions = require('firebase-functions');
 const express = require('express');
 const fetch = require('node-fetch');
 
-const { apiKey } = require('./__config__/daily.json');
+const { METHODS, getMethod } = require('./util/methods');
+const { getHeaders } = require('./util/headers');
 
 const app = express();
 app.get('/', async (request, response) => {
@@ -10,9 +11,7 @@ app.get('/', async (request, response) => {
     'https://api.daily.co/v1/rooms',
     {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${apiKey}`
-      }
+      headers: getHeaders()
     }
   );
 
@@ -33,9 +32,7 @@ app.post('/', async (request, response) => {
     'https://api.daily.co/v1/rooms',
     {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`
-      }
+      headers: getHeaders()
     }
   );
 
@@ -48,54 +45,49 @@ app.post('/', async (request, response) => {
 });
 
 const roomsFE = async (data, context) => {
-  let message = '';
   if (!context.auth) {
     console.error('No logged-in user.');
     throw new functions.https.HttpsError('unauthenticated', 'No logged-in user', { sentData: data });
   } else {
-    const { uid } = context.auth;
-    const { name, email } = context.auth.token;
-    const { method: _method = 'get' } = {} = data;
-    const method = _method.toLowerCase();
+    const method = getMethod(data);
 
     switch (method) {
-      case 'get': {
+      case METHODS.GET: {
         const result = await fetch(
           'https://api.daily.co/v1/rooms',
           {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${apiKey}`
-            }
+            method: METHODS.GET,
+            headers: getHeaders()
           }
         );
 
         const json = await result.json();
-        return { message: 'Done.', result: json, data };
+        return { message: 'Done.', result: json, sentData: data };
       }
 
-      case 'post' : {
+      case METHODS.POST : {
         const { name } = data;
 
         const result = await fetch(
           'https://api.daily.co/v1/rooms',
           {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${apiKey}`
-            },
+            method: METHODS.POST,
+            headers: getHeaders(),
             body: JSON.stringify({
-              name
+              name,
+              properties: {
+                enable_recording: 'rtp-tracks'
+              }
             })
           }
         );
 
         const json = await result.json();
         console.log(json);
-        return { message: 'Done.', result: json, data }
+        return { message: 'Done.', result: json, sentData: data }
       }
 
-      case 'delete': {
+      case METHODS.DELETE: {
         const { endpoint } = data;
         console.log(`Deleting ${endpoint}...`);
 
@@ -104,14 +96,14 @@ const roomsFE = async (data, context) => {
         const result = await fetch(
           `https://api.daily.co/v1/rooms/${endpoint}`,
           {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${apiKey}`
-            }
+            method: METHODS.DELETE,
+            headers: getHeaders()
           }
         );
 
-        return { message: 'Done.', data }
+        const json = await result.json();
+
+        return { message: 'Done.', result: json, sentData: data }
       }
 
       default: {

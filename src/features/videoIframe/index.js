@@ -26,8 +26,13 @@ const Video = () => {
 
     setCallFrame(callFrame);
     return () => {
-      callFrame.destroy();
-      setCallFrame(null);
+      const stopRecording = async () => {
+        setCallFrame(null);
+        callFrame.stopRecording();
+        await callFrame.destroy();
+      }
+
+      stopRecording();
     }
   }, []);
 
@@ -35,6 +40,7 @@ const Video = () => {
     console.log('video: setting url!', url);
     if (callFrame && url) {
       callFrame.join({ url });
+      callFrame.startRecording(); // TODO This should be explicit but not easily missed.
     }
   }, [url, callFrame]);
   return (
