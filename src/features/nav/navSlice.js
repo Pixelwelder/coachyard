@@ -8,12 +8,13 @@ const MAIN_TABS = {
 
 const ADMIN_TABS = {
   ROOMS: 0,
-  RECORDINGS: 1
+  RECORDINGS: 1,
+  ASSETS: 2
 }
 
 const initialState = {
   mainTab: MAIN_TABS.ADMIN,
-  adminTab: ADMIN_TABS.RECORDINGS
+  adminTab: ADMIN_TABS.ASSETS
 };
 
 const { actions, reducer } = createSlice({

@@ -3,6 +3,7 @@ const serviceAccount = require('./__config__/firebase-service-account.json');
 
 const { rooms, roomsFE } = require('./rooms');
 const { recordingsFE } = require('./recordings');
+const { assetsFE } = require('./assets');
 const { processVideo } = require('./ffmpegTest');
 
 admin.initializeApp({
@@ -15,5 +16,6 @@ module.exports = {
   rooms,
   roomsFE,
   recordingsFE,
+  assetsFE,
   processVideo
 };

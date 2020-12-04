@@ -3,7 +3,7 @@ const functions = require('firebase-functions');
 const fetch = require('node-fetch');
 
 const { METHODS, getMethod } = require('./util/methods');
-const { getHeaders } = require('./util/headers');
+const { getDailyHeaders } = require('./util/headers');
 const { apiKey } = require('./__config__/daily.json');
 
 const recordingsFE = async (data = {}, context) => {
@@ -15,7 +15,7 @@ const recordingsFE = async (data = {}, context) => {
         `https://api.daily.co/v1/recordings${endpoint && ('/' + endpoint)}`,
         {
           method: METHODS.GET,
-          headers: getHeaders()
+          headers: getDailyHeaders()
         }
       );
       const json = await result.json();

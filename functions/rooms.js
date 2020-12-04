@@ -3,7 +3,7 @@ const express = require('express');
 const fetch = require('node-fetch');
 
 const { METHODS, getMethod } = require('./util/methods');
-const { getHeaders } = require('./util/headers');
+const { getDailyHeaders } = require('./util/headers');
 
 const app = express();
 app.get('/', async (request, response) => {
@@ -11,13 +11,11 @@ app.get('/', async (request, response) => {
     'https://api.daily.co/v1/rooms',
     {
       method: 'GET',
-      headers: getHeaders()
+      headers: getDailyHeaders()
     }
   );
 
   const json = await result.json();
-
-  console.log(json);
 
   return response
     .status(200)
@@ -32,7 +30,7 @@ app.post('/', async (request, response) => {
     'https://api.daily.co/v1/rooms',
     {
       method: 'POST',
-      headers: getHeaders()
+      headers: getDailyHeaders()
     }
   );
 
@@ -57,7 +55,7 @@ const roomsFE = async (data, context) => {
           'https://api.daily.co/v1/rooms',
           {
             method: METHODS.GET,
-            headers: getHeaders()
+            headers: getDailyHeaders()
           }
         );
 
@@ -72,7 +70,7 @@ const roomsFE = async (data, context) => {
           'https://api.daily.co/v1/rooms',
           {
             method: METHODS.POST,
-            headers: getHeaders(),
+            headers: getDailyHeaders(),
             body: JSON.stringify({
               name,
               properties: {
@@ -97,7 +95,7 @@ const roomsFE = async (data, context) => {
           `https://api.daily.co/v1/rooms/${endpoint}`,
           {
             method: METHODS.DELETE,
-            headers: getHeaders()
+            headers: getDailyHeaders()
           }
         );
 

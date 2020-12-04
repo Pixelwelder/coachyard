@@ -24,6 +24,10 @@ const initialState = {
   recordings: {
     total_count: 0,
     data: []
+  },
+  assets: {
+    total_count: 0,
+    data: []
   }
 };
 
@@ -121,12 +125,30 @@ const fetchRecordings = createAsyncThunk(
   }
 );
 
+const fetchAssets = createAsyncThunk(
+  'fetchAssets',
+  async (_, { dispatch }) => {
+    dispatch(logActions.log(createLog(`Fetching assets...` )));
+    try {
+      dispatch(logActions.log(createLog(`Fetched assets`)));
+      const assets = app.functions().httpsCallable('assetsFE');
+      const result = await assets({ method: 'get' });
+      return result;
+    } catch (error) {
+      console.error(error);
+      dispatch(logActions.log(createLog(error.message, ERROR)));
+      throw error;
+    }
+  }
+)
+
 const init = createAsyncThunk(
   'initAdmin',
   async ({ firebase }, { dispatch }) => {
     dispatch(logActions.log(createLog(`Admin initializing...` )));
     await dispatch(fetchRooms());
     await dispatch(fetchRecordings());
+    await dispatch(fetchAssets());
     dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );
@@ -167,11 +189,25 @@ const { reducer } = createSlice({
       const { data } = action.payload;
       state.isLoading = false;
       state.recordings = data.result;
+    },
+    [fetchAssets.pending]: (state, action) => {
+      state.isLoading = true;
+      state.assets = initialState.assets;
+    },
+    [fetchAssets.rejected]: (state, action) => {
+      state.isLoading = false;
+    },
+    [fetchAssets.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.assets = {
+        ...action.payload.data.result,
+        total_count: action.payload.data.result.data.length
+      };
     }
   }
 });
 
-const actions = { init, fetchRooms, createRoom, deleteRoom, fetchRecordings, mergeVideos };
+const actions = { init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchAssets };
 
 const select = ({ admin }) => admin;
 const selectRooms = createSelector(
@@ -182,7 +218,11 @@ const selectRecordings = createSelector(
   select,
   (admin) => admin.recordings.data || []
 );
-const selectors = { select, selectRooms, selectRecordings };
+const selectAssets = createSelector(
+  select,
+  ({ assets }) => assets.data
+);
+const selectors = { select, selectRooms, selectRecordings, selectAssets };
 
 export { actions, selectors }
 export default reducer;
