@@ -207,8 +207,6 @@ const { reducer } = createSlice({
   }
 });
 
-const actions = { init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchAssets };
-
 const select = ({ admin }) => admin;
 const selectRooms = createSelector(
   select,
@@ -222,7 +220,9 @@ const selectAssets = createSelector(
   select,
   ({ assets }) => assets.data
 );
+
 const selectors = { select, selectRooms, selectRecordings, selectAssets };
+const actions = { init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchAssets };
 
 export { actions, selectors }
 export default reducer;
