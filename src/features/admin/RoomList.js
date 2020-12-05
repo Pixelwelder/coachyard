@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
+import { useDispatch, useSelector } from 'react-redux';
 import { actions as videoActions } from '../videoIframe/videoSlice';
 import { actions as navActions, MAIN_TABS } from '../nav/navSlice';
 import JoinIcon from '@material-ui/icons/LiveTv';
@@ -15,15 +16,58 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
-import { useDispatch, useSelector } from 'react-redux';
+import DeleteDialog from './DeleteDialog';
 
-const RecordingList = () => {
+const CreateDialog = ({ open, onClose, onConfirm }) => {
+  const [name, setName] = useState('');
+
+  const close = () => {
+    setName('');
+    onClose();
+  }
+
+  return (
+    <Dialog open={open} onClose={close} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Create Live Session</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          What would you like to call this live session?
+        </DialogContentText>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="name"
+          label="name"
+          type="text"
+          fullWidth
+          value={name}
+          onChange={({ target: { value } }) => setName(value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
+        {/*  Cancel*/}
+        {/*</Button>*/}
+        <Button
+          onClick={() => onConfirm({ name: name })}
+          color="primary"
+        >
+          Create!
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const RoomList = () => {
   const dispatch = useDispatch();
   const items = useSelector(adminSelectors.selectRooms);
   const [showNewDialog, setShowNewDialog] = useState(false);
 
   const [newName, setNewName] = useState('');
   const [toDelete, setToDelete] = useState('');
+
+  const fetchItems = adminActions.fetchRooms;
 
   const columns = [
     { field: 'name', headerName: 'Name', width: 220 },
@@ -61,89 +105,41 @@ const RecordingList = () => {
 
   return (
     <div style={{ height: 400, width: '100%' }}>
-      <Button onClick={() => dispatch(adminActions.fetchRooms())}><CachedIcon /></Button>
+      <Button onClick={() => dispatch(fetchItems())}>
+        <CachedIcon />
+      </Button>
       <Button onClick={() => {
         setShowNewDialog(true);
         setNewName('');
       }}>
         <AddIcon />
       </Button>
-      <Button
-        onClick={() => {
-          dispatch(adminActions.mergeVideos());
-        }}
-      >
-        <MergeTypeIcon />
-      </Button>
+
       <DataGrid
         rows={items}
         columns={columns}
-        // rowHeight={}
-        // headerHeight={}
-        // scrollbarSize={}
-        // columnBuffer={}
-        // sortingOrder={}
-        // icons={}
-        // columnTypes={}
       />
 
-      <Dialog open={showNewDialog} onClose={() => setShowNewDialog(false)} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Create Live Session</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            What would you like to call this live session?
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="name"
-            type="text"
-            fullWidth
-            value={newName}
-            onChange={({ target: { value } }) => setNewName(value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
-          {/*  Cancel*/}
-          {/*</Button>*/}
-          <Button
-            onClick={() => {
-              setShowNewDialog(false);
-              dispatch(adminActions.createRoom({ name: newName }));
-            }}
-            color="primary"
-          >
-            Create!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CreateDialog
+        open={showNewDialog}
+        onClose={() => setShowNewDialog(false)}
+        onConfirm={({ name }) => {
+          setShowNewDialog(false);
+          dispatch(adminActions.createRoom({ name }));
+        }}
+      />
 
-      <Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete Live Session '{toDelete}'?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setToDelete('')} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              dispatch(adminActions.deleteRoom({ name: toDelete }));
-              setToDelete('');
-            }}
-            color="primary"
-          >
-            Delete!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeleteDialog
+        toDelete={toDelete}
+        onClose={() => setToDelete('')}
+        onConfirm={() => {
+          dispatch(adminActions.deleteRoom({ name: toDelete }));
+          setToDelete('');
+        }}
+      />
+
     </div>
   );
 };
 
-export default RecordingList;
+export default RoomList;

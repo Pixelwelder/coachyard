@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import DailyIframe from '@daily-co/daily-js';
+import { useSelector } from 'react-redux';
+import Button from '@material-ui/core/Button';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import { red } from '@material-ui/core/colors';
 
 import { selectors as videoSelectors } from './videoSlice';
-import { useSelector } from 'react-redux';
 
 const Video = () => {
   const [callFrame, setCallFrame] = useState(null);
+  const [isInMeeting, setIsInMeeting] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const { url } = useSelector(videoSelectors.select);
 
   useEffect(() => {
@@ -24,7 +29,12 @@ const Video = () => {
       }
     });
 
+    callFrame.on('recording-started', () => setIsRecording(true));
+    callFrame.on('recording-stopped', () => setIsRecording(false));
+    callFrame.on('joined-meeting', (event) => setIsInMeeting(true));
+    callFrame.on('left-meeting', (event) => setIsInMeeting(false));
     setCallFrame(callFrame);
+
     return () => {
       const stopRecording = async () => {
         setCallFrame(null);
@@ -37,15 +47,20 @@ const Video = () => {
   }, []);
 
   useEffect(() => {
-    console.log('video: setting url!', url);
     if (callFrame && url) {
       callFrame.join({ url });
-      callFrame.startRecording(); // TODO This should be explicit but not easily missed.
     }
   }, [url, callFrame]);
+
+  const record = () => {
+    callFrame.startRecording();
+  }
+
   return (
     <div>
-
+      <Button disabled={!isInMeeting || isRecording} onClick={record}>
+        <FiberManualRecordIcon style={{ color: red[500] }} /> Record
+      </Button>
     </div>
   );
 };

@@ -6,8 +6,8 @@ import JoinIcon from '@material-ui/icons/LiveTv';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { actions as adminActions, selectors as adminSelectors } from './adminSlice';
 import CachedIcon from '@material-ui/icons/Cached';
-import AddIcon from '@material-ui/icons/Add';
-import MergeTypeIcon from '@material-ui/icons/MergeType';
+import DownloadIcon from '@material-ui/icons/GetApp';
+import InfoIcon from '@material-ui/icons/Info';
 import { DataGrid } from '@material-ui/data-grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -16,11 +16,12 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import { useDispatch, useSelector } from 'react-redux';
+import Info from './Info';
 
 const RecordingList = () => {
   const dispatch = useDispatch();
   const items = useSelector(adminSelectors.selectRecordings);
-  const [showNewDialog, setShowNewDialog] = useState(false);
+  const [item, setItem] = useState(false);
 
   const [newName, setNewName] = useState('');
   const [toDelete, setToDelete] = useState('');
@@ -45,13 +46,14 @@ const RecordingList = () => {
             >
               <JoinIcon />
             </Button>
-            <Button
-              onClick={() => {
-                const name = params.getValue('name');
-                setToDelete(name);
-              }}
-            >
+            <Button onClick={() => setToDelete(params.getValue('name'))}>
               <DeleteIcon />
+            </Button>
+            <Button onClick={() => {}}>
+              <DownloadIcon />
+            </Button>
+            <Button onClick={() => setItem(params.data)}>
+              <InfoIcon />
             </Button>
           </div>
         )
@@ -74,28 +76,30 @@ const RecordingList = () => {
         // columnTypes={}
       />
 
-      <Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete Live Session '{toDelete}'?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setToDelete('')} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              // dispatch(adminActions.deleteRoom({ name: toDelete }));
-              setToDelete('');
-            }}
-            color="primary"
-          >
-            Delete!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Info item={item} onClose={() => setItem(null)} />
+
+      {/*<Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">*/}
+      {/*  <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>*/}
+      {/*  <DialogContent>*/}
+      {/*    <DialogContentText>*/}
+      {/*      Are you sure you want to delete Live Session '{toDelete}'?*/}
+      {/*    </DialogContentText>*/}
+      {/*  </DialogContent>*/}
+      {/*  <DialogActions>*/}
+      {/*    <Button onClick={() => setToDelete('')} color="primary">*/}
+      {/*      Cancel*/}
+      {/*    </Button>*/}
+      {/*    <Button*/}
+      {/*      onClick={() => {*/}
+      {/*        // dispatch(adminActions.deleteRoom({ name: toDelete }));*/}
+      {/*        setToDelete('');*/}
+      {/*      }}*/}
+      {/*      color="primary"*/}
+      {/*    >*/}
+      {/*      Delete!*/}
+      {/*    </Button>*/}
+      {/*  </DialogActions>*/}
+      {/*</Dialog>*/}
     </div>
   );
 };

@@ -16,13 +16,11 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import { useDispatch, useSelector } from 'react-redux';
+import DeleteDialog from './DeleteDialog';
 
-const RecordingList = () => {
+const AssetList = () => {
   const dispatch = useDispatch();
   const items = useSelector(adminSelectors.selectAssets);
-  const [showNewDialog, setShowNewDialog] = useState(false);
-
-  const [newName, setNewName] = useState('');
   const [toDelete, setToDelete] = useState('');
 
   const columns = [
@@ -46,6 +44,7 @@ const RecordingList = () => {
               <JoinIcon />
             </Button>
             <Button
+              disabled={true}
               onClick={() => {
                 const name = params.getValue('name');
                 setToDelete(name);
@@ -61,64 +60,23 @@ const RecordingList = () => {
 
   return (
     <div style={{ height: 400, width: '100%' }}>
-      <Button onClick={() => dispatch(adminActions.fetchAssets())}><CachedIcon /></Button>
-      <Button onClick={() => {
-        setShowNewDialog(true);
-        setNewName('');
-      }}>
-        <AddIcon />
+      <Button onClick={() => dispatch(adminActions.fetchAssets())}>
+        <CachedIcon />
       </Button>
-      <Button
-        onClick={() => {
-          dispatch(adminActions.mergeVideos());
-        }}
-      >
-        <MergeTypeIcon />
-      </Button>
+
       <DataGrid
         rows={items}
         columns={columns}
-        // rowHeight={}
-        // headerHeight={}
-        // scrollbarSize={}
-        // columnBuffer={}
-        // sortingOrder={}
-        // icons={}
-        // columnTypes={}
       />
 
-      <Dialog open={showNewDialog} onClose={() => setShowNewDialog(false)} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Create Live Session</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            What would you like to call this live session?
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="name"
-            type="text"
-            fullWidth
-            value={newName}
-            onChange={({ target: { value } }) => setNewName(value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
-          {/*  Cancel*/}
-          {/*</Button>*/}
-          <Button
-            onClick={() => {
-              setShowNewDialog(false);
-              dispatch(adminActions.createRoom({ name: newName }));
-            }}
-            color="primary"
-          >
-            Create!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeleteDialog
+        toDelete={toDelete}
+        onClose={() => setToDelete('')}
+        onConfirm={() => {
+          dispatch(adminActions.deleteRoom({ name: toDelete }));
+          setToDelete('');
+        }}
+      />
 
       <Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>
@@ -146,4 +104,4 @@ const RecordingList = () => {
   );
 };
 
-export default RecordingList;
+export default AssetList;

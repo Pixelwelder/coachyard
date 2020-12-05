@@ -90,23 +90,6 @@ const deleteRoom = createAsyncThunk(
   }
 );
 
-const mergeVideos = createAsyncThunk(
-  'mergeVideos',
-  async (_, { dispatch }) => {
-    try {
-      dispatch(logActions.log(createLog(`Attempting video merge...`)));
-      const processVideo = app.functions().httpsCallable('processVideo');
-      const result = await processVideo();
-      console.log(result);
-      dispatch(logActions.log(createLog(`Video merge successful: ${Math.floor(result.data.totalTime/1000)}`)));
-    } catch (error) {
-      dispatch(logActions.log(createLog(error.message, ERROR)));
-      console.error(error);
-      throw error;
-    }
-  }
-);
-
 const fetchRecordings = createAsyncThunk(
   'fetchRecordings',
   async (_, { dispatch }) => {
@@ -140,7 +123,14 @@ const fetchAssets = createAsyncThunk(
       throw error;
     }
   }
-)
+);
+
+const deleteAsset = createAsyncThunk(
+  'deleteAsset',
+  async ({ name }, { dispatch }) => {
+    dispatch(logActions.log(createLog(`Deleting asset...` )));
+  }
+);
 
 const init = createAsyncThunk(
   'initAdmin',
@@ -150,6 +140,23 @@ const init = createAsyncThunk(
     await dispatch(fetchRecordings());
     await dispatch(fetchAssets());
     dispatch(logActions.log(createLog(`Admin initialized` )));
+  }
+);
+
+const mergeVideos = createAsyncThunk(
+  'mergeVideos',
+  async (_, { dispatch }) => {
+    try {
+      dispatch(logActions.log(createLog(`Attempting video merge...`)));
+      const processVideo = app.functions().httpsCallable('processVideo');
+      const result = await processVideo();
+      console.log(result);
+      dispatch(logActions.log(createLog(`Video merge successful: ${Math.floor(result.data.totalTime/1000)}`)));
+    } catch (error) {
+      dispatch(logActions.log(createLog(error.message, ERROR)));
+      console.error(error);
+      throw error;
+    }
   }
 );
 
