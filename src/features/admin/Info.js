@@ -1,47 +1,62 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import app from 'firebase/app';
+
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import { DataGrid } from '@material-ui/data-grid';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import Input from '@material-ui/core/Input';
-import FormControl from '@material-ui/core/FormControl';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import ReactPlayer from 'react-player';
+import InfoItem from './InfoItem';
+import TracksDisplay from './TracksDisplay';
 
 const trackColumns = [
   { field: 'name', headerName: 'Name', width: 220 },
 ];
 
 const Info = ({ item, onClose }) => {
-  console.log(item);
+  useEffect(() => {
+    const go = async (id) => {
+      const composites = app.functions().httpsCallable('compositesFE');
+      const result = await composites({ id });
+      console.log('RESULT', result);
+    };
+    if (item) {
+      go(item.id);
+    }
+  }, [item]);
+
   const [tabValue, setTabValue] = useState(0);
-
-
 
   return (
     <Dialog open={!!item} onClose={onClose} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Info</DialogTitle>
+      <DialogTitle id="form-dialog-title">{item?.room_name || 'Item'}</DialogTitle>
       <DialogContent>
         {!!item && (
           <>
-            <p>{item.room_name}</p>
-            {Object.entries(item).map(([name, value], index) => {
-              return (
-                <div style={{ display: 'flex' }} key={index}>
-                  <span>{name}: </span>
-                  <span>{value.toString()}</span>
-                </div>
-              );
-            })}
-            <Tabs value={tabValue} onChange={(event, newValue) => setTabValue(newValue)}>
+            <InfoItem item={item} />
+            <TracksDisplay tracks={item.tracks} />
+            <Select
+              labelId="tracks-label"
+              id="tracks-select"
+              value={tabValue}
+              onChange={({ target: { value } }) => setTabValue(value)}
+            >
               {item.tracks.map((track, index) => {
-                return (<Tab label={index} key={index} />);
+                return <MenuItem value={index} key={index}>{index}</MenuItem>;
               })}
-            </Tabs>
-            {Object.entries(item.tracks[tabValue]).map(([name, value], index) => {
+            </Select>
+            {/*<Tabs value={tabValue} onChange={(event, newValue) => setTabValue(newValue)}>*/}
+            {/*  {item.tracks.map((track, index) => {*/}
+            {/*    return (<Tab label={index} key={index} />);*/}
+            {/*  })}*/}
+            {/*</Tabs>*/}
+            {Object.entries((item?.tracks || [])[tabValue]).map(([name, value], index) => {
               return (
                 <div style={{ display: 'flex' }} key={index}>
                   <span>{name}: </span>
@@ -49,6 +64,10 @@ const Info = ({ item, onClose }) => {
                 </div>
               );
             })}
+            <ReactPlayer
+              url={`https://api.daily.co/v1/recordings/0526c677-f214-41ba-8ead-53ed1ec3f8ae/composites/17c60468-79d4-4e3a-ff87-9ef161e2f60a.mp4`}
+            />
+            {/*<a href={`https://api.daily.co${item.tracks[tabValue].download_url}`} target="_blank">Download</a>*/}
           </>
         )}
 

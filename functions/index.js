@@ -3,6 +3,7 @@ const serviceAccount = require('./__config__/firebase-service-account.json');
 
 const { rooms, roomsFE } = require('./rooms');
 const { recordingsFE } = require('./recordings');
+const { createCompositeFE, compositesFE } = require('./composites');
 const { assetsFE } = require('./assets');
 const { processVideo } = require('./ffmpegTest');
 
@@ -17,5 +18,7 @@ module.exports = {
   roomsFE,
   recordingsFE,
   assetsFE,
-  processVideo
+  processVideo,
+  compositesFE,
+  createCompositeFE
 };

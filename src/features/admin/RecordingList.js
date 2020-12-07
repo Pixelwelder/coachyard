@@ -6,9 +6,11 @@ import JoinIcon from '@material-ui/icons/LiveTv';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { actions as adminActions, selectors as adminSelectors } from './adminSlice';
 import CachedIcon from '@material-ui/icons/Cached';
+import ReactPlayer from 'react-player';
 import DownloadIcon from '@material-ui/icons/GetApp';
 import InfoIcon from '@material-ui/icons/Info';
 import { DataGrid } from '@material-ui/data-grid';
+import CompositeIcon from '@material-ui/icons/SystemUpdateAlt';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -49,11 +51,14 @@ const RecordingList = () => {
             <Button onClick={() => setToDelete(params.getValue('name'))}>
               <DeleteIcon />
             </Button>
-            <Button onClick={() => {}}>
-              <DownloadIcon />
-            </Button>
+            {/*<Button onClick={() => {}}>*/}
+            {/*  <DownloadIcon />*/}
+            {/*</Button>*/}
             <Button onClick={() => setItem(params.data)}>
               <InfoIcon />
+            </Button>
+            <Button onClick={() => dispatch(adminActions.createComposite({ id: params.data.id }))}>
+              <CompositeIcon />
             </Button>
           </div>
         )
@@ -64,17 +69,13 @@ const RecordingList = () => {
   return (
     <div style={{ height: 400, width: '100%' }}>
       <Button onClick={() => dispatch(adminActions.fetchRecordings())}><CachedIcon /></Button>
+
       <DataGrid
         rows={items}
         columns={columns}
-        // rowHeight={}
-        // headerHeight={}
-        // scrollbarSize={}
-        // columnBuffer={}
-        // sortingOrder={}
-        // icons={}
-        // columnTypes={}
       />
+
+
 
       <Info item={item} onClose={() => setItem(null)} />
 

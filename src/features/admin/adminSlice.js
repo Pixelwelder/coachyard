@@ -132,17 +132,6 @@ const deleteAsset = createAsyncThunk(
   }
 );
 
-const init = createAsyncThunk(
-  'initAdmin',
-  async ({ firebase }, { dispatch }) => {
-    dispatch(logActions.log(createLog(`Admin initializing...` )));
-    await dispatch(fetchRooms());
-    await dispatch(fetchRecordings());
-    await dispatch(fetchAssets());
-    dispatch(logActions.log(createLog(`Admin initialized` )));
-  }
-);
-
 const mergeVideos = createAsyncThunk(
   'mergeVideos',
   async (_, { dispatch }) => {
@@ -157,6 +146,51 @@ const mergeVideos = createAsyncThunk(
       console.error(error);
       throw error;
     }
+  }
+);
+
+const createComposite = createAsyncThunk(
+  'createComposite',
+  async (args, { dispatch }) => {
+    try {
+      dispatch(logActions.log(createLog(`Creating composite...`)));
+      const createComposite = app.functions().httpsCallable('createCompositeFE');
+      const result = await createComposite(args);
+      dispatch(logActions.log(createLog(`Composite created`)));
+    } catch (error) {
+      dispatch(logActions.log(createLog(error.message, ERROR)));
+      console.error(error);
+      throw error;
+    }
+  }
+);
+
+const fetchComposites = createAsyncThunk(
+  'fetchComposites',
+  async (_, { dispatch }) => {
+    dispatch(logActions.log(createLog(`Fetching composites...` )));
+    try {
+      dispatch(logActions.log(createLog(`Fetched composites`)));
+      const assets = app.functions().httpsCallable('compositesFE');
+      const result = await assets({ method: 'get' });
+      return result;
+    } catch (error) {
+      console.error(error);
+      dispatch(logActions.log(createLog(error.message, ERROR)));
+      throw error;
+    }
+  }
+);
+
+const init = createAsyncThunk(
+  'initAdmin',
+  async ({ firebase }, { dispatch }) => {
+    dispatch(logActions.log(createLog(`Admin initializing...` )));
+    await dispatch(fetchRooms());
+    await dispatch(fetchRecordings());
+    await dispatch(fetchAssets());
+    await dispatch(fetchComposites());
+    dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );
 
@@ -197,6 +231,15 @@ const { reducer } = createSlice({
       state.isLoading = false;
       state.recordings = data.result;
     },
+    [fetchComposites.pending]: (state, action) => {
+      state.isLoading = true;
+    },
+    [fetchComposites.rejected]: (state, action) => {
+      state.isLoading = false;
+    },
+    [fetchComposites.fulfilled]: (state, action) => {
+      state.isLoading = false;
+    },
     [fetchAssets.pending]: (state, action) => {
       state.isLoading = true;
       state.assets = initialState.assets;
@@ -223,13 +266,19 @@ const selectRecordings = createSelector(
   select,
   (admin) => admin.recordings.data || []
 );
+const selectComposites = createSelector(
+  select,
+  ({ composites }) => composites.data || []
+);
 const selectAssets = createSelector(
   select,
   ({ assets }) => assets.data
 );
 
-const selectors = { select, selectRooms, selectRecordings, selectAssets };
-const actions = { init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchAssets };
+const selectors = { select, selectRooms, selectRecordings, selectComposites, selectAssets };
+const actions = {
+  init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchComposites, fetchAssets, createComposite
+};
 
 export { actions, selectors }
 export default reducer;
