@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const fetch = require('node-fetch');
 
 const { METHODS, getMethod } = require('./util/methods');
-const { getDailyHeaders } = require('./util/headers');
+const { getDailyHeaders, getMuxHeaders } = require('./util/headers');
 
 const createCompositeFE = async (data, context) => {
   if (!context.auth) {
@@ -75,6 +75,61 @@ const compositesFE = async (data, context) => {
       );
 
       const json = await result.json();
+
+      return { message: 'Done.', result: json, sentData: data };
+    }
+
+    case METHODS.POST: {
+      const { id } = data;
+
+      const result = await fetch(
+        `http://api.daily.co/v1/recordings/${id}/composites`,
+        {
+          headers: getDailyHeaders(),
+          method: METHODS.GET
+        }
+      );
+
+      const json = await result.json();
+      console.log(json);
+      if (json.current_error) {
+        throw new functions.https.HttpsError('internal', json.current_error);
+      }
+
+      const { newest_composite: { download_url } } = json;
+      const fullUrl = `https://api.daily.com${download_url}`;
+
+      try {
+        // const muxResult = await fetch(
+        //   'https://api.mux.com/video/v1/assets',
+        //   {
+        //     headers: getMuxHeaders(),
+        //     method: METHODS.POST,
+        //     body: JSON.stringify({
+        //       input: fullUrl
+        //     })
+        //   }
+        // );
+        // console.log('result', muxResult);
+
+        // https://storage.googleapis.com/muxdemofiles/mux-video-intro.mp4
+
+        const muxResult = await fetch(
+          'https://api.mux.com/video/v1/assets',
+          {
+            headers: getMuxHeaders(),
+            method: METHODS.POST,
+            body: JSON.stringify({
+              input: 'https://storage.googleapis.com/muxdemofiles/mux-video-intro.mp4',
+              playback_policy: 'public'
+            })
+          }
+        );
+        console.log('result', muxResult);
+
+      } catch (error) {
+        console.error(error);
+      }
 
       return { message: 'Done.', result: json, sentData: data };
     }

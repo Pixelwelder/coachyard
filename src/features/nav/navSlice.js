@@ -9,7 +9,7 @@ const MAIN_TABS = {
 const ADMIN_TABS = {
   ROOMS: 0,
   RECORDINGS: 1,
-  ASSETS: 3
+  ASSETS: 2
 }
 
 const initialState = {

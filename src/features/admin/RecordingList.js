@@ -29,12 +29,12 @@ const RecordingList = () => {
   const [toDelete, setToDelete] = useState('');
 
   const columns = [
-    { field: 'name', headerName: 'Name', width: 220 },
-    { field: 'id', headerName: 'ID', width: 220 },
+    { field: 'id', headerName: 'ID', width: 300 },
+    { field: 'tracks', headerName: 'Tracks', valueFormatter: ({ value }) => value.length },
     {
       field: '',
       headerName: 'Actions',
-      width: 300,
+      flex: 1,
       disableClickEventBubbling: true,
       renderCell: (params) => {
         return (

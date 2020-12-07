@@ -14,23 +14,13 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ReactPlayer from 'react-player';
 import InfoItem from './InfoItem';
 import TracksDisplay from './TracksDisplay';
+import VideoDisplay from './VideoDisplay';
 
 const trackColumns = [
   { field: 'name', headerName: 'Name', width: 220 },
 ];
 
 const Info = ({ item, onClose }) => {
-  useEffect(() => {
-    const go = async (id) => {
-      const composites = app.functions().httpsCallable('compositesFE');
-      const result = await composites({ id });
-      console.log('RESULT', result);
-    };
-    if (item) {
-      go(item.id);
-    }
-  }, [item]);
-
   const [tabValue, setTabValue] = useState(0);
 
   return (
@@ -41,6 +31,7 @@ const Info = ({ item, onClose }) => {
           <>
             <InfoItem item={item} />
             <TracksDisplay tracks={item.tracks} />
+            <VideoDisplay id={item.id} />
             <Select
               labelId="tracks-label"
               id="tracks-select"

@@ -17,6 +17,7 @@ import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import { useDispatch, useSelector } from 'react-redux';
 import DeleteDialog from './DeleteDialog';
+import ReactPlayer from 'react-player';
 
 const AssetList = () => {
   const dispatch = useDispatch();
@@ -45,10 +46,7 @@ const AssetList = () => {
             </Button>
             <Button
               disabled={true}
-              onClick={() => {
-                const name = params.getValue('name');
-                setToDelete(name);
-              }}
+              onClick={() => setToDelete(params.getValue('name'))}
             >
               <DeleteIcon />
             </Button>
@@ -59,47 +57,33 @@ const AssetList = () => {
   ];
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 400, width: '100%', border: '1px solid red' }}>
       <Button onClick={() => dispatch(adminActions.fetchAssets())}>
         <CachedIcon />
       </Button>
 
-      <DataGrid
-        rows={items}
-        columns={columns}
-      />
+      <div style={{ display: 'flex' }}>
+        <DataGrid
+          rows={items}
+          columns={columns}
+        />
+
+        <ReactPlayer
+          width={400}
+          height={300}
+          style={{ border: '3px solid blue' }}
+          url={`https://api.daily.co/v1/recordings/0526c677-f214-41ba-8ead-53ed1ec3f8ae/composites/17c60468-79d4-4e3a-ff87-9ef161e2f60a.mp4`}
+        />
+      </div>
 
       <DeleteDialog
         toDelete={toDelete}
         onClose={() => setToDelete('')}
         onConfirm={() => {
-          dispatch(adminActions.deleteRoom({ name: toDelete }));
+          dispatch(adminActions.deleteAsset({ name: toDelete }));
           setToDelete('');
         }}
       />
-
-      <Dialog open={!!toDelete} onClose={() => setToDelete('')} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Delete Live Session</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete Live Session '{toDelete}'?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setToDelete('')} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              dispatch(adminActions.deleteRoom({ name: toDelete }));
-              setToDelete('');
-            }}
-            color="primary"
-          >
-            Delete!
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };

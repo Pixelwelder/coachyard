@@ -277,7 +277,12 @@ const selectAssets = createSelector(
 
 const selectors = { select, selectRooms, selectRecordings, selectComposites, selectAssets };
 const actions = {
-  init, fetchRooms, createRoom, deleteRoom, mergeVideos, fetchRecordings, fetchComposites, fetchAssets, createComposite
+  init,
+  fetchRooms, createRoom, deleteRoom,
+  fetchRecordings,
+  fetchComposites,
+  fetchAssets, deleteAsset,
+  mergeVideos, createComposite
 };
 
 export { actions, selectors }
