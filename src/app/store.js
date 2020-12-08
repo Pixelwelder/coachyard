@@ -5,6 +5,7 @@ import logReducer from '../features/log/logSlice';
 import adminReducer from '../features/admin/adminSlice';
 import navReducer from '../features/nav/navSlice';
 import videoReducer from '../features/videoIframe/videoSlice';
+import courseReducer from '../features/course/courseSlice';
 
 export default configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export default configureStore({
     log: logReducer,
     admin: adminReducer,
     nav: navReducer,
-    video: videoReducer
-  },
+    video: videoReducer,
+    course: courseReducer
+  }
 });

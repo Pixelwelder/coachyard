@@ -18,6 +18,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { useDispatch, useSelector } from 'react-redux';
 import DeleteDialog from './DeleteDialog';
 import ReactPlayer from 'react-player';
+import InfoIcon from '@material-ui/icons/Info';
 
 const AssetList = () => {
   const dispatch = useDispatch();
@@ -35,6 +36,12 @@ const AssetList = () => {
       renderCell: (params) => {
         return (
           <div>
+            <Button onClick={() => {
+              console.log('PARAMS', params.data);
+              dispatch(adminActions.setToExamine(params.data));
+            }}>
+              <InfoIcon />
+            </Button>
             <Button
               onClick={() => {
                 const url = params.getValue('url');
@@ -57,12 +64,12 @@ const AssetList = () => {
   ];
 
   return (
-    <div style={{ height: 400, width: '100%', border: '1px solid red' }}>
+    <div style={{ height: 400, width: '100%' }}>
       <Button onClick={() => dispatch(adminActions.fetchAssets())}>
         <CachedIcon />
       </Button>
 
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', height: 400 }}>
         <DataGrid
           rows={items}
           columns={columns}
@@ -72,7 +79,7 @@ const AssetList = () => {
           width={400}
           height={300}
           style={{ border: '3px solid blue' }}
-          url={`https://api.daily.co/v1/recordings/0526c677-f214-41ba-8ead-53ed1ec3f8ae/composites/17c60468-79d4-4e3a-ff87-9ef161e2f60a.mp4`}
+          url={`https://stream.mux.com/YQVbuUSFG0200KYkZpmoXpgBnigpw9jCX8u4X00lQvSvDY.m3u8`}
         />
       </div>
 

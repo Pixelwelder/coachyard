@@ -17,6 +17,7 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import DeleteDialog from './DeleteDialog';
+import InfoIcon from '@material-ui/icons/Info';
 
 const CreateDialog = ({ open, onClose, onConfirm }) => {
   const [name, setName] = useState('');
@@ -65,7 +66,7 @@ const RoomList = () => {
   const [showNewDialog, setShowNewDialog] = useState(false);
 
   const [newName, setNewName] = useState('');
-  const [toDelete, setToDelete] = useState('');
+  // const [toDelete, setToDelete] = useState('');
 
   const fetchItems = adminActions.fetchRooms;
 
@@ -80,6 +81,11 @@ const RoomList = () => {
       renderCell: (params) => {
         return (
           <div>
+            <Button onClick={() => {
+              dispatch(adminActions.setToExamine(params.data));
+            }}>
+              <InfoIcon />
+            </Button>
             <Button
               onClick={() => {
                 const url = params.getValue('url');
@@ -91,8 +97,7 @@ const RoomList = () => {
             </Button>
             <Button
               onClick={() => {
-                const name = params.getValue('name');
-                setToDelete(name);
+                dispatch(adminActions.setToDelete(params.getValue('name')))
               }}
             >
               <DeleteIcon />
@@ -129,14 +134,14 @@ const RoomList = () => {
         }}
       />
 
-      <DeleteDialog
-        toDelete={toDelete}
-        onClose={() => setToDelete('')}
-        onConfirm={() => {
-          dispatch(adminActions.deleteRoom({ name: toDelete }));
-          setToDelete('');
-        }}
-      />
+      {/*<DeleteDialog*/}
+      {/*  toDelete={toDelete}*/}
+      {/*  onClose={() => setToDelete('')}*/}
+      {/*  onConfirm={() => {*/}
+      {/*    dispatch(adminActions.deleteRoom({ name: toDelete }));*/}
+      {/*    setToDelete('');*/}
+      {/*  }}*/}
+      {/*/>*/}
 
     </div>
   );

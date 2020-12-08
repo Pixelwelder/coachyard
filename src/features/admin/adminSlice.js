@@ -28,6 +28,10 @@ const initialState = {
   assets: {
     total_count: 0,
     data: []
+  },
+  ui: {
+    toExamine: null,
+    toDelete: null
   }
 };
 
@@ -194,7 +198,7 @@ const init = createAsyncThunk(
   }
 );
 
-const { reducer } = createSlice({
+const { reducer, actions: generatedActions } = createSlice({
   name: 'admin',
   initialState,
   extraReducers: {
@@ -254,6 +258,16 @@ const { reducer } = createSlice({
         total_count: action.payload.data.result.data.length
       };
     }
+  },
+  reducers: {
+    setToDelete: (state, action) => {
+      console.log('action', action);
+      state.ui.toDelete = action.payload;
+    },
+    setToExamine: (state, action) => {
+      console.log('action', action);
+      state.ui.toExamine = action.payload;
+    }
   }
 });
 
@@ -274,9 +288,11 @@ const selectAssets = createSelector(
   select,
   ({ assets }) => assets.data
 );
+const selectUI = createSelector(select, ({ ui }) => ui);
 
-const selectors = { select, selectRooms, selectRecordings, selectComposites, selectAssets };
+const selectors = { select, selectRooms, selectRecordings, selectComposites, selectAssets, selectUI };
 const actions = {
+  ...generatedActions,
   init,
   fetchRooms, createRoom, deleteRoom,
   fetchRecordings,
