@@ -2,8 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const MAIN_TABS = {
   VIDEO: 0,
-  ADMIN: 1,
-  DEV: 2
+  COURSE: 1,
+  ADMIN: 2,
+  DEV: 3
 };
 
 const ADMIN_TABS = {
@@ -13,7 +14,7 @@ const ADMIN_TABS = {
 }
 
 const initialState = {
-  mainTab: MAIN_TABS.ADMIN,
+  mainTab: MAIN_TABS.COURSE,
   adminTab: ADMIN_TABS.RECORDINGS
 };
 

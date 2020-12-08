@@ -4,9 +4,10 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import Typography from '@material-ui/core/Typography';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Alert from '@material-ui/lab/Alert';
-import app from 'firebase';
+import app from 'firebase/app';
 import { ItemDetails } from './ItemDetails';
 import Button from '@material-ui/core/Button';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const VideoDisplay = ({ id }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,7 +15,7 @@ const VideoDisplay = ({ id }) => {
 
   useEffect(() => {
     const go = async (id) => {
-      const composites = app.functions().httpsCallable('compositesFE');
+      const composites = app.functions().httpsCallable(CALLABLE_FUNCTIONS.COMPOSITES);
       const result = await composites({ id });
       setItem(result.data.result.newest_composite);
     };
@@ -25,7 +26,7 @@ const VideoDisplay = ({ id }) => {
 
   const send = async (item) => {
     console.log('sending', id);
-    const compositesFE = app.functions().httpsCallable('compositesFE');
+    const compositesFE = app.functions().httpsCallable(CALLABLE_FUNCTIONS.COMPOSITES);
     const result = await compositesFE({
       method: 'post',
       id

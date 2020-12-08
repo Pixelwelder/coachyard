@@ -38,21 +38,21 @@ body {
 .body {
   flex: 1;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 
-  .sidebar {
-    flex: 0 0 150px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .sidebar-2 {
-    flex-basis: 250px;
-  }
-
-  .video {
-    flex: 1;
-  }
+  //.sidebar {
+  //  flex: 0 0 150px;
+  //  display: flex;
+  //  flex-direction: column;
+  //}
+  //
+  //.sidebar-2 {
+  //  flex-basis: 250px;
+  //}
+  //
+  //.video {
+  //  flex: 1;
+  //}
 
   .admin {
     width: 100vw;

@@ -6,11 +6,12 @@ import Typography from '@material-ui/core/Typography';
 import Video from './features/videoIframe';
 import Log from './features/log';
 import './App.scss';
-import { actions as appActions } from './features/app/appSlice';
 import Auth from './features/auth';
 import Admin from './features/admin';
 import Nav from './features/nav';
 import { selectors as navSelectors, MAIN_TABS } from './features/nav/navSlice';
+import { actions as appActions, selectors as appSelectors } from './features/app/appSlice';
+import Course from './features/course';
 
 function App() {
   const dispatch = useDispatch();
@@ -18,7 +19,12 @@ function App() {
     dispatch(appActions.init());
   }, [dispatch]);
 
+  const { isInitialized } = useSelector(appSelectors.select);
   const { mainTab } = useSelector(navSelectors.select);
+
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <div className="App">
@@ -31,7 +37,7 @@ function App() {
       <Nav />
 
       <div className="page-section body">
-        {mainTab === 0 && (
+        {mainTab === MAIN_TABS.VIDEO && (
           <>
             <div className="sidebar sidebar-1">
               <Typography variant="h2">Live Session</Typography>
@@ -41,10 +47,13 @@ function App() {
             </div>
           </>
         )}
-        {mainTab === 1 && (
+        {mainTab === MAIN_TABS.COURSE && (
+          <Course />
+        )}
+        {mainTab === MAIN_TABS.ADMIN && (
           <Admin />
         )}
-        {mainTab === 2 && (
+        {mainTab === MAIN_TABS.DEV && (
           <Log />
         )}
         {/*<div className="sidebar sidebar-2">*/}

@@ -7,10 +7,11 @@ import firebaseConfig from '../../__config__/firebase.json';
 import { actions as logActions } from '../log/logSlice';
 import { createLog } from '../log/logSlice';
 import { actions as adminActions } from '../admin/adminSlice';
+import { actions as assetActions } from '../../app/assets';
 import { ERROR } from '../log/logTypes';
 
 const initialState = {
-  initialized: false,
+  isInitialised: false,
   isLoading: false,
   authUser: { uid: null, email: null }
 };
@@ -20,8 +21,8 @@ const setupFirebase = createAsyncThunk(
   async (_, { dispatch, getState }) => {
     dispatch(logActions.log(createLog(`Initializing Firebase...` )));
     const state = getState();
-    const { initialized } = select(state);
-    if (initialized) {
+    const { isInitialized } = select(state);
+    if (isInitialized) {
       throw new Error('Firebase is already initialized.');
     }
 
@@ -52,6 +53,7 @@ const init = createAsyncThunk(
     dispatch(logActions.log(createLog(`INITIALIZING...` )));
     try {
       await dispatch(setupFirebase());
+      await dispatch(assetActions.init());
       await dispatch(adminActions.init({ firebase: app }));
     } catch (error) {
       dispatch(logActions.log(createLog(error.message, ERROR)));
@@ -100,7 +102,7 @@ const appSlice = createSlice({
   },
   extraReducers: {
     [init.fulfilled]: (state) => {
-      state.initialized = true;
+      state.isInitialized = true;
     }
   }
 });

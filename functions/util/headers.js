@@ -8,7 +8,7 @@ const getDailyHeaders = () => ({
 
 const getMuxHeaders = () => ({
   'Content-Type': 'application/json',
-  Authorization: 'Basic ' + new Buffer(`${tokenId}:${secret}`).toString('base64')
+  Authorization: 'Basic ' + Buffer.from(`${tokenId}:${secret}`).toString('base64')
 });
 
 module.exports = { getDailyHeaders, getMuxHeaders };

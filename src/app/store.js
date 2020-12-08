@@ -6,6 +6,7 @@ import adminReducer from '../features/admin/adminSlice';
 import navReducer from '../features/nav/navSlice';
 import videoReducer from '../features/videoIframe/videoSlice';
 import courseReducer from '../features/course/courseSlice';
+import assetsReducer from '../app/assets';
 
 export default configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export default configureStore({
     admin: adminReducer,
     nav: navReducer,
     video: videoReducer,
-    course: courseReducer
+    course: courseReducer,
+    assets: assetsReducer
   }
 });

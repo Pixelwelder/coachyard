@@ -4,6 +4,7 @@ import app from 'firebase/app';
 import { ERROR } from '../log/logTypes';
 
 import { actions as videoActions } from '../videoIframe/videoSlice';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
   isLoading: true,
@@ -38,11 +39,10 @@ const initialState = {
 const fetchRooms = createAsyncThunk(
   'fetchRooms',
   async (_, { dispatch }) => {
-    const rooms = app.functions().httpsCallable('roomsFE');
+    const rooms = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ROOMS);
     try {
       dispatch(logActions.log(createLog('Fetching all rooms...')));
       const result = await rooms({ method: 'get' });
-      console.log(result);
       dispatch(logActions.log(createLog(`Rooms fetched: ${result.data.result.data.length}`)));
       return result;
     } catch (error) {
@@ -56,7 +56,7 @@ const fetchRooms = createAsyncThunk(
 const createRoom = createAsyncThunk(
   'createRoom',
   async ({ name }, { dispatch }) => {
-    const rooms = app.functions().httpsCallable('roomsFE');
+    const rooms = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ROOMS);
     try {
       dispatch(logActions.log(createLog(`Creating room ${name}...`)));
       const result = await rooms({ method: 'post', name });
@@ -79,7 +79,7 @@ const createRoom = createAsyncThunk(
 const deleteRoom = createAsyncThunk(
   'deleteRoom',
   async ({ name }, { dispatch }) => {
-    const rooms = app.functions().httpsCallable('roomsFE');
+    const rooms = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ROOMS);
     try {
       dispatch(logActions.log(createLog(`Deleting room ${name}...`)));
       const result = await rooms({ method: 'delete', endpoint: name });
@@ -99,7 +99,7 @@ const fetchRecordings = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       dispatch(logActions.log(createLog(`Fetching recordings...`)));
-      const recordings = app.functions().httpsCallable('recordingsFE');
+      const recordings = app.functions().httpsCallable(CALLABLE_FUNCTIONS.RECORDINGS);
       const result = await recordings({ method: 'get' });
       console.log('recordings', result);
       dispatch(logActions.log(createLog(`Recordings fetched`)));
@@ -118,7 +118,7 @@ const fetchAssets = createAsyncThunk(
     dispatch(logActions.log(createLog(`Fetching assets...` )));
     try {
       dispatch(logActions.log(createLog(`Fetched assets`)));
-      const assets = app.functions().httpsCallable('assetsFE');
+      const assets = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ASSETS);
       const result = await assets({ method: 'get' });
       return result;
     } catch (error) {
@@ -141,7 +141,7 @@ const mergeVideos = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       dispatch(logActions.log(createLog(`Attempting video merge...`)));
-      const processVideo = app.functions().httpsCallable('processVideo');
+      const processVideo = app.functions().httpsCallable(CALLABLE_FUNCTIONS.PROCESS_VIDEO);
       const result = await processVideo();
       console.log(result);
       dispatch(logActions.log(createLog(`Video merge successful: ${Math.floor(result.data.totalTime/1000)}`)));
@@ -158,7 +158,7 @@ const createComposite = createAsyncThunk(
   async (args, { dispatch }) => {
     try {
       dispatch(logActions.log(createLog(`Creating composite...`)));
-      const createComposite = app.functions().httpsCallable('createCompositeFE');
+      const createComposite = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COMPOSITE);
       const result = await createComposite(args);
       dispatch(logActions.log(createLog(`Composite created`)));
     } catch (error) {
@@ -174,9 +174,9 @@ const fetchComposites = createAsyncThunk(
   async (_, { dispatch }) => {
     dispatch(logActions.log(createLog(`Fetching composites...` )));
     try {
+      const composites = app.functions().httpsCallable(CALLABLE_FUNCTIONS.COMPOSITES);
+      const result = await composites({ method: 'get' });
       dispatch(logActions.log(createLog(`Fetched composites`)));
-      const assets = app.functions().httpsCallable('compositesFE');
-      const result = await assets({ method: 'get' });
       return result;
     } catch (error) {
       console.error(error);
@@ -192,8 +192,8 @@ const init = createAsyncThunk(
     dispatch(logActions.log(createLog(`Admin initializing...` )));
     await dispatch(fetchRooms());
     await dispatch(fetchRecordings());
-    await dispatch(fetchAssets());
-    await dispatch(fetchComposites());
+    // await dispatch(fetchAssets());
+    // await dispatch(fetchComposites());
     dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );
