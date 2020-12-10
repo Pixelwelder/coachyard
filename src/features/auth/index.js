@@ -29,25 +29,25 @@ const Auth = () => {
           <Button disabled={isLoading} onClick={onLogOut} variant="outlined">Sign Out</Button>
         </div>
       )}
-      {!authUser.uid && (
-        <form className="auth-form" onSubmit={onLogIn}>
-          <FormControl>
-            <Input
-              id="email" value={email} disabled={isLoading} placeholder="email"
-              onChange={({ target: { value } }) => setEmail(value)}
-            />
-          </FormControl>
-          <FormControl>
-            <Input
-              id="password" type="password" value={password} disabled={isLoading} placeholder="password"
-              onChange={({ target: { value }}) => setPassword(value)}
-            />
-          </FormControl>
-          {/*<FormControl disabled={isLoading} value={email} as="input" onChange={({ target: { value } }) => setEmail(value)}/>*/}
-          {/*<FormControl disabled={isLoading} value={password} as="input" type="password" onChange={({ target: { value }}) => setPassword(value)} />*/}
-          <Button type="submit" disabled={isLoading} variant="outlined">Sign In</Button>
-        </form>
-      )}
+      {/*{!authUser.uid && (*/}
+      {/*  <form className="auth-form" onSubmit={onLogIn}>*/}
+      {/*    <FormControl>*/}
+      {/*      <Input*/}
+      {/*        id="email" value={email} disabled={isLoading} placeholder="email"*/}
+      {/*        onChange={({ target: { value } }) => setEmail(value)}*/}
+      {/*      />*/}
+      {/*    </FormControl>*/}
+      {/*    <FormControl>*/}
+      {/*      <Input*/}
+      {/*        id="password" type="password" value={password} disabled={isLoading} placeholder="password"*/}
+      {/*        onChange={({ target: { value }}) => setPassword(value)}*/}
+      {/*      />*/}
+      {/*    </FormControl>*/}
+      {/*    /!*<FormControl disabled={isLoading} value={email} as="input" onChange={({ target: { value } }) => setEmail(value)}/>*!/*/}
+      {/*    /!*<FormControl disabled={isLoading} value={password} as="input" type="password" onChange={({ target: { value }}) => setPassword(value)} />*!/*/}
+      {/*    <Button type="submit" disabled={isLoading} variant="outlined">Sign In</Button>*/}
+      {/*  </form>*/}
+      {/*)}*/}
     </div>
   );
 };

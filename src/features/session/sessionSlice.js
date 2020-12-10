@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit';
+import SESSION_MODES from './sessionModes';
 
 const initialState = {
-  isDisplayed: true
+  mode: SESSION_MODES.SIGN_UP
 };
 
 const init = createAsyncThunk(
@@ -12,7 +13,9 @@ const init = createAsyncThunk(
 const { reducer, actions: generatedActions } = createSlice({
   name: 'session',
   initialState,
-  reducers: {},
+  reducers: {
+    setMode: (state, action) => { state.mode = action.payload; }
+  },
   extraReducers: {}
 });
 

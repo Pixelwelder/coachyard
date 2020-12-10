@@ -12,6 +12,7 @@ import Nav from './features/nav';
 import { selectors as navSelectors, MAIN_TABS } from './features/nav/navSlice';
 import { actions as appActions, selectors as appSelectors } from './features/app/appSlice';
 import Course from './features/course';
+import Session from './features/session';
 
 function App() {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ function App() {
   return (
     <div className="App">
       <CssBaseline />
+      <Session />
       <div className="page-section header">
         <Typography variant="h1">Coachyard</Typography>
         <Auth />

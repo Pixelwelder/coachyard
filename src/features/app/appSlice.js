@@ -13,6 +13,7 @@ import { ERROR } from '../log/logTypes';
 const initialState = {
   isInitialised: false,
   isLoading: false,
+  error: null,
   authUser: { uid: null, email: null }
 };
 
@@ -66,12 +67,30 @@ const init = createAsyncThunk(
 const signIn = createAsyncThunk(
   'signIn',
   async ({ email, password }, { dispatch }) => {
+    console.log('signIn action thunk');
     try {
       dispatch(logActions.log(createLog('Attempting sign in...')));
       await app.auth().signInWithEmailAndPassword(email, password);
+      console.log('signed in');
       dispatch(logActions.log(createLog('Sign in successful.')));
     } catch (error) {
+      console.log('error', error);
       dispatch(logActions.log(createLog(`Firebase error: ${error.message}`, ERROR)));
+      throw error;
+    }
+  }
+);
+
+const signUp = createAsyncThunk(
+  'signUp',
+  async ({ email, password }, { dispatch }) => {
+    try {
+      dispatch(logActions.log(createLog('Attempting sign up...')));
+      await app.auth().createUserWithEmailAndPassword(email, password);
+      dispatch(logActions.log(createLog('Sign up successful')));
+    } catch (error) {
+      console.log('error', error);
+      dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
     }
   }
@@ -101,16 +120,17 @@ const appSlice = createSlice({
     }
   },
   extraReducers: {
-    [init.fulfilled]: (state) => {
-      state.isInitialized = true;
-    }
+    [init.fulfilled]: (state) => { state.isInitialized = true; },
+    [signIn.rejected]: (state, action) => { state.error = action.error; },
+    [signOut.rejected]: (state, action) => { state.error = action.error; },
+    [signUp.rejected]: (state, action) => { state.error = action.error; }
   }
 });
 
 const select = ({ app }) => app;
 const selectors = { select };
 
-const actions = { init, signIn, signOut };
+const actions = { init, signIn, signUp, signOut };
 const reducer = appSlice.reducer;
 
 export { actions, selectors };
