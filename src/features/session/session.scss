@@ -1,3 +1,10 @@
 .session {
+  form {
+    display: flex;
+    flex-direction: column;
+  }
 
+  .MuiTextField-root {
+    margin-bottom: 16px;
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
@@ -8,6 +8,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Link from '@material-ui/core/Link';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
+import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,6 +27,11 @@ const Session = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  useEffect(
+    () => { onClear(); },
+    [authUser]
+  );
+
   const onClear = () => {
     setEmail('');
     setPassword('');
@@ -37,13 +43,11 @@ const Session = () => {
     switch (mode) {
       case SESSION_MODES.SIGN_UP: {
         await dispatch(appActions.signUp({ email, password }));
-        onClear();
         break;
       }
 
       case SESSION_MODES.SIGN_IN: {
         await dispatch(appActions.signIn({ email, password }));
-        onClear();
         break;
       }
 
@@ -58,27 +62,33 @@ const Session = () => {
     dispatch(appActions.clearError());
   };
 
+  // TODO Lotta overlap here.
   return (
-    <Dialog className="session" open={!authUser.uid} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">{mode === SESSION_MODES.SIGN_IN ? 'Sign In' : 'Sign Up'}</DialogTitle>
+    <Dialog
+      className="session" open={!authUser.uid}
+      aria-labelledby="form-dialog-title"
+      fullWidth
+    >
+      <DialogTitle id="form-dialog-title">
+        {mode === SESSION_MODES.SIGN_IN ? 'Welcome Back!' : 'Welcome!'}
+      </DialogTitle>
       <DialogContent>
         {mode === SESSION_MODES.SIGN_UP && (
           <>
+            <DialogContentText>Come on in, the water's fine!</DialogContentText>
             <form onSubmit={onSubmit}>
-              <FormControl>
-                <Input
-                  error={isErrorType('email')(error)}
-                  id="email" value={email} disabled={isLoading} placeholder="email"
-                  onChange={({ target: { value } }) => setEmail(value)}
-                />
-              </FormControl>
-              <FormControl>
-                <Input
-                  id="password" type="password" value={password} disabled={isLoading} placeholder="password"
-                  onChange={({ target: { value }}) => setPassword(value)}
-                  error={isErrorType('password')(error)}
-                />
-              </FormControl>
+              <TextField
+                variant="filled"
+                error={isErrorType('email')(error)}
+                id="email" value={email} disabled={isLoading} placeholder="email"
+                onChange={({ target: { value } }) => setEmail(value)}
+              />
+              <TextField
+                variant="filled"
+                id="password" type="password" value={password} disabled={isLoading} placeholder="password"
+                onChange={({ target: { value }}) => setPassword(value)}
+                error={isErrorType('password')(error)}
+              />
               <button className="invisible" type="submit" />
             </form>
             {!!error && <Alert severity="error">{error.message}</Alert>}
@@ -88,21 +98,20 @@ const Session = () => {
 
         {mode === SESSION_MODES.SIGN_IN && (
           <>
+            <DialogContentText>Good to see you again!</DialogContentText>
             <form onSubmit={onSubmit}>
-              <FormControl>
-                <Input
-                  error={isErrorType('email')(error)}
-                  id="email" value={email} disabled={isLoading} placeholder="email"
-                  onChange={({ target: { value } }) => setEmail(value)}
-                />
-              </FormControl>
-              <FormControl>
-                <Input
-                  error={isErrorType('password')(error)}
-                  id="password" type="password" value={password} disabled={isLoading} placeholder="password"
-                  onChange={({ target: { value }}) => setPassword(value)}
-                />
-              </FormControl>
+              <TextField
+                variant="filled"
+                error={isErrorType('email')(error)}
+                id="email" value={email} disabled={isLoading} placeholder="email"
+                onChange={({ target: { value } }) => setEmail(value)}
+              />
+              <TextField
+                variant="filled"
+                id="password" type="password" value={password} disabled={isLoading} placeholder="password"
+                onChange={({ target: { value }}) => setPassword(value)}
+                error={isErrorType('password')(error)}
+              />
               <button className="invisible" type="submit" />
             </form>
             {!!error && <Alert severity="error">{error.message}</Alert>}
