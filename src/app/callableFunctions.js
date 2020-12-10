@@ -4,7 +4,8 @@ const CALLABLE_FUNCTIONS = {
   COMPOSITES: 'compositesFE',
   ASSETS: 'assetsFE',
   CREATE_COMPOSITE: 'createCompositeFE',
-  PROCESS_VIDEO: 'processVideo'
+  PROCESS_VIDEO: 'processVideo',
+  SET_PRIVILEGE: 'setPrivilege'
 };
 
 export {
