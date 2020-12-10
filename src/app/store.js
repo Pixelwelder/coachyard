@@ -7,6 +7,7 @@ import navReducer from '../features/nav/navSlice';
 import videoReducer from '../features/videoIframe/videoSlice';
 import courseReducer from '../features/course/courseSlice';
 import assetsReducer from '../app/assets';
+import sessionReducer from '../features/session/sessionSlice';
 
 export default configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export default configureStore({
     nav: navReducer,
     video: videoReducer,
     course: courseReducer,
-    assets: assetsReducer
+    assets: assetsReducer,
+    session: sessionReducer
   }
 });

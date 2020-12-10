@@ -1,8 +1,10 @@
 const functions = require('firebase-functions');
 const fetch = require('node-fetch');
+const express = require('express');
 
 const { METHODS, getMethod } = require('./util/methods');
 const { getDailyHeaders, getMuxHeaders } = require('./util/headers');
+const { checkAuth } = require('./util/auth');
 
 const createCompositeFE = async (data, context) => {
   if (!context.auth) {
@@ -24,6 +26,7 @@ const createCompositeFE = async (data, context) => {
   console.log(json);
 
   const url = `https://api.daily.co/v1/recordings/${id}/composites`;
+  console.log('CALLING', url);
   const body = {
     composite_mode: 'tracks-layout',
     size: '1280x720',
@@ -138,6 +141,13 @@ const compositesFE = async (data, context) => {
       throw new functions.https.HttpsError('unimplemented', `${method} is unimplemented.`, { sentData: data });
     }
   }
+};
+
+const transferComposite = (data, context) => {
+  checkAuth(context);
+  const method = getMethod(data);
+
+
 };
 
 module.exports = {

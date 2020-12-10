@@ -3,12 +3,7 @@ const fetch = require('node-fetch');
 
 const { getMethod, METHODS } = require('./util/methods');
 const { getMuxHeaders } = require('./util/headers');
-
-const checkAuth = (context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'No logged-in user.', { sentData: data });
-  }
-};
+const { checkAuth } = require('./util/auth');
 
 const getUrl = (data) => {
   const { id = '', endpoint = '' } = data;
@@ -53,7 +48,7 @@ const assetsFE = async (data = {}, context) => {
   }
   // console.log(json);
   return { message: 'Done.', result: json, sentData: data };
-}
+};
 
 module.exports = {
   assetsFE: functions.https.onCall(assetsFE)

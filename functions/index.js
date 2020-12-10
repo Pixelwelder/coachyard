@@ -6,6 +6,7 @@ const { recordingsFE } = require('./recordings');
 const { createCompositeFE, compositesFE } = require('./composites');
 const { assetsFE } = require('./assets');
 const { processVideo } = require('./ffmpegTest');
+const { video, videoFE } = require('./video');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -20,5 +21,7 @@ module.exports = {
   assetsFE,
   processVideo,
   compositesFE,
-  createCompositeFE
+  createCompositeFE,
+  video,
+  videoFE
 };

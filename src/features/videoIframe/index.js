@@ -58,9 +58,9 @@ const Video = () => {
 
   return (
     <div>
-      <Button disabled={!isInMeeting || isRecording} onClick={record}>
-        <FiberManualRecordIcon style={{ color: red[500] }} /> Record
-      </Button>
+      {/*<Button disabled={!isInMeeting || isRecording} onClick={record}>*/}
+      {/*  <FiberManualRecordIcon style={{ color: red[500] }} /> Record*/}
+      {/*</Button>*/}
     </div>
   );
 };

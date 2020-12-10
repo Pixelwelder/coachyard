@@ -74,7 +74,7 @@ const roomsFE = async (data, context) => {
             body: JSON.stringify({
               name,
               properties: {
-                enable_recording: 'rtp-tracks'
+                enable_recording: 'local'//'rtp-tracks'
               }
             })
           }
