@@ -37,10 +37,10 @@ const setupFirebase = createAsyncThunk(
         if (authUser) {
           const { uid, email } = authUser;
           dispatch(logActions.log(createLog(`User logged in: ${email}` )));
-          dispatch(appSlice.actions.setAuthUser({ uid, email }));
+          dispatch(generatedActions.setAuthUser({ uid, email }));
         } else {
           dispatch(logActions.log(createLog(`User logged out.` )));
-          dispatch(appSlice.actions.setAuthUser(initialState.authUser));
+          dispatch(generatedActions.setAuthUser(initialState.authUser));
         }
       }
     );
@@ -111,27 +111,48 @@ const signOut = createAsyncThunk(
   }
 );
 
-const appSlice = createSlice({
+/**
+ * Used when a load begins or ends.
+ */
+const setIsLoading = _initialState => (state, action) => {
+  state.isLoading = action.payload;
+  if (action.payload) state.error = _initialState.error;
+}
+
+/**
+ * Used when a load fails.
+ */
+const setError = _initialState => (state, action) => {
+  state.error = action.error || _initialState.error;
+  state.isLoading = false;
+}
+
+const { reducer, actions: generatedActions } = createSlice({
   name: 'init',
   initialState,
   reducers: {
     setAuthUser: (state, action) => {
       state.authUser = action.payload;
-    }
+    },
+    clearError: (state) => { state.error = initialState.error; }
   },
   extraReducers: {
     [init.fulfilled]: (state) => { state.isInitialized = true; },
-    [signIn.rejected]: (state, action) => { state.error = action.error; },
-    [signOut.rejected]: (state, action) => { state.error = action.error; },
-    [signUp.rejected]: (state, action) => { state.error = action.error; }
+
+    [signIn.pending]: setIsLoading(initialState),
+    [signUp.pending]: setIsLoading(initialState),
+    [signOut.pending]: setIsLoading(initialState),
+
+    [signIn.rejected]: setError(initialState),
+    [signUp.rejected]: setError(initialState),
+    [signOut.rejected]: setError(initialState)
   }
 });
 
 const select = ({ app }) => app;
 const selectors = { select };
 
-const actions = { init, signIn, signUp, signOut };
-const reducer = appSlice.reducer;
+const actions = { ...generatedActions, init, signIn, signUp, signOut };
 
 export { actions, selectors };
 export default reducer;

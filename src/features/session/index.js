@@ -6,15 +6,18 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Link from '@material-ui/core/Link';
+import FormControl from '@material-ui/core/FormControl';
+import Input from '@material-ui/core/Input';
+import { Typography } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+import { useDispatch, useSelector } from 'react-redux';
 
 import './session.scss';
 import { selectors as sessionSelectors, actions as sessionActions } from './sessionSlice';
 import { selectors as appSelectors, actions as appActions } from '../app/appSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
 import SESSION_MODES from './sessionModes';
-import { Typography } from '@material-ui/core';
+
+const isErrorType = type => error => !!error && error.message.toLowerCase().includes(type);
 
 const Session = () => {
   const dispatch = useDispatch();
@@ -52,6 +55,7 @@ const Session = () => {
     onClear();
     const newMode = mode === SESSION_MODES.SIGN_IN ? SESSION_MODES.SIGN_UP : SESSION_MODES.SIGN_IN;
     dispatch(sessionActions.setMode(newMode));
+    dispatch(appActions.clearError());
   };
 
   return (
@@ -63,6 +67,7 @@ const Session = () => {
             <form onSubmit={onSubmit}>
               <FormControl>
                 <Input
+                  error={isErrorType('email')(error)}
                   id="email" value={email} disabled={isLoading} placeholder="email"
                   onChange={({ target: { value } }) => setEmail(value)}
                 />
@@ -71,10 +76,12 @@ const Session = () => {
                 <Input
                   id="password" type="password" value={password} disabled={isLoading} placeholder="password"
                   onChange={({ target: { value }}) => setPassword(value)}
+                  error={isErrorType('password')(error)}
                 />
               </FormControl>
               <button className="invisible" type="submit" />
             </form>
+            {!!error && <Alert severity="error">{error.message}</Alert>}
             <p>Already got an account? <span className="link" onClick={onToggle}>Sign In</span></p>
           </>
         )}
@@ -84,18 +91,21 @@ const Session = () => {
             <form onSubmit={onSubmit}>
               <FormControl>
                 <Input
+                  error={isErrorType('email')(error)}
                   id="email" value={email} disabled={isLoading} placeholder="email"
                   onChange={({ target: { value } }) => setEmail(value)}
                 />
               </FormControl>
               <FormControl>
                 <Input
+                  error={isErrorType('password')(error)}
                   id="password" type="password" value={password} disabled={isLoading} placeholder="password"
                   onChange={({ target: { value }}) => setPassword(value)}
                 />
               </FormControl>
               <button className="invisible" type="submit" />
             </form>
+            {!!error && <Alert severity="error">{error.message}</Alert>}
             <p>Need an account? <span className="link" onClick={onToggle}>Sign Up</span></p>
           </>
         )}
