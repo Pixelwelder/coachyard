@@ -50,6 +50,20 @@ app.get('/', async (req, res) => {
     .end();
 });
 
+const app2 = express();
+app2.get('/', async (req, res) => {
+  const { uid } = req.query;
+
+  await admin.auth().setCustomUserClaims(uid, { privileges: USER_PRIVILEGES.IS_ADMIN | USER_PRIVILEGES.IS_MEMBER })
+  const user = await admin.auth().getUser(uid);
+
+  return res
+    .status(200)
+    .json(user)
+    .end();
+})
+
 module.exports = {
-  setPrivilege: functions.https.onCall(setPrivilege)
+  setPrivilege: functions.https.onCall(setPrivilege),
+  addPrivilege: functions.https.onRequest(app2)
 };

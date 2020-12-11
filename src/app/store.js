@@ -8,6 +8,7 @@ import videoReducer from '../features/videoIframe/videoSlice';
 import courseReducer from '../features/course/courseSlice';
 import assetsReducer from '../app/assets';
 import sessionReducer from '../features/session/sessionSlice';
+import uiReducer from '../features/ui/uiSlice';
 
 export default configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export default configureStore({
     video: videoReducer,
     course: courseReducer,
     assets: assetsReducer,
-    session: sessionReducer
+    session: sessionReducer,
+    ui: uiReducer
   }
 });

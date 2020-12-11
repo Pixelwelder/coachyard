@@ -187,14 +187,14 @@ const fetchComposites = createAsyncThunk(
 );
 
 // TODO Test this.
-const setPrivilege = createAsyncThunk(
-  'setPrivilege',
-  async ({ uid, privilege }, { dispatch }) => {
-    const setPrivilegeCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SET_PRIVILEGE);
-    const result = await setPrivilegeCallable({ uid, privilege });
-    console.log('RESULT', result);
-  }
-);
+// const setPrivilege = createAsyncThunk(
+//   'setPrivilege',
+//   async ({ uid, privilege }, { dispatch }) => {
+//     const setPrivilegeCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SET_PRIVILEGE);
+//     const result = await setPrivilegeCallable({ uid, privilege });
+//     console.log('RESULT', result);
+//   }
+// );
 
 const init = createAsyncThunk(
   'initAdmin',
@@ -204,8 +204,6 @@ const init = createAsyncThunk(
     await dispatch(fetchRecordings());
     // await dispatch(fetchAssets());
     // await dispatch(fetchComposites());
-    const r = await dispatch(setPrivilege({ uid: '2QzZSk1FKoU2x3w6Wfu8whJR29K2', privilege: 8 }));
-    console.log('RESULT', r);
     dispatch(logActions.log(createLog(`Admin initialized` )));
   }
 );
@@ -311,7 +309,7 @@ const actions = {
   fetchComposites,
   fetchAssets, deleteAsset,
   mergeVideos, createComposite,
-  setPrivilege
+  // setPrivilege
 };
 
 export { actions, selectors }

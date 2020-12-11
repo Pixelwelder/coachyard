@@ -7,7 +7,7 @@ const { createCompositeFE, compositesFE } = require('./composites');
 const { assetsFE } = require('./assets');
 const { processVideo } = require('./ffmpegTest');
 const { video, videoFE } = require('./video');
-const { setPrivilege } = require('./admin/users');
+const { setPrivilege, addPrivilege } = require('./admin/users');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -25,5 +25,6 @@ module.exports = {
   createCompositeFE,
   video,
   videoFE,
-  setPrivilege
+  setPrivilege,
+  addPrivilege
 };

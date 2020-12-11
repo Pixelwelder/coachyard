@@ -33,11 +33,15 @@ const setupFirebase = createAsyncThunk(
     }
 
     app.auth().onAuthStateChanged(
-      authUser => {
+      async (authUser) => {
         if (authUser) {
           const { uid, email } = authUser;
           dispatch(logActions.log(createLog(`User logged in: ${email}` )));
-          dispatch(generatedActions.setAuthUser({ uid, email }));
+
+          // Get token.
+          const { claims } = await authUser.getIdTokenResult(true);
+          dispatch(generatedActions.setAuthUser({ uid, email, claims }));
+
         } else {
           dispatch(logActions.log(createLog(`User logged out.` )));
           dispatch(generatedActions.setAuthUser(initialState.authUser));
@@ -55,7 +59,7 @@ const init = createAsyncThunk(
     try {
       await dispatch(setupFirebase());
       await dispatch(assetActions.init());
-      await dispatch(adminActions.init({ firebase: app }));
+      // await dispatch(adminActions.init({ firebase: app }));
     } catch (error) {
       dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
