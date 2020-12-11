@@ -50,16 +50,17 @@ app.get('/', async (req, res) => {
     .end();
 });
 
+// TODO Absolutely gigantic security risk.
 const app2 = express();
 app2.get('/', async (req, res) => {
-  const { uid } = req.query;
-
-  await admin.auth().setCustomUserClaims(uid, { privileges: USER_PRIVILEGES.IS_ADMIN | USER_PRIVILEGES.IS_MEMBER })
-  const user = await admin.auth().getUser(uid);
+  // const { uid, privileges } = req.query;
+  //
+  // await admin.auth().setCustomUserClaims(uid, { privileges })
+  // const user = await admin.auth().getUser(uid);
 
   return res
     .status(200)
-    .json(user)
+    // .json(user)
     .end();
 })
 
