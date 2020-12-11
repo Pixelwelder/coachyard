@@ -32,29 +32,31 @@ const Info = ({ item, onClose }) => {
             <InfoItem item={item} />
             <TracksDisplay tracks={item.tracks} />
             <VideoDisplay id={item.id} />
-            <Select
-              labelId="tracks-label"
-              id="tracks-select"
-              value={tabValue}
-              onChange={({ target: { value } }) => setTabValue(value)}
-            >
-              {item.tracks.map((track, index) => {
-                return <MenuItem value={index} key={index}>{index}</MenuItem>;
-              })}
-            </Select>
+            {/*{item.tracks && (*/}
+            {/*  <Select*/}
+            {/*    labelId="tracks-label"*/}
+            {/*    id="tracks-select"*/}
+            {/*    value={tabValue}*/}
+            {/*    onChange={({ target: { value } }) => setTabValue(value)}*/}
+            {/*  >*/}
+            {/*    {item.tracks.map((track, index) => {*/}
+            {/*      return <MenuItem value={index} key={index}>{index}</MenuItem>;*/}
+            {/*    })}*/}
+            {/*  </Select>*/}
+            {/*)}*/}
             {/*<Tabs value={tabValue} onChange={(event, newValue) => setTabValue(newValue)}>*/}
             {/*  {item.tracks.map((track, index) => {*/}
             {/*    return (<Tab label={index} key={index} />);*/}
             {/*  })}*/}
             {/*</Tabs>*/}
-            {Object.entries((item?.tracks || [])[tabValue]).map(([name, value], index) => {
-              return (
-                <div style={{ display: 'flex' }} key={index}>
-                  <span>{name}: </span>
-                  <span>{value.toString()}</span>
-                </div>
-              );
-            })}
+            {/*{Object.entries((item?.tracks || [])[tabValue]).map(([name, value], index) => {*/}
+            {/*  return (*/}
+            {/*    <div style={{ display: 'flex' }} key={index}>*/}
+            {/*      <span>{name}: </span>*/}
+            {/*      <span>{value.toString()}</span>*/}
+            {/*    </div>*/}
+            {/*  );*/}
+            {/*})}*/}
             <ReactPlayer
               url={`https://api.daily.co/v1/recordings/0526c677-f214-41ba-8ead-53ed1ec3f8ae/composites/17c60468-79d4-4e3a-ff87-9ef161e2f60a.mp4`}
             />

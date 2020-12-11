@@ -14,8 +14,8 @@ const ADMIN_TABS = {
 }
 
 const initialState = {
-  mainTab: MAIN_TABS.COURSE,
-  adminTab: ADMIN_TABS.RECORDINGS
+  mainTab: MAIN_TABS.ADMIN,
+  adminTab: ADMIN_TABS.ROOMS
 };
 
 const { actions, reducer } = createSlice({
