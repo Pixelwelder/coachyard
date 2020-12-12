@@ -19,8 +19,10 @@ const Nav = () => {
     <Tabs value={mainTab} onChange={(event, newValue) => dispatch(navActions.setMainTab(newValue))}>
       <Tab label="Live Session" value={MAIN_TABS.VIDEO} />
       <Tab label="Course" value={MAIN_TABS.COURSE} />
-      {isAdmin && <Tab label="Admin" value={MAIN_TABS.ADMIN}/>}
-      {isAdmin && <Tab label="Dev" value={MAIN_TABS.DEV}/>}
+      <Tab label="Teacher" value={MAIN_TABS.TEACHER} />
+      {/* TODO: Admin limitations */}
+      <Tab label="Admin" value={MAIN_TABS.ADMIN}/>
+      <Tab label="Dev" value={MAIN_TABS.DEV}/>
     </Tabs>
   );
 };

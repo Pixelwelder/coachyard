@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
-import { actions as adminActions } from '../admin/adminSlice';
-import InfoIcon from '@material-ui/icons/Info';
-import { actions as videoActions } from '../videoIframe/videoSlice';
-import { actions as navActions, MAIN_TABS } from '../nav/navSlice';
-import JoinIcon from '@material-ui/icons/LiveTv';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { DataGrid } from '@material-ui/data-grid';
 import CachedIcon from '@material-ui/icons/Cached';
 import AddIcon from '@material-ui/icons/Add';
 
 import NewCourseDialog from './NewCourseDialog';
 
-const CoursesList = () => {
+const CoursesList = ({ items, onRefresh }) => {
   const columns = [
-    { field: 'name', headerName: 'Name', width: 220 },
-    { field: 'id', headerName: 'ID', width: 220 },
+    { field: 'displayName', headerName: 'Name', width: 220 },
+    {
+      field: 'content',
+      headerName: 'Content',
+      valueFormatter: ({ data: { content } }) => content.length.toString(),
+      width: 220
+    },
     {
       field: '',
       headerName: 'Actions',
@@ -55,7 +54,7 @@ const CoursesList = () => {
 
   return (
     <div>
-      <Button onClick={() => {}}>
+      <Button onClick={onRefresh}>
         <CachedIcon />
       </Button>
       <Button onClick={() => setShowCreateDialog(true)}>
@@ -64,7 +63,7 @@ const CoursesList = () => {
 
       <div style={{ height: 400 }}>
         <DataGrid
-          rows={[]}
+          rows={items}
           columns={columns}
         />
       </div>

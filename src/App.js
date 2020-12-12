@@ -14,6 +14,7 @@ import { actions as appActions, selectors as appSelectors } from './features/app
 import Course from './features/course';
 import Session from './features/session';
 import Account from './features/account';
+import Teacher from './features/teacher';
 
 function App() {
   const dispatch = useDispatch();
@@ -53,6 +54,9 @@ function App() {
         )}
         {mainTab === MAIN_TABS.COURSE && (
           <Course />
+        )}
+        {mainTab === MAIN_TABS.TEACHER && (
+          <Teacher />
         )}
         {mainTab === MAIN_TABS.ADMIN && (
           <Admin />

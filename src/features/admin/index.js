@@ -32,13 +32,13 @@ const Admin = () => {
         <Tab label="Recordings"/>
         {/* TODO */}
         <Tab label="Assets"/>
-        <Tab label="Courses" />
+        {/*<Tab label="Courses" />*/}
       </Tabs>
 
       {adminTab === ADMIN_TABS.ROOMS && <RoomList />}
       {adminTab === ADMIN_TABS.RECORDINGS && <RecordingList />}
       {adminTab === ADMIN_TABS.ASSETS && <AssetList />}
-      {adminTab === ADMIN_TABS.COURSES && <CoursesList />}
+      {/*{adminTab === ADMIN_TABS.COURSES && <CoursesList />}*/}
 
       {!!toExamine && (
         <Info item={toExamine} onClose={() => dispatch(adminActions.setToExamine(null))} />
