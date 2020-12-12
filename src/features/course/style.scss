@@ -1,14 +1,14 @@
 .course {
-  border: 1px solid gray;
+  //border: 1px solid gray;
 }
 
 .course-body {
-  border: 1px solid gray;
+  //border: 1px solid gray;
   display: flex;
 }
 
 .course-list {
-  border: 1px solid gray;
+  //border: 1px solid gray;
   flex: 0 0 200px;
 }
 
@@ -17,3 +17,6 @@
   flex: 1;
 }
 
+li {
+  list-style: none;
+}

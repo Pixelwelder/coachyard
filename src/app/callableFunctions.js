@@ -5,7 +5,13 @@ const CALLABLE_FUNCTIONS = {
   ASSETS: 'assetsFE',
   CREATE_COMPOSITE: 'createCompositeFE',
   PROCESS_VIDEO: 'processVideo',
-  SET_PRIVILEGE: 'setPrivilege'
+  SET_PRIVILEGE: 'setPrivilege',
+
+  CREATE_COURSE: 'createCourse',
+  GET_COURSE: 'getCourse',
+  UPDATE_COURSE: 'updateCourse',
+  DELETE_COURSE: 'deleteCourse',
+  GET_ALL_COURSES: 'getAllCourses'
 };
 
 export {

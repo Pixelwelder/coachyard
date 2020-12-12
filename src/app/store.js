@@ -9,6 +9,7 @@ import courseReducer from '../features/course/courseSlice';
 import assetsReducer from '../app/assets';
 import sessionReducer from '../features/session/sessionSlice';
 import uiReducer from '../features/ui/uiSlice';
+import teacherReducer from '../features/teacher/teacherSlice';
 
 export default configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export default configureStore({
     course: courseReducer,
     assets: assetsReducer,
     session: sessionReducer,
-    ui: uiReducer
+    ui: uiReducer,
+    teacher: teacherReducer
   }
 });

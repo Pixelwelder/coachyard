@@ -10,12 +10,13 @@ const MAIN_TABS = {
 const ADMIN_TABS = {
   ROOMS: 0,
   RECORDINGS: 1,
-  ASSETS: 2
+  ASSETS: 2,
+  COURSES: 3
 }
 
 const initialState = {
   mainTab: MAIN_TABS.ADMIN,
-  adminTab: ADMIN_TABS.ROOMS
+  adminTab: ADMIN_TABS.COURSES
 };
 
 const { actions, reducer } = createSlice({

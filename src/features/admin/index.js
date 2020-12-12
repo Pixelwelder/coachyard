@@ -14,6 +14,7 @@ import USER_PRIVILEGES from '../../constants/userPrivileges';
 import './style.scss';
 import Info from './Info';
 import DeleteDialog from './DeleteDialog';
+import CoursesList from '../teacher/CoursesList';
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -28,13 +29,16 @@ const Admin = () => {
     <div className="admin">
       <Tabs value={adminTab} onChange={(event, newValue) => dispatch(navActions.setAdminTab(newValue))}>
         <Tab label="Rooms" />
-        {isAdmin && <Tab label="Recordings"/>}
-        {isAdmin && <Tab label="Assets"/>}
+        <Tab label="Recordings"/>
+        {/* TODO */}
+        <Tab label="Assets"/>
+        <Tab label="Courses" />
       </Tabs>
 
       {adminTab === ADMIN_TABS.ROOMS && <RoomList />}
       {adminTab === ADMIN_TABS.RECORDINGS && <RecordingList />}
       {adminTab === ADMIN_TABS.ASSETS && <AssetList />}
+      {adminTab === ADMIN_TABS.COURSES && <CoursesList />}
 
       {!!toExamine && (
         <Info item={toExamine} onClose={() => dispatch(adminActions.setToExamine(null))} />
