@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { actions as appActions } from '../app/appSlice';
 
 const initialState = {
   isLoading: false,
@@ -46,23 +47,14 @@ const getCreatedCourses = createAsyncThunk(
 
 const createStudent = createAsyncThunk(
   'createStudent',
-  async (params) => {
+  async (params, { dispatch }) => {
     console.log('creating student', )
     const createStudent = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_STUDENT);
     const result = await createStudent(params);
     console.log('result', result);
+    dispatch(appActions.refreshUser());
   }
 )
-
-const getStudents = createAsyncThunk(
-  'getStudents',
-  async () => {
-    const authUser = app.auth().currentUser;
-    if (!authUser) return [];
-
-
-  }
-);
 
 const onPending = () => (state, action) => {
   state.isLoading = true;
@@ -98,7 +90,7 @@ const { reducer, actions: generatedActions } = createSlice({
   }
 });
 
-const actions = { init, createCourse, getCreatedCourses, createStudent, getStudents, ...generatedActions };
+const actions = { init, createCourse, getCreatedCourses, createStudent, ...generatedActions };
 
 const select = ({ teacher }) => teacher;
 const selectCourses = createSelector(select, ({ courses }) => {

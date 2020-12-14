@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/functions';
@@ -16,9 +16,27 @@ const initialState = {
   isLoading: false,
   error: null,
   // Just holds the basics.
-  authUser: { uid: null, email: null, displayName: null, claims: null },
+  authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
   authUserMeta: null
 };
+
+const refreshUser = createAsyncThunk(
+  'refreshUser',
+  async (_, { dispatch }) => {
+    const authUser = app.auth().currentUser;
+    const { uid, email, displayName } = authUser;
+
+    // Get token.
+    const { claims } = await authUser.getIdTokenResult(true);
+
+    // Get meta
+    const { data: meta } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
+    console.log('userMeta', meta);
+
+    // return { uid, email, displayName, claims, meta };
+    dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
+  }
+);
 
 const setupFirebase = createAsyncThunk(
   'setupFirebase',
@@ -39,17 +57,9 @@ const setupFirebase = createAsyncThunk(
     app.auth().onAuthStateChanged(
       async (authUser) => {
         if (authUser) {
-          const { uid, email, displayName } = authUser;
-          dispatch(logActions.log(createLog(`User logged in: ${email}` )));
 
-          // Get token.
-          const { claims } = await authUser.getIdTokenResult(true);
-          dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims }));
-
-          // Get meta
-          const getUserMeta = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META);
-          const userMeta = await getUserMeta();
-          console.log('userMeta', userMeta);
+          dispatch(refreshUser());
+          // dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
 
         } else {
           dispatch(logActions.log(createLog(`User logged out.` )));
@@ -166,9 +176,17 @@ const { reducer, actions: generatedActions } = createSlice({
 });
 
 const select = ({ app }) => app;
-const selectors = { select };
+/**
+ * Selects students as an array ready for a datagrid (i.e. with an id property).
+ */
+const selectStudents = createSelector(select, ({ authUser }) => {
+  const arr = authUser?.meta?.students || [];
+  const students = arr.map(item => ({ ...item, id: item.email }));
+  return students;
+});
+const selectors = { select, selectStudents };
 
-const actions = { ...generatedActions, init, signIn, signOut, signUpServerside };
+const actions = { ...generatedActions, init, signIn, signOut, signUpServerside, refreshUser };
 
 export { actions, selectors };
 export default reducer;
