@@ -44,6 +44,16 @@ const getCreatedCourses = createAsyncThunk(
   }
 );
 
+const createStudent = createAsyncThunk(
+  'createStudent',
+  async (params) => {
+    console.log('creating student', )
+    const createStudent = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_STUDENT);
+    const result = await createStudent(params);
+    console.log('result', result);
+  }
+)
+
 const getStudents = createAsyncThunk(
   'getStudents',
   async () => {
@@ -78,13 +88,17 @@ const { reducer, actions: generatedActions } = createSlice({
     [createCourse.rejected]: onRejected(),
     [createCourse.fulfilled]: onFulfilled(),
 
+    [createStudent.pending]: onPending(),
+    [createStudent.rejected]: onRejected(),
+    [createStudent.fulfilled]: onFulfilled(),
+
     [getCreatedCourses.pending]: onPending(),
     [getCreatedCourses.rejected]: onRejected(),
     [getCreatedCourses.fulfilled]: onFulfilled('courses')
   }
 });
 
-const actions = { init, createCourse, getCreatedCourses, ...generatedActions };
+const actions = { init, createCourse, getCreatedCourses, createStudent, getStudents, ...generatedActions };
 
 const select = ({ teacher }) => teacher;
 const selectCourses = createSelector(select, ({ courses }) => {

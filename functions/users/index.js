@@ -11,6 +11,14 @@ const newUserMeta = (overrides) => ({
   ...overrides
 });
 
+const newStudent = (overrides) => ({
+  uid: '',
+  email: '',
+  created: '',
+  updated: '',
+  ...overrides
+});
+
 /**
  * Creates a user but does not log them in.
  */
@@ -61,25 +69,69 @@ const getUserMeta = async (data, context) => {
   } catch (error) {
     throw new functions.https.HttpsError('internal', error.message, error);
   }
-}
+};
 
-// // This could be done with rules.
-// const getStudents = async (data, context) => {
-//   try {
-//     checkAuth(context);
-//     const { uid } = context.auth;
-//     const teacher = await admin.firestore().collection('users').doc(uid).get();
-//     const data = teacher.docs[0].data();
-//
-//     const snapshot = admin.firestore().collection('users')
-//   } catch (error) {
-//     console.log(error);
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// }
+/**
+ * Creates a student for the logged-in teacher.
+ */
+const createStudent = async (data, context) => {
+  try {
+    console.log('createStudent', data);
+    checkAuth(context);
+
+    // Grab the teacher.
+    console.log('getting teacher');
+    const { uid } = context.auth;
+    const snapshot = await admin.firestore().collection('users').doc(uid).get();
+    const teacherMeta = snapshot.data();
+    const students = teacherMeta.students || [];
+
+    const email = data.email.toLowerCase();
+
+    console.log('checking current students');
+    // Make sure this teacher doesn't already have this student.
+    const existingStudent = students.find((student) => {
+      console.log('comparing', student.email, email);
+      return student.email === email;
+    });
+    if (existingStudent) {
+      throw new Error(`Looks like you already have a student with email ${email}.`);
+    }
+
+    console.log('checking for student as existing auth user');
+    // If this student exists, grab them.
+    let userRecord;
+    try {
+      userRecord = await admin.auth().getUserByEmail(email);
+      if (userRecord) console.log('FOUND');
+    } catch {
+      // User doesn't exist.
+    }
+
+    // Now create a new student.
+    console.log('creating student');
+    const { displayName } = data;
+    const timestamp = admin.firestore.Timestamp.now();
+    const student = newStudent({
+      uid: (userRecord && userRecord.uid) || '',
+      email,
+      displayName,
+      created: timestamp,
+      updated: timestamp
+    });
+
+    students.push(student);
+    await admin.firestore().collection('users').doc(uid).update({ students });
+    console.log('Done.');
+    return { message: 'Student added.', data: student };
+  } catch (error) {
+    console.log('error', error.message);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
 
 module.exports = {
   createUser: functions.https.onCall(createUser),
   getUserMeta: functions.https.onCall(getUserMeta),
-  // getStudents: functions.https.onCall(getStudents)
+  createStudent: functions.https.onCall(createStudent)
 };

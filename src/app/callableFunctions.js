@@ -10,6 +10,8 @@ const CALLABLE_FUNCTIONS = {
   CREATE_USER: 'createUser',
   GET_USER_META: 'getUserMeta',
 
+  CREATE_STUDENT: 'createStudent',
+
   CREATE_COURSE: 'createCourse',
   GET_COURSE: 'getCourse',
   UPDATE_COURSE: 'updateCourse',

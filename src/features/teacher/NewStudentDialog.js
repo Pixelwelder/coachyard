@@ -1,38 +1,45 @@
-import Dialog from '@material-ui/core/Dialog';
+import React, { useState } from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
+import TextField from '@material-ui/core/TextField';
+import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
-import React, { useState } from 'react';
-import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectors as teacherSelectors, actions as teacherActions } from './teacherSlice';
-import Alert from '@material-ui/lab/Alert';
 
-const NewCourseDialog = ({ open, onClose }) => {
-  const [displayName, setDisplayName] = useState('');
-  const { isLoading, error } = useSelector(teacherSelectors.select);
+const NewStudentDialog = ({ open, onClose }) => {
   const dispatch = useDispatch();
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const { error, isLoading } = useSelector(teacherSelectors.select);
 
-  const onCreate = async () => {
-    await dispatch(teacherActions.createCourse({ course: { displayName } }));
+  const onCreate = () => {
+    dispatch(teacherActions.createStudent({ email, displayName }))
   };
 
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
+      <DialogTitle id="form-dialog-title">Add New Student</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Create a brand-spankin'-new course.
+          Add a new student.
         </DialogContentText>
         <form>
           <TextField
-            fullWidth
-            variant="filled" label="Course Name" placeholder="Course Name"
-            id="displayName" value={displayName} disabled={isLoading}
+            fullWidth autoFocus
+            variant="filled" label="Student Name" placeholder="Student Name"
+            id="displayName" value={displayName}
             onChange={({ target: { value } }) => setDisplayName(value)}
+          />
+          <TextField
+            fullWidth
+            variant="filled" label="Student Email" placeholder="Student Email"
+            id="email" value={email}
+            onChange={({ target: { value } }) => setEmail(value)}
           />
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
@@ -44,13 +51,13 @@ const NewCourseDialog = ({ open, onClose }) => {
         <Button
           onClick={onCreate}
           color="primary"
-          disabled={!displayName}
+          disabled={!displayName || !email}
         >
-          Create!
+          Add
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default NewCourseDialog;
+export default NewStudentDialog;

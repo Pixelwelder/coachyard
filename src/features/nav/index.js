@@ -4,9 +4,6 @@ import Tabs from '@material-ui/core/Tabs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { actions as navActions, MAIN_TABS, selectors as navSelectors } from './navSlice';
-import { selectors as appSelectors } from '../app/appSlice';
-import USER_PRIVILEGES from '../../constants/userPrivileges';
-
 
 const Nav = () => {
   const dispatch = useDispatch();
