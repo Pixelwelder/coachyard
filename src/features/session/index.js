@@ -5,11 +5,7 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import Link from '@material-ui/core/Link';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
 import TextField from '@material-ui/core/TextField';
-import { Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -81,12 +77,13 @@ const Session = () => {
               <TextField
                 variant="filled"
                 error={isErrorType('email')(error)}
-                id="email" value={email} disabled={isLoading} placeholder="email"
+                id="email" value={email} disabled={isLoading} placeholder="email" autoComplete="email"
                 onChange={({ target: { value } }) => setEmail(value)}
               />
               <TextField
                 variant="filled"
-                id="password" type="password" value={password} disabled={isLoading} placeholder="password"
+                id="password" type="password" autoComplete="current-password"
+                value={password} disabled={isLoading} placeholder="password"
                 onChange={({ target: { value }}) => setPassword(value)}
                 error={isErrorType('password')(error)}
               />
@@ -102,14 +99,14 @@ const Session = () => {
             <DialogContentText>Good to see you again!</DialogContentText>
             <form onSubmit={onSubmit}>
               <TextField
-                variant="filled"
+                variant="filled" autoComplete="email"
                 error={isErrorType('email')(error)}
                 id="email" value={email} disabled={isLoading} placeholder="email"
                 onChange={({ target: { value } }) => setEmail(value)}
               />
               <TextField
                 variant="filled"
-                id="password" type="password" value={password} disabled={isLoading} placeholder="password"
+                id="password" type="password" autoComplete="current-password" value={password} disabled={isLoading} placeholder="password"
                 onChange={({ target: { value }}) => setPassword(value)}
                 error={isErrorType('password')(error)}
               />
@@ -124,6 +121,7 @@ const Session = () => {
         <Button
           onClick={onSubmit}
           color="primary"
+          disabled={isLoading}
         >
           {mode === SESSION_MODES.SIGN_IN ? 'Sign In' : 'Sign Up'}
         </Button>

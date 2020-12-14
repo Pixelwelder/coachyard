@@ -30,6 +30,7 @@ const setupFirebase = createAsyncThunk(
     await app.initializeApp(firebaseConfig);
     if (window.location.hostname === 'localhost') {
       app.functions().useEmulator('localhost', 5001);
+      // app.auth().useEmulator('http://localhost:9099/');
     }
 
     app.auth().onAuthStateChanged(
@@ -122,6 +123,9 @@ const signUpServerside = createAsyncThunk(
       console.log('creating user serverside...');
       const createUser = app.functions().httpsCallable('createUser');
       const result = await createUser(args);
+
+      const { email, password } = args;
+      await app.auth().signInWithEmailAndPassword(email, password);
       console.log('result', result);
     } catch (error) {
       console.log(error);
@@ -135,7 +139,7 @@ const signUpServerside = createAsyncThunk(
  */
 const setIsLoading = _initialState => (state, action) => {
   state.isLoading = action.payload;
-  if (action.payload) state.error = _initialState.error;
+  state.error = _initialState.error;
 }
 
 /**

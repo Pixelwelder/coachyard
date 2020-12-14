@@ -14,8 +14,8 @@ const ROLES = {
 
 const newUserMeta = (overrides) => ({
   uid: '',
-  firstName: '',
-  lastName: '',
+  created: '',
+  updated: '',
   ...overrides
 });
 
@@ -25,21 +25,32 @@ const newUserMeta = (overrides) => ({
 const createUser = async (data, context) => {
   try {
     const { email, password, roles, displayName } = data;
+
+    // Create the user in the auth database.
     console.log('Creating user', displayName, email, roles);
-    const authUser = await admin.auth().createUser({
+    const userRecord = await admin.auth().createUser({
       email,
       emailVerified: false,
       password,
       displayName
     });
-    const { uid } = authUser;
+
+    // Add custom user claims.
+    const { uid } = userRecord;
     console.log('created user', uid);
     await admin.auth().setCustomUserClaims(uid, { roles });
     console.log('added roles', roles);
 
     // Now create a user meta for additional information.
-    const userMeta = newUserMeta({ uid });
+    const timestamp = admin.firestore.Timestamp.now();
+    const userMeta = newUserMeta({
+      uid,
+      created: timestamp,
+      updated: timestamp
+    });
+
     // Use the same ID for both.
+    console.log('adding user meta for', uid);
     const result = await admin.firestore().collection('users').doc(uid).set(userMeta);
     console.log('Added meta object to firestore.');
     return { message: 'Done.' }
