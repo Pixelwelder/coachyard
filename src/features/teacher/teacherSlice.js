@@ -5,7 +5,8 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 const initialState = {
   isLoading: false,
   error: null,
-  courses: []
+  courses: [],
+  students: []
 };
 
 const init = createAsyncThunk(
@@ -40,6 +41,16 @@ const getCreatedCourses = createAsyncThunk(
       console.error(error);
       throw error;
     }
+  }
+);
+
+const getStudents = createAsyncThunk(
+  'getStudents',
+  async () => {
+    const authUser = app.auth().currentUser;
+    if (!authUser) return [];
+
+
   }
 );
 

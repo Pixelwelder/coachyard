@@ -8,6 +8,7 @@ const CALLABLE_FUNCTIONS = {
   SET_PRIVILEGE: 'setPrivilege',
 
   CREATE_USER: 'createUser',
+  GET_USER_META: 'getUserMeta',
 
   CREATE_COURSE: 'createCourse',
   GET_COURSE: 'getCourse',

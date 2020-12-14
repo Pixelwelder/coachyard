@@ -2,20 +2,12 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { checkAuth } = require('../util/auth');
 
-// Create user - POST
-// Get user - GET
-// Delete user - DELETE
-// Get all users - GET
-
-const ROLES = {
-  STUDENT: 1,
-  TEACHER: 2
-};
-
 const newUserMeta = (overrides) => ({
   uid: '',
   created: '',
   updated: '',
+  students: [],
+  courses: [],
   ...overrides
 });
 
@@ -27,7 +19,6 @@ const createUser = async (data, context) => {
     const { email, password, roles, displayName } = data;
 
     // Create the user in the auth database.
-    console.log('Creating user', displayName, email, roles);
     const userRecord = await admin.auth().createUser({
       email,
       emailVerified: false,
@@ -37,9 +28,7 @@ const createUser = async (data, context) => {
 
     // Add custom user claims.
     const { uid } = userRecord;
-    console.log('created user', uid);
     await admin.auth().setCustomUserClaims(uid, { roles });
-    console.log('added roles', roles);
 
     // Now create a user meta for additional information.
     const timestamp = admin.firestore.Timestamp.now();
@@ -50,10 +39,8 @@ const createUser = async (data, context) => {
     });
 
     // Use the same ID for both.
-    console.log('adding user meta for', uid);
     const result = await admin.firestore().collection('users').doc(uid).set(userMeta);
-    console.log('Added meta object to firestore.');
-    return { message: 'Done.' }
+    return { message: 'Done.', data: { uid } }
   } catch (error) {
     console.log('error', error.message)
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -61,24 +48,38 @@ const createUser = async (data, context) => {
   // const result2 = await admin.auth().setCustomUserClaims()
 };
 
-// Updates user meta to new version.
-const upgradeUserMeta = () => {};
-
-const onCreateUser = (authUser) => {
-  // Create a matching entry in the database.
-  console.log('USER CREATED');
-  // const user = newUser({});
-  // const user = admin.firestore()
+/**
+ * Returns the metadata for the currently logged-in user.
+ */
+const getUserMeta = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { uid } = context.auth;
+    const snapshot = await admin.firestore().collection('users').doc(uid).get();
+    const data = snapshot.data();
+    return data;
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 }
 
-const onDeleteUser = (user) => {
-
-};
-
-const getUser = (data, context) => {};
+// // This could be done with rules.
+// const getStudents = async (data, context) => {
+//   try {
+//     checkAuth(context);
+//     const { uid } = context.auth;
+//     const teacher = await admin.firestore().collection('users').doc(uid).get();
+//     const data = teacher.docs[0].data();
+//
+//     const snapshot = admin.firestore().collection('users')
+//   } catch (error) {
+//     console.log(error);
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// }
 
 module.exports = {
   createUser: functions.https.onCall(createUser),
-  onCreateUser: functions.auth.user().onCreate(onCreateUser),
-  onDeleteUser: functions.auth.user().onDelete(onDeleteUser)
-}
+  getUserMeta: functions.https.onCall(getUserMeta),
+  // getStudents: functions.https.onCall(getStudents)
+};

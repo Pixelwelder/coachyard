@@ -11,9 +11,6 @@ import USER_PRIVILEGES from '../../constants/userPrivileges';
 const Nav = () => {
   const dispatch = useDispatch();
   const { mainTab } = useSelector(navSelectors.select);
-  const { authUser } = useSelector(appSelectors.select);
-  const { claims: { privileges = 0 } = {} } = authUser;
-  const isAdmin = (privileges & USER_PRIVILEGES.IS_ADMIN) === USER_PRIVILEGES.IS_ADMIN;
 
   return (
     <Tabs value={mainTab} onChange={(event, newValue) => dispatch(navActions.setMainTab(newValue))}>

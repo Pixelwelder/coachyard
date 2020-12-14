@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import CoursesList from './CoursesList';
 import { actions as teacherActions, selectors as teacherSelectors } from './teacherSlice';
 import { selectors as appSelectors } from '../app/appSlice';
+import Students from './Students';
 
 
 const Teacher = () => {
@@ -21,7 +22,8 @@ const Teacher = () => {
 
   return (
     <div>
-      <CoursesList items={courses} onRefresh={() => dispatch(teacherActions.getCreatedCourses())} />
+      {/*<CoursesList items={courses} onRefresh={() => dispatch(teacherActions.getCreatedCourses())} />*/}
+      <Students />
     </div>
   )
 };

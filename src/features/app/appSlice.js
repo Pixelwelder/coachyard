@@ -9,12 +9,15 @@ import { createLog } from '../log/logSlice';
 import { actions as adminActions } from '../admin/adminSlice';
 import { actions as assetActions } from '../../app/assets';
 import { ERROR } from '../log/logTypes';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
   isInitialised: false,
   isLoading: false,
   error: null,
-  authUser: { uid: null, email: null }
+  // Just holds the basics.
+  authUser: { uid: null, email: null, displayName: null, claims: null },
+  authUserMeta: null
 };
 
 const setupFirebase = createAsyncThunk(
@@ -29,19 +32,24 @@ const setupFirebase = createAsyncThunk(
 
     await app.initializeApp(firebaseConfig);
     if (window.location.hostname === 'localhost') {
-      app.functions().useEmulator('localhost', 5001);
       // app.auth().useEmulator('http://localhost:9099/');
+      app.functions().useEmulator('localhost', 5001);
     }
 
     app.auth().onAuthStateChanged(
       async (authUser) => {
         if (authUser) {
-          const { uid, email } = authUser;
+          const { uid, email, displayName } = authUser;
           dispatch(logActions.log(createLog(`User logged in: ${email}` )));
 
           // Get token.
           const { claims } = await authUser.getIdTokenResult(true);
-          dispatch(generatedActions.setAuthUser({ uid, email, claims }));
+          dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims }));
+
+          // Get meta
+          const getUserMeta = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META);
+          const userMeta = await getUserMeta();
+          console.log('userMeta', userMeta);
 
         } else {
           dispatch(logActions.log(createLog(`User logged out.` )));
@@ -81,21 +89,6 @@ const signIn = createAsyncThunk(
     } catch (error) {
       console.log('error', error);
       dispatch(logActions.log(createLog(`Firebase error: ${error.message}`, ERROR)));
-      throw error;
-    }
-  }
-);
-
-const signUp = createAsyncThunk(
-  'signUp',
-  async ({ email, password }, { dispatch }) => {
-    try {
-      dispatch(logActions.log(createLog('Attempting sign up...')));
-      await app.auth().createUserWithEmailAndPassword(email, password);
-      dispatch(logActions.log(createLog('Sign up successful')));
-    } catch (error) {
-      console.log('error', error);
-      dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
     }
   }
@@ -163,12 +156,10 @@ const { reducer, actions: generatedActions } = createSlice({
     [init.fulfilled]: (state) => { state.isInitialized = true; },
 
     [signIn.pending]: setIsLoading(initialState),
-    [signUp.pending]: setIsLoading(initialState),
     [signOut.pending]: setIsLoading(initialState),
     [signUpServerside.pending]: setIsLoading(initialState),
 
     [signIn.rejected]: setError(initialState),
-    [signUp.rejected]: setError(initialState),
     [signOut.rejected]: setError(initialState),
     [signUpServerside.rejected]: setError(initialState)
   }
@@ -177,7 +168,7 @@ const { reducer, actions: generatedActions } = createSlice({
 const select = ({ app }) => app;
 const selectors = { select };
 
-const actions = { ...generatedActions, init, signIn, signUp, signOut, signUpServerside };
+const actions = { ...generatedActions, init, signIn, signOut, signUpServerside };
 
 export { actions, selectors };
 export default reducer;

@@ -16,7 +16,8 @@ const users = require('./users')
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://coach-yard.firebaseio.com',
-  storageBucket: 'coach-yard.appspot.com'
+  storageBucket: 'coach-yard.appspot.com',
+  projectId: 'coach-yard'
 });
 
 module.exports = {
