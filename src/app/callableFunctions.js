@@ -7,6 +7,8 @@ const CALLABLE_FUNCTIONS = {
   PROCESS_VIDEO: 'processVideo',
   SET_PRIVILEGE: 'setPrivilege',
 
+  CREATE_USER: 'createUser',
+
   CREATE_COURSE: 'createCourse',
   GET_COURSE: 'getCourse',
   UPDATE_COURSE: 'updateCourse',

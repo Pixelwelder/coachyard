@@ -10,6 +10,8 @@ const { video, videoFE } = require('./video');
 const { setPrivilege, addPrivilege } = require('./admin/users');
 const { initDatabase } = require('./admin/init');
 const courses = require('./courses');
+const sessions = require('./sessions');
+const users = require('./users')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -30,5 +32,7 @@ module.exports = {
   setPrivilege,
   addPrivilege,
   initDatabase,
-  ...courses
+  ...courses,
+  ...sessions,
+  ...users
 };

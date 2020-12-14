@@ -42,7 +42,8 @@ const Session = () => {
 
     switch (mode) {
       case SESSION_MODES.SIGN_UP: {
-        await dispatch(appActions.signUp({ email, password }));
+        // await dispatch(appActions.signUp({ email, password }));
+        await dispatch(appActions.signUpServerside({ email, password, displayName: 'New User', roles: 1 | 2 }));
         break;
       }
 

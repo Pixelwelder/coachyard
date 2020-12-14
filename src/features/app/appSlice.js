@@ -115,6 +115,21 @@ const signOut = createAsyncThunk(
   }
 );
 
+const signUpServerside = createAsyncThunk(
+  'signUpServerside',
+  async (args, { dispatch }) => {
+    try {
+      console.log('creating user serverside...');
+      const createUser = app.functions().httpsCallable('createUser');
+      const result = await createUser(args);
+      console.log('result', result);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
 /**
  * Used when a load begins or ends.
  */
@@ -146,17 +161,19 @@ const { reducer, actions: generatedActions } = createSlice({
     [signIn.pending]: setIsLoading(initialState),
     [signUp.pending]: setIsLoading(initialState),
     [signOut.pending]: setIsLoading(initialState),
+    [signUpServerside.pending]: setIsLoading(initialState),
 
     [signIn.rejected]: setError(initialState),
     [signUp.rejected]: setError(initialState),
-    [signOut.rejected]: setError(initialState)
+    [signOut.rejected]: setError(initialState),
+    [signUpServerside.rejected]: setError(initialState)
   }
 });
 
 const select = ({ app }) => app;
 const selectors = { select };
 
-const actions = { ...generatedActions, init, signIn, signUp, signOut };
+const actions = { ...generatedActions, init, signIn, signUp, signOut, signUpServerside };
 
 export { actions, selectors };
 export default reducer;
