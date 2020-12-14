@@ -10,7 +10,7 @@ import NewStudentDialog from './NewStudentDialog';
 
 const Students = () => {
   const [showNewDialog, setShowNewDialog] = useState(false);
-  const students = useSelector(appSelectors.selectStudents)
+  const students = useSelector(appSelectors.selectStudents);
   const dispatch = useDispatch();
 
   const columns = [

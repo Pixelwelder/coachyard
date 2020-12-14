@@ -17,8 +17,9 @@ const NewStudentDialog = ({ open, onClose }) => {
   const [email, setEmail] = useState('');
   const { error, isLoading } = useSelector(teacherSelectors.select);
 
-  const onCreate = () => {
-    dispatch(teacherActions.createStudent({ email, displayName }))
+  const onCreate = async () => {
+    await dispatch(teacherActions.createStudent({ email, displayName }));
+    onClose();
   };
 
   return (
