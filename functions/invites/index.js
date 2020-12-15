@@ -53,12 +53,12 @@ const createInvite = async (data, context) => {
     const { uid } = context.auth;
     const { name: teacherDisplayName = '' } = context.auth.token;
     const { email, displayName } = data;
-    // const snapshot = await admin.firestore().collection('users')
-    //   .where('email', '==', email)
-    //   .get();
-    //
-    // if (!snapshot.docs.length) throw new Error(`No user with email ${email}`)
-    // if (snapshot.docs.length > 1) throw new Error(`${snapshot.docs.length} users with email ${email}.`);
+
+    // Make sure this is not already a student.
+    const teacherDoc = await admin.firestore().collection('users').doc(uid).get();
+    const { students } = teacherDoc.data();
+    const exists = students.find(student => student.email === email);
+    if (exists) throw new Error(`Teacher ${uid} already has a student with email ${email}.`);
 
     // Check to make sure we don't already have an invite for this user.
     const querySnapshot = await admin.firestore().collection('invites')
@@ -132,9 +132,21 @@ const acceptInvite = async (data, context) => {
   }
 };
 
+const deleteInvite = (data, context) => {
+  try {
+    checkAuth(context);
+    const { uid } = data;
+    admin.firestore().collection('invites').doc(uid).delete();
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
 module.exports = {
   getInvitesTo: functions.https.onCall(getInvitesTo),
   getInvitesFrom: functions.https.onCall(getInvitesFrom),
   createInvite: functions.https.onCall(createInvite),
-  acceptInvite: functions.https.onCall(acceptInvite)
+  acceptInvite: functions.https.onCall(acceptInvite),
+  deleteInvite: functions.https.onCall(deleteInvite)
 };

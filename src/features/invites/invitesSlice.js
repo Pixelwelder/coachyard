@@ -60,6 +60,17 @@ const acceptInvite = createAsyncThunk(
   }
 );
 
+const deleteInvite = createAsyncThunk(
+  'deleteInvite',
+  async (params, { dispatch }) => {
+    console.log('deleting', params);
+    const deleteInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_INVITE);
+    const result = await deleteInviteCallable(params);
+    console.log('result);')
+    await dispatch(getInvitesFrom());
+  }
+)
+
 const onPending = initialState => (state) => {
   state.isLoading = true;
   state.error = initialState.error;
@@ -110,7 +121,7 @@ const { reducer, actions: generatedActions } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, acceptInvite };
+const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, acceptInvite, deleteInvite };
 
 const addIds = items => items.map(item => ({ ...item, id: item.uid }));
 

@@ -15,6 +15,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from '@material-ui/lab/Alert';
 import AcceptIcon from '@material-ui/icons/Check';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
 //   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -90,7 +91,7 @@ import AcceptIcon from '@material-ui/icons/Check';
 const InvitesFrom = () => {
   const { authUser } = useSelector(appSelectors.select);
   const { error, isLoading, showNewDialog, email, displayName } = useSelector(invitesSelectors.select);
-  const invitesFrom = useSelector(invitesSelectors.selectInvitesTo);
+  const invitesFrom = useSelector(invitesSelectors.selectInvitesFrom);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -103,7 +104,24 @@ const InvitesFrom = () => {
   const columns = [
     { field: 'displayName', headerName: 'Name', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
-    // { field: 'uid', headerName: 'Is Member?', width: 220, valueFormatter: ({ value }) => !!value },
+    {
+      field: '',
+      headerName: 'Actions',
+      flex: 1,
+      disableClickEventBubbling: true,
+      renderCell: (params) => {
+        return (
+          <div>
+            <Button onClick={() => {
+              const { uid } = params.data;
+              dispatch(invitesActions.deleteInvite({ uid }));
+            }}>
+              <DeleteIcon />
+            </Button>
+          </div>
+        )
+      }
+    }
   ];
 
   const onSubmit = (event) => {
