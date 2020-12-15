@@ -25,6 +25,7 @@ const newStudent = (overrides) => ({
 const createUser = async (data, context) => {
   try {
     const { email, password, roles, displayName } = data;
+    console.log('creating user', data);
 
     // Create the user in the auth database.
     const userRecord = await admin.auth().createUser({

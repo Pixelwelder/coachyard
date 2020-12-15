@@ -143,7 +143,7 @@ const signUpServerside = createAsyncThunk(
   'signUpServerside',
   async (args, { dispatch }) => {
     try {
-      console.log('creating user serverside...');
+      console.log('creating user serverside with args', args);
       const createUser = app.functions().httpsCallable('createUser');
       const result = await createUser(args);
 

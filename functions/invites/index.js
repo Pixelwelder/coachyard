@@ -6,6 +6,7 @@ const newInvite = (overrides) => ({
   created: '',
   updated: '',
   teacherUid: '',
+  teacherDisplayName: '',
   email: '',
   displayName: '',
   ...overrides
@@ -25,7 +26,7 @@ const getInvitesTo = async (data, context) => {
       .where('email', '==', email)
       .get();
 
-    const invites = querySnapshot.docs.map(({ data, id }) => ({ ...data(), id }));
+    const invites = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
     console.log(invites);
     return invites;
 
@@ -56,9 +57,10 @@ const getInvitesFrom = async (data, context) => {
 const createInvite = async (data, context) => {
   console.log('createInvite', data);
   try {
-    console.log('createInvite');
+    console.log('createInvite', context.token);
     checkAuth(context);
     const { uid } = context.auth;
+    const { name: teacherDisplayName = '' } = context.auth.token;
     const { email, displayName } = data;
     // const snapshot = await admin.firestore().collection('users')
     //   .where('email', '==', email)
@@ -82,8 +84,9 @@ const createInvite = async (data, context) => {
       created: timestamp,
       updated: timestamp,
       teacherUid: uid,
+      teacherDisplayName,
       email,
-      displayName
+      displayName,
     });
 
     await admin.firestore().collection('invites').doc().set(invite);

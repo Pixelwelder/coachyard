@@ -104,7 +104,8 @@ const InvitesFrom = () => {
     // { field: 'uid', headerName: 'Is Member?', width: 220, valueFormatter: ({ value }) => !!value },
   ];
 
-  const onSubmit = () => {
+  const onSubmit = (event) => {
+    event.preventDefault();
     dispatch(invitesActions.createInvite());
   };
 
@@ -137,7 +138,7 @@ const InvitesFrom = () => {
           <DialogContentText>
             Who would you like to invite?
           </DialogContentText>
-          <form>
+          <form onSubmit={onSubmit}>
             <TextField
               fullWidth autoFocus
               variant="filled" label="Student Name" placeholder="Student Name"
@@ -150,6 +151,7 @@ const InvitesFrom = () => {
               id="email" value={email}
               onChange={({ target: { value } }) => dispatch(invitesActions.setEmail(value))}
             />
+            <button className="invisible" type="submit" />
           </form>
           {!!error && <Alert severity="error">{error.message}</Alert>}
         </DialogContent>
@@ -182,7 +184,21 @@ const InvitesTo = () => {
     if (authUser) go();
   }, [authUser, dispatch]);
 
-  return <p>Invites to me: {invitesTo?.length || '0'}</p>
+  const columns = [
+    { field: 'displayName', headerName: 'Name', width: 220 },
+    { field: 'email', headerName: 'Email', width: 220 },
+    // { field: 'uid', headerName: 'Is Member?', width: 220, valueFormatter: ({ value }) => !!value },
+  ];
+
+  return (
+    <div>
+      <div>
+        <Button onClick={() => {}}>
+          <CachedIcon />
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export { InvitesFrom, InvitesTo };

@@ -20,6 +20,7 @@ const Session = () => {
   const dispatch = useDispatch();
   const { mode } = useSelector(sessionSelectors.select);
   const { isLoading, error, authUser, query } = useSelector(appSelectors.select);
+  const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -51,7 +52,7 @@ const Session = () => {
     switch (mode) {
       case SESSION_MODES.SIGN_UP: {
         // await dispatch(appActions.signUp({ email, password }));
-        await dispatch(appActions.signUpServerside({ email, password, displayName: 'New User', roles: 1 | 2 }));
+        await dispatch(appActions.signUpServerside({ email, password, displayName, roles: 1 | 2 }));
         break;
       }
 
@@ -86,6 +87,11 @@ const Session = () => {
           <>
             <DialogContentText>Come on in, the water's fine!</DialogContentText>
             <form onSubmit={onSubmit}>
+              <TextField
+                variant="filled"
+                id="displayName" value={displayName} disabled={isLoading} placeholder="name" autoComplete="name"
+                onChange={({ target: { value } }) => setDisplayName(value)}
+              />
               <TextField
                 variant="filled"
                 error={isErrorType('email')(error)}
