@@ -25,18 +25,24 @@ const initialState = {
 const refreshUser = createAsyncThunk(
   'refreshUser',
   async (_, { dispatch }) => {
-    const authUser = app.auth().currentUser;
-    const { uid, email, displayName } = authUser;
+    try {
+      console.log('refreshing user');
+      const authUser = app.auth().currentUser;
+      const { uid, email, displayName } = authUser;
 
-    // Get token.
-    const { claims } = await authUser.getIdTokenResult(true);
+      // Get token.
+      const { claims } = await authUser.getIdTokenResult(true);
 
-    // Get meta
-    const { data: meta } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
-    console.log('userMeta', meta);
+      // Get meta
+      const { data: meta } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
+      console.log('userMeta', meta);
 
-    // return { uid, email, displayName, claims, meta };
-    dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
+      // return { uid, email, displayName, claims, meta };
+      dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 );
 

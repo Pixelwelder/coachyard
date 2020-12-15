@@ -48,6 +48,8 @@ yarn-debug.log*
 yarn-error.log*
 firestore-debug.log
 firebase-debug.log
+database-debug.log
+pubsub-debug.log
 .eslintcache
 
 /public/videos

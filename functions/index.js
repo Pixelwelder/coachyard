@@ -12,6 +12,7 @@ const { initDatabase } = require('./admin/init');
 const courses = require('./courses');
 const sessions = require('./sessions');
 const users = require('./users')
+const invites = require('./invites');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -35,5 +36,6 @@ module.exports = {
   initDatabase,
   ...courses,
   ...sessions,
-  ...users
+  ...users,
+  ...invites
 };

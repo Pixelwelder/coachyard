@@ -10,6 +10,7 @@ import assetsReducer from '../app/assets';
 import sessionReducer from '../features/session/sessionSlice';
 import uiReducer from '../features/ui/uiSlice';
 import teacherReducer from '../features/teacher/teacherSlice';
+import invitesReducer from '../features/invites/invitesSlice';
 
 export default configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export default configureStore({
     assets: assetsReducer,
     session: sessionReducer,
     ui: uiReducer,
-    teacher: teacherReducer
+    teacher: teacherReducer,
+    invites: invitesReducer
   }
 });

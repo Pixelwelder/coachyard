@@ -54,7 +54,7 @@ const createStudent = createAsyncThunk(
     console.log('result', result);
     dispatch(appActions.refreshUser());
   }
-)
+);
 
 const onPending = () => (state, action) => {
   state.isLoading = true;

@@ -5,7 +5,7 @@ import CoursesList from './CoursesList';
 import { actions as teacherActions, selectors as teacherSelectors } from './teacherSlice';
 import { selectors as appSelectors } from '../app/appSlice';
 import Students from './Students';
-
+import { InvitesFrom, InvitesTo } from '../invites';
 
 const Teacher = () => {
   const courses = useSelector(teacherSelectors.selectCourses);
@@ -14,7 +14,7 @@ const Teacher = () => {
 
   useEffect(() => {
     const go = async () => {
-      dispatch(teacherActions.init());
+      // dispatch(teacherActions.init());
     };
 
     if (authUser) go();
@@ -23,7 +23,11 @@ const Teacher = () => {
   return (
     <div>
       {/*<CoursesList items={courses} onRefresh={() => dispatch(teacherActions.getCreatedCourses())} />*/}
-      <Students />
+      {/*<Students />*/}
+      From me:
+      <InvitesFrom />
+      To me:
+      <InvitesTo />
     </div>
   )
 };

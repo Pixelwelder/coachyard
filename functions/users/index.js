@@ -38,16 +38,30 @@ const createUser = async (data, context) => {
     const { uid } = userRecord;
     await admin.auth().setCustomUserClaims(uid, { roles });
 
-    // Now create a user meta for additional information.
+    // Now we need a user meta for additional information.
     const timestamp = admin.firestore.Timestamp.now();
-    const userMeta = newUserMeta({
-      uid,
-      created: timestamp,
-      updated: timestamp
-    });
+    let userMeta;
+
+    // If this user was created by a teacher, the user meta will already exist.
+    const snapshot = await admin.firestore()
+      .collection('users')
+      .where('email', '==', email)
+      .get();
+
+    if (!snapshot.empty) {
+      // It exists
+      userMeta = snapshot.docs[0].data();
+    } else {
+      userMeta = newUserMeta({
+        uid,
+        created: timestamp
+      });
+    }
+
+    userMeta.updated = timestamp;
 
     // Use the same ID for both.
-    const result = await admin.firestore().collection('users').doc(uid).set(userMeta);
+    await admin.firestore().collection('users').doc(uid).set(userMeta);
     return { message: 'Done.', data: { uid } }
   } catch (error) {
     console.log('error', error.message)
@@ -64,9 +78,13 @@ const getUserMeta = async (data, context) => {
     checkAuth(context);
     const { uid } = context.auth;
     const snapshot = await admin.firestore().collection('users').doc(uid).get();
-    const data = snapshot.data();
-    return data;
+    const userMeta = snapshot.data();
+    console.log('userMeta', userMeta);
+
+    // if (!userMeta) throw new Error(`No user meta for user ${uid}.`)
+    return userMeta;
   } catch (error) {
+    console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
