@@ -13,6 +13,7 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
+import Alert from '@material-ui/lab/Alert';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
 //   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -87,7 +88,7 @@ import Dialog from '@material-ui/core/Dialog';
 
 const InvitesFrom = () => {
   const { authUser } = useSelector(appSelectors.select);
-  const { invitesFrom } = useSelector(invitesSelectors.select);
+  const { invitesFrom, error, isLoading, showNewDialog, email, displayName } = useSelector(invitesSelectors.select);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -97,18 +98,14 @@ const InvitesFrom = () => {
     if (authUser) go();
   }, [authUser, dispatch]);
 
-  const [showNewDialog, setShowNewDialog] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-
   const columns = [
     { field: 'displayName', headerName: 'Name', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
     // { field: 'uid', headerName: 'Is Member?', width: 220, valueFormatter: ({ value }) => !!value },
   ];
 
-  const onSubmit = async () => {
-    dispatch(invitesActions.createInvite({ email, displayName }));
+  const onSubmit = () => {
+    dispatch(invitesActions.createInvite());
   };
 
   const onRefresh = () => {};
@@ -119,18 +116,22 @@ const InvitesFrom = () => {
         <Button onClick={onRefresh}>
           <CachedIcon />
         </Button>
-        <Button onClick={() => setShowNewDialog(true)}>
+        <Button onClick={() => dispatch(invitesActions.setShowNewDialog(true))}>
           <AddIcon />
         </Button>
       </div>
-      <div style={{ height: 200 }}>
+      <div style={{ height: 300 }}>
         <DataGrid
           rows={invitesFrom}
           columns={columns}
         />
       </div>
 
-      <Dialog open={showNewDialog} onClose={() => setShowNewDialog(false)} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={showNewDialog}
+        onClose={() => dispatch(invitesActions.setShowNewDialog(false))}
+        aria-labelledby="form-dialog-title"
+      >
         <DialogTitle id="form-dialog-title">Invite New Student</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -141,19 +142,19 @@ const InvitesFrom = () => {
               fullWidth autoFocus
               variant="filled" label="Student Name" placeholder="Student Name"
               id="displayName" value={displayName}
-              onChange={({ target: { value } }) => setDisplayName(value)}
+              onChange={({ target: { value } }) => dispatch(invitesActions.setDisplayName(value))}
             />
             <TextField
               fullWidth
               variant="filled" label="Student Email" placeholder="Student Email"
               id="email" value={email}
-              onChange={({ target: { value } }) => setEmail(value)}
+              onChange={({ target: { value } }) => dispatch(invitesActions.setEmail(value))}
             />
           </form>
-          {/*{!!error && <Alert severity="error">{error.message}</Alert>}*/}
+          {!!error && <Alert severity="error">{error.message}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowNewDialog(false)} color="primary">
+          <Button onClick={() => dispatch(invitesActions.setShowNewDialog(false))} color="primary">
             Cancel
           </Button>
           <Button

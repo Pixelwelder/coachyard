@@ -7,6 +7,7 @@ const newInvite = (overrides) => ({
   updated: '',
   teacherUid: '',
   email: '',
+  displayName: '',
   ...overrides
 });
 
@@ -58,7 +59,7 @@ const createInvite = async (data, context) => {
     console.log('createInvite');
     checkAuth(context);
     const { uid } = context.auth;
-    const { email } = data;
+    const { email, displayName } = data;
     // const snapshot = await admin.firestore().collection('users')
     //   .where('email', '==', email)
     //   .get();
@@ -74,12 +75,15 @@ const createInvite = async (data, context) => {
 
     if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
 
+    // TODO Make sure it's not to yourself for some reason.
+
     const timestamp = admin.firestore.Timestamp.now();
     const invite = newInvite({
       created: timestamp,
       updated: timestamp,
       teacherUid: uid,
-      email
+      email,
+      displayName
     });
 
     await admin.firestore().collection('invites').doc().set(invite);

@@ -4,7 +4,13 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
   invitesTo: [],
-  invitesFrom: []
+  invitesFrom: [],
+
+  isLoading: false,
+  error: '',
+  showNewDialog: false,
+  displayName: '',
+  email: ''
 };
 
 const getInvitesTo = createAsyncThunk(
@@ -33,24 +39,58 @@ const getInvitesFrom = createAsyncThunk(
 
 const createInvite = createAsyncThunk(
   'createInvite',
-  async (params, { dispatch }) => {
-    console.log('creating invite', params);
+  async (_, { getState, dispatch }) => {
+    const state = getState();
+    const { email, displayName } = selectors.select(state);
     const createInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_INVITE);
-    const result = await createInviteCallable(params);
-    console.log('result', result);
+    const result = await createInviteCallable({ email, displayName });
+    dispatch(generatedActions.setShowNewDialog(false));
     dispatch(getInvitesFrom());
   }
 );
 
+const onPending = initialState => (state) => {
+  state.isLoading = true;
+  state.error = initialState.error;
+};
+
+const onRejected = initialState => (state, action) => {
+  state.isLoading = false;
+  state.error = action.error;
+};
+
+const onFulfilled = name => (state, action) => {
+  state.isLoading = false;
+  if (name) state[name] = action.payload;
+};
+
+const setValue = name => (state, action) => {
+  state[name] = action.payload;
+}
+
 const { reducer, actions: generatedActions } = createSlice({
   name: 'invites',
   initialState,
+  reducers: {
+    setShowNewDialog: setValue('showNewDialog'),
+    setDisplayName: setValue('displayName'),
+    setEmail: setValue('email')
+  },
   extraReducers: {
-    [getInvitesTo.fulfilled]: (state, action) => {
-      state.invitesTo = action.payload;
-    },
-    [getInvitesFrom.fulfilled]: (state, action) => {
-      state.invitesFrom = action.payload;
+    [getInvitesTo.pending]: onPending(initialState),
+    [getInvitesTo.rejected]: onRejected(initialState),
+    [getInvitesTo.fulfilled]: onFulfilled('invitesTo'),
+
+    [getInvitesFrom.pending]: onPending(initialState),
+    [getInvitesFrom.rejected]: onRejected(initialState),
+    [getInvitesFrom.fulfilled]: onFulfilled('invitesFrom'),
+
+    [createInvite.pending]: onPending(initialState),
+    [createInvite.rejected]: onRejected(initialState),
+    [createInvite.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.email = initialState.email;
+      state.displayName = initialState.displayName;
     }
   }
 });
