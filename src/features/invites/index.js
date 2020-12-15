@@ -98,7 +98,7 @@ const InvitesFrom = () => {
     const go = async () => {
       dispatch(invitesActions.getInvitesFrom());
     };
-    if (authUser) go();
+    if (authUser.uid) go();
   }, [authUser, dispatch]);
 
   const columns = [
@@ -199,7 +199,7 @@ const InvitesTo = () => {
     const go = async () => {
       dispatch(invitesActions.getInvitesTo());
     };
-    if (authUser) go();
+    if (authUser.uid) go();
   }, [authUser, dispatch]);
 
   const columns = [

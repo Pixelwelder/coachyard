@@ -94,7 +94,11 @@ const { reducer, actions: generatedActions } = createSlice({
   name: 'invites',
   initialState,
   reducers: {
-    setShowNewDialog: setValue('showNewDialog'),
+    setShowNewDialog: (state, action) => {
+      state.displayName = initialState.displayName;
+      state.email = initialState.email;
+      state.showNewDialog = action.payload;
+    },
     setDisplayName: setValue('displayName'),
     setEmail: setValue('email')
   },
@@ -110,6 +114,7 @@ const { reducer, actions: generatedActions } = createSlice({
     [createInvite.pending]: onPending(initialState),
     [createInvite.rejected]: onRejected(initialState),
     [createInvite.fulfilled]: (state, action) => {
+      state.showNewDialog = false;
       state.isLoading = false;
       state.email = initialState.email;
       state.displayName = initialState.displayName;

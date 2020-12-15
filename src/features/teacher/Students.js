@@ -21,15 +21,16 @@ const Students = () => {
 
   return (
     <div>
+      Students
       <div>
         <Button onClick={() => dispatch(appActions.refreshUser())}>
           <CachedIcon />
         </Button>
-        <Button onClick={() => setShowNewDialog(true)}>
-          <AddIcon />
-        </Button>
+        {/*<Button onClick={() => setShowNewDialog(true)}>*/}
+        {/*  <AddIcon />*/}
+        {/*</Button>*/}
       </div>
-      <div style={{ height: 400 }}>
+      <div style={{ height: 300 }}>
         <DataGrid
           rows={students}
           columns={columns}
