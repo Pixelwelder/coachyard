@@ -14,6 +14,7 @@ import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Alert from '@material-ui/lab/Alert';
+import AcceptIcon from '@material-ui/icons/Check';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
 //   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -88,7 +89,8 @@ import Alert from '@material-ui/lab/Alert';
 
 const InvitesFrom = () => {
   const { authUser } = useSelector(appSelectors.select);
-  const { invitesFrom, error, isLoading, showNewDialog, email, displayName } = useSelector(invitesSelectors.select);
+  const { error, isLoading, showNewDialog, email, displayName } = useSelector(invitesSelectors.select);
+  const invitesFrom = useSelector(invitesSelectors.selectInvitesTo);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -109,12 +111,10 @@ const InvitesFrom = () => {
     dispatch(invitesActions.createInvite());
   };
 
-  const onRefresh = () => {};
-
   return (
     <div>
       <div>
-        <Button onClick={onRefresh}>
+        <Button onClick={() => dispatch(invitesActions.getInvitesFrom())}>
           <CachedIcon />
         </Button>
         <Button onClick={() => dispatch(invitesActions.setShowNewDialog(true))}>
@@ -174,7 +174,7 @@ const InvitesFrom = () => {
 
 const InvitesTo = () => {
   const { authUser } = useSelector(appSelectors.select);
-  const { invitesTo } = useSelector(invitesSelectors.select);
+  const invitesTo = useSelector(invitesSelectors.selectInvitesTo);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -185,17 +185,40 @@ const InvitesTo = () => {
   }, [authUser, dispatch]);
 
   const columns = [
-    { field: 'displayName', headerName: 'Name', width: 220 },
+    { field: 'teacherDisplayName', headerName: 'From', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
-    // { field: 'uid', headerName: 'Is Member?', width: 220, valueFormatter: ({ value }) => !!value },
+    {
+      field: '',
+      headerName: 'Actions',
+      flex: 1,
+      disableClickEventBubbling: true,
+      renderCell: (params) => {
+        return (
+          <div>
+            <Button onClick={() => {
+              const { uid } = params.data;
+              dispatch(invitesActions.acceptInvite({ uid }));
+            }}>
+              <AcceptIcon/>
+            </Button>
+          </div>
+        )
+      }
+    }
   ];
 
   return (
     <div>
       <div>
-        <Button onClick={() => {}}>
+        <Button onClick={() => dispatch(invitesActions.getInvitesTo())}>
           <CachedIcon />
         </Button>
+      </div>
+      <div style={{ height: 300 }}>
+        <DataGrid
+          rows={invitesTo}
+          columns={columns}
+        />
       </div>
     </div>
   );

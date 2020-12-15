@@ -1,16 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { checkAuth } = require('../util/auth');
-
-const newInvite = (overrides) => ({
-  created: '',
-  updated: '',
-  teacherUid: '',
-  teacherDisplayName: '',
-  email: '',
-  displayName: '',
-  ...overrides
-});
+const { newStudent, newInvite } = require('../data');
 
 /**
  * Returns all invites addressed to the logged-in user.
@@ -26,7 +17,7 @@ const getInvitesTo = async (data, context) => {
       .where('email', '==', email)
       .get();
 
-    const invites = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    const invites = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id }));
     console.log(invites);
     return invites;
 
@@ -45,7 +36,7 @@ const getInvitesFrom = async (data, context) => {
       .where('teacherUid', '==', uid)
       .get();
 
-    const invites = await querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    const invites = await querySnapshot.docs.map((doc) => ({ ...doc.data(), uid: doc.id }));
     console.log(invites);
     return invites;
   } catch (error) {
@@ -98,8 +89,52 @@ const createInvite = async (data, context) => {
   }
 };
 
+const acceptInvite = async (data, context) => {
+  try {
+    checkAuth(context);
+
+    const { uid } = data;
+    const inviteSnapshot = await admin.firestore().collection('invites').doc(uid).get();
+    if (!inviteSnapshot.exists) throw new Error(`No invite by ui ${uid}.`)
+
+    const { teacherUid, email } = inviteSnapshot.data();
+    console.log('got invite', teacherUid, email);
+
+    const studentUser = await admin.auth().getUserByEmail(email);
+    const { uid: studentUid, displayName } = studentUser;
+    console.log('found user', studentUid, displayName);
+
+    const timestamp = admin.firestore.Timestamp.now();
+    const student = newStudent({
+      uid: studentUid,
+      email,
+      displayName, // TODO This must be updated when user updates it.
+      created: timestamp,
+      updated: timestamp
+    });
+
+    const teacherSnapshot = await admin.firestore().collection('users').doc(teacherUid).get();
+    if (!teacherSnapshot.exists) throw new Error(`No teacher by uid ${teacherUid}.`)
+
+    const teacherMeta = teacherSnapshot.data();
+    console.log('got teacher', teacherMeta);
+
+    const existing = teacherMeta.students.find((student) => student.email === email);
+    if (existing) throw new Error(`${studentUid} is already a student of teacher ${teacherUid}`);
+    const students = [ ...(teacherMeta.students || []), student ];
+
+    await admin.firestore().collection('users').doc(teacherUid).update({ students });
+    await admin.firestore().collection('invites').doc(uid).delete();
+    return { message: 'Done.' };
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
 module.exports = {
   getInvitesTo: functions.https.onCall(getInvitesTo),
   getInvitesFrom: functions.https.onCall(getInvitesFrom),
-  createInvite: functions.https.onCall(createInvite)
+  createInvite: functions.https.onCall(createInvite),
+  acceptInvite: functions.https.onCall(acceptInvite)
 };

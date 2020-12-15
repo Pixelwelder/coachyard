@@ -49,6 +49,17 @@ const createInvite = createAsyncThunk(
   }
 );
 
+const acceptInvite = createAsyncThunk(
+  'acceptInvite',
+  async (params, { dispatch }) => {
+    console.log('accept invite', params);
+    const acceptInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ACCEPT_INVITE);
+    const result = await acceptInviteCallable(params);
+    console.log('result', result);
+    await dispatch(getInvitesTo());
+  }
+);
+
 const onPending = initialState => (state) => {
   state.isLoading = true;
   state.error = initialState.error;
@@ -91,14 +102,22 @@ const { reducer, actions: generatedActions } = createSlice({
       state.isLoading = false;
       state.email = initialState.email;
       state.displayName = initialState.displayName;
-    }
+    },
+
+    [acceptInvite.pending]: onPending(initialState),
+    [acceptInvite.rejected]: onRejected(initialState),
+    [acceptInvite.fulfilled]: onFulfilled(),
   }
 });
 
-const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite };
+const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, acceptInvite };
+
+const addIds = items => items.map(item => ({ ...item, id: item.uid }));
 
 const select = ({ invites }) => invites;
-const selectors = { select };
+const selectInvitesFrom = createSelector(select, ({ invitesFrom }) => addIds(invitesFrom));
+const selectInvitesTo = createSelector(select, ({ invitesTo }) => addIds(invitesTo));
+const selectors = { select, selectInvitesFrom, selectInvitesTo };
 
 export { actions, selectors };
 export default reducer;

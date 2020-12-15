@@ -1,23 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { checkAuth } = require('../util/auth');
-
-const newUserMeta = (overrides) => ({
-  uid: '',
-  created: '',
-  updated: '',
-  students: [],
-  courses: [],
-  ...overrides
-});
-
-const newStudent = (overrides) => ({
-  uid: '',
-  email: '',
-  created: '',
-  updated: '',
-  ...overrides
-});
+const { newStudent, newUserMeta } = require('../data');
 
 /**
  * Creates a user but does not log them in.
