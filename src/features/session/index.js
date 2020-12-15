@@ -19,13 +19,25 @@ const isErrorType = type => error => !!error && error.message.toLowerCase().incl
 const Session = () => {
   const dispatch = useDispatch();
   const { mode } = useSelector(sessionSelectors.select);
-  const { isLoading, error, authUser } = useSelector(appSelectors.select);
+  const { isLoading, error, authUser, query } = useSelector(appSelectors.select);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // Clear any time the user changes.
+  useEffect(() => { onClear(); }, [authUser]);
+
   useEffect(
-    () => { onClear(); },
-    [authUser]
+    () => {
+      // If we have an invitation, load it.
+      const loadInvite = async () => {
+
+      };
+
+      if (query.invite) {
+        loadInvite();
+      }
+    },
+    [query]
   );
 
   const onClear = () => {

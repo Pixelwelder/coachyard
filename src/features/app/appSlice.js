@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/functions';
+import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';
 import { actions as logActions } from '../log/logSlice';
@@ -17,7 +18,8 @@ const initialState = {
   error: null,
   // Just holds the basics.
   authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
-  authUserMeta: null
+  authUserMeta: null,
+  query: {}
 };
 
 const refreshUser = createAsyncThunk(
@@ -79,7 +81,19 @@ const init = createAsyncThunk(
       await dispatch(setupFirebase());
       await dispatch(assetActions.init());
       // await dispatch(adminActions.init({ firebase: app }));
+
+      // Set the query. For some reason the object returned from queryString is non-serializable.
+      const query = queryString.parse(window.location.search);
+      const queryObj = Object.entries(query)
+        .reduce((accum, [name, val]) => ({ ...accum, [name]: val}), {});
+      dispatch(generatedActions.setQuery(queryObj));
+
+      // Do we have an invitation to deal with?
+      if (queryObj.invite) {
+        console.log('INVITE', queryObj.invite);
+      }
     } catch (error) {
+      console.error(error);
       dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
     }
@@ -157,10 +171,9 @@ const { reducer, actions: generatedActions } = createSlice({
   name: 'init',
   initialState,
   reducers: {
-    setAuthUser: (state, action) => {
-      state.authUser = action.payload;
-    },
-    clearError: (state) => { state.error = initialState.error; }
+    setAuthUser: (state, action) => { state.authUser = action.payload; },
+    clearError: (state) => { state.error = initialState.error; },
+    setQuery: (state, action) => { state.query = action.payload; }
   },
   extraReducers: {
     [init.fulfilled]: (state) => { state.isInitialized = true; },
@@ -184,6 +197,7 @@ const selectStudents = createSelector(select, ({ authUser }) => {
   const students = arr.map(item => ({ ...item, id: item.email }));
   return students;
 });
+
 const selectors = { select, selectStudents };
 
 const actions = { ...generatedActions, init, signIn, signOut, signUpServerside, refreshUser };

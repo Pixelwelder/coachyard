@@ -24,13 +24,17 @@ function App() {
 
   const { isInitialized } = useSelector(appSelectors.select);
   const { mainTab } = useSelector(navSelectors.select);
+  const { query } = useSelector(appSelectors.select);
+  // console.log(query);
 
   if (!isInitialized) {
     return null;
+
   }
 
   return (
     <div className="App">
+      {/*<p>{ query.toString() }</p>*/}
       <CssBaseline />
       <Session />
       <Account />
