@@ -14,6 +14,7 @@ import Alert from '@material-ui/lab/Alert';
 import AcceptIcon from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import CancelIcon from '@material-ui/icons/Clear';
 import { DateTimePicker } from '@material-ui/pickers';
 
 import { selectors as invitesSelectors, actions as invitesActions } from './invitesSlice';
@@ -105,10 +106,12 @@ const InvitesFrom = () => {
   }, [authUser, dispatch]);
 
   const DeleteButton = ({ params }) => (
-    <Button onClick={() => {
-      const { uid } = params.data;
-      dispatch(invitesActions.deleteInvite({ uid }));
-    }}>
+    <Button
+      onClick={() => {
+        const { uid } = params.data;
+        dispatch(invitesActions.deleteInvite({ uid }));
+      }}
+    >
       <DeleteIcon />
     </Button>
   );
@@ -129,6 +132,7 @@ const InvitesFrom = () => {
       field: 'date', headerName: 'When', width: 220,
       valueFormatter: ({ value }) => DateTime.fromISO(value).toLocal().toString()
     },
+    { field: 'accepted', headerName: 'Accepted', width: 220 },
     {
       field: '',
       headerName: 'Actions',
@@ -224,6 +228,28 @@ const InvitesTo = () => {
     if (authUser.uid) go();
   }, [authUser, dispatch]);
 
+  const AcceptButton = ({ params }) => (
+    <Button
+      onClick={() => {
+        const { uid } = params.data;
+        dispatch(invitesActions.updateInvite({ uid, update: { accepted: true } }));
+      }}
+    >
+      <AcceptIcon/>
+    </Button>
+  );
+
+  const RejectButton = ({ params }) => (
+    <Button
+      onClick={() => {
+        const { uid } = params.data;
+        dispatch(invitesActions.updateInvite({ uid, update: { accepted: false } }));
+      }}
+    >
+      <CancelIcon />
+    </Button>
+  );
+
   const columns = [
     { field: 'teacherDisplayName', headerName: 'From', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
@@ -235,12 +261,8 @@ const InvitesTo = () => {
       renderCell: (params) => {
         return (
           <div>
-            <Button onClick={() => {
-              const { uid } = params.data;
-              dispatch(invitesActions.acceptInvite({ uid }));
-            }}>
-              <AcceptIcon/>
-            </Button>
+            {!params.data.accepted && <AcceptButton params={params} />}
+            {params.data.accepted && <RejectButton params={params} />}
           </div>
         )
       }

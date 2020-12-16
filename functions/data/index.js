@@ -23,6 +23,7 @@ const newInvite = (overrides) => ({
   email: '',
   displayName: '',
   time: '',
+  accepted: false,
   ...overrides
 });
 

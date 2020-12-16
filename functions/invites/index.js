@@ -18,7 +18,6 @@ const getInvitesTo = async (data, context) => {
       .get();
 
     const invites = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id }));
-    console.log(invites);
     return invites;
 
   } catch (error) {
@@ -61,18 +60,20 @@ const createInvite = async (data, context) => {
     const teacherDoc = await admin.firestore().collection('users').doc(uid).get();
     const teacherMeta = teacherDoc.data();
 
+    // TODO Make sure it doesn't overlap another one.
+
     // Make sure this is not already a student.
-    const { students } = teacherMeta;
-    const exists = students.find(student => student.email === email);
-    if (exists) throw new Error(`Teacher ${uid} already has a student with email ${email}.`);
+    // const { students } = teacherMeta;
+    // const exists = students.find(student => student.email === email);
+    // if (exists) throw new Error(`Teacher ${uid} already has a student with email ${email}.`);
 
     // Check to make sure we don't already have an invite for this user.
-    const querySnapshot = await admin.firestore().collection('invites')
-      .where('teacherUid', '==', uid)
-      .where('email', '==', email)
-      .get();
+    // const querySnapshot = await admin.firestore().collection('invites')
+    //   .where('teacherUid', '==', uid)
+    //   .where('email', '==', email)
+    //   .get();
 
-    if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
+    // if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
 
     const timestamp = admin.firestore.Timestamp.now();
     const invite = newInvite({
@@ -94,42 +95,44 @@ const createInvite = async (data, context) => {
   }
 };
 
-const acceptInvite = async (data, context) => {
+const updateInvite = async (data, context) => {
   try {
     checkAuth(context);
 
-    const { uid } = data;
+    const { uid, update } = data;
     const inviteSnapshot = await admin.firestore().collection('invites').doc(uid).get();
     if (!inviteSnapshot.exists) throw new Error(`No invite by ui ${uid}.`)
 
-    const { teacherUid, email } = inviteSnapshot.data();
-    console.log('got invite', teacherUid, email);
+    await admin.firestore().collection('invites').doc(uid).update(update);
 
-    const studentUser = await admin.auth().getUserByEmail(email);
-    const { uid: studentUid, displayName } = studentUser;
-    console.log('found user', studentUid, displayName);
+    // const { teacherUid, email } = inviteSnapshot.data();
+    // console.log('got invite', teacherUid, email);
 
-    const timestamp = admin.firestore.Timestamp.now();
-    const student = newStudent({
-      uid: studentUid,
-      email,
-      displayName, // TODO This must be updated when user updates it.
-      created: timestamp,
-      updated: timestamp
-    });
+    // const studentUser = await admin.auth().getUserByEmail(email);
+    // const { uid: studentUid, displayName } = studentUser;
+    // console.log('found user', studentUid, displayName);
 
-    const teacherSnapshot = await admin.firestore().collection('users').doc(teacherUid).get();
-    if (!teacherSnapshot.exists) throw new Error(`No teacher by uid ${teacherUid}.`)
+    // const timestamp = admin.firestore.Timestamp.now();
+    // const student = newStudent({
+    //   uid: studentUid,
+    //   email,
+    //   displayName, // TODO This must be updated when user updates it.
+    //   created: timestamp,
+    //   updated: timestamp
+    // });
 
-    const teacherMeta = teacherSnapshot.data();
-    console.log('got teacher', teacherMeta);
+    // const teacherSnapshot = await admin.firestore().collection('users').doc(teacherUid).get();
+    // if (!teacherSnapshot.exists) throw new Error(`No teacher by uid ${teacherUid}.`)
 
-    const existing = teacherMeta.students.find((student) => student.email === email);
-    if (existing) throw new Error(`${studentUid} is already a student of teacher ${teacherUid}`);
-    const students = [ ...(teacherMeta.students || []), student ];
+    // const teacherMeta = teacherSnapshot.data();
+    // console.log('got teacher', teacherMeta);
 
-    await admin.firestore().collection('users').doc(teacherUid).update({ students });
-    await admin.firestore().collection('invites').doc(uid).delete();
+    // const existing = teacherMeta.students.find((student) => student.email === email);
+    // if (existing) throw new Error(`${studentUid} is already a student of teacher ${teacherUid}`);
+    // const students = [ ...(teacherMeta.students || []), student ];
+
+    // await admin.firestore().collection('users').doc(teacherUid).update({ students });
+    // await admin.firestore().collection('invites').doc(uid).delete();
     return { message: 'Done.' };
   } catch (error) {
     console.error(error);
@@ -154,6 +157,6 @@ module.exports = {
   getInvitesTo: functions.https.onCall(getInvitesTo),
   getInvitesFrom: functions.https.onCall(getInvitesFrom),
   createInvite: functions.https.onCall(createInvite),
-  acceptInvite: functions.https.onCall(acceptInvite),
+  updateInvite: functions.https.onCall(updateInvite),
   deleteInvite: functions.https.onCall(deleteInvite)
 };

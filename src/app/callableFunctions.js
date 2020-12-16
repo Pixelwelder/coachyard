@@ -15,7 +15,7 @@ const CALLABLE_FUNCTIONS = {
   CREATE_INVITE: 'createInvite',
   GET_INVITES_TO: 'getInvitesTo',
   GET_INVITES_FROM: 'getInvitesFrom',
-  ACCEPT_INVITE: 'acceptInvite',
+  UPDATE_INVITE: 'updateInvite',
   DELETE_INVITE: 'deleteInvite',
 
   CREATE_COURSE: 'createCourse',

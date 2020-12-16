@@ -51,12 +51,12 @@ const createInvite = createAsyncThunk(
   }
 );
 
-const acceptInvite = createAsyncThunk(
-  'acceptInvite',
+const updateInvite = createAsyncThunk(
+  'updateInvite',
   async (params, { dispatch }) => {
-    console.log('accept invite', params);
-    const acceptInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ACCEPT_INVITE);
-    const result = await acceptInviteCallable(params);
+    console.log('update invite', params);
+    const updateInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_INVITE);
+    const result = await updateInviteCallable(params);
     console.log('result', result);
     await dispatch(getInvitesTo());
   }
@@ -134,13 +134,13 @@ const { reducer, actions: generatedActions } = createSlice({
       state.isLoading = false;
     },
 
-    [acceptInvite.pending]: onPending(initialState),
-    [acceptInvite.rejected]: onRejected(initialState),
-    [acceptInvite.fulfilled]: onFulfilled(),
+    [updateInvite.pending]: onPending(initialState),
+    [updateInvite.rejected]: onRejected(initialState),
+    [updateInvite.fulfilled]: onFulfilled(),
   }
 });
 
-const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, acceptInvite, deleteInvite };
+const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, updateInvite, deleteInvite };
 
 const addIds = items => items.map(item => ({ ...item, id: item.uid }));
 
