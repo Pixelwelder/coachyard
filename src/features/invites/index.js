@@ -19,6 +19,7 @@ import { DateTimePicker } from '@material-ui/pickers';
 
 import { selectors as invitesSelectors, actions as invitesActions } from './invitesSlice';
 import { actions as appActions, selectors as appSelectors } from '../app/appSlice';
+import { actions as videoActions, selectors as videoSelectors } from '../videoIframe/videoSlice';
 import { DateTime } from 'luxon';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
@@ -92,11 +93,39 @@ import { DateTime } from 'luxon';
 //   );
 // };
 
+const ConfirmDialog = ({ open, title = 'Confirm', text = 'Are you sure?', onCancel, onConfirm }) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      aria-labelledby="form-dialog-title"
+    >
+      <DialogTitle id="form-dialog-title">{title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {text}
+        </DialogContentText>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onCancel} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={onConfirm} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 const InvitesFrom = () => {
   const { authUser } = useSelector(appSelectors.select);
   const { error, isLoading, showNewDialog, email, displayName, date } = useSelector(invitesSelectors.select);
   const invitesFrom = useSelector(invitesSelectors.selectInvitesFrom);
   const dispatch = useDispatch();
+
+  const [toConfirm, setToConfirm] = useState(null);
 
   useEffect(() => {
     const go = async () => {
@@ -109,7 +138,7 @@ const InvitesFrom = () => {
     <Button
       onClick={() => {
         const { uid } = params.data;
-        dispatch(invitesActions.deleteInvite({ uid }));
+        setToConfirm({ uid });
       }}
     >
       <DeleteIcon />
@@ -125,14 +154,26 @@ const InvitesFrom = () => {
     </Button>
   )
 
+  const LaunchButton = ({ params }) => {
+    const { uid } = params.data;
+    return (
+      <Button
+        color="primary" variant="contained"
+        onClick={() => dispatch(videoActions.launch({ uid }))}
+      >
+        Launch
+      </Button>
+    )
+  };
+
   const columns = [
-    { field: 'displayName', headerName: 'Name', width: 220 },
-    { field: 'email', headerName: 'Email', width: 220 },
+    { field: 'displayName', headerName: 'To', width: 120 },
+    { field: 'email', headerName: 'Email', width: 120 },
     {
       field: 'date', headerName: 'When', width: 220,
-      valueFormatter: ({ value }) => DateTime.fromISO(value).toLocal().toString()
+      valueFormatter: ({ value }) => DateTime.fromISO(value).toLocal().toLocaleString(DateTime.DATETIME_SHORT)
     },
-    { field: 'accepted', headerName: 'Accepted', width: 220 },
+    { field: 'accepted', headerName: 'Accepted', width: 100 },
     {
       field: '',
       headerName: 'Actions',
@@ -143,6 +184,7 @@ const InvitesFrom = () => {
           <div>
             <DeleteButton params={params} />
             <EditButton params={params} />
+            <LaunchButton params={params} />
           </div>
         )
       }
@@ -170,6 +212,15 @@ const InvitesFrom = () => {
           columns={columns}
         />
       </div>
+
+      <ConfirmDialog
+        text="Are you sure you want to delete this invitation?"
+        open={!!toConfirm} onCancel={() => setToConfirm(null)}
+        onConfirm={async () => {
+          await dispatch(invitesActions.deleteInvite(toConfirm));
+          setToConfirm(null);
+        }}
+      />
 
       <Dialog
         open={showNewDialog}
@@ -251,8 +302,12 @@ const InvitesTo = () => {
   );
 
   const columns = [
-    { field: 'teacherDisplayName', headerName: 'From', width: 220 },
-    { field: 'email', headerName: 'Email', width: 220 },
+    { field: 'displayName', headerName: 'To', width: 120 },
+    { field: 'email', headerName: 'Email', width: 120 },
+    {
+      field: 'date', headerName: 'When', width: 220,
+      valueFormatter: ({ value }) => DateTime.fromISO(value).toLocal().toLocaleString(DateTime.DATETIME_SHORT)
+    },
     {
       field: '',
       headerName: 'Actions',

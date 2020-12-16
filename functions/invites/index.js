@@ -1,7 +1,12 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const fetch = require('node-fetch');
+const { getDailyHeaders } = require('../util/headers');
+const { METHODS } = require('../util/methods');
+
 const { checkAuth } = require('../util/auth');
 const { newStudent, newInvite } = require('../data');
+
 
 /**
  * Returns all invites addressed to the logged-in user.
@@ -36,7 +41,6 @@ const getInvitesFrom = async (data, context) => {
       .get();
 
     const invites = await querySnapshot.docs.map((doc) => ({ ...doc.data(), uid: doc.id }));
-    console.log(invites);
     return invites;
   } catch (error) {
     console.error(error);
@@ -140,23 +144,91 @@ const updateInvite = async (data, context) => {
   }
 };
 
-const deleteInvite = (data, context) => {
+const _checkRoom = async ({ name }) => {
+  const result = await fetch(
+    `https://api.daily.co/v1/rooms/${name}`,
+    {
+      method: METHODS.GET,
+      headers: getDailyHeaders()
+    }
+  );
+
+  const json = await result.json();
+  return json;
+};
+
+const _launchRoom = async ({ name }) => {
+  const result = await fetch(
+    `https://api.daily.co/v1/rooms`,
+    {
+      method: METHODS.POST,
+      headers: getDailyHeaders(),
+      body: JSON.stringify({
+        name,
+        properties: {
+          enable_recording: 'local'//'rtp-tracks'
+        }
+      })
+    }
+  );
+
+  const json = await result.json();
+  return json;
+};
+
+const deleteInvite = async (data, context) => {
   try {
     checkAuth(context);
     const { uid } = data;
-    admin.firestore().collection('invites').doc(uid).delete();
+
+    const currentRoom = await _checkRoom({ name: uid });
+    if (!currentRoom.error) throw new Error('Cannot delete an in-progress invite.');
+
+    await admin.firestore().collection('invites').doc(uid).delete();
+    return { message: 'Done.' };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
 
-// TODO Update invite.
+
+
+const launch = async (data, context) => {
+  // Get invite uid.
+  try {
+    checkAuth(context);
+    const { uid } = data;
+
+    const inviteDoc = await admin.firestore().collection('invites').doc(uid).get();
+    if (!inviteDoc) throw new Error(`No invite by uid ${uid}`);
+
+    // Does the room already exist?
+    const currentRoom = await _checkRoom({ name: uid });
+    if (!currentRoom.error) return currentRoom;
+
+    const newRoom = await _launchRoom({ name: uid });
+    return newRoom;
+
+  } catch (error) {
+    console.log(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+/**
+ * Ends a meeting.
+ */
+const end = async (data, context) => {
+
+};
 
 module.exports = {
   getInvitesTo: functions.https.onCall(getInvitesTo),
   getInvitesFrom: functions.https.onCall(getInvitesFrom),
   createInvite: functions.https.onCall(createInvite),
   updateInvite: functions.https.onCall(updateInvite),
-  deleteInvite: functions.https.onCall(deleteInvite)
+  deleteInvite: functions.https.onCall(deleteInvite),
+  launch: functions.https.onCall(launch),
+  end: functions.https.onCall(end)
 };

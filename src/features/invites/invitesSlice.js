@@ -71,7 +71,7 @@ const deleteInvite = createAsyncThunk(
     console.log('result);')
     await dispatch(getInvitesFrom());
   }
-)
+);
 
 const onPending = initialState => (state) => {
   state.isLoading = true;
@@ -140,7 +140,10 @@ const { reducer, actions: generatedActions } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, getInvitesFrom, getInvitesTo, createInvite, updateInvite, deleteInvite };
+const actions = {
+  ...generatedActions,
+  getInvitesFrom, getInvitesTo, createInvite, updateInvite, deleteInvite
+};
 
 const addIds = items => items.map(item => ({ ...item, id: item.uid }));
 
