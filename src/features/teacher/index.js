@@ -23,8 +23,8 @@ const Teacher = () => {
   return (
     <div>
       {/*<CoursesList items={courses} onRefresh={() => dispatch(teacherActions.getCreatedCourses())} />*/}
-      <h3>Students</h3>
-      <Students />
+      {/*<h3>Students</h3>*/}
+      {/*<Students />*/}
 
       <h3>Invites from me:</h3>
       <InvitesFrom />

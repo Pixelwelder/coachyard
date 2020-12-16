@@ -52,7 +52,7 @@ const createInvite = async (data, context) => {
     checkAuth(context);
     const { uid } = context.auth;
     const { name: teacherDisplayName = '', email: teacherEmail } = context.auth.token;
-    const { email, displayName } = data;
+    const { email, displayName, date } = data;
 
     // Make sure it's not you.
     if (email === teacherEmail) throw new Error('Though we encourage lifelong learning, you cannot invite yourself.');
@@ -82,6 +82,7 @@ const createInvite = async (data, context) => {
       teacherDisplayName,
       email,
       displayName,
+      date
     });
 
     await admin.firestore().collection('invites').doc().set(invite);

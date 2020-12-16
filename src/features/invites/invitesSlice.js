@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { DateTime } from 'luxon';
 
 const initialState = {
   invitesTo: [],
@@ -10,7 +11,8 @@ const initialState = {
   error: '',
   showNewDialog: false,
   displayName: '',
-  email: ''
+  email: '',
+  date: ''
 };
 
 const getInvitesTo = createAsyncThunk(
@@ -41,9 +43,9 @@ const createInvite = createAsyncThunk(
   'createInvite',
   async (_, { getState, dispatch }) => {
     const state = getState();
-    const { email, displayName } = selectors.select(state);
+    const { email, displayName, date } = selectors.select(state);
     const createInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_INVITE);
-    const result = await createInviteCallable({ email, displayName });
+    const result = await createInviteCallable({ email, displayName, date });
     dispatch(generatedActions.setShowNewDialog(false));
     dispatch(getInvitesFrom());
   }
@@ -97,10 +99,20 @@ const { reducer, actions: generatedActions } = createSlice({
     setShowNewDialog: (state, action) => {
       state.displayName = initialState.displayName;
       state.email = initialState.email;
+
+      // Default to a date/time that's a nice round number in the future.
+      // At least an hour away, at the top of the hour.
+      const hours = DateTime.local().hour + 2;
+      state.date = DateTime.local().set({ hours, minutes: 0, seconds: 0, milliseconds: 0 }).toUTC().toString();
+
+      state.error = initialState.error;
       state.showNewDialog = action.payload;
     },
     setDisplayName: setValue('displayName'),
-    setEmail: setValue('email')
+    setEmail: setValue('email'),
+    setDate: (state, action) => {
+      state.date = DateTime.fromISO(action.payload).toUTC().toString();
+    }
   },
   extraReducers: {
     [getInvitesTo.pending]: onPending(initialState),
@@ -114,10 +126,12 @@ const { reducer, actions: generatedActions } = createSlice({
     [createInvite.pending]: onPending(initialState),
     [createInvite.rejected]: onRejected(initialState),
     [createInvite.fulfilled]: (state, action) => {
+      state.displayName = initialState.displayName;
+      state.email = initialState.email;
+      state.date = initialState.date;
+
       state.showNewDialog = false;
       state.isLoading = false;
-      state.email = initialState.email;
-      state.displayName = initialState.displayName;
     },
 
     [acceptInvite.pending]: onPending(initialState),

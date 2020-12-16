@@ -22,6 +22,7 @@ const newInvite = (overrides) => ({
   teacherDisplayName: '',
   email: '',
   displayName: '',
+  time: '',
   ...overrides
 });
 

@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
-import { selectors as invitesSelectors, actions as invitesActions } from './invitesSlice';
-import { actions as appActions, selectors as appSelectors } from '../app/appSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import CachedIcon from '@material-ui/icons/Cached';
@@ -17,6 +14,11 @@ import Alert from '@material-ui/lab/Alert';
 import AcceptIcon from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import { DateTimePicker } from '@material-ui/pickers';
+
+import { selectors as invitesSelectors, actions as invitesActions } from './invitesSlice';
+import { actions as appActions, selectors as appSelectors } from '../app/appSlice';
+import { DateTime } from 'luxon';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
 //   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -91,7 +93,7 @@ import EditIcon from '@material-ui/icons/Edit';
 
 const InvitesFrom = () => {
   const { authUser } = useSelector(appSelectors.select);
-  const { error, isLoading, showNewDialog, email, displayName } = useSelector(invitesSelectors.select);
+  const { error, isLoading, showNewDialog, email, displayName, date } = useSelector(invitesSelectors.select);
   const invitesFrom = useSelector(invitesSelectors.selectInvitesFrom);
   const dispatch = useDispatch();
 
@@ -123,6 +125,10 @@ const InvitesFrom = () => {
   const columns = [
     { field: 'displayName', headerName: 'Name', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
+    {
+      field: 'date', headerName: 'When', width: 220,
+      valueFormatter: ({ value }) => DateTime.fromISO(value).toLocal().toString()
+    },
     {
       field: '',
       headerName: 'Actions',
@@ -166,7 +172,7 @@ const InvitesFrom = () => {
         onClose={() => dispatch(invitesActions.setShowNewDialog(false))}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">Invite New Student</DialogTitle>
+        <DialogTitle id="form-dialog-title">Create New Session</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Who would you like to invite?
@@ -184,6 +190,7 @@ const InvitesFrom = () => {
               id="email" value={email}
               onChange={({ target: { value } }) => dispatch(invitesActions.setEmail(value))}
             />
+            <DateTimePicker value={date} onChange={value => dispatch(invitesActions.setDate(value))} />
             <button className="invisible" type="submit" />
           </form>
           {!!error && <Alert severity="error">{error.message}</Alert>}

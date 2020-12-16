@@ -8,8 +8,8 @@ const newSession = (overrides) => ({
   updated: '',
   date: '',
   displayName: '',
-  student: '',
-  teacher: '',
+  teacherUid: '',
+  studentEmail: '', // Since we don't know if they've joined yet.
   ...overrides
 });
 
