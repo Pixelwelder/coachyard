@@ -51,12 +51,18 @@ const createInvite = async (data, context) => {
     console.log('createInvite', context.token);
     checkAuth(context);
     const { uid } = context.auth;
-    const { name: teacherDisplayName = '' } = context.auth.token;
+    const { name: teacherDisplayName = '', email: teacherEmail } = context.auth.token;
     const { email, displayName } = data;
 
-    // Make sure this is not already a student.
+    // Make sure it's not you.
+    if (email === teacherEmail) throw new Error('Though we encourage lifelong learning, you cannot invite yourself.');
+
+    // Run some checks.
     const teacherDoc = await admin.firestore().collection('users').doc(uid).get();
-    const { students } = teacherDoc.data();
+    const teacherMeta = teacherDoc.data();
+
+    // Make sure this is not already a student.
+    const { students } = teacherMeta;
     const exists = students.find(student => student.email === email);
     if (exists) throw new Error(`Teacher ${uid} already has a student with email ${email}.`);
 
@@ -67,8 +73,6 @@ const createInvite = async (data, context) => {
       .get();
 
     if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
-
-    // TODO Make sure it's not to yourself for some reason.
 
     const timestamp = admin.firestore.Timestamp.now();
     const invite = newInvite({
@@ -142,6 +146,8 @@ const deleteInvite = (data, context) => {
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
+
+// TODO Update invite.
 
 module.exports = {
   getInvitesTo: functions.https.onCall(getInvitesTo),

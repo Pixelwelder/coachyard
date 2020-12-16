@@ -16,6 +16,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Alert from '@material-ui/lab/Alert';
 import AcceptIcon from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 
 // const Invites = ({ items, error, onNew, onRefresh }) => {
 //   const [showNewDialog, setShowNewDialog] = useState(false);
@@ -101,6 +102,24 @@ const InvitesFrom = () => {
     if (authUser.uid) go();
   }, [authUser, dispatch]);
 
+  const DeleteButton = ({ params }) => (
+    <Button onClick={() => {
+      const { uid } = params.data;
+      dispatch(invitesActions.deleteInvite({ uid }));
+    }}>
+      <DeleteIcon />
+    </Button>
+  );
+
+  const EditButton = ({ params }) => (
+    <Button disabled onClick={() => {
+      const { uid } = params.data;
+      // dispatch(invitesActions.deleteInvite({ uid }));
+    }}>
+      <EditIcon />
+    </Button>
+  )
+
   const columns = [
     { field: 'displayName', headerName: 'Name', width: 220 },
     { field: 'email', headerName: 'Email', width: 220 },
@@ -112,12 +131,8 @@ const InvitesFrom = () => {
       renderCell: (params) => {
         return (
           <div>
-            <Button onClick={() => {
-              const { uid } = params.data;
-              dispatch(invitesActions.deleteInvite({ uid }));
-            }}>
-              <DeleteIcon />
-            </Button>
+            <DeleteButton params={params} />
+            <EditButton params={params} />
           </div>
         )
       }

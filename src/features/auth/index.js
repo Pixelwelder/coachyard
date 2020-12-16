@@ -49,7 +49,7 @@ const Auth = () => {
           <Button
             onClick={onOpen}
           >
-            {authUser.email}
+            {authUser.displayName || authUser.email}
           </Button>
           <Menu
             id="simple-menu"

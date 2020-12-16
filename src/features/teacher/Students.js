@@ -21,7 +21,6 @@ const Students = () => {
 
   return (
     <div>
-      Students
       <div>
         <Button onClick={() => dispatch(appActions.refreshUser())}>
           <CachedIcon />
