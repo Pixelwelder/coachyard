@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import CourseList from './CourseList';
+import { CoursesCreated } from './CourseList';
 import VideoPlayer from './VideoPlayer';
 import { actions as courseActions } from './courseSlice';
 import { useDispatch } from 'react-redux';
@@ -20,8 +20,8 @@ const Course = () => {
         <h2>Course</h2>
       </div>
       <div className="course-body">
-        <CourseList />
-        <VideoPlayer />
+        <CoursesCreated />
+        {/*<VideoPlayer />*/}
       </div>
     </div>
   );

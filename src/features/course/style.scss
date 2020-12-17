@@ -9,7 +9,8 @@
 
 .course-list {
   //border: 1px solid gray;
-  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .video-player {

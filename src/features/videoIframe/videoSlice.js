@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import app from 'firebase';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { actions as navActions, MAIN_TABS } from '../nav/navSlice';
+import { actions as invitesActions } from '../invites/invitesSlice';
 
 const initialState = {
   // url: 'https://coachyard.daily.co/VEEbX1t95wtc3h5mIEcE'
@@ -18,7 +19,23 @@ const launch = createAsyncThunk(
     const { data: { url } } = result;
     dispatch(generatedActions.setUrl(url));
     dispatch(navActions.setMainTab(MAIN_TABS.VIDEO));
+    await invitesActions.getInvitesFrom();
+    await invitesActions.getInvitesTo();
+
     console.log('done launching', result);
+  }
+);
+
+const end = createAsyncThunk(
+  'end',
+  async (params) => {
+    console.log('stopping...');
+    const launchCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.END);
+    const result = await launchCallable(params);
+    console.log('RESULT', result);
+    await invitesActions.getInvitesFrom();
+    await invitesActions.getInvitesTo();
+    console.log('done');
   }
 );
 
@@ -32,7 +49,7 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, launch };
+const actions = { ...generatedActions, launch, end };
 
 const selectors = {
   select: ({ video }) => video

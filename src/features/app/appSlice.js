@@ -203,8 +203,15 @@ const selectStudents = createSelector(select, ({ authUser }) => {
   const students = arr.map(item => ({ ...item, id: item.email }));
   return students;
 });
+const selectCoursesCreated = createSelector(select, ({ authUser }) => {
+  return authUser?.meta?.coursesCreated || [];
+});
 
-const selectors = { select, selectStudents };
+const selectCoursesEnrolled = createSelector(select, ({ authUser }) => {
+  return authUser?.meta?.coursesEnrolled || [];
+});
+
+const selectors = { select, selectStudents, selectCoursesCreated, selectCoursesEnrolled };
 
 const actions = { ...generatedActions, init, signIn, signOut, signUpServerside, refreshUser };
 

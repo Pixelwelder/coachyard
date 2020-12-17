@@ -16,7 +16,7 @@ const ADMIN_TABS = {
 }
 
 const initialState = {
-  mainTab: MAIN_TABS.TEACHER,
+  mainTab: MAIN_TABS.COURSE,
   adminTab: ADMIN_TABS.ROOMS
 };
 

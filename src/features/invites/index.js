@@ -166,6 +166,18 @@ const InvitesFrom = () => {
     )
   };
 
+  const EndButton = ({ params }) => {
+    const { uid } = params.data;
+    return (
+      <Button
+        color="primary" variant="contained"
+        onClick={() => dispatch(videoActions.end({ uid }))}
+      >
+        End
+      </Button>
+    );
+  }
+
   const columns = [
     { field: 'displayName', headerName: 'To', width: 120 },
     { field: 'email', headerName: 'Email', width: 120 },
@@ -184,7 +196,8 @@ const InvitesFrom = () => {
           <div>
             <DeleteButton params={params} />
             <EditButton params={params} />
-            <LaunchButton params={params} />
+            {!params.data.inProgress && (<LaunchButton params={params} />)}
+            {params.data.inProgress && (<EndButton params={params} />)}
           </div>
         )
       }

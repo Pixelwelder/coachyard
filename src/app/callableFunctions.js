@@ -21,10 +21,12 @@ const CALLABLE_FUNCTIONS = {
   END: 'end',
 
   CREATE_COURSE: 'createCourse',
+  GIVE_COURSE: 'giveCourse',
   GET_COURSE: 'getCourse',
   UPDATE_COURSE: 'updateCourse',
   DELETE_COURSE: 'deleteCourse',
   GET_CREATED_COURSES: 'getCreatedCourses',
+  ADD_ITEM_TO_COURSE: 'addItemToCourse',
 
   GET_ALL_COURSES: 'getAllCourses'
 };

@@ -1,34 +1,58 @@
-const newUserMeta = (overrides) => ({
-  uid: '',
+const newBaseItem = (overrides) => ({
   created: '',
   updated: '',
+  ...overrides
+});
+
+const newUserMeta = (overrides) => ({
+  ...newBaseItem(),
+  uid: '',
   students: [],
-  courses: [],
+  coursesCreated: [],
+  coursesEnrolled: [],
   ...overrides
 });
 
 const newStudent = (overrides) => ({
+  ...newBaseItem(),
   uid: '',
   email: '',
-  created: '',
-  updated: '',
   ...overrides
 });
 
 const newInvite = (overrides) => ({
-  created: '',
-  updated: '',
+  ...newBaseItem(),
   teacherUid: '',
   teacherDisplayName: '',
   email: '',
   displayName: '',
   time: '',
   accepted: false,
+  completed: false,
+  inProgress: false,
+  ...overrides
+});
+
+const newCourse = (overrides) => ({
+  ...newBaseItem(),
+  creatorUid: '',
+  displayName: '',
+  description: '',
+  items: [],
+  ...overrides
+});
+
+const newCourseItem = (overrides) => ({
+  ...newBaseItem(),
+  displayName: '',
+  description: '',
   ...overrides
 });
 
 module.exports = {
   newUserMeta,
   newStudent,
-  newInvite
+  newInvite,
+  newCourse,
+  newCourseItem
 };

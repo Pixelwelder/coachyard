@@ -192,8 +192,6 @@ const deleteInvite = async (data, context) => {
   }
 };
 
-
-
 const launch = async (data, context) => {
   // Get invite uid.
   try {
@@ -205,9 +203,16 @@ const launch = async (data, context) => {
 
     // Does the room already exist?
     const currentRoom = await _checkRoom({ name: uid });
-    if (!currentRoom.error) return currentRoom;
+    if (!currentRoom.error) {
+      // It exists. Is it still available?
+      if (currentRoom.completed) throw new Error('This session is now over.');
+      return currentRoom;
+    }
 
     const newRoom = await _launchRoom({ name: uid });
+    if (newRoom.error) throw new Error(newRoom.error);
+
+    await admin.firestore().collection('invites').doc(uid).update({ inProgress: true });
     return newRoom;
 
   } catch (error) {
@@ -220,7 +225,37 @@ const launch = async (data, context) => {
  * Ends a meeting.
  */
 const end = async (data, context) => {
+  try {
+    const { uid } = data;
+    const inviteDoc = await admin.firestore().collection('invites').doc(uid).get();
+    if (!inviteDoc.exists) throw new Error(`No invite by id ${uid}`);
 
+    const invite = inviteDoc.data();
+    const { teacherUid } = invite;
+    console.log(context.auth.uid, invite);
+    if (context.auth.uid !== teacherUid) throw new Error('You can only end a session you began.');
+
+    const result = await fetch(
+      `https://api.daily.co/v1/rooms/${uid}`,
+      {
+        method: METHODS.DELETE,
+        headers: getDailyHeaders()
+      }
+    );
+
+    const json = await result.json();
+
+    console.log(json);
+
+    // TODO Now update the invite.
+    await admin.firestore().collection('invites').doc(uid)
+      .update({ inProgress: false, completed: true });
+
+    return { message: 'Done.', result: json, sentData: data }
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 };
 
 module.exports = {
