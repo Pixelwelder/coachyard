@@ -314,6 +314,19 @@ const InvitesTo = () => {
     </Button>
   );
 
+  const JoinButton = ({ params }) => {
+    console.log(params.data);
+    const { room } = params.data;
+    return (
+      <Button
+        color="primary" variant="contained"
+        onClick={() => dispatch(videoActions.join(room))}
+      >
+        Join
+      </Button>
+    )
+  };
+
   const columns = [
     { field: 'displayName', headerName: 'To', width: 120 },
     { field: 'email', headerName: 'Email', width: 120 },
@@ -331,6 +344,7 @@ const InvitesTo = () => {
           <div>
             {!params.data.accepted && <AcceptButton params={params} />}
             {params.data.accepted && <RejectButton params={params} />}
+            {params.data.inProgress && (<JoinButton params={params} />)}
           </div>
         )
       }

@@ -39,6 +39,14 @@ const end = createAsyncThunk(
   }
 );
 
+const join = createAsyncThunk(
+  'join',
+  async ({ url }, { dispatch }) => {
+    dispatch(generatedActions.setUrl(url));
+    dispatch(navActions.setMainTab(MAIN_TABS.VIDEO));
+  }
+);
+
 const { actions: generatedActions, reducer } = createSlice({
   name: 'video',
   initialState,
@@ -49,7 +57,7 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, launch, end };
+const actions = { ...generatedActions, launch, end, join };
 
 const selectors = {
   select: ({ video }) => video

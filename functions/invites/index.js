@@ -210,9 +210,10 @@ const launch = async (data, context) => {
     }
 
     const newRoom = await _launchRoom({ name: uid });
+    console.log(newRoom);
     if (newRoom.error) throw new Error(newRoom.error);
 
-    await admin.firestore().collection('invites').doc(uid).update({ inProgress: true });
+    await admin.firestore().collection('invites').doc(uid).update({ inProgress: true, room: newRoom });
     return newRoom;
 
   } catch (error) {
@@ -249,7 +250,7 @@ const end = async (data, context) => {
 
     // TODO Now update the invite.
     await admin.firestore().collection('invites').doc(uid)
-      .update({ inProgress: false, completed: true });
+      .update({ inProgress: false, room: false, completed: true });
 
     return { message: 'Done.', result: json, sentData: data }
   } catch (error) {
