@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectors as courseSelectors, actions as courseActions } from './courseSlice';
@@ -7,6 +7,7 @@ import { selectors as appSelectors } from '../app/appSlice';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import RefreshIcon from '@material-ui/icons/Cached';
+import EditIcon from '@material-ui/icons/Edit';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -17,7 +18,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-const Item = ({ item, onDelete }) => {
+const Item = ({ item, onDelete, onEdit }) => {
   // const { id: playbackId } = item.playback_ids[0];
   // const width = 150;
   // const height = 100;
@@ -26,6 +27,9 @@ const Item = ({ item, onDelete }) => {
     <li>
       <div style={{ display: 'flex' }}>
         <h3>Item</h3>
+        <Button onClick={onEdit}>
+          <EditIcon />
+        </Button>
         <Button onClick={onDelete}>
           <DeleteIcon />
         </Button>
@@ -43,10 +47,17 @@ const Item = ({ item, onDelete }) => {
 const CourseView = ({ course }) => {
   const dispatch = useDispatch();
   const { newItem, newItemIsOpen } = useSelector(courseSelectors.select);
+  const [file, setFile] = useState(null);
+
+  const onUpload = ({ target: { files } }) => {
+    const file = files[0];
+    setFile(file);
+    dispatch(courseActions.setNewItem({ file: file.name }))
+  }
 
   const onSubmit = (event) => {
     event.preventDefault();
-    dispatch(courseActions.addItemToCourse());
+    dispatch(courseActions.addItemToCourse({ file }));
   };
 
   return (
@@ -68,6 +79,7 @@ const CourseView = ({ course }) => {
                 item={item}
                 key={index}
                 onDelete={() => dispatch(courseActions.deleteItemFromCourse({ item, index }))}
+                onEdit={() => dispatch(courseActions.editItem({ item, index }))}
               />
             ))}
           </ul>
@@ -99,6 +111,7 @@ const CourseView = ({ course }) => {
                 dispatch(courseActions.setNewItem({ description: value }));
               }}
             />
+            <input type="file" id="upload" onChange={onUpload} />
             <button className="invisible" type="submit" />
           </form>
         </DialogContent>

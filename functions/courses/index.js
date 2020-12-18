@@ -170,7 +170,7 @@ const addItemToCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
-    const { courseUid, newItem: { displayName, description } } = data;
+    const { courseUid, newItem: { displayName, description, file } } = data;
 
     console.log('addItemToCourse', data);
     const result = admin.firestore().runTransaction(async (transaction) => {
@@ -186,6 +186,7 @@ const addItemToCourse = async (data, context) => {
       const item = newCourseItem({
         displayName,
         description,
+        file,
         created: timestamp,
         updated: timestamp
       });

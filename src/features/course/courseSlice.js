@@ -158,11 +158,18 @@ const deleteSelectedCourse = createAsyncThunk(
  */
 const addItemToCourse = createAsyncThunk(
   'addItemToCourse',
-  async (_, { dispatch, getState }) => {
+  async ({ file }, { dispatch, getState }) => {
     const { newItem, selectedCourse } = select(getState());
+
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
-    console.log('done', data);
+    console.log('item added', data);
+
+    // Now upload file.
+    const storageRef = app.storage().ref('raw');
+    const fileRef = storageRef.child(file.name);
+    const uploadResult = await fileRef.put(file);
+    console.log('uploaded', uploadResult);
 
     // Reset UI.
     dispatch(generatedActions.resetNewItem());
@@ -170,6 +177,11 @@ const addItemToCourse = createAsyncThunk(
     // Reload the course with the new item.
     await dispatch(_getCurrentCourse());
   }
+);
+
+const editItem = createAsyncThunk(
+  'editItem',
+  async () => {}
 );
 
 /**
