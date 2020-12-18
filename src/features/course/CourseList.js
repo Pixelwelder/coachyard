@@ -5,6 +5,7 @@ import { selectors as courseSelectors, actions as courseActions } from './course
 import { selectors as assetsSelectors, actions as assetsActions } from '../../app/assets';
 import { selectors as appSelectors } from '../app/appSlice';
 import AddIcon from '@material-ui/icons/Add';
+import RefreshIcon from '@material-ui/icons/Cached';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -45,15 +46,20 @@ const CourseView = ({ course }) => {
   return (
     <div>
       {course && (
-        <>
-          <p>{course.displayName}</p>
-          <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
-            <AddIcon />
-          </Button>
+        <div>
+          <div style={{ display: 'flex' }}>
+            <p>{course.displayName}</p>
+            <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
+              <AddIcon />
+            </Button>
+            <Button>
+              <RefreshIcon />
+            </Button>
+          </div>
           <ul>
             {course.items.map((item, index) => <Item item={item} key={index} />)}
           </ul>
-        </>
+        </div>
       )}
 
       <Dialog

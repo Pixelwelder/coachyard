@@ -107,22 +107,61 @@ const addItemToCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
-    // TODO Can this person add it?
+    const { courseUid, newItem: { displayName, description } } = data;
 
     console.log(data);
-    const { courseUid, newItem: { displayName, description } } = data;
-    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!courseDoc.exists) throw new Error(`No course by uid ${courseUid}.`)
+    const result = admin.firestore().runTransaction(async (transaction) => {
 
-    const course = courseDoc.data();
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+      if (!courseDoc.exists) throw new Error(`No course by uid ${courseUid}.`)
 
-    const courseItem = newCourseItem({ displayName, description });
-    await admin.firestore().collection('courses').doc(courseUid)
-      .update({ items: [ ...course.items, courseItem ] });
+      const course = courseDoc.data();
+      if (course.creatorUid !== uid) throw new Error('Only the creator of a course can add an item.');
+
+      const item = newCourseItem({ displayName, description });
+
+      // Add it to the items table.
+      const itemRef = admin.firestore().collection('items').doc();
+      await transaction.create(itemRef, item);
+
+      // Now update course.
+      await transaction.update(courseRef, { items: [ ...course.items, item ]});
+    });
 
     return { message: `Added new course item to course ${courseUid}.` };
   } catch (error) {
     console.error(error);
+  }
+};
+
+/**
+ * Deletes an item from a course.
+ * Requires that the caller be the creator of the course.
+ *
+ * @param itemUid
+ * @param courseUid
+ */
+const deleteItem = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { auth: { uid } } = context;
+    const { itemUid, courseUid } = data;
+
+    // Can this user do this?
+    const userDoc = await admin.firestore().collection('users').doc(uid).get();
+    const userMeta = userDoc.data();
+    const canExecute = !!userMeta.coursesCreated.find(course => course.creatorUid === uid);
+    if (!canExecute) throw new Error(`Course ${courseUid} is not owned by user ${uid}.`);
+
+    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
+    const course = courseDoc.data();
+    // const newItems = course.items.filter(item => item)
+
+
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
 
