@@ -44,12 +44,17 @@ const Item = ({ item, onDelete, onEdit }) => {
   );
 };
 
-const CourseView = ({ course }) => {
+const CourseView = ({ course, items }) => {
   const dispatch = useDispatch();
   const { newItem, newItemIsOpen, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
 
   const onUpload = ({ target: { files } }) => {
+    if (!files.length) {
+      setFile(null);
+      return;
+    }
+
     const file = files[0];
     setFile(file);
     dispatch(courseActions.setNewItem({ file: file.name }))
@@ -61,7 +66,7 @@ const CourseView = ({ course }) => {
   };
 
   const isDisabled = () => {
-    return upload.isUploading;
+    return upload.isUploading || !file;
   }
 
   return (
@@ -78,11 +83,11 @@ const CourseView = ({ course }) => {
             </Button>
           </div>
           <ul>
-            {course.items.map((item, index) => (
+            {items.map((item, index) => (
               <Item
                 item={item}
                 key={index}
-                onDelete={() => dispatch(courseActions.deleteItemFromCourse({ item, index }))}
+                onDelete={() => dispatch(courseActions.deleteItemFromCourse({ uid: item.uid }))}
                 onEdit={() => dispatch(courseActions.editItem({ item, index }))}
               />
             ))}
@@ -142,7 +147,9 @@ const CourseView = ({ course }) => {
 const CoursesCreated = () => {
   const dispatch = useDispatch();
   const courses = useSelector(appSelectors.selectCoursesCreated);
-  const { newCourse, newCourseIsOpen, selectedCourse, selectedCourseData } = useSelector(courseSelectors.select);
+  const {
+    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems
+  } = useSelector(courseSelectors.select);
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -170,7 +177,7 @@ const CoursesCreated = () => {
           <DeleteIcon />
         </Button>
       </div>
-      <CourseView course={selectedCourseData} />
+      <CourseView course={selectedCourseData} items={selectedCourseItems} />
       {/*<ul>*/}
       {/*  {courses.map((asset, index) => (*/}
       {/*    <Item key={index} item={asset} onClick={() => dispatch(courseActions.setVideo(asset))} />*/}

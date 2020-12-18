@@ -38,14 +38,17 @@ const newCourse = (overrides) => ({
   creatorUid: '',
   displayName: '',
   description: '',
-  items: [],
   ...overrides
 });
 
 const newCourseItem = (overrides) => ({
   ...newBaseItem(),
+  uid: '',
+  courseUid: '',
   displayName: '',
   description: '',
+  firebaseId: '',
+  streamingId: '',
   ...overrides
 });
 

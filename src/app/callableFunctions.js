@@ -28,6 +28,7 @@ const CALLABLE_FUNCTIONS = {
   GET_CREATED_COURSES: 'getCreatedCourses',
   ADD_ITEM_TO_COURSE: 'addItemToCourse',
   DELETE_ITEM_FROM_COURSE: 'deleteItemFromCourse',
+  SEND_ITEM_TO_STREAMING_SERVICE: 'sendItemToStreamingService',
 
   GET_ALL_COURSES: 'getAllCourses'
 };

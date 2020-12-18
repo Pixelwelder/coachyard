@@ -1,6 +1,10 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const fetch = require('node-fetch');
+const { v4: uuidv4 } = require('uuid');
 const { checkAuth } = require('../util/auth');
+const { getMuxHeaders } = require('../util/headers');
+const { METHODS } = require('../util/methods');
 const { newCourse, newCourseItem } = require('../data');
 
 const createCourse = async (data, context) => {
@@ -128,7 +132,12 @@ const getCourse = async (data, context) => {
     const { data: userMeta } = await _getUserMeta({ uid: context.auth.uid });
     const { data: course } = await _getCourse({ userMeta, courseUid: data.uid });
 
-    return course;
+    const snapshot = await admin.firestore().collection('items')
+      .where('courseUid', '==', data.uid ).get();
+
+    const items = snapshot.docs.map(item => item.data());
+
+    return { course, items };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -147,7 +156,8 @@ const deleteCourse = async (data, context) => {
     if (course.creatorUid !== context.auth.uid) throw new Error(`User ${context.auth.uid} did not create ${data.uid}.`);
 
     const result = admin.firestore().runTransaction((transaction) => {
-
+      // TODO All items.
+      // TODO All videos.
     });
 
     // Delete the document itself.
@@ -169,11 +179,12 @@ const deleteCourse = async (data, context) => {
 const addItemToCourse = async (data, context) => {
   try {
     checkAuth(context);
+
     const { auth: { uid } } = context;
     const { courseUid, newItem: { displayName, description, file } } = data;
 
     console.log('addItemToCourse', data);
-    const result = admin.firestore().runTransaction(async (transaction) => {
+    const { item } = await admin.firestore().runTransaction(async (transaction) => {
 
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
       const courseDoc = await transaction.get(courseRef);
@@ -182,8 +193,11 @@ const addItemToCourse = async (data, context) => {
       const course = courseDoc.data();
       if (course.creatorUid !== uid) throw new Error('Only the creator of a course can add an item.');
 
+      const itemRef = admin.firestore().collection('items').doc();
       const timestamp = admin.firestore.Timestamp.now();
       const item = newCourseItem({
+        uid: itemRef.id,
+        courseUid,
         displayName,
         description,
         file,
@@ -192,14 +206,14 @@ const addItemToCourse = async (data, context) => {
       });
 
       // Add it to the items table.
-      // const itemRef = admin.firestore().collection('items').doc();
-      // await transaction.create(itemRef, item);
+      await transaction.create(itemRef, item);
 
       // Now update course.
-      await transaction.update(courseRef, { items: [ ...course.items, item ]});
+      // await transaction.update(courseRef, { items: [ ...course.items, item.uid ]});
+      return { item };
     });
 
-    return { message: `Added new course item to course ${courseUid}.` };
+    return { message: `Added new course item to course ${courseUid}.`, item };
   } catch (error) {
     console.error(error);
   }
@@ -216,7 +230,7 @@ const deleteItemFromCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
-    const { courseUid, index } = data;
+    const { courseUid, itemUid } = data;
 
     const result = admin.firestore().runTransaction(async (transaction) => {
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
@@ -226,18 +240,59 @@ const deleteItemFromCourse = async (data, context) => {
       // Can the user do this?
       if (!course.creatorUid === uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
 
-      // const userRef = admin.firestore().collection('users').doc(uid);
-      // const userDoc = await transaction.get(userRef);
-      // const user = userDoc.data();
-
-      const newItems = [...course.items];
-      newItems.splice(index, 1);
-      await transaction.update(courseRef, { items: newItems });
+      const itemRef = admin.firestore().collection('items').doc(itemUid);
+      transaction.delete(itemRef);
 
       // TODO Delete file!
     });
 
     return { message: 'Item removed.' };
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+// const getItemsForCourse = async (data, context) => {
+//   try {
+//     checkAuth(context);
+//     const { uid } = data;
+//
+//     const snapshot = await admin.firestore().collection('items')
+//       .where('courseUid', '==', uid ).get();
+//
+//     const items = snapshot.docs.map(item => item.data());
+//     return items;
+//   } catch (error) {
+//     console.error(error);
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// };
+
+const sendItemToStreamingService = async (data, context) => {
+  try {
+    checkAuth(context);
+    const {
+      uid,
+      params: { input, playback_policy }
+    } = data;
+
+    const result = await fetch(
+      'https://api.mux.com/video/v1/assets',
+      {
+        headers: getMuxHeaders(),
+        method: METHODS.POST,
+        body: JSON.stringify({ input, playback_policy, test: true })
+      }
+    );
+
+    const json = await result.json();
+    console.log('result', json);
+
+    // Now record the result.
+    // const ref = admin.firestore().collection('courses').
+
+    return { message: 'Done, I think.', result: json };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -282,6 +337,7 @@ module.exports = {
   // Items
   addItemToCourse: functions.https.onCall(addItemToCourse),
   deleteItemFromCourse: functions.https.onCall(deleteItemFromCourse),
+  sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService),
 
   getAllCourses: functions.https.onCall(getAllCourses),
   getCreatedCourses: functions.https.onCall(getCreatedCourses)

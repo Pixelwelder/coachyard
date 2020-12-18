@@ -13,6 +13,7 @@ const initialState = {
   // Actual loaded course.
   selectedCourse: '',
   selectedCourseData: null,
+  selectedCourseItems: [],
 
   // UI
   newCourseIsOpen: false,
@@ -88,10 +89,12 @@ const _getCurrentCourse = createAsyncThunk(
   async (_, { getState, dispatch }) => {
     // Load the current course.
     const { selectedCourse } = select(getState());
-    const getCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_COURSE);
-    const { data: course } = await getCourseCallable({ uid: selectedCourse });
+    const getCourse = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_COURSE);
+    const { data: { course, items } } = await getCourse({ uid: selectedCourse });
+
     console.log('getCurrentCourse', course);
     dispatch(generatedActions.setSelectedCourseData(course));
+    dispatch(generatedActions.setSelectedCourseItems(items));
   }
 );
 
@@ -168,12 +171,13 @@ const addItemToCourse = createAsyncThunk(
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
+    const { item } = data;
     console.log('item added', data);
 
     // Now upload file.
     dispatch(generatedActions.setUpload({ isUploading: true }));
-    const storageRef = app.storage().ref('raw');
-    const fileRef = storageRef.child(file.name);
+    const storageRef = app.storage().ref(`raw`);
+    const fileRef = storageRef.child(item.uid);
     const uploadTask = fileRef.put(file);
 
     // Monitor the task
@@ -187,7 +191,19 @@ const addItemToCourse = createAsyncThunk(
         throw error;
       },
       async () => {
-        // TODO Now send it to Mux.
+        // TODO MUX
+        // Now get a url for streaming service.
+        console.log('GETTING URL...');
+        const downloadUrl = await fileRef.getDownloadURL();
+
+        // Send to streaming service.
+        console.log('Sending to streaming service:', downloadUrl);
+        const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
+        const streamResult = await callable({
+          uid: item.uid,
+          params: { input: downloadUrl, playback_policy: ['public'] }
+        });
+        console.log('sent', streamResult);
 
         // Reset UI.
         dispatch(generatedActions.resetUpload());
@@ -228,16 +244,16 @@ const editItem = createAsyncThunk(
 );
 
 /**
- * Deletes an item from the course.
+ * Deletes an item from the current course.
  * // TODO No warning.
  */
 const deleteItemFromCourse = createAsyncThunk(
   'deleteItemFromCourse',
-  async ({ index }, { dispatch, getState }) => {
+  async ({ uid }, { dispatch, getState }) => {
     const { selectedCourse } = select(getState());
-    console.log('deleteItemFromCourse', selectedCourse, index);
+    console.log('deleteItemFromCourse', selectedCourse, uid);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM_FROM_COURSE);
-    const result = await callable({ courseUid: selectedCourse, index });
+    const result = await callable({ courseUid: selectedCourse, itemUid: uid });
 
     console.log('deleteItemFromCourse result', result);
 
@@ -274,9 +290,11 @@ const { actions: generatedActions, reducer } = createSlice({
     // Loading a course.
     setSelectedCourse: (state, action) => { state.selectedCourse = action.payload; },
     setSelectedCourseData: (state, action) => { state.selectedCourseData = action.payload; },
+    setSelectedCourseItems: (state, action) => { state.selectedCourseItems = action.payload; },
     resetSelectedCourse: (state, action) => {
       state.selectedCourse = initialState.selectedCourse;
       state.selectedCourseData = initialState.selectedCourseData;
+      state.selectedCourseItems = initialState.selectedCourseItems;
     },
 
     // UI - Adding a new course.
@@ -345,7 +363,7 @@ const actions = {
   ...generatedActions,
   fetchAssets, fetchPlaybackId,
   createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse,
-  addItemToCourse, deleteItemFromCourse
+  addItemToCourse, deleteItemFromCourse, editItem
 };
 
 export { selectors, actions };
