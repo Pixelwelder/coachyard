@@ -208,26 +208,33 @@ const addItemToCourse = async (data, context) => {
  * Deletes an item from a course.
  * Requires that the caller be the creator of the course.
  *
- * @param itemUid
  * @param courseUid
+ * @param index
  */
-const deleteItem = async (data, context) => {
+const deleteItemFromCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
-    const { itemUid, courseUid } = data;
+    const { courseUid, index } = data;
 
-    // Can this user do this?
-    const userDoc = await admin.firestore().collection('users').doc(uid).get();
-    const userMeta = userDoc.data();
-    const canExecute = !!userMeta.coursesCreated.find(course => course.creatorUid === uid);
-    if (!canExecute) throw new Error(`Course ${courseUid} is not owned by user ${uid}.`);
+    const result = admin.firestore().runTransaction(async (transaction) => {
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+      const course = courseDoc.data();
 
-    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
-    const course = courseDoc.data();
-    // const newItems = course.items.filter(item => item)
+      // Can the user do this?
+      if (!course.creatorUid === uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
 
+      // const userRef = admin.firestore().collection('users').doc(uid);
+      // const userDoc = await transaction.get(userRef);
+      // const user = userDoc.data();
 
+      const newItems = [...course.items];
+      newItems.splice(index, 1);
+      await transaction.update(courseRef, { items: newItems });
+    });
+
+    return { message: 'Item removed.' };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -262,13 +269,17 @@ const getCreatedCourses = async (data, context) => {
 };
 
 module.exports = {
+  // Courses
   createCourse: functions.https.onCall(createCourse),
-  addItemToCourse: functions.https.onCall(addItemToCourse),
-  // giveCourse: functions.https.onCall(giveCourse),
-
   getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
-  updateCourse: functions.https.onCall(updateCourse),
+  // updateCourse: functions.https.onCall(updateCourse),
+  // giveCourse: functions.https.onCall(giveCourse),
+
+  // Items
+  addItemToCourse: functions.https.onCall(addItemToCourse),
+  deleteItemFromCourse: functions.https.onCall(deleteItemFromCourse),
+
   getAllCourses: functions.https.onCall(getAllCourses),
   getCreatedCourses: functions.https.onCall(getCreatedCourses)
 };

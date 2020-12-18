@@ -122,6 +122,38 @@ const setAndLoadSelectedCourse = createAsyncThunk(
 // );
 
 /**
+ * @private - does not update load/error.
+ */
+const _deleteCourse = createAsyncThunk(
+  'deleteCourse',
+  async ({ uid }, { dispatch }) => {
+    console.log('deleteCourse', uid);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
+    const result = await callable({ uid });
+    console.log('deleteCourse', result);
+  }
+);
+
+/**
+ * Deletes the currently selected course. No warning.
+ * // TODO Add warning.
+ */
+const deleteSelectedCourse = createAsyncThunk(
+  'deleteCurrentCourse',
+  async (_, { getState, dispatch }) => {
+    const { selectedCourse } = select(getState());
+    console.log('deleteSelectedCourse', selectedCourse);
+    await dispatch(_deleteCourse({ uid: selectedCourse }));
+
+    // Reset UI.
+    dispatch(generatedActions.resetSelectedCourse());
+
+    // Reload user.
+    await dispatch(appActions.refreshUser());
+  }
+)
+
+/**
  * Adds the current item to the course.
  */
 const addItemToCourse = createAsyncThunk(
@@ -140,35 +172,25 @@ const addItemToCourse = createAsyncThunk(
   }
 );
 
-const _deleteCourse = createAsyncThunk(
-  'deleteCourse',
-  async ({ uid }, { dispatch }) => {
-    console.log('deleteCourse', uid);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
-    const result = await callable({ uid });
-    console.log('deleteCourse', result);
-  }
-);
-
-const deleteSelectedCourse = createAsyncThunk(
-  'deleteCurrentCourse',
-  async (_, { getState, dispatch }) => {
-    const { selectedCourse } = select(getState());
-    console.log('deleteSelectedCourse', selectedCourse);
-    await dispatch(_deleteCourse({ uid: selectedCourse }));
-
-    // Reset UI.
-    dispatch(generatedActions.resetSelectedCourse());
-
-    // Reload user.
-    await dispatch(appActions.refreshUser());
-  }
-)
-
+/**
+ * Deletes an item from the course.
+ * // TODO No warning.
+ */
 const deleteItemFromCourse = createAsyncThunk(
   'deleteItemFromCourse',
-  async () => {}
+  async ({ index }, { dispatch, getState }) => {
+    const { selectedCourse } = select(getState());
+    console.log('deleteItemFromCourse', selectedCourse, index);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM_FROM_COURSE);
+    const result = await callable({ courseUid: selectedCourse, index });
+
+    console.log('deleteItemFromCourse result', result);
+
+    // Reload.
+    await dispatch(_getCurrentCourse());
+  }
 );
+
 
 // Utility functions for setting loading and error states.
 const onPending = (state) => {
@@ -248,7 +270,11 @@ const { actions: generatedActions, reducer } = createSlice({
 
     [addItemToCourse.pending]: onPending,
     [addItemToCourse.rejected]: onRejected,
-    [addItemToCourse.fulfilled]: onFulfilled
+    [addItemToCourse.fulfilled]: onFulfilled,
+
+    [deleteItemFromCourse.pending]: onPending,
+    [deleteItemFromCourse.rejected]: onRejected,
+    [deleteItemFromCourse.fulfilled]: onFulfilled,
   }
 });
 

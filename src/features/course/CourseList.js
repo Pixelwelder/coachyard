@@ -17,14 +17,19 @@ import Dialog from '@material-ui/core/Dialog';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-const Item = ({ item, onClick }) => {
+const Item = ({ item, onDelete }) => {
   // const { id: playbackId } = item.playback_ids[0];
   // const width = 150;
   // const height = 100;
 
   return (
     <li>
-      <h3>Item</h3>
+      <div style={{ display: 'flex' }}>
+        <h3>Item</h3>
+        <Button onClick={onDelete}>
+          <DeleteIcon />
+        </Button>
+      </div>
       <p>{item.displayName}</p>
       {/*<img*/}
       {/*  style={{ width, height }}*/}
@@ -58,7 +63,13 @@ const CourseView = ({ course }) => {
             </Button>
           </div>
           <ul>
-            {course.items.map((item, index) => <Item item={item} key={index} />)}
+            {course.items.map((item, index) => (
+              <Item
+                item={item}
+                key={index}
+                onDelete={() => dispatch(courseActions.deleteItemFromCourse({ item, index }))}
+              />
+            ))}
           </ul>
         </div>
       )}
