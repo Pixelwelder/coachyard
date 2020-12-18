@@ -56,6 +56,9 @@ const fetchPlaybackId = createAsyncThunk(
 );
 
 // ------------------------------------------------------------------------------------
+/**
+ * Creates a course based on what's currently in the reducer, then reloads UI.
+ */
 const createCourse = createAsyncThunk(
   'createCourse',
   async (_, { dispatch, getState }) => {
@@ -87,6 +90,20 @@ const _getCurrentCourse = createAsyncThunk(
   }
 );
 
+/**
+ * Reloads the current course. Public, so it updates load/error states.
+ */
+const reloadCurrentCourse = createAsyncThunk(
+  'reloadCurrentCourse',
+  async (_, { dispatch }) => {
+    await dispatch(_getCurrentCourse());
+  }
+);
+
+/**
+ * Sets the currently selected course, then loads it.
+ * @param selectedCourse - the uid of the course to set/load
+ */
 const setAndLoadSelectedCourse = createAsyncThunk(
   'setAndLoadSelectedCourse',
   async (selectedCourse, { dispatch }) => {
@@ -221,6 +238,10 @@ const { actions: generatedActions, reducer } = createSlice({
     [setAndLoadSelectedCourse.rejected]: onRejected,
     [setAndLoadSelectedCourse.fulfilled]: onFulfilled,
 
+    [reloadCurrentCourse.pending]: onPending,
+    [reloadCurrentCourse.rejected]: onRejected,
+    [reloadCurrentCourse.fulfilled]: onFulfilled,
+
     [deleteSelectedCourse.pending]: onPending,
     [deleteSelectedCourse.rejected]: onRejected,
     [deleteSelectedCourse.fulfilled]: onFulfilled,
@@ -238,7 +259,7 @@ const selectors = { select, selectItems };
 const actions = {
   ...generatedActions,
   fetchAssets, fetchPlaybackId,
-  createCourse, setAndLoadSelectedCourse, deleteSelectedCourse,
+  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse,
   addItemToCourse, deleteItemFromCourse
 };
 

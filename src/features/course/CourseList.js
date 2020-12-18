@@ -53,7 +53,7 @@ const CourseView = ({ course }) => {
             <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
               <AddIcon />
             </Button>
-            <Button>
+            <Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>
               <RefreshIcon />
             </Button>
           </div>

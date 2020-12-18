@@ -73,6 +73,11 @@ const createCourse = async (data, context) => {
 //   }
 // };
 
+/**
+ * Utility function - asynchronously loads a user meta.
+ * @private
+ * @param uid
+ */
 const _getUserMeta = async ({ uid }) => {
   const doc = await admin.firestore().collection('users').doc(uid).get();
   if (!doc.exists) throw new Error(`No user by uid ${uid}.`);
@@ -80,11 +85,24 @@ const _getUserMeta = async ({ uid }) => {
   return { doc, data: doc.data() };
 };
 
+/**
+ * Utility function - tells us whether a user is cleared to load a course.
+ * @private
+ * @param userMeta
+ * @param courseUid
+ */
 const _canGetCourse = ({ userMeta, courseUid }) => {
   return !![...userMeta.coursesCreated, ...userMeta.coursesEnrolled]
     .find(_courseUid => _courseUid === courseUid);
 };
 
+/**
+ * Utility function - asynchronously loads a course.
+ * @private
+ * @param userMeta - the user meta of the user who wishes to load the course
+ * @param courseUid - the id of the course to load
+ * @param doCheck - whether we should check if the user is allowed
+ */
 const _getCourse = async ({ userMeta, courseUid, doCheck = true }) => {
   console.log('_getCourse', courseUid);
   if (doCheck) {
@@ -125,18 +143,22 @@ const deleteCourse = async (data, context) => {
   try {
     checkAuth(context);
 
-    console.log('--- DELETE_COURSE ---', data);
     const { data: course, doc } = await _getCourse({ courseUid: data.uid, doCheck: false });
     if (course.creatorUid !== context.auth.uid) throw new Error(`User ${context.auth.uid} did not create ${data.uid}.`);
 
+    const result = admin.firestore().runTransaction((transaction) => {
+
+    });
+
+    // Delete the document itself.
     await doc.ref.delete();
 
     // Now remove it from the user.
     const { doc: userDoc, data: { coursesCreated } } = await _getUserMeta({ uid: context.auth.uid });
     const filteredCourses = coursesCreated.filter(courseUid => courseUid !== data.uid);
-    console.log('filtered courses', filteredCourses)
     await userDoc.ref.update({ coursesCreated: filteredCourses, updated: admin.firestore.Timestamp.now() });
 
+    // Done.
     return { message: `Course ${data.uid} deleted.` };
   } catch (error) {
     console.error(error);
@@ -150,7 +172,7 @@ const addItemToCourse = async (data, context) => {
     const { auth: { uid } } = context;
     const { courseUid, newItem: { displayName, description } } = data;
 
-    console.log(data);
+    console.log('addItemToCourse', data);
     const result = admin.firestore().runTransaction(async (transaction) => {
 
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
@@ -169,8 +191,8 @@ const addItemToCourse = async (data, context) => {
       });
 
       // Add it to the items table.
-      const itemRef = admin.firestore().collection('items').doc();
-      await transaction.create(itemRef, item);
+      // const itemRef = admin.firestore().collection('items').doc();
+      // await transaction.create(itemRef, item);
 
       // Now update course.
       await transaction.update(courseRef, { items: [ ...course.items, item ]});
