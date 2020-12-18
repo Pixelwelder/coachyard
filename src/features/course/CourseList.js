@@ -46,7 +46,7 @@ const Item = ({ item, onDelete, onEdit }) => {
 
 const CourseView = ({ course }) => {
   const dispatch = useDispatch();
-  const { newItem, newItemIsOpen } = useSelector(courseSelectors.select);
+  const { newItem, newItemIsOpen, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
 
   const onUpload = ({ target: { files } }) => {
@@ -59,6 +59,10 @@ const CourseView = ({ course }) => {
     event.preventDefault();
     dispatch(courseActions.addItemToCourse({ file }));
   };
+
+  const isDisabled = () => {
+    return upload.isUploading;
+  }
 
   return (
     <div>
@@ -112,7 +116,10 @@ const CourseView = ({ course }) => {
               }}
             />
             <input type="file" id="upload" onChange={onUpload} />
-            <button className="invisible" type="submit" />
+            {upload.isUploading && (
+              <p>{Math.round(upload.bytesTransferred / upload.totalBytes) * 100}%</p>
+            )}
+            <button className="invisible" type="submit" disabled={isDisabled()} />
           </form>
         </DialogContent>
         <DialogActions>
@@ -122,6 +129,7 @@ const CourseView = ({ course }) => {
           <Button
             onClick={onSubmit}
             color="primary"
+            disabled={isDisabled()}
           >
             Create!
           </Button>

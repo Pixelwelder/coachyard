@@ -233,6 +233,8 @@ const deleteItemFromCourse = async (data, context) => {
       const newItems = [...course.items];
       newItems.splice(index, 1);
       await transaction.update(courseRef, { items: newItems });
+
+      // TODO Delete file!
     });
 
     return { message: 'Item removed.' };

@@ -26,6 +26,11 @@ const initialState = {
   newItem: {
     displayName: '',
     description: ''
+  },
+  upload: {
+    isUploading: false,
+    bytesTransferred: 0,
+    totalBytes: 0
   }
 };
 
@@ -158,7 +163,7 @@ const deleteSelectedCourse = createAsyncThunk(
  */
 const addItemToCourse = createAsyncThunk(
   'addItemToCourse',
-  async ({ file }, { dispatch, getState }) => {
+  ({ file }, { dispatch, getState }) => new Promise(async (resolve, reject) => {
     const { newItem, selectedCourse } = select(getState());
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
@@ -166,17 +171,55 @@ const addItemToCourse = createAsyncThunk(
     console.log('item added', data);
 
     // Now upload file.
+    dispatch(generatedActions.setUpload({ isUploading: true }));
     const storageRef = app.storage().ref('raw');
     const fileRef = storageRef.child(file.name);
-    const uploadResult = await fileRef.put(file);
-    console.log('uploaded', uploadResult);
+    const uploadTask = fileRef.put(file);
 
-    // Reset UI.
-    dispatch(generatedActions.resetNewItem());
+    // Monitor the task
+    uploadTask.on('state_changed',
+        (snapshot) => {
+        const { bytesTransferred, totalBytes } = snapshot;
+        dispatch(generatedActions.setUpload({ bytesTransferred, totalBytes }));
+      },
+      (error) => {
+        dispatch(generatedActions.resetUpload());
+        throw error;
+      },
+      async () => {
+        // TODO Now send it to Mux.
 
-    // Reload the course with the new item.
-    await dispatch(_getCurrentCourse());
-  }
+        // Reset UI.
+        dispatch(generatedActions.resetUpload());
+        dispatch(generatedActions.resetNewItem());
+
+        // Reload the course with the new item.
+        await dispatch(_getCurrentCourse());
+        resolve();
+      }
+    );
+  })
+  // async ({ file }, { dispatch, getState }) => {
+  //   const { newItem, selectedCourse } = select(getState());
+  //
+  //   const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
+  //   const { data } = await callable({ courseUid: selectedCourse, newItem });
+  //   console.log('item added', data);
+  //
+  //   // Now upload file.
+  //   const storageRef = app.storage().ref('raw');
+  //   const fileRef = storageRef.child(file.name);
+  //   const uploadResult = await fileRef.put(file);
+  //   console.log('uploaded', uploadResult);
+  //
+  //   // TODO Now send it to Mux.
+  //
+  //   // Reset UI.
+  //   dispatch(generatedActions.resetNewItem());
+  //
+  //   // Reload the course with the new item.
+  //   await dispatch(_getCurrentCourse());
+  // }
 );
 
 const editItem = createAsyncThunk(
@@ -254,7 +297,11 @@ const { actions: generatedActions, reducer } = createSlice({
     resetNewItem: (state, action) => {
       state.newItem = initialState.newItem;
       state.newItemIsOpen = false;
-    }
+    },
+    setUpload: (state, action) => {
+      state.upload = { ...state.upload, ...action.payload };
+    },
+    resetUpload: (state, action) => { state.upload = initialState.upload; }
   },
   extraReducers: {
     [fetchAssets.pending]: (state) => { state.isLoading = true; },
