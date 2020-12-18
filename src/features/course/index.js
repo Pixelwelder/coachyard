@@ -9,7 +9,7 @@ const Course = () => {
 
   useEffect(() => {
     const go = async () => {
-      await dispatch(courseActions.init({ id: 'id-goes-here' })); // TODO
+      // await dispatch(courseActions.init({ id: 'id-goes-here' })); // TODO
     };
     go();
   }, [dispatch]);

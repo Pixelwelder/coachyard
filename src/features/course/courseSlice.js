@@ -21,6 +21,7 @@ const initialState = {
     description: ''
   },
 
+  // UI
   newItemIsOpen: false,
   newItem: {
     displayName: '',
@@ -58,29 +59,27 @@ const fetchPlaybackId = createAsyncThunk(
 const createCourse = createAsyncThunk(
   'createCourse',
   async (_, { dispatch, getState }) => {
-    console.log('createCourse');
-    const state = getState();
-    const { newCourse } = select(state);
-    console.log(newCourse);
+    const { newCourse } = select(getState());
     const createCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
-    const { data } = await createCourseCallable(newCourse);
-    console.log('create course:', data);
+    const { data: { courseUid } } = await createCourseCallable(newCourse);
 
     // Reset UI.
     dispatch(generatedActions.resetNewCourse());
 
     // Reload data.
     await dispatch(appActions.refreshUser());
-    await dispatch(getCurrentCourse());
+    await dispatch(setAndLoadSelectedCourse(courseUid));
   }
 );
 
-const getCurrentCourse = createAsyncThunk(
+/**
+ * @internal - Does not set load or error states.
+ */
+const _getCurrentCourse = createAsyncThunk(
   'getCurrentCourse',
   async (_, { getState, dispatch }) => {
     // Load the current course.
-    const state = getState();
-    const { selectedCourse } = select(state);
+    const { selectedCourse } = select(getState());
     const getCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_COURSE);
     const { data: course } = await getCourseCallable({ uid: selectedCourse });
     console.log('getCurrentCourse', course);
@@ -92,41 +91,82 @@ const setAndLoadSelectedCourse = createAsyncThunk(
   'setAndLoadSelectedCourse',
   async (selectedCourse, { dispatch }) => {
     dispatch(generatedActions.setSelectedCourse(selectedCourse));
-    dispatch(getCurrentCourse());
+    dispatch(_getCurrentCourse());
   }
 );
 
-const giveCourse = createAsyncThunk(
-  'giveCourse',
-  async (params) => {
-    const giveCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GIVE_COURSE);
-    const result = await giveCourseCallable(params);
-    console.log('give course:', result);
-  }
-);
+// const giveCourse = createAsyncThunk(
+//   'giveCourse',
+//   async (params) => {
+//     const giveCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GIVE_COURSE);
+//     const result = await giveCourseCallable(params);
+//     console.log('give course:', result);
+//   }
+// );
 
+/**
+ * Adds the current item to the course.
+ */
 const addItemToCourse = createAsyncThunk(
   'addItemToCourse',
   async (_, { dispatch, getState }) => {
-    console.log('add item to course');
-    const state = getState();
-    const { newItem, selectedCourse } = select(state);
-    console.log(newItem);
+    const { newItem, selectedCourse } = select(getState());
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
     console.log('done', data);
-    await dispatch(setAndLoadSelectedCourse(selectedCourse));
+
+    // Reset UI.
+    dispatch(generatedActions.resetNewItem());
+
+    // Reload the course with the new item.
+    await dispatch(_getCurrentCourse());
   }
 );
 
-const init = createAsyncThunk(
-  'courseInit',
-  async ({ id }, { dispatch }) => {
-    // TODO Use course ID.
-    const result = await dispatch(fetchAssets());
-    console.log('fetchAssets', result);
+const _deleteCourse = createAsyncThunk(
+  'deleteCourse',
+  async ({ uid }, { dispatch }) => {
+    console.log('deleteCourse', uid);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
+    const result = await callable({ uid });
+    console.log('deleteCourse', result);
   }
 );
+
+const deleteSelectedCourse = createAsyncThunk(
+  'deleteCurrentCourse',
+  async (_, { getState, dispatch }) => {
+    const { selectedCourse } = select(getState());
+    console.log('deleteSelectedCourse', selectedCourse);
+    await dispatch(_deleteCourse({ uid: selectedCourse }));
+
+    // Reset UI.
+    dispatch(generatedActions.resetSelectedCourse());
+
+    // Reload user.
+    await dispatch(appActions.refreshUser());
+  }
+)
+
+const deleteItemFromCourse = createAsyncThunk(
+  'deleteItemFromCourse',
+  async () => {}
+);
+
+// Utility functions for setting loading and error states.
+const onPending = (state) => {
+  state.error = initialState.error;
+  state.isLoading = true;
+};
+
+const onRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.error;
+};
+
+const onFulfilled = (state) => {
+  state.isLoading = false;
+};
 
 const { actions: generatedActions, reducer } = createSlice({
   name: 'course',
@@ -140,7 +180,10 @@ const { actions: generatedActions, reducer } = createSlice({
     // Loading a course.
     setSelectedCourse: (state, action) => { state.selectedCourse = action.payload; },
     setSelectedCourseData: (state, action) => { state.selectedCourseData = action.payload; },
-    // TODO Reset?
+    resetSelectedCourse: (state, action) => {
+      state.selectedCourse = initialState.selectedCourse;
+      state.selectedCourseData = initialState.selectedCourseData;
+    },
 
     // UI - Adding a new course.
     setNewCourse: (state, action) => {
@@ -170,10 +213,21 @@ const { actions: generatedActions, reducer } = createSlice({
       state.items = action.payload;
     },
 
-    [addItemToCourse.fulfilled]: (state, action) => {
-      state.newItemIsOpen = false;
-      state.newItem = initialState.newItem;
-    }
+    [createCourse.pending]: onPending,
+    [createCourse.rejected]: onRejected,
+    [createCourse.fulfilled]: onFulfilled,
+
+    [setAndLoadSelectedCourse.pending]: onPending,
+    [setAndLoadSelectedCourse.rejected]: onRejected,
+    [setAndLoadSelectedCourse.fulfilled]: onFulfilled,
+
+    [deleteSelectedCourse.pending]: onPending,
+    [deleteSelectedCourse.rejected]: onRejected,
+    [deleteSelectedCourse.fulfilled]: onFulfilled,
+
+    [addItemToCourse.pending]: onPending,
+    [addItemToCourse.rejected]: onRejected,
+    [addItemToCourse.fulfilled]: onFulfilled
   }
 });
 
@@ -182,8 +236,10 @@ const selectItems = createSelector(select, ({ items }) => items);
 const selectors = { select, selectItems };
 
 const actions = {
-  ...generatedActions, init, fetchAssets, fetchPlaybackId, createCourse, giveCourse,
-  setAndLoadSelectedCourse, addItemToCourse
+  ...generatedActions,
+  fetchAssets, fetchPlaybackId,
+  createCourse, setAndLoadSelectedCourse, deleteSelectedCourse,
+  addItemToCourse, deleteItemFromCourse
 };
 
 export { selectors, actions };

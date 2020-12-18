@@ -6,7 +6,6 @@ const { newCourse, newCourseItem } = require('../data');
 const createCourse = async (data, context) => {
   try {
     checkAuth(context);
-    console.log(data);
 
     const { auth: { token: { uid } } } = context;
     const { displayName, description } = data;
@@ -43,31 +42,75 @@ const createCourse = async (data, context) => {
   }
 };
 
-const giveCourse = async (data, context) => {
+// const giveCourse = async (data, context) => {
+//   try {
+//     checkAuth(context);
+//     const { auth: { token: { uid } } } = context;
+//     const { courseUid, userUid } = context;
+//
+//     // Get the course.
+//     const course = await admin.firestore().collection('courses').doc(courseUid).get();
+//     if (!course.exists) throw new Error(`Course ${courseUid} does not exist.`);
+//
+//     // See if the giver has the right to give it.
+//     if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
+//
+//     const gifteeDoc = await admin.firestore().collection('users').doc(userUid).get();
+//     if (!gifteeDoc.exists) throw new Error(`No user by uid ${userUid}.`);
+//
+//     const giftee = gifteeDoc.data();
+//     if (giftee.courses.find(_courseUid => _courseUid === courseUid))
+//       throw new Error(`User already owns course ${userUid}.`);
+//
+//     await admin.firestore().collection('users').doc(userUid)
+//       .update({ courses: [ ...giftee.courses, courseUid ]});
+//
+//     return { message: `User ${userUid} now owns course ${courseUid}.`};
+//
+//   } catch (error) {
+//     console.error(error);
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// };
+
+const _getUserMeta = async ({ uid }) => {
+  const doc = await admin.firestore().collection('users').doc(uid).get();
+  if (!doc.exists) throw new Error(`No user by uid ${uid}.`);
+
+  return { doc, data: doc.data() };
+};
+
+const _canGetCourse = ({ userMeta, courseUid }) => {
+  return !![...userMeta.coursesCreated, ...userMeta.coursesEnrolled]
+    .find(_courseUid => _courseUid === courseUid);
+};
+
+const _getCourse = async ({ userMeta, courseUid, doCheck = true }) => {
+  console.log('_getCourse', courseUid);
+  if (doCheck) {
+    if (!_canGetCourse({ userMeta, courseUid })) throw new Error(`User ${userMeta.uid} cannot get course ${courseUid}`)
+  }
+
+  const doc = await admin.firestore().collection('courses').doc(courseUid).get();
+  if (!doc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+
+  return { doc, data: doc.data() };
+};
+
+/**
+ * Gets a specific course.
+ * @param.uid - the id of the course to return
+ */
+const getCourse = async (data, context) => {
   try {
     checkAuth(context);
-    const { auth: { token: { uid } } } = context;
-    const { courseUid, userUid } = context;
 
-    // Get the course.
-    const course = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!course.exists) throw new Error(`Course ${courseUid} does not exist.`);
+    console.log('----', data);
 
-    // See if the giver has the right to give it.
-    if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
+    const { data: userMeta } = await _getUserMeta({ uid: context.auth.uid });
+    const { data: course } = await _getCourse({ userMeta, courseUid: data.uid });
 
-    const gifteeDoc = await admin.firestore().collection('users').doc(userUid).get();
-    if (!gifteeDoc.exists) throw new Error(`No user by uid ${userUid}.`);
-
-    const giftee = gifteeDoc.data();
-    if (giftee.courses.find(_courseUid => _courseUid === courseUid))
-      throw new Error(`User already owns course ${userUid}.`);
-
-    await admin.firestore().collection('users').doc(userUid)
-      .update({ courses: [ ...giftee.courses, courseUid ]});
-
-    return { message: `User ${userUid} now owns course ${courseUid}.`};
-
+    return course;
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -75,28 +118,26 @@ const giveCourse = async (data, context) => {
 };
 
 /**
- * Gets a specific course.
- * @param.id - the id of the course to return
+ * Deletes a specific course.
+ * @param.uid - the id of the course to delete
  */
-const getCourse = async (data, context) => {
+const deleteCourse = async (data, context) => {
   try {
     checkAuth(context);
-    const { auth: { uid } } = context;
-    const { uid: courseUid } = data;
 
-    const userDoc = await admin.firestore().collection('users').doc(uid).get();
-    const userMeta = userDoc.data();
-    const canGet = !![...userMeta.coursesCreated, ...userMeta.coursesEnrolled]
-      .find(_courseUid => _courseUid === _courseUid);
+    console.log('--- DELETE_COURSE ---', data);
+    const { data: course, doc } = await _getCourse({ courseUid: data.uid, doCheck: false });
+    if (course.creatorUid !== context.auth.uid) throw new Error(`User ${context.auth.uid} did not create ${data.uid}.`);
 
-    console.log(userMeta.coursesCreated, userMeta.coursesEnrolled, courseUid)
-    if (!canGet) throw new Error(`User ${uid} is not able to get course ${courseUid}.`);
+    await doc.ref.delete();
 
-    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!courseDoc.exists) throw new Error(`Course ${uid} does not exist.`);
+    // Now remove it from the user.
+    const { doc: userDoc, data: { coursesCreated } } = await _getUserMeta({ uid: context.auth.uid });
+    const filteredCourses = coursesCreated.filter(courseUid => courseUid !== data.uid);
+    console.log('filtered courses', filteredCourses)
+    await userDoc.ref.update({ coursesCreated: filteredCourses, updated: admin.firestore.Timestamp.now() });
 
-    return courseDoc.data();
-
+    return { message: `Course ${data.uid} deleted.` };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -119,7 +160,13 @@ const addItemToCourse = async (data, context) => {
       const course = courseDoc.data();
       if (course.creatorUid !== uid) throw new Error('Only the creator of a course can add an item.');
 
-      const item = newCourseItem({ displayName, description });
+      const timestamp = admin.firestore.Timestamp.now();
+      const item = newCourseItem({
+        displayName,
+        description,
+        created: timestamp,
+        updated: timestamp
+      });
 
       // Add it to the items table.
       const itemRef = admin.firestore().collection('items').doc();
@@ -166,7 +213,7 @@ const deleteItem = async (data, context) => {
 };
 
 const updateCourse = () => {};
-const deleteCourse = () => {};
+// const deleteCourse = () => {};
 
 const getAllCourses = (data, context) => {
   checkAuth(context);
@@ -195,7 +242,7 @@ const getCreatedCourses = async (data, context) => {
 module.exports = {
   createCourse: functions.https.onCall(createCourse),
   addItemToCourse: functions.https.onCall(addItemToCourse),
-  giveCourse: functions.https.onCall(giveCourse),
+  // giveCourse: functions.https.onCall(giveCourse),
 
   getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
