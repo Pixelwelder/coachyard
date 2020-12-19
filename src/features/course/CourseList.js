@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as courseSelectors, actions as courseActions } from './courseSlice';
+import { selectors as courseSelectors, actions as courseActions, MODES } from './courseSlice';
 import { selectors as assetsSelectors, actions as assetsActions } from '../../app/assets';
 import { selectors as appSelectors } from '../app/appSlice';
 import AddIcon from '@material-ui/icons/Add';
@@ -18,7 +18,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-const Item = ({ item, onDelete, onEdit }) => {
+const Item = ({ item, onDelete, onEdit, mode }) => {
   // const { id: playbackId } = item.playback_ids[0];
   // const width = 150;
   // const height = 100;
@@ -27,12 +27,16 @@ const Item = ({ item, onDelete, onEdit }) => {
     <li>
       <div style={{ display: 'flex' }}>
         <h3>Item</h3>
-        <Button onClick={onEdit}>
-          <EditIcon />
-        </Button>
-        <Button onClick={onDelete}>
-          <DeleteIcon />
-        </Button>
+        {mode === MODES.EDIT && (
+          <>
+            <Button onClick={onEdit}>
+              <EditIcon />
+            </Button>
+            <Button onClick={onDelete}>
+              <DeleteIcon />
+            </Button>
+          </>
+        )}
       </div>
       <p>{item.displayName}</p>
       {/*<img*/}
@@ -46,7 +50,7 @@ const Item = ({ item, onDelete, onEdit }) => {
 
 const CourseView = ({ course, items }) => {
   const dispatch = useDispatch();
-  const { newItem, newItemIsOpen, upload } = useSelector(courseSelectors.select);
+  const { newItem, newItemIsOpen, upload, mode } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
 
   const onUpload = ({ target: { files } }) => {
@@ -80,19 +84,24 @@ const CourseView = ({ course, items }) => {
             <Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>
               <RefreshIcon />
             </Button>
-            <Button onClick={() => {}}>
-              <EditIcon />
-            </Button>
-            <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
-              <AddIcon />
-            </Button>
-            <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
-              <DeleteIcon />
-            </Button>
+            {mode === MODES.EDIT && (
+              <>
+                <Button onClick={() => alert('Not implemented.')}>
+                  <EditIcon />
+                </Button>
+                <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
+                  <AddIcon />
+                </Button>
+                <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
+                  <DeleteIcon />
+                </Button>
+              </>
+            )}
           </div>
           <ul>
             {items.map((item, index) => (
               <Item
+                mode={mode}
                 item={item}
                 key={index}
                 onDelete={() => dispatch(courseActions.deleteItemFromCourse({ uid: item.uid }))}
@@ -155,7 +164,7 @@ const CourseView = ({ course, items }) => {
 const CoursesCreated = () => {
   const dispatch = useDispatch();
   const {
-    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems, createdCourses
+    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems, createdCourses, mode
   } = useSelector(courseSelectors.select);
 
   const onSubmit = (event) => {
@@ -165,7 +174,14 @@ const CoursesCreated = () => {
 
   return (
     <div className="course-list">
-      <h2>Course List</h2>
+      <div style={{ display: 'flex' }}>
+        <h2>Course List</h2>
+        {mode === MODES.VIEW && (
+          <Button onClick={() => dispatch(courseActions.setMode(MODES.EDIT))}>
+            <EditIcon />
+          </Button>
+        )}
+      </div>
       <div style={{ display: 'flex', flexFlow: 'row nowrap' }}>
         <Select
           labelId="tracks-label"
@@ -177,12 +193,14 @@ const CoursesCreated = () => {
             return <MenuItem value={course.uid} key={index}>{course.displayName}</MenuItem>;
           })}
         </Select>
-        <Button onClick={() => {}}>
+        <Button onClick={() => alert('not implemented')}>
           <RefreshIcon />
         </Button>
-        <Button onClick={() => dispatch(courseActions.setNewCourseIsOpen(true))}>
-          <AddIcon />
-        </Button>
+        {mode === MODES.EDIT && (
+          <Button onClick={() => dispatch(courseActions.setNewCourseIsOpen(true))}>
+            <AddIcon />
+          </Button>
+        )}
       </div>
       <CourseView course={selectedCourseData} items={selectedCourseItems} />
       {/*<ul>*/}

@@ -3,6 +3,11 @@ import { actions as logActions, createLog } from '../log/logSlice';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
+const MODES = {
+  VIEW: 'view',
+  EDIT: 'edit'
+};
+
 const initialState = {
   isLoading: false,
   video: null,
@@ -15,6 +20,9 @@ const initialState = {
   selectedCourse: '',
   selectedCourseData: null,
   selectedCourseItems: [],
+
+  // UI
+  mode: MODES.VIEW,
 
   // UI
   newCourseIsOpen: false,
@@ -319,6 +327,9 @@ const { actions: generatedActions, reducer } = createSlice({
       state.selectedCourseItems = initialState.selectedCourseItems;
     },
 
+    // UI - overall mode
+    setMode: (state, action) => { state.mode = action.payload; },
+
     // UI - Adding a new course.
     setNewCourse: (state, action) => {
       state.newCourse = { ...state.newCourse, ...action.payload };
@@ -389,5 +400,5 @@ const actions = {
   addItemToCourse, deleteItemFromCourse, editItem
 };
 
-export { selectors, actions };
+export { selectors, actions, MODES };
 export default reducer;
