@@ -247,11 +247,6 @@ const addItemToCourse = createAsyncThunk(
   })
 );
 
-const editItem = createAsyncThunk(
-  'editItem',
-  async () => {}
-);
-
 /**
  * Deletes an item from the current course.
  * // TODO No warning.
@@ -334,7 +329,17 @@ const { actions: generatedActions, reducer } = createSlice({
     },
 
     // UI - Adding an item to a course.
-    setNewItemMode: (state, action) => { state.newItemMode = action.payload; },
+    createItem: (state, action) => {
+      state.newItemMode = MODES.CREATE;
+    },
+    editItem: (state, action) => {
+      state.newItemMode = MODES.EDIT;
+      state.newItem = action.payload;
+    },
+    closeItem: (state, action) => {
+      state.newItemMode = MODES.CLOSED;
+    },
+    // setNewItemMode: (state, action) => { state.newItemMode = action.payload; },
     setNewItem: (state, action) => {
       state.newItem = { ...state.newItem, ...action.payload };
     },
@@ -390,7 +395,7 @@ const actions = {
   ...generatedActions,
   fetchAssets, fetchPlaybackId,
   createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, _getCreatedCourses,
-  addItemToCourse, deleteItemFromCourse, editItem
+  addItemToCourse, deleteItemFromCourse
 };
 
 export { selectors, actions, MODES };

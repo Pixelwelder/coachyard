@@ -26,7 +26,7 @@ const CourseView = ({ course, items }) => {
                 <Button onClick={() => dispatch(courseActions.editCourse())}>
                   <EditIcon />
                 </Button>
-                <Button onClick={() => dispatch(courseActions.setNewItemMode(MODES.CREATE))}>
+                <Button onClick={() => dispatch(courseActions.createItem())}>
                   <AddIcon />
                 </Button>
                 <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
@@ -42,7 +42,7 @@ const CourseView = ({ course, items }) => {
                 item={item}
                 key={index}
                 onDelete={() => dispatch(courseActions.deleteItemFromCourse({ uid: item.uid }))}
-                onEdit={() => dispatch(courseActions.editItem({ item, index }))}
+                onEdit={() => dispatch(courseActions.editItem(item))}
               />
             ))}
           </ul>

@@ -28,7 +28,11 @@ const ItemDialog = () => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    dispatch(courseActions.addItemToCourse({ file }));
+    if (newItemMode === MODES.CREATE) {
+      dispatch(courseActions.addItemToCourse({ file }));
+    } else {
+      alert('Not implemented yet.');
+    }
   };
 
   const isDisabled = () => {
@@ -39,13 +43,13 @@ const ItemDialog = () => {
   return (
     <Dialog
       open={newItemMode !== MODES.CLOSED}
-      onClose={() => dispatch(courseActions.setNewItemMode(MODES.CLOSED))}
+      onClose={() => dispatch(courseActions.closeItem())}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">Create New Item</DialogTitle>
+      <DialogTitle id="form-dialog-title">{newItem.displayName || 'Create New Item'}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          What would you like to call this item?
+          Explanation...
         </DialogContentText>
         <form onSubmit={onSubmit}>
           <TextField
@@ -78,7 +82,7 @@ const ItemDialog = () => {
           color="primary"
           disabled={isDisabled()}
         >
-          Create!
+          {newItemMode === MODES.CREATE ? 'Create' : 'Update'}
         </Button>
       </DialogActions>
     </Dialog>
