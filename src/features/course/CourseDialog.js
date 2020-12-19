@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as courseActions, selectors as courseSelectors } from './courseSlice';
+import { actions as courseActions, MODES, selectors as courseSelectors } from './courseSlice';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -9,24 +9,22 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import React from 'react';
 
-const NewCourseDialog = () => {
-  const { newCourse, newCourseIsOpen } = useSelector(courseSelectors.select);
+const CourseDialog = () => {
+  const { newCourse, newCourseMode } = useSelector(courseSelectors.select);
   const dispatch = useDispatch();
 
   const onSubmit = (event) => {
     event.preventDefault();
-    dispatch(courseActions.createCourse());
+    dispatch(courseActions.createCourse({ update: newCourseMode === MODES.EDIT }));
   };
-
-  console.log('NEW COURSE IS OPEN', newCourseIsOpen);
 
   return (
     <Dialog
-      open={newCourseIsOpen}
-      onClose={() => dispatch(courseActions.setNewCourseIsOpen(false))}
+      open={newCourseMode !== MODES.CLOSED}
+      onClose={() => dispatch(courseActions.closeCourse())}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
+      <DialogTitle id="form-dialog-title">{newCourse.displayName || ''}</DialogTitle>
       <DialogContent>
         <DialogContentText>
           What would you like to call this course?
@@ -57,11 +55,11 @@ const NewCourseDialog = () => {
           onClick={onSubmit}
           color="primary"
         >
-          Create!
+          {newCourseMode === MODES.CREATE ? 'Create' : 'Update' }
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default NewCourseDialog;
+export default CourseDialog;

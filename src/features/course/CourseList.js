@@ -9,8 +9,8 @@ import DoneIcon from '@material-ui/icons/Check';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import NewCourseDialog from './NewCourseDialog';
-import NewItemDialog from './NewItemDialog';
+import CourseDialog from './CourseDialog';
+import ItemDialog from './ItemDialog';
 import CourseView from './CourseView';
 
 const CoursesCreated = () => {
@@ -50,15 +50,15 @@ const CoursesCreated = () => {
           <RefreshIcon />
         </Button>
         {mode === MODES.EDIT && (
-          <Button onClick={() => dispatch(courseActions.setNewCourseIsOpen(true))}>
+          <Button onClick={() => dispatch(courseActions.editCourse())}>
             <AddIcon />
           </Button>
         )}
       </div>
 
       <CourseView course={selectedCourseData} items={selectedCourseItems} />
-      <NewCourseDialog />
-      <NewItemDialog />
+      <CourseDialog />
+      <ItemDialog />
     </div>
   );
 };

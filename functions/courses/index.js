@@ -36,6 +36,31 @@ const createCourse = async (data, context) => {
   }
 };
 
+const updateCourse = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { auth: { uid } } = context;
+
+    console.log(data);
+
+    await admin.firestore().runTransaction(async (transaction) => {
+      const ref = admin.firestore().collection('courses').doc(data.uid);
+      const doc = await transaction.get(ref);
+      const course = doc.data();
+      console.log(course);
+      if (course.creatorUid !== uid) throw new Error(`User ${uid} cannot update course ${course.uid}.`);
+
+      await transaction.update(ref, data); // TODO Correct?
+    });
+
+    console.log('Course updated.');
+    return { message: 'Course updated.', course: data };
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
 // const giveCourse = async (data, context) => {
 //   try {
 //     checkAuth(context);
@@ -354,7 +379,6 @@ const sendItemToStreamingService = async (data, context) => {
   }
 };
 
-const updateCourse = () => {};
 // const deleteCourse = () => {};
 
 // const getAllCourses = (data, context) => {
@@ -389,6 +413,7 @@ const getCreatedCourses = async (data, context) => {
 module.exports = {
   // Courses
   createCourse: functions.https.onCall(createCourse),
+  updateCourse: functions.https.onCall(updateCourse),
   getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
   // updateCourse: functions.https.onCall(updateCourse),

@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as courseActions, selectors as courseSelectors } from './courseSlice';
+import { actions as courseActions, MODES, selectors as courseSelectors } from './courseSlice';
 import React, { useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -9,9 +9,9 @@ import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
-const NewItemDialog = () => {
+const ItemDialog = () => {
   const dispatch = useDispatch();
-  const { newItemIsOpen, newItem, upload } = useSelector(courseSelectors.select);
+  const { newItemMode, newItem, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
 
   const onUpload = ({ target: { files } }) => {
@@ -38,8 +38,8 @@ const NewItemDialog = () => {
 
   return (
     <Dialog
-      open={newItemIsOpen}
-      onClose={() => dispatch(courseActions.setNewItemIsOpen(false))}
+      open={newItemMode !== MODES.CLOSED}
+      onClose={() => dispatch(courseActions.setNewItemMode(MODES.CLOSED))}
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">Create New Item</DialogTitle>
@@ -85,4 +85,4 @@ const NewItemDialog = () => {
   );
 };
 
-export default NewItemDialog;
+export default ItemDialog;

@@ -5,7 +5,9 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const MODES = {
   VIEW: 'view',
-  EDIT: 'edit'
+  EDIT: 'edit',
+  CREATE: 'create',
+  CLOSED: 'closed'
 };
 
 const initialState = {
@@ -25,14 +27,14 @@ const initialState = {
   mode: MODES.VIEW,
 
   // UI
-  newCourseIsOpen: false,
+  newCourseMode: MODES.CLOSED,
   newCourse: {
     displayName: '',
     description: ''
   },
 
   // UI
-  newItemIsOpen: false,
+  newItemMode: MODES.CLOSED,
   newItem: {
     displayName: '',
     description: '',
@@ -77,9 +79,10 @@ const fetchPlaybackId = createAsyncThunk(
  */
 const createCourse = createAsyncThunk(
   'createCourse',
-  async (_, { dispatch, getState }) => {
+  async ({ update = false }, { dispatch, getState }) => {
     const { newCourse } = select(getState());
-    const createCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
+    const createCourseCallable = app.functions()
+      .httpsCallable(update ? CALLABLE_FUNCTIONS.UPDATE_COURSE : CALLABLE_FUNCTIONS.CREATE_COURSE);
     const { data: { course } } = await createCourseCallable(newCourse);
 
     // Reset UI.
@@ -242,27 +245,6 @@ const addItemToCourse = createAsyncThunk(
       }
     );
   })
-  // async ({ file }, { dispatch, getState }) => {
-  //   const { newItem, selectedCourse } = select(getState());
-  //
-  //   const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
-  //   const { data } = await callable({ courseUid: selectedCourse, newItem });
-  //   console.log('item added', data);
-  //
-  //   // Now upload file.
-  //   const storageRef = app.storage().ref('raw');
-  //   const fileRef = storageRef.child(file.name);
-  //   const uploadResult = await fileRef.put(file);
-  //   console.log('uploaded', uploadResult);
-  //
-  //   // TODO Now send it to Mux.
-  //
-  //   // Reset UI.
-  //   dispatch(generatedActions.resetNewItem());
-  //
-  //   // Reload the course with the new item.
-  //   await dispatch(_getCurrentCourse());
-  // }
 );
 
 const editItem = createAsyncThunk(
@@ -331,23 +313,34 @@ const { actions: generatedActions, reducer } = createSlice({
     setMode: (state, action) => { state.mode = action.payload; },
 
     // UI - Adding a new course.
+    createCourse: (state, action) => {
+      state.newCourseMode = MODES.CREATE;
+    },
+    editCourse: (state, action) => {
+      state.newCourseMode = MODES.EDIT;
+      state.newCourse = state.selectedCourseData;
+    },
+    closeCourse: (state, action) => {
+      state.newCourseMode = MODES.CLOSED;
+    },
+    // setNewCourseMode: (state, action) => { state.newCourseMode = action.payload; },
     setNewCourse: (state, action) => {
       state.newCourse = { ...state.newCourse, ...action.payload };
     },
-    setNewCourseIsOpen: (state, action) => { state.newCourseIsOpen = action.payload; },
+    // setNewCourseIsOpen: (state, action) => { state.newCourseIsOpen = action.payload; },
     resetNewCourse: (state, action) => {
       state.newCourse = initialState.newCourse;
-      state.newCourseIsOpen = false;
+      state.newCourseMode = MODES.CLOSED;
     },
 
     // UI - Adding an item to a course.
+    setNewItemMode: (state, action) => { state.newItemMode = action.payload; },
     setNewItem: (state, action) => {
       state.newItem = { ...state.newItem, ...action.payload };
     },
-    setNewItemIsOpen: (state, action) => { state.newItemIsOpen = action.payload },
     resetNewItem: (state, action) => {
       state.newItem = initialState.newItem;
-      state.newItemIsOpen = false;
+      state.newItemMode = MODES.CLOSED;
     },
     setUpload: (state, action) => {
       state.upload = { ...state.upload, ...action.payload };

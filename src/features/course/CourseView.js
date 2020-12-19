@@ -10,7 +10,7 @@ import React from 'react';
 
 const CourseView = ({ course, items }) => {
   const dispatch = useDispatch();
-  const { mode } = useSelector(courseSelectors.select);
+  const { mode, selectedCourse } = useSelector(courseSelectors.select);
 
   return (
     <div>
@@ -23,10 +23,10 @@ const CourseView = ({ course, items }) => {
             </Button>
             {mode === MODES.EDIT && (
               <>
-                <Button onClick={() => alert('Not implemented.')}>
+                <Button onClick={() => dispatch(courseActions.editCourse())}>
                   <EditIcon />
                 </Button>
-                <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
+                <Button onClick={() => dispatch(courseActions.setNewItemMode(MODES.CREATE))}>
                   <AddIcon />
                 </Button>
                 <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
