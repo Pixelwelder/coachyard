@@ -9,12 +9,13 @@ import { actions as logActions } from '../log/logSlice';
 import { createLog } from '../log/logSlice';
 import { actions as adminActions } from '../admin/adminSlice';
 import { actions as assetActions } from '../../app/assets';
+import { actions as courseActions } from '../course/courseSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
   isInitialised: false,
-  isLoading: false,
+  isLoading: false, // TODO
   error: null,
   // Just holds the basics.
   authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
@@ -39,6 +40,9 @@ const refreshUser = createAsyncThunk(
 
       // return { uid, email, displayName, claims, meta };
       dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
+
+      // Load courses.
+      await dispatch(courseActions._getCreatedCourses());
     } catch (error) {
       console.error(error);
       throw error;
@@ -203,15 +207,12 @@ const selectStudents = createSelector(select, ({ authUser }) => {
   const students = arr.map(item => ({ ...item, id: item.email }));
   return students;
 });
-const selectCoursesCreated = createSelector(select, ({ authUser }) => {
-  return authUser?.meta?.coursesCreated || [];
-});
 
 const selectCoursesEnrolled = createSelector(select, ({ authUser }) => {
   return authUser?.meta?.coursesEnrolled || [];
 });
 
-const selectors = { select, selectStudents, selectCoursesCreated, selectCoursesEnrolled };
+const selectors = { select, selectStudents, selectCoursesEnrolled };
 
 const actions = { ...generatedActions, init, signIn, signOut, signUpServerside, refreshUser };
 

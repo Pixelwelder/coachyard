@@ -52,6 +52,7 @@ const CourseView = ({ course, items }) => {
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {
       setFile(null);
+      dispatch(courseActions.setNewItem({ file: '' }))
       return;
     }
 
@@ -66,7 +67,8 @@ const CourseView = ({ course, items }) => {
   };
 
   const isDisabled = () => {
-    return upload.isUploading || !file;
+    return false;
+    // return upload.isUploading || !file;
   }
 
   return (
@@ -75,11 +77,14 @@ const CourseView = ({ course, items }) => {
         <div>
           <div style={{ display: 'flex' }}>
             <p>{course.displayName}</p>
-            <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
-              <AddIcon />
-            </Button>
             <Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>
               <RefreshIcon />
+            </Button>
+            <Button onClick={() => {}}>
+              <EditIcon />
+            </Button>
+            <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
+              <AddIcon />
             </Button>
           </div>
           <ul>
@@ -146,9 +151,8 @@ const CourseView = ({ course, items }) => {
 
 const CoursesCreated = () => {
   const dispatch = useDispatch();
-  const courses = useSelector(appSelectors.selectCoursesCreated);
   const {
-    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems
+    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems, createdCourses
   } = useSelector(courseSelectors.select);
 
   const onSubmit = (event) => {
@@ -166,8 +170,8 @@ const CoursesCreated = () => {
           value={selectedCourse}
           onChange={({ target: { value } }) => dispatch(courseActions.setAndLoadSelectedCourse(value))}
         >
-          {courses.map((course, index) => {
-            return <MenuItem value={course} key={index}>{course}</MenuItem>;
+          {createdCourses.map((course, index) => {
+            return <MenuItem value={course.uid} key={index}>{course.displayName}</MenuItem>;
           })}
         </Select>
         <Button onClick={() => dispatch(courseActions.setNewCourseIsOpen(true))}>

@@ -79,8 +79,10 @@ const createInvite = async (data, context) => {
 
     // if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
 
+    const doc = admin.firestore().collection('invites').doc();
     const timestamp = admin.firestore.Timestamp.now();
     const invite = newInvite({
+      uid: doc.id,
       created: timestamp,
       updated: timestamp,
       teacherUid: uid,
@@ -90,7 +92,7 @@ const createInvite = async (data, context) => {
       date
     });
 
-    await admin.firestore().collection('invites').doc().set(invite);
+    await doc.set(invite);
     console.log('Done.');
     return { message: 'Invite created', data: invite };
   } catch (error) {

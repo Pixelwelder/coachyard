@@ -1,4 +1,5 @@
 const newBaseItem = (overrides) => ({
+  uid: '', // Always store the uid when created.
   created: '',
   updated: '',
   ...overrides
@@ -6,16 +7,14 @@ const newBaseItem = (overrides) => ({
 
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
-  uid: '',
   students: [],
-  coursesCreated: [],
   coursesEnrolled: [],
   ...overrides
 });
 
+// TODO - Remove.
 const newStudent = (overrides) => ({
   ...newBaseItem(),
-  uid: '',
   email: '',
   ...overrides
 });
@@ -26,7 +25,7 @@ const newInvite = (overrides) => ({
   teacherDisplayName: '',
   email: '',
   displayName: '',
-  time: '',
+  date: '',
   accepted: false,
   completed: false,
   inProgress: false,

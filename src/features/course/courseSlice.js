@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { actions as logActions, createLog } from '../log/logSlice';
-import { actions as appActions } from '../app/appSlice';
 import app from 'firebase/app';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
@@ -9,6 +8,9 @@ const initialState = {
   isLoading: false,
   video: null,
   items: [], // Assets. TODO.
+
+  // All courses.
+  createdCourses: [],
 
   // Actual loaded course.
   selectedCourse: '',
@@ -26,7 +28,8 @@ const initialState = {
   newItemIsOpen: false,
   newItem: {
     displayName: '',
-    description: ''
+    description: '',
+    file: ''
   },
   upload: {
     isUploading: false,
@@ -70,14 +73,14 @@ const createCourse = createAsyncThunk(
   async (_, { dispatch, getState }) => {
     const { newCourse } = select(getState());
     const createCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
-    const { data: { courseUid } } = await createCourseCallable(newCourse);
+    const { data: { course } } = await createCourseCallable(newCourse);
 
     // Reset UI.
     dispatch(generatedActions.resetNewCourse());
 
     // Reload data.
-    await dispatch(appActions.refreshUser());
-    await dispatch(setAndLoadSelectedCourse(courseUid));
+    await dispatch(_getCreatedCourses());
+    await dispatch(setAndLoadSelectedCourse(course.uid));
   }
 );
 
@@ -115,6 +118,7 @@ const reloadCurrentCourse = createAsyncThunk(
 const setAndLoadSelectedCourse = createAsyncThunk(
   'setAndLoadSelectedCourse',
   async (selectedCourse, { dispatch }) => {
+    console.log('setAndLoadSelectedCourse');
     dispatch(generatedActions.setSelectedCourse(selectedCourse));
     dispatch(_getCurrentCourse());
   }
@@ -156,10 +160,23 @@ const deleteSelectedCourse = createAsyncThunk(
     // Reset UI.
     dispatch(generatedActions.resetSelectedCourse());
 
-    // Reload user.
-    await dispatch(appActions.refreshUser());
+    // Reload courses.
+    await dispatch(_getCreatedCourses());
   }
-)
+);
+
+/**
+ * Gets all courses created by a user.
+ * @private - does not set load/error
+ */
+const _getCreatedCourses = createAsyncThunk(
+  'getCreatedCourses',
+  async (_, { dispatch }) => {
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_CREATED_COURSES);
+    const { data: courses } = await callable();
+    dispatch(generatedActions.setCreatedCourses(courses));
+  }
+);
 
 /**
  * Adds the current item to the course.
@@ -287,6 +304,9 @@ const { actions: generatedActions, reducer } = createSlice({
       state.video = action.payload;
     },
 
+    // All created courses.
+    setCreatedCourses: (state, action) => { state.createdCourses = action.payload },
+
     // Loading a course.
     setSelectedCourse: (state, action) => { state.selectedCourse = action.payload; },
     setSelectedCourseData: (state, action) => { state.selectedCourseData = action.payload; },
@@ -329,6 +349,7 @@ const { actions: generatedActions, reducer } = createSlice({
       state.items = action.payload;
     },
 
+    // --------------------------------------------------------------------------------
     [createCourse.pending]: onPending,
     [createCourse.rejected]: onRejected,
     [createCourse.fulfilled]: onFulfilled,
@@ -362,7 +383,7 @@ const selectors = { select, selectItems };
 const actions = {
   ...generatedActions,
   fetchAssets, fetchPlaybackId,
-  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse,
+  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, _getCreatedCourses,
   addItemToCourse, deleteItemFromCourse, editItem
 };
 
