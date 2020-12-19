@@ -304,7 +304,8 @@ const sendItemToStreamingService = async (data, context) => {
     console.log('result', json);
 
     // Now record the result.
-    // const ref = admin.firestore().collection('courses').
+    const doc = admin.firestore().collection('items').doc(uid);
+    await doc.update({ streamingId: json.data.id });
 
     return { message: 'Done, I think.', result: json };
   } catch (error) {

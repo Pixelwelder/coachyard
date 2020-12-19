@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
+import { v4 as uuidv4 } from 'uuid';
 import { actions as logActions, createLog } from '../log/logSlice';
 import app from 'firebase/app';
-import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
@@ -201,6 +201,7 @@ const addItemToCourse = createAsyncThunk(
     uploadTask.on('state_changed',
         (snapshot) => {
         const { bytesTransferred, totalBytes } = snapshot;
+        console.log('state changed', bytesTransferred, totalBytes);
         dispatch(generatedActions.setUpload({ bytesTransferred, totalBytes }));
       },
       (error) => {
@@ -210,17 +211,20 @@ const addItemToCourse = createAsyncThunk(
       async () => {
         // TODO MUX
         // Now get a url for streaming service.
-        console.log('GETTING URL...');
-        const downloadUrl = await fileRef.getDownloadURL();
+        console.log('COMPLETE', file);
+        if (file) {
+          console.log('Getting url for file', file);
+          const downloadUrl = await fileRef.getDownloadURL();
 
-        // Send to streaming service.
-        console.log('Sending to streaming service:', downloadUrl);
-        const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
-        const streamResult = await callable({
-          uid: item.uid,
-          params: { input: downloadUrl, playback_policy: ['public'] }
-        });
-        console.log('sent', streamResult);
+          // Send to streaming service.
+          console.log('Sending to streaming service:', downloadUrl);
+          const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
+          const streamResult = await callable({
+            uid: item.uid,
+            params: { input: downloadUrl, playback_policy: ['public'] }
+          });
+          console.log('sent', streamResult);
+        }
 
         // Reset UI.
         dispatch(generatedActions.resetUpload());
