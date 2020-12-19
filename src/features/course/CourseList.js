@@ -68,7 +68,7 @@ const CourseView = ({ course, items }) => {
 
   const isDisabled = () => {
     return false;
-    // return upload.isUploading || !file;
+    return upload.isUploading || !file;
   }
 
   return (
@@ -85,6 +85,9 @@ const CourseView = ({ course, items }) => {
             </Button>
             <Button onClick={() => dispatch(courseActions.setNewItemIsOpen(true))}>
               <AddIcon />
+            </Button>
+            <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
+              <DeleteIcon />
             </Button>
           </div>
           <ul>
@@ -127,7 +130,7 @@ const CourseView = ({ course, items }) => {
             />
             <input type="file" id="upload" onChange={onUpload} />
             {upload.isUploading && (
-              <p>{Math.round(upload.bytesTransferred / upload.totalBytes) * 100}%</p>
+              <p>{Math.round((upload.bytesTransferred / upload.totalBytes) * 100)}%</p>
             )}
             <button className="invisible" type="submit" disabled={isDisabled()} />
           </form>
@@ -174,11 +177,11 @@ const CoursesCreated = () => {
             return <MenuItem value={course.uid} key={index}>{course.displayName}</MenuItem>;
           })}
         </Select>
+        <Button onClick={() => {}}>
+          <RefreshIcon />
+        </Button>
         <Button onClick={() => dispatch(courseActions.setNewCourseIsOpen(true))}>
           <AddIcon />
-        </Button>
-        <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())} disabled={!selectedCourse}>
-          <DeleteIcon />
         </Button>
       </div>
       <CourseView course={selectedCourseData} items={selectedCourseItems} />

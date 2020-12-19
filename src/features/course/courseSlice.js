@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { v4 as uuidv4 } from 'uuid';
 import { actions as logActions, createLog } from '../log/logSlice';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
@@ -201,8 +200,7 @@ const addItemToCourse = createAsyncThunk(
     uploadTask.on('state_changed',
         (snapshot) => {
         const { bytesTransferred, totalBytes } = snapshot;
-        console.log('state changed', bytesTransferred, totalBytes);
-        dispatch(generatedActions.setUpload({ bytesTransferred, totalBytes }));
+        dispatch(generatedActions.setUpload({ isUploading: true, bytesTransferred, totalBytes }));
       },
       (error) => {
         dispatch(generatedActions.resetUpload());

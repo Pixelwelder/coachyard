@@ -161,20 +161,47 @@ const deleteCourse = async (data, context) => {
     // const { data: course, doc } = await _getCourse({ courseUid: data.uid, doCheck: false });
     // if (course.creatorUid !== context.auth.uid) throw new Error(`User ${context.auth.uid} did not create ${data.uid}.`);
 
-    const { numItems } = await admin.firestore().runTransaction((transaction) => {
+    const { auth: { uid } } = context;
+
+    const { items } = await admin.firestore().runTransaction(async (transaction) => {
       const courseRef = admin.firestore().collection('courses').doc(data.uid);
-      const courseDoc = transaction.get(courseRef);
-      transaction.delete(courseDoc);
+      const courseDoc = await transaction.get(courseRef);
+      const course = courseDoc.data();
+      if (course.creatorUid !== uid) throw new Error(`User ${uid} did not create ${data.uid}.`);
 
       const itemsRef = admin.firestore().collection('items')
-        .where('creatorUid', '==', context.auth.uid);
-      const itemsDocs = transaction.get(itemsRef);
-      itemsDocs.docs.forEach(doc => { transaction.delete(doc); });
+        .where('courseUid', '==', data.uid);
+      const itemsDocs = await transaction.get(itemsRef);
+
+      console.log(`found ${itemsDocs.size} items`);
+      transaction.delete(courseRef);
+
+      // Should this be async?
+      const items = itemsDocs.docs.map(doc => doc.data());
+      itemsDocs.docs.forEach(doc => { transaction.delete(doc.ref); });
 
       // TODO All videos.
       // TODO All streaming items.
-      return { numItems: itemsDocs.size };
+      return { items };
     });
+
+    // Now delete from streaming server.
+    const promises = items.map(async item => {
+      const { streamingId } = item;
+      console.log('deleting', streamingId);
+      const result = await fetch(
+        `https://api.mux.com/video/v1/assets/${streamingId}`,
+        {
+          method: METHODS.DELETE,
+          headers: getMuxHeaders()
+        }
+      );
+      console.log(result);
+    });
+
+    await Promise.all(promises);
+
+    console.log(`Deleted ${items.length}.`);
 
     // Now remove it from the user.
     // const { doc: userDoc, data: { coursesCreated } } = await _getUserMeta({ uid: context.auth.uid });
@@ -182,7 +209,7 @@ const deleteCourse = async (data, context) => {
     // await userDoc.ref.update({ coursesCreated: filteredCourses, updated: admin.firestore.Timestamp.now() });
 
     // Done.
-    return { message: `Course ${data.uid} and ${numItems} items deleted.` };
+    return { message: `Course ${data.uid} and ${items.length} items deleted.` };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -246,7 +273,7 @@ const deleteItemFromCourse = async (data, context) => {
     const { auth: { uid } } = context;
     const { courseUid, itemUid } = data;
 
-    const result = admin.firestore().runTransaction(async (transaction) => {
+    const { item } = await admin.firestore().runTransaction(async (transaction) => {
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
       const courseDoc = await transaction.get(courseRef);
       const course = courseDoc.data();
@@ -255,12 +282,25 @@ const deleteItemFromCourse = async (data, context) => {
       if (!course.creatorUid === uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
 
       const itemRef = admin.firestore().collection('items').doc(itemUid);
-      transaction.delete(itemRef);
+      const itemDoc = await itemRef.get();
+      const item = itemDoc.data();
 
-      // TODO Delete file!
+      await transaction.delete(itemRef);
+
+      return { item };
     });
 
-    return { message: 'Item removed.' };
+    console.log('deleting from streaming service', item);
+    const result = await fetch(
+      `https://api.mux.com/video/v1/assets/${item.streamingId}`,
+      {
+        method: METHODS.DELETE,
+        headers: getMuxHeaders()
+      }
+    );
+    console.log(result);
+
+    return { message: 'Item removed.', result };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
