@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectors as courseSelectors, actions as courseActions, MODES } from './courseSlice';
-import { selectors as assetsSelectors, actions as assetsActions } from '../../app/assets';
-import { selectors as appSelectors } from '../app/appSlice';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import RefreshIcon from '@material-ui/icons/Cached';
 import EditIcon from '@material-ui/icons/Edit';
+import DoneIcon from '@material-ui/icons/Check';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -161,11 +160,9 @@ const CourseView = ({ course, items }) => {
   );
 };
 
-const CoursesCreated = () => {
+const NewCourseDialog = () => {
+  const { newCourse, newCourseIsOpen } = useSelector(courseSelectors.select);
   const dispatch = useDispatch();
-  const {
-    newCourse, newCourseIsOpen, selectedCourse, selectedCourseData, selectedCourseItems, createdCourses, mode
-  } = useSelector(courseSelectors.select);
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -173,7 +170,57 @@ const CoursesCreated = () => {
   };
 
   return (
-    <div className="course-list">
+    <Dialog
+      open={newCourseIsOpen}
+      onClose={() => dispatch(courseActions.setNewCourseIsOpen(false))}
+      aria-labelledby="form-dialog-title"
+    >
+      <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          What would you like to call this course?
+        </DialogContentText>
+        <form onSubmit={onSubmit}>
+          <TextField
+            autoFocus id="displayName" label="name" type="text"
+            value={newCourse.displayName}
+            onChange={({ target: { value } }) => {
+              dispatch(courseActions.setNewCourse({ displayName: value }));
+            }}
+          />
+          <TextField
+            id="description" label="description" type="text"
+            value={newCourse.description}
+            onChange={({ target: { value } }) => {
+              dispatch(courseActions.setNewCourse({ description: value }));
+            }}
+          />
+          <button className="invisible" type="submit" />
+        </form>
+      </DialogContent>
+      <DialogActions>
+        {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
+        {/*  Cancel*/}
+        {/*</Button>*/}
+        <Button
+          onClick={onSubmit}
+          color="primary"
+        >
+          Create!
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const CoursesCreated = () => {
+  const dispatch = useDispatch();
+  const {
+    selectedCourse, selectedCourseData, selectedCourseItems, createdCourses, mode
+  } = useSelector(courseSelectors.select);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
         <h2>Course List</h2>
         {mode === MODES.VIEW && (
@@ -181,7 +228,13 @@ const CoursesCreated = () => {
             <EditIcon />
           </Button>
         )}
+        {mode === MODES.EDIT && (
+          <Button onClick={() => dispatch(courseActions.setMode(MODES.VIEW))}>
+            <DoneIcon />
+          </Button>
+        )}
       </div>
+
       <div style={{ display: 'flex', flexFlow: 'row nowrap' }}>
         <Select
           labelId="tracks-label"
@@ -202,53 +255,9 @@ const CoursesCreated = () => {
           </Button>
         )}
       </div>
-      <CourseView course={selectedCourseData} items={selectedCourseItems} />
-      {/*<ul>*/}
-      {/*  {courses.map((asset, index) => (*/}
-      {/*    <Item key={index} item={asset} onClick={() => dispatch(courseActions.setVideo(asset))} />*/}
-      {/*  ))}*/}
-      {/*</ul>*/}
 
-      <Dialog
-        open={newCourseIsOpen}
-        onClose={() => dispatch(courseActions.setNewCourseIsOpen(false))}
-        aria-labelledby="form-dialog-title"
-      >
-        <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            What would you like to call this course?
-          </DialogContentText>
-          <form onSubmit={onSubmit}>
-            <TextField
-              autoFocus id="displayName" label="name" type="text"
-              value={newCourse.displayName}
-              onChange={({ target: { value } }) => {
-                dispatch(courseActions.setNewCourse({ displayName: value }));
-              }}
-            />
-            <TextField
-              id="description" label="description" type="text"
-              value={newCourse.description}
-              onChange={({ target: { value } }) => {
-                dispatch(courseActions.setNewCourse({ description: value }));
-              }}
-            />
-            <button className="invisible" type="submit" />
-          </form>
-        </DialogContent>
-        <DialogActions>
-          {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
-          {/*  Cancel*/}
-          {/*</Button>*/}
-          <Button
-            onClick={onSubmit}
-            color="primary"
-          >
-            Create!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CourseView course={selectedCourseData} items={selectedCourseItems} />
+      <NewCourseDialog />
     </div>
   );
 };
