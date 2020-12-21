@@ -8,12 +8,14 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
+import ReactPlayer from 'react-player';
 
 const ItemDialog = () => {
   const dispatch = useDispatch();
-  const { newItemMode, newItem, upload } = useSelector(courseSelectors.select);
+  const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
-  const [isChangingFile, setIsChangingFile] = useState(false);
+  const { playbackId } = newItem;
+  console.log('ITEM DIALOG:', newItem);
 
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {
@@ -29,7 +31,7 @@ const ItemDialog = () => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    if (newItemMode === MODES.CREATE) {
+    if (itemUI.mode === MODES.CREATE) {
       dispatch(courseActions.addItemToCourse({ file }));
     } else {
       dispatch(courseActions.updateItem({ file }));
@@ -43,7 +45,7 @@ const ItemDialog = () => {
 
   return (
     <Dialog
-      open={newItemMode !== MODES.CLOSED}
+      open={itemUI.mode !== MODES.CLOSED}
       onClose={() => dispatch(courseActions.closeItem())}
       aria-labelledby="form-dialog-title"
     >
@@ -68,12 +70,22 @@ const ItemDialog = () => {
             }}
           />
 
-          {newItemMode === MODES.CREATE && <input type="file" id="upload" onChange={onUpload} />}
-          {newItemMode === MODES.EDIT && (
+          {playbackId && (
+            <ReactPlayer
+              width={400}
+              height={300}
+              style={{ border: '3px solid blue' }}
+              url={`https://stream.mux.com/${playbackId}.m3u8`}
+              controls={true}
+            />
+          )}
+
+          {itemUI.mode === MODES.CREATE && <input type="file" id="upload" onChange={onUpload} />}
+          {itemUI.mode === MODES.EDIT && (
             <>
-              {isChangingFile && <input type="file" id="upload" onChange={onUpload} />}
-              {!isChangingFile && (
-                <Button onClick={() => setIsChangingFile(true)}>
+              {itemUI.isChangingFile && <input type="file" id="upload" onChange={onUpload} />}
+              {!itemUI.isChangingFile && (
+                <Button onClick={() => dispatch(courseActions.setItemUI({ isChangingFile: true }))}>
                   Update File
                 </Button>
               )}
@@ -94,7 +106,7 @@ const ItemDialog = () => {
           color="primary"
           disabled={isDisabled()}
         >
-          {newItemMode === MODES.CREATE ? 'Create' : 'Update'}
+          {itemUI.mode === MODES.CREATE ? 'Create' : 'Update'}
         </Button>
       </DialogActions>
     </Dialog>

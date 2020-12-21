@@ -241,12 +241,25 @@ const deleteCourse = async (data, context) => {
   }
 };
 
+/**
+ * Filters user input for item creation.
+ */
+const filterItem = ({
+  displayName,
+  description,
+  file: originalFilename
+}) => ({
+  displayName,
+  description,
+  originalFilename
+});
+
 const addItemToCourse = async (data, context) => {
   try {
     checkAuth(context);
 
     const { auth: { uid } } = context;
-    const { courseUid, newItem: { displayName, description, file } } = data;
+    const { courseUid, newItem } = data;
 
     console.log('addItemToCourse', data);
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
@@ -264,11 +277,9 @@ const addItemToCourse = async (data, context) => {
         uid: itemRef.id,
         creatorUid: uid,
         courseUid,
-        displayName,
-        description,
-        file,
         created: timestamp,
-        updated: timestamp
+        updated: timestamp,
+        ...filterItem(newItem)
       });
 
       // Add it to the items table.
@@ -309,10 +320,7 @@ const updateItem = async (data, context) => {
       if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
 
       // Update it (but let's not be too trusting).
-      const filteredUpdate = {
-        displayName: update.displayName,
-        description: update.description
-      };
+      const filteredUpdate = filterItem(update);
       await transaction.update(itemRef, filteredUpdate);
       return { item: { ...itemData, ...filteredUpdate } };
     });
@@ -365,6 +373,11 @@ const deleteItem = async (data, context) => {
   }
 };
 
+const parseMuxResponse = ({ data: { playback_ids, id } }) => ({
+  playbackId: playback_ids[0].id,
+  streamingId: id
+});
+
 const sendItemToStreamingService = async (data, context) => {
   try {
     checkAuth(context);
@@ -403,7 +416,7 @@ const sendItemToStreamingService = async (data, context) => {
     console.log('result', json);
 
     // Now record the result.
-    await itemRef.update({ streamingId: json.data.id });
+    await itemRef.update(parseMuxResponse(json));
 
     return { message: 'Done. I think.', result: json };
   } catch (error) {

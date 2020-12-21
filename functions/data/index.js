@@ -47,7 +47,11 @@ const newCourseItem = (overrides) => ({
   courseUid: '',
   displayName: '',
   description: '',
+
+  originalFilename: '',
   streamingId: '',
+  playbackId: '',
+
   ...overrides
 });
 

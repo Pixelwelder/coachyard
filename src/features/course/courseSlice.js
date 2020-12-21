@@ -34,7 +34,10 @@ const initialState = {
   },
 
   // UI
-  newItemMode: MODES.CLOSED,
+  itemUI: {
+    mode: MODES.CLOSED,
+    isChangingFile: false,
+  },
   newItem: {
     displayName: '',
     description: '',
@@ -191,7 +194,7 @@ const _getCreatedCourses = createAsyncThunk(
 const _addItemToCourse = createAsyncThunk(
   '_addItemToCourse',
   async (_, { getState }) => {
-    const { newItem, selectedCourse } = select(getState());
+    const { newItem, selectedCourse, file } = select(getState());
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
@@ -392,27 +395,28 @@ const { actions: generatedActions, reducer } = createSlice({
 
     // UI - Adding an item to a course.
     createItem: (state, action) => {
-      state.newItemMode = MODES.CREATE;
+      state.newItem = initialState.newItem;
+      state.itemUI.mode = MODES.CREATE;
     },
     editItem: (state, action) => {
-      state.newItemMode = MODES.EDIT;
       state.newItem = action.payload;
+      state.itemUI.mode = MODES.EDIT;
     },
     closeItem: (state, action) => {
-      state.newItemMode = MODES.CLOSED;
+      state.itemUI = initialState.itemUI;
     },
-    // setNewItemMode: (state, action) => { state.newItemMode = action.payload; },
     setNewItem: (state, action) => {
       state.newItem = { ...state.newItem, ...action.payload };
     },
     resetNewItem: (state, action) => {
       state.newItem = initialState.newItem;
-      state.newItemMode = MODES.CLOSED;
+      state.itemUI = initialState.itemUI;
     },
     setUpload: (state, action) => {
       state.upload = { ...state.upload, ...action.payload };
     },
-    resetUpload: (state, action) => { state.upload = initialState.upload; }
+    resetUpload: (state, action) => { state.upload = initialState.upload; },
+    setItemUI: (state, action) => { state.itemUI = { ...state.itemUI, ...action.payload }; }
   },
   extraReducers: {
     [fetchAssets.pending]: (state) => { state.isLoading = true; },
