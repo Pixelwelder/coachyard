@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/functions';
+import 'firebase/storage';
 import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';

@@ -10,7 +10,7 @@ import React from 'react';
 
 const CourseView = ({ course, items }) => {
   const dispatch = useDispatch();
-  const { mode, selectedCourse } = useSelector(courseSelectors.select);
+  const { mode } = useSelector(courseSelectors.select);
 
   return (
     <div>
@@ -41,8 +41,11 @@ const CourseView = ({ course, items }) => {
                 mode={mode}
                 item={item}
                 key={index}
-                onDelete={() => dispatch(courseActions.deleteItemFromCourse({ uid: item.uid }))}
-                onEdit={() => dispatch(courseActions.editItem(item))}
+                onDelete={() => dispatch(courseActions.deleteItem({ uid: item.uid }))}
+                onEdit={() => {
+                  console.log(items);
+                  dispatch(courseActions.editItem(item));
+                }}
               />
             ))}
           </ul>

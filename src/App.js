@@ -73,12 +73,12 @@ function App() {
         {/*</div>*/}
       </div>
 
-      <div className="page-section footer">
-        <ul>
-          <li><a href="/">Terms and Conditions</a></li>
-          <li><a href="/">Privacy Policy</a></li>
-        </ul>
-      </div>
+      {/*<div className="page-section footer">*/}
+      {/*  <ul>*/}
+      {/*    <li><a href="/">Terms and Conditions</a></li>*/}
+      {/*    <li><a href="/">Privacy Policy</a></li>*/}
+      {/*  </ul>*/}
+      {/*</div>*/}
 
     </div>
   );

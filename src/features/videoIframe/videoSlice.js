@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import app from 'firebase';
+import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { actions as navActions, MAIN_TABS } from '../nav/navSlice';
 import { actions as invitesActions } from '../invites/invitesSlice';

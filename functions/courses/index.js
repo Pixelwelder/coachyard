@@ -262,6 +262,7 @@ const addItemToCourse = async (data, context) => {
       const timestamp = admin.firestore.Timestamp.now();
       const item = newCourseItem({
         uid: itemRef.id,
+        creatorUid: uid,
         courseUid,
         displayName,
         description,
@@ -286,33 +287,61 @@ const addItemToCourse = async (data, context) => {
 };
 
 /**
+ * Updates a single item in a course.
+ *
+ * @param itemUid - the item to update
+ * @param update - an object of name-value pairs to update
+ */
+const updateItem = async (data, context) => {
+  try {
+    checkAuth(context);
+
+    const { auth: { uid } } = context;
+    const { uid: itemUid, update } = data;
+
+    if (!update) throw new Error('Update param required.');
+
+    const { item } = await admin.firestore().runTransaction(async (transaction) => {
+      // Grab the item.
+      const itemRef = admin.firestore().collection('items').doc(itemUid);
+      const itemDoc = await transaction.get(itemRef);
+      const itemData = itemDoc.data();
+      if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
+
+      // Update it.
+      await transaction.update(itemRef, update);
+      return { item: { ...itemData, ...update } };
+    });
+
+    return { message: 'Item updated.', item };
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+/**
  * Deletes an item from a course.
  * Requires that the caller be the creator of the course.
  *
  * @param courseUid
  * @param index
  */
-const deleteItemFromCourse = async (data, context) => {
+const deleteItem = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
-    const { courseUid, itemUid } = data;
+    const { uid: itemUid } = data;
 
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
-      const courseRef = admin.firestore().collection('courses').doc(courseUid);
-      const courseDoc = await transaction.get(courseRef);
-      const course = courseDoc.data();
-
-      // Can the user do this?
-      if (!course.creatorUid === uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
-
       const itemRef = admin.firestore().collection('items').doc(itemUid);
       const itemDoc = await itemRef.get();
-      const item = itemDoc.data();
+      const itemData = itemDoc.data();
+      if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
 
       await transaction.delete(itemRef);
 
-      return { item };
+      return { item: itemData };
     });
 
     console.log('deleting from streaming service', item);
@@ -356,6 +385,23 @@ const sendItemToStreamingService = async (data, context) => {
       params: { input, playback_policy }
     } = data;
 
+    console.log(data);
+    const itemRef = admin.firestore().collection('items').doc(uid);
+    const itemDoc = await itemRef.get();
+    const itemData = itemDoc.data();
+    if (itemData.streamingId) {
+      // Already exists. Delete it.
+      console.log('Deleting existing streaming asset...');
+      const result = await fetch(
+        `https://api.mux.com/video/v1/assets/${itemData.streamingId}`,
+        {
+          method: METHODS.DELETE,
+          headers: getMuxHeaders()
+        }
+      );
+      console.log('Deleted', result);
+    }
+
     const result = await fetch(
       'https://api.mux.com/video/v1/assets',
       {
@@ -369,10 +415,9 @@ const sendItemToStreamingService = async (data, context) => {
     console.log('result', json);
 
     // Now record the result.
-    const doc = admin.firestore().collection('items').doc(uid);
-    await doc.update({ streamingId: json.data.id });
+    await itemRef.update({ streamingId: json.data.id });
 
-    return { message: 'Done, I think.', result: json };
+    return { message: 'Done. I think.', result: json };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -421,7 +466,8 @@ module.exports = {
 
   // Items
   addItemToCourse: functions.https.onCall(addItemToCourse),
-  deleteItemFromCourse: functions.https.onCall(deleteItemFromCourse),
+  updateItem: functions.https.onCall(updateItem),
+  deleteItem: functions.https.onCall(deleteItem),
   sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService),
 
   // getAllCourses: functions.https.onCall(getAllCourses),

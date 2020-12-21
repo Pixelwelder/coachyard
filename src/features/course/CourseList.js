@@ -50,7 +50,7 @@ const CoursesCreated = () => {
           <RefreshIcon />
         </Button>
         {mode === MODES.EDIT && (
-          <Button onClick={() => dispatch(courseActions.editCourse())}>
+          <Button onClick={() => dispatch(courseActions.createNewCourse())}>
             <AddIcon />
           </Button>
         )}

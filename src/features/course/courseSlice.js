@@ -188,78 +188,122 @@ const _getCreatedCourses = createAsyncThunk(
   }
 );
 
-/**
- * Adds the current item to the course.
- */
-const addItemToCourse = createAsyncThunk(
-  'addItemToCourse',
-  ({ file }, { dispatch, getState }) => new Promise(async (resolve, reject) => {
+const _addItemToCourse = createAsyncThunk(
+  '_addItemToCourse',
+  async (_, { getState }) => {
     const { newItem, selectedCourse } = select(getState());
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
     const { item } = data;
     console.log('item added', data);
+    return item;
+  }
+);
 
-    // Now upload file.
+const _uploadItem = createAsyncThunk(
+  'updateItem',
+  async ({ uid, file }, { dispatch }) => new Promise((resolve, reject) => {
     dispatch(generatedActions.setUpload({ isUploading: true }));
+
+    // Upload the file to Firebase Storage.
     const storageRef = app.storage().ref(`raw`);
-    const fileRef = storageRef.child(item.uid);
+    const fileRef = storageRef.child(uid);
     const uploadTask = fileRef.put(file);
 
     // Monitor the task
     uploadTask.on('state_changed',
-        (snapshot) => {
+      (snapshot) => {
         const { bytesTransferred, totalBytes } = snapshot;
         dispatch(generatedActions.setUpload({ isUploading: true, bytesTransferred, totalBytes }));
       },
       (error) => {
         dispatch(generatedActions.resetUpload());
-        throw error;
+        return reject(error);
       },
       async () => {
-        // TODO MUX
         // Now get a url for streaming service.
-        console.log('COMPLETE', file);
-        if (file) {
-          console.log('Getting url for file', file);
-          const downloadUrl = await fileRef.getDownloadURL();
-
-          // Send to streaming service.
-          console.log('Sending to streaming service:', downloadUrl);
-          const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
-          const streamResult = await callable({
-            uid: item.uid,
-            params: { input: downloadUrl, playback_policy: ['public'] }
-          });
-          console.log('sent', streamResult);
-        }
-
-        // Reset UI.
-        dispatch(generatedActions.resetUpload());
-        dispatch(generatedActions.resetNewItem());
-
-        // Reload the course with the new item.
-        await dispatch(_getCurrentCourse());
-        resolve();
+        console.log('upload complete', file);
+        return resolve(fileRef.getDownloadURL());
       }
     );
   })
+);
+
+const _sendToStreamingService = createAsyncThunk(
+  '_sendToStreamingService',
+  async ({ uid, downloadUrl }) => {
+    console.log('Sending to streaming service:', downloadUrl);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
+    const streamResult = await callable({
+      uid: uid,
+      params: { input: downloadUrl, playback_policy: ['public'] }
+    });
+    console.log('sent', streamResult);
+  }
+);
+
+const _resetItem = createAsyncThunk(
+  '_resetItem',
+  async (_, { dispatch }) => {
+    // Reset UI.
+    dispatch(generatedActions.resetUpload());
+    dispatch(generatedActions.resetNewItem());
+
+    // Reload the course with the new item.
+    await dispatch(_getCurrentCourse());
+  }
+);
+
+/**
+ * Adds the current item to the course.
+ */
+const addItemToCourse = createAsyncThunk(
+  'addItemToCourse',
+  async ({ file }, { dispatch, getState }) => {
+
+    // Create the data object.
+    const { payload: item } = await dispatch(_addItemToCourse());
+    const { uid } = item;
+
+    // Upload the file if applicable.
+    if (file) {
+      // First, to Firebase Storage.
+      const { payload: downloadUrl } = await dispatch(_uploadItem({ uid, file }));
+
+      // Send to streaming service.
+      await dispatch(_sendToStreamingService({ uid, downloadUrl }));
+      console.log('addItemToCourse: complete');
+    }
+
+    // Reset UI and load the current course again.
+    await dispatch(_resetItem());
+
+    // Done.
+
+  }
+);
+
+const updateItem = createAsyncThunk(
+  'updateItem',
+  async (_, { getState }) => {
+    console.log('updateItem', select(getState()));
+    // const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
+    // const result = await callable({ });
+  }
 );
 
 /**
  * Deletes an item from the current course.
  * // TODO No warning.
  */
-const deleteItemFromCourse = createAsyncThunk(
-  'deleteItemFromCourse',
+const deleteItem = createAsyncThunk(
+  'deleteItem',
   async ({ uid }, { dispatch, getState }) => {
-    const { selectedCourse } = select(getState());
-    console.log('deleteItemFromCourse', selectedCourse, uid);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM_FROM_COURSE);
-    const result = await callable({ courseUid: selectedCourse, itemUid: uid });
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
+    const result = await callable({ uid });
 
-    console.log('deleteItemFromCourse result', result);
+    console.log('deleteItem result', result);
 
     // Reload.
     await dispatch(_getCurrentCourse());
@@ -308,7 +352,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setMode: (state, action) => { state.mode = action.payload; },
 
     // UI - Adding a new course.
-    createCourse: (state, action) => {
+    createNewCourse: (state, action) => {
       state.newCourseMode = MODES.CREATE;
     },
     editCourse: (state, action) => {
@@ -381,9 +425,13 @@ const { actions: generatedActions, reducer } = createSlice({
     [addItemToCourse.rejected]: onRejected,
     [addItemToCourse.fulfilled]: onFulfilled,
 
-    [deleteItemFromCourse.pending]: onPending,
-    [deleteItemFromCourse.rejected]: onRejected,
-    [deleteItemFromCourse.fulfilled]: onFulfilled,
+    [updateItem.pending]: onPending,
+    [updateItem.rejected]: onRejected,
+    [updateItem.fulfilled]: onFulfilled,
+
+    [deleteItem.pending]: onPending,
+    [deleteItem.rejected]: onRejected,
+    [deleteItem.fulfilled]: onFulfilled,
   }
 });
 
@@ -395,7 +443,7 @@ const actions = {
   ...generatedActions,
   fetchAssets, fetchPlaybackId,
   createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, _getCreatedCourses,
-  addItemToCourse, deleteItemFromCourse
+  addItemToCourse, updateItem, deleteItem
 };
 
 export { selectors, actions, MODES };

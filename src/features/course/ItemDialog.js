@@ -13,6 +13,7 @@ const ItemDialog = () => {
   const dispatch = useDispatch();
   const { newItemMode, newItem, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
+  const [isChangingFile, setIsChangingFile] = useState(false);
 
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {
@@ -31,7 +32,7 @@ const ItemDialog = () => {
     if (newItemMode === MODES.CREATE) {
       dispatch(courseActions.addItemToCourse({ file }));
     } else {
-      alert('Not implemented yet.');
+      dispatch(courseActions.updateItem())
     }
   };
 
@@ -66,7 +67,18 @@ const ItemDialog = () => {
               dispatch(courseActions.setNewItem({ description: value }));
             }}
           />
-          <input type="file" id="upload" onChange={onUpload} />
+
+          {newItemMode === MODES.CREATE && <input type="file" id="upload" onChange={onUpload} />}
+          {newItemMode === MODES.EDIT && (
+            <>
+              {isChangingFile && <input type="file" id="upload" onChange={onUpload} />}
+              {!isChangingFile && (
+                <Button onClick={() => setIsChangingFile(true)}>
+                  Update File
+                </Button>
+              )}
+            </>
+          )}
           {upload.isUploading && (
             <p>{Math.round((upload.bytesTransferred / upload.totalBytes) * 100)}%</p>
           )}

@@ -43,6 +43,7 @@ const newCourse = (overrides) => ({
 const newCourseItem = (overrides) => ({
   ...newBaseItem(),
   uid: '',
+  creatorUid: '',
   courseUid: '',
   displayName: '',
   description: '',
