@@ -32,7 +32,7 @@ const ItemDialog = () => {
     if (newItemMode === MODES.CREATE) {
       dispatch(courseActions.addItemToCourse({ file }));
     } else {
-      dispatch(courseActions.updateItem())
+      dispatch(courseActions.updateItem({ file }));
     }
   };
 

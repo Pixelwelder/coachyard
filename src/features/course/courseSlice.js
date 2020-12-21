@@ -280,16 +280,34 @@ const addItemToCourse = createAsyncThunk(
     await dispatch(_resetItem());
 
     // Done.
-
   }
 );
 
+/**
+ * Updates a single item.
+ */
 const updateItem = createAsyncThunk(
   'updateItem',
-  async (_, { getState }) => {
-    console.log('updateItem', select(getState()));
-    // const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
-    // const result = await callable({ });
+  async ({ file }, { getState, dispatch }) => {
+    // Update the data object.
+    const { newItem } = select(getState());
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
+    const { data: { item } } = await callable({ uid: newItem.uid, update: newItem });
+    console.log('updated:', item);
+    const { uid } = item;
+
+    // Update the file, if necessary.
+    if (file) {
+      // Upload to Firebase Storage.
+      const { payload: downloadUrl } = await dispatch(_uploadItem({ uid, file }));
+
+      // Send to streaming service.
+      await dispatch(_sendToStreamingService({ uid, downloadUrl }));
+      console.log('updateItem: complete');
+    }
+
+    // Reset UI and load the current course again.
+    await dispatch(_resetItem());
   }
 );
 

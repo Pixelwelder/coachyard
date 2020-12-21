@@ -308,9 +308,13 @@ const updateItem = async (data, context) => {
       const itemData = itemDoc.data();
       if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
 
-      // Update it.
-      await transaction.update(itemRef, update);
-      return { item: { ...itemData, ...update } };
+      // Update it (but let's not be too trusting).
+      const filteredUpdate = {
+        displayName: update.displayName,
+        description: update.description
+      };
+      await transaction.update(itemRef, filteredUpdate);
+      return { item: { ...itemData, ...filteredUpdate } };
     });
 
     return { message: 'Item updated.', item };
@@ -361,22 +365,6 @@ const deleteItem = async (data, context) => {
   }
 };
 
-// const getItemsForCourse = async (data, context) => {
-//   try {
-//     checkAuth(context);
-//     const { uid } = data;
-//
-//     const snapshot = await admin.firestore().collection('items')
-//       .where('courseUid', '==', uid ).get();
-//
-//     const items = snapshot.docs.map(item => item.data());
-//     return items;
-//   } catch (error) {
-//     console.error(error);
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// };
-
 const sendItemToStreamingService = async (data, context) => {
   try {
     checkAuth(context);
@@ -423,15 +411,6 @@ const sendItemToStreamingService = async (data, context) => {
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
-
-// const deleteCourse = () => {};
-
-// const getAllCourses = (data, context) => {
-//   checkAuth(context);
-//   // TODO This is admin only.
-//
-//   const { auth: { token: { uid } } } = context;
-// };
 
 /**
  * Gets the courses created by the signed-in user.
