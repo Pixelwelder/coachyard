@@ -8,7 +8,7 @@ const newBaseItem = (overrides) => ({
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
   students: [],
-  coursesEnrolled: [],
+  enrolled: {},
   ...overrides
 });
 
@@ -21,7 +21,7 @@ const newStudent = (overrides) => ({
 
 const newInvite = (overrides) => ({
   ...newBaseItem(),
-  teacherUid: '',
+  teacherUid: '', // TODO creatorUid
   teacherDisplayName: '',
   email: '',
   displayName: '',

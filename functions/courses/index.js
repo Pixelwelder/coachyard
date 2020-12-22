@@ -111,7 +111,7 @@ const updateCourse = async (data, context) => {
  * @param courseUid
  */
 const _canGetCourse = ({ userMeta, course }) => {
-  return course.creatorUid === userMeta.uid || !!userMeta.coursesEnrolled.find(_courseUid => _courseUid === course.uid);
+  return course.creatorUid === userMeta.uid || !!userMeta.enrolled[course.uid];
 };
 
 /**
@@ -150,11 +150,13 @@ const getCourse = async (data, context) => {
       const userRef = admin.firestore().collection('users').doc(uid);
       const userDoc = await transaction.get(userRef);
       const userMeta = userDoc.data();
+      console.log('user', userMeta);
 
       // Grab the course.
       const courseRef = admin.firestore().collection('courses').doc(data.uid);
       const courseDoc = await transaction.get(courseRef);
       const course = courseDoc.data();
+      console.log('course', course);
 
       // Does the user have access?
       if (!_canGetCourse({ userMeta, course })) throw new Error(`User ${uid} can't get course ${data.uid}.`);

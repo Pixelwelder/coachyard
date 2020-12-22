@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**}/documents {
+      allow read, write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if true;//isSignedIn();
+      allow write: if request.auth.uid == uid;
+    }
+
+    match /invites/{uid} {
+      allow read: if isCreator() || isInvited();
+      allow write: if isCreator();
+    }
+
+    match /courses/{uid} {
+      allow read: if isCreator() || isEnrolled();
+      allow write: if isCreator();
+    }
+
+    match /items/{uid} {
+      allow read: if isCreator() || isEnrolledInParentCourse();
+      allow write: if isCreator();
+    }
+
+    match /stripe_customers/{uid} {
+      allow read, write: if request.auth.uid == uid;
+
+      match /payment_methods/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
+      match /payments/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
+
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // TODO Simplify.
+    function isCreator() {
+      return (resource.data.creatorUid == request.auth.uid) || (resource.data.teacherUid == request.auth.uid);
+    }
+
+    function isInvited() {
+      return resource.data.email == request.auth;
+    }
+
+    function isEnrolled() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
+    }
+
+    function isEnrolledInParentCourse() {
+      let parentCourse = get(/databases/$(database)/documents/users/$(resource.data.courseUid));
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
+    }
+  }
+}

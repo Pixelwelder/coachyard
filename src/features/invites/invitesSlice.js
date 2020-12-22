@@ -15,6 +15,7 @@ const initialState = {
   date: ''
 };
 
+let toListener = () => {};
 const getInvitesTo = createAsyncThunk(
   'getInvitesTo',
   async () => {
