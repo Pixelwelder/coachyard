@@ -5,7 +5,7 @@ const { getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 
 const { checkAuth } = require('../util/auth');
-const { newStudent, newInvite } = require('../data');
+const { newInvite } = require('../data');
 
 
 /**
@@ -110,35 +110,6 @@ const updateInvite = async (data, context) => {
     if (!inviteSnapshot.exists) throw new Error(`No invite by ui ${uid}.`)
 
     await admin.firestore().collection('invites').doc(uid).update(update);
-
-    // const { teacherUid, email } = inviteSnapshot.data();
-    // console.log('got invite', teacherUid, email);
-
-    // const studentUser = await admin.auth().getUserByEmail(email);
-    // const { uid: studentUid, displayName } = studentUser;
-    // console.log('found user', studentUid, displayName);
-
-    // const timestamp = admin.firestore.Timestamp.now();
-    // const student = newStudent({
-    //   uid: studentUid,
-    //   email,
-    //   displayName, // TODO This must be updated when user updates it.
-    //   created: timestamp,
-    //   updated: timestamp
-    // });
-
-    // const teacherSnapshot = await admin.firestore().collection('users').doc(teacherUid).get();
-    // if (!teacherSnapshot.exists) throw new Error(`No teacher by uid ${teacherUid}.`)
-
-    // const teacherMeta = teacherSnapshot.data();
-    // console.log('got teacher', teacherMeta);
-
-    // const existing = teacherMeta.students.find((student) => student.email === email);
-    // if (existing) throw new Error(`${studentUid} is already a student of teacher ${teacherUid}`);
-    // const students = [ ...(teacherMeta.students || []), student ];
-
-    // await admin.firestore().collection('users').doc(teacherUid).update({ students });
-    // await admin.firestore().collection('invites').doc(uid).delete();
     return { message: 'Done.' };
   } catch (error) {
     console.error(error);
