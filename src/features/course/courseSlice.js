@@ -106,7 +106,7 @@ const createCourse = createAsyncThunk(
 
     // Reload data.
     // await dispatch(_getCreatedCourses());
-    await dispatch(setAndLoadSelectedCourse(course.uid));
+    // await dispatch(setAndLoadSelectedCourse(course.uid));
   }
 );
 
@@ -341,12 +341,23 @@ const init = createAsyncThunk(
       const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
       dispatch(generatedActions.setCreatedCourses(courses));
 
-      // If the current course is not among them, reset.
+      // If the user just removed one, switch to another.
       const { selectedCourse } = select(getState());
       if (!courses.find(course => course.uid === selectedCourse)) {
-        console.log('current course is gone!');
-        dispatch(generatedActions.resetSelectedCourse());
+        if (courses.length) {
+          dispatch(setAndLoadSelectedCourse(courses[courses.length - 1].uid))
+        } else {
+          dispatch(generatedActions.resetSelectedCourse());
+        }
       }
+
+      // If the user just added one, switch to it.
+      let toLoad;
+      snapshot.docChanges().forEach((change) => {
+        const { doc, type } = change;
+        if (type === 'added') toLoad = doc.id;
+      });
+      if (toLoad) dispatch(setAndLoadSelectedCourse(toLoad));
     };
 
     const handleChangedUser = (snapshot) => {
