@@ -41,9 +41,8 @@ const CourseView = ({ course, items }) => {
                 mode={mode}
                 item={item}
                 key={index}
-                onDelete={() => dispatch(courseActions.deleteItem({ uid: item.uid }))}
+                onDelete={() => dispatch(courseActions.openDeleteItemUI(item.uid))}
                 onEdit={() => {
-                  console.log(items);
                   dispatch(courseActions.editItem(item));
                 }}
               />

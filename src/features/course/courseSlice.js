@@ -41,6 +41,11 @@ const initialState = {
     mode: MODES.CLOSED
   },
 
+  giveCourseUI: {
+    mode: MODES.CLOSED,
+    email: ''
+  },
+
   // UI
   itemUI: {
     mode: MODES.CLOSED,
@@ -57,9 +62,9 @@ const initialState = {
     totalBytes: 0
   },
 
-  giveCourseUI: {
+  deleteItemUI: {
     mode: MODES.CLOSED,
-    email: ''
+    uid: ''
   }
 };
 
@@ -103,10 +108,6 @@ const createCourse = createAsyncThunk(
 
     // Reset UI.
     dispatch(generatedActions.resetNewCourseUI());
-
-    // Reload data.
-    // await dispatch(_getCreatedCourses());
-    // await dispatch(setAndLoadSelectedCourse(course.uid));
   }
 );
 
@@ -167,7 +168,6 @@ const deleteSelectedCourse = createAsyncThunk(
   'deleteCurrentCourse',
   async (_, { getState, dispatch }) => {
     const { selectedCourse } = select(getState());
-    console.log('deleteSelectedCourse', selectedCourse);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
     await callable({ uid: selectedCourse });
 
@@ -187,8 +187,8 @@ const giveCourse = createAsyncThunk(
     } = select(getState());
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GIVE_COURSE);
-    const result = await callable({ email, courseUid: selectedCourse });
-    console.log('giveCourse', result);
+    await callable({ email, courseUid: selectedCourse });
+
     dispatch(generatedActions.resetGiveCourseUI());
   }
 );
@@ -320,14 +320,12 @@ const updateItem = createAsyncThunk(
  */
 const deleteItem = createAsyncThunk(
   'deleteItem',
-  async ({ uid }, { dispatch, getState }) => {
+  async (_, { dispatch, getState }) => {
+    const { deleteItemUI: { uid } } = select(getState());
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
     const result = await callable({ uid });
 
-    console.log('deleteItem result', result);
-
-    // Reload.
-    await dispatch(_getCurrentCourse());
+    dispatch(generatedActions.resetDeleteItemUI());
   }
 );
 
@@ -456,6 +454,27 @@ const { actions: generatedActions, reducer } = createSlice({
       state.newCourseMode = MODES.CLOSED;
     },
 
+    // UI - Deleting a course.
+    openDeleteCourseUI: (state) => { state.deleteCourseUI.mode = MODES.OPEN; },
+    setDeleteCourseUI: (state, action) => {
+      state.deleteCourseUI = { ...state.deleteCourseUI, ...action.payload };
+    },
+    resetDeleteCourseUI: (state) => { state.deleteCourseUI = initialState.deleteCourseUI; },
+
+    // UI - Giving a course.
+    openGiveCourseUI: (state, action) => {
+      state.giveCourseUI = {
+        ...initialState.giveCourseUI,
+        mode: MODES.OPEN
+      };
+    },
+    setGiveCourseUI: (state, action) => {
+      state.giveCourseUI = { ...state.giveCourseUI, ...action.payload };
+    },
+    resetGiveCourseUI: (state, action) => {
+      state.giveCourseUI = initialState.giveCourseUI;
+    },
+
     // UI - Adding an item to a course.
     createItem: (state, action) => {
       state.newItem = initialState.newItem;
@@ -481,26 +500,13 @@ const { actions: generatedActions, reducer } = createSlice({
     resetUpload: (state, action) => { state.upload = initialState.upload; },
     setItemUI: (state, action) => { state.itemUI = { ...state.itemUI, ...action.payload }; },
 
-    // UI - Deleting a course.
-    openDeleteCourseUI: (state) => { state.deleteCourseUI.mode = MODES.OPEN; },
-    setDeleteCourseUI: (state, action) => {
-      state.deleteCourseUI = { ...state.deleteCourseUI, ...action.payload };
+    openDeleteItemUI: (state, action) => {
+      state.deleteItemUI = {
+        mode: MODES.OPEN,
+        uid: action.payload
+      }
     },
-    resetDeleteCourseUI: (state) => { state.deleteCourseUI = initialState.deleteCourseUI; },
-
-    // UI - Giving a course.
-    openGiveCourseUI: (state, action) => {
-      state.giveCourseUI = {
-        ...initialState.giveCourseUI,
-        mode: MODES.OPEN
-      };
-    },
-    setGiveCourseUI: (state, action) => {
-      state.giveCourseUI = { ...state.giveCourseUI, ...action.payload };
-    },
-    resetGiveCourseUI: (state, action) => {
-      state.giveCourseUI = initialState.giveCourseUI;
-    }
+    resetDeleteItemUI: (state) => { state.deleteItemUI.mode = MODES.CLOSED; }
   },
   extraReducers: {
     [fetchAssets.pending]: (state) => { state.isLoading = true; },

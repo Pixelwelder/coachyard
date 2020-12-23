@@ -360,7 +360,10 @@ const deleteItem = async (data, context) => {
     const { auth: { uid } } = context;
     const { uid: itemUid } = data;
 
+    console.log('deleteItem', data);
+
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
+      console.log(itemUid);
       const itemRef = admin.firestore().collection('items').doc(itemUid);
       const itemDoc = await itemRef.get();
       const itemData = itemDoc.data();

@@ -38,7 +38,7 @@ const ConfirmationDialog = ({ open, message, onClose, onConfirm }) => {
   )
 };
 
-const ConfirmDeleteDialog = () => {
+const ConfirmDeleteCourseDialog = () => {
   const dispatch = useDispatch();
   const { deleteCourseUI } = useSelector(courseSelectors.select);
 
@@ -52,5 +52,19 @@ const ConfirmDeleteDialog = () => {
   )
 };
 
-export { ConfirmDeleteDialog };
+const ConfirmDeleteItemDialog = () => {
+  const dispatch = useDispatch();
+  const { deleteItemUI } = useSelector(courseSelectors.select);
+
+  return (
+    <ConfirmationDialog
+      open={deleteItemUI.mode !== MODES.CLOSED}
+      message="Are you sure you want to delete this item from this course?"
+      onClose={() => dispatch(courseActions.resetDeleteItemUI())}
+      onConfirm={() => dispatch(courseActions.deleteItem())}
+    />
+  )
+};
+
+export { ConfirmDeleteCourseDialog, ConfirmDeleteItemDialog };
 
