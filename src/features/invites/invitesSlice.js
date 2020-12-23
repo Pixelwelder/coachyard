@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { DateTime } from 'luxon';
+import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
   invitesTo: [],
@@ -56,12 +57,7 @@ const init = createAsyncThunk(
 
     // When invites change, this handler will fire.
     const createHandleSnapshot = actionCreator => (snapshot) => {
-      console.log('invite snapshot:', snapshot.size);
-      snapshot.docChanges().forEach((change) => {
-        console.log('changed', change.type);
-      });
-
-      const invites = snapshot.docs.map(doc => doc.data());
+      const invites = snapshot.docs.map(doc => parseUnserializables(doc.data()));
       dispatch(actionCreator(invites));
     };
 
@@ -76,7 +72,7 @@ const init = createAsyncThunk(
 
         // TODO Change to creatorUid
         if (fromListener) fromListener();
-        fromListener = app.firestore().collection('invites').where('teacherUid', '==', uid)
+        fromListener = app.firestore().collection('invites').where('creatorUid', '==', uid)
           .onSnapshot(createHandleSnapshot(generatedActions.setInvitesFrom));
 
         if (toListener) toListener();

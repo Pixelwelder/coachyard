@@ -21,7 +21,7 @@ const newStudent = (overrides) => ({
 
 const newInvite = (overrides) => ({
   ...newBaseItem(),
-  teacherUid: '', // TODO creatorUid
+  creatorUid: '',
   teacherDisplayName: '',
   email: '',
   displayName: '',

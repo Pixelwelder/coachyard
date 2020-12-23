@@ -13,8 +13,8 @@ const CALLABLE_FUNCTIONS = {
   CREATE_STUDENT: 'createStudent',
 
   CREATE_INVITE: 'createInvite',
-  GET_INVITES_TO: 'getInvitesTo',
-  GET_INVITES_FROM: 'getInvitesFrom',
+  // GET_INVITES_TO: 'getInvitesTo',
+  // GET_INVITES_FROM: 'getInvitesFrom',
   UPDATE_INVITE: 'updateInvite',
   DELETE_INVITE: 'deleteInvite',
   LAUNCH: 'launch',

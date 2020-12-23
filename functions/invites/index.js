@@ -7,47 +7,6 @@ const { METHODS } = require('../util/methods');
 const { checkAuth } = require('../util/auth');
 const { newInvite } = require('../data');
 
-
-/**
- * Returns all invites addressed to the logged-in user.
- * (Note: invites are addressed by email.)
- */
-const getInvitesTo = async (data, context) => {
-  try {
-    checkAuth(context);
-
-    const { email } = context.auth.token;
-    const querySnapshot = await admin.firestore()
-      .collection('invites')
-      .where('email', '==', email)
-      .get();
-
-    const invites = querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id }));
-    return invites;
-
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-const getInvitesFrom = async (data, context) => {
-  try {
-    checkAuth(context);
-    const { uid } = context.auth;
-    const querySnapshot = await admin.firestore()
-      .collection('invites')
-      .where('teacherUid', '==', uid)
-      .get();
-
-    const invites = await querySnapshot.docs.map((doc) => ({ ...doc.data(), uid: doc.id }));
-    return invites;
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-}
-
 const createInvite = async (data, context) => {
   console.log('createInvite', data);
   try {
@@ -66,26 +25,14 @@ const createInvite = async (data, context) => {
 
     // TODO Make sure it doesn't overlap another one.
 
-    // Make sure this is not already a student.
-    // const { students } = teacherMeta;
-    // const exists = students.find(student => student.email === email);
-    // if (exists) throw new Error(`Teacher ${uid} already has a student with email ${email}.`);
-
-    // Check to make sure we don't already have an invite for this user.
-    // const querySnapshot = await admin.firestore().collection('invites')
-    //   .where('teacherUid', '==', uid)
-    //   .where('email', '==', email)
-    //   .get();
-
-    // if (!querySnapshot.empty) throw new Error(`You already have a pending invite for ${email}.`);
-
+    // Create the invite.
     const doc = admin.firestore().collection('invites').doc();
     const timestamp = admin.firestore.Timestamp.now();
     const invite = newInvite({
       uid: doc.id,
       created: timestamp,
       updated: timestamp,
-      teacherUid: uid,
+      creatorUid: uid,
       teacherDisplayName,
       email,
       displayName,
@@ -205,9 +152,9 @@ const end = async (data, context) => {
     if (!inviteDoc.exists) throw new Error(`No invite by id ${uid}`);
 
     const invite = inviteDoc.data();
-    const { teacherUid } = invite;
+    const { creatorUid } = invite;
     console.log(context.auth.uid, invite);
-    if (context.auth.uid !== teacherUid) throw new Error('You can only end a session you began.');
+    if (context.auth.uid !== creatorUid) throw new Error('You can only end a session you began.');
 
     const result = await fetch(
       `https://api.daily.co/v1/rooms/${uid}`,
@@ -233,8 +180,8 @@ const end = async (data, context) => {
 };
 
 module.exports = {
-  getInvitesTo: functions.https.onCall(getInvitesTo),
-  getInvitesFrom: functions.https.onCall(getInvitesFrom),
+  // getInvitesTo: functions.https.onCall(getInvitesTo),
+  // getInvitesFrom: functions.https.onCall(getInvitesFrom),
   createInvite: functions.https.onCall(createInvite),
   updateInvite: functions.https.onCall(updateInvite),
   deleteInvite: functions.https.onCall(deleteInvite),
