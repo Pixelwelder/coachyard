@@ -13,7 +13,7 @@ const createInvite = async (data, context) => {
     console.log('createInvite', context.token);
     checkAuth(context);
     const { uid } = context.auth;
-    const { name: teacherDisplayName = '', email: teacherEmail } = context.auth.token;
+    const { name: creatorDisplayName = '', email: teacherEmail } = context.auth.token;
     const { email, displayName, date } = data;
 
     // Make sure it's not you.
@@ -33,7 +33,7 @@ const createInvite = async (data, context) => {
       created: timestamp,
       updated: timestamp,
       creatorUid: uid,
-      teacherDisplayName,
+      creatorDisplayName,
       email,
       displayName,
       date

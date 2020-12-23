@@ -2,27 +2,39 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**}/documents {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /users/{uid} {
-      allow read: if true;//isSignedIn();
-      allow write: if true;//request.auth.uid == uid;
+      allow read: if isSignedIn();
+      allow write: if request.auth.uid == uid;
     }
 
+    // Currently unused since we update/delete through cloud functions.
     match /invites/{uid} {
-      allow read: if true;//isCreator() || isInvited();
-      allow write: if true;//isCreator();
+      allow read: if isCreator() || isInvited();
+      allow write: if isCreator();
     }
 
     match /courses/{uid} {
-      allow read: if true;// isCreator() || isEnrolled();
-      allow write: if true;// isCreator();
+      allow list: if true;
+      allow get: if isCreator() || isEnrolled();
+      allow write: if isCreator();
+
+      function isEnrolled() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
+      }
     }
 
     match /items/{uid} {
-      allow read: if true;//isCreator() || isEnrolledInParentCourse();
-      allow write: if true;//isCreator();
+      allow list: if true;
+      allow get: if isCreator() || isEnrolledInParentCourse();
+      allow write: if isCreator() || isEnrolledInParentCourse();
+
+      function isEnrolledInParentCourse() {
+        let parentCourse = get(/databases/$(database)/documents/courses/$(resource.data.courseUid));
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
+      }
     }
 
     match /stripe_customers/{uid} {
@@ -37,26 +49,16 @@ service cloud.firestore {
 
     }
 
-    // function isSignedIn() {
-    //   return request.auth != null;
-    // }
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
-    // TODO Simplify.
-    // function isCreator() {
-    //   return (resource.data.creatorUid == request.auth.uid) || (resource.data.teacherUid == request.auth.uid);
-    // }
+    function isCreator() {
+      return resource.data.creatorUid == request.auth.uid;
+    }
 
-    // function isInvited() {
-    //   return resource.data.email == request.auth.token.email;
-    // }
-
-    // function isEnrolled() {
-    //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
-    // }
-
-    // function isEnrolledInParentCourse() {
-    //   let parentCourse = get(/databases/$(database)/documents/users/$(resource.data.courseUid));
-    //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
-    // }
+    function isInvited() {
+      return resource.data.email == request.auth.token.email;
+    }
   }
 }

@@ -15,7 +15,6 @@ const ItemDialog = () => {
   const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
   const { playbackId } = newItem;
-  console.log('ITEM DIALOG:', newItem);
 
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {

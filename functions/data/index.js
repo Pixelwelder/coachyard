@@ -1,3 +1,4 @@
+// TODO - Duped in front end.
 const newBaseItem = (overrides) => ({
   uid: '', // Always store the uid when created.
   created: '',
@@ -19,10 +20,11 @@ const newStudent = (overrides) => ({
   ...overrides
 });
 
+// TODO - Remove (moved to front end).
 const newInvite = (overrides) => ({
   ...newBaseItem(),
   creatorUid: '',
-  teacherDisplayName: '',
+  creatorDisplayName: '',
   email: '',
   displayName: '',
   date: '',

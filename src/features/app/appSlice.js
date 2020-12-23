@@ -44,7 +44,7 @@ const refreshUser = createAsyncThunk(
       dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
 
       // Load courses.
-      await dispatch(courseActions._getCreatedCourses());
+      // await dispatch(courseActions._getCreatedCourses());
     } catch (error) {
       console.error(error);
       throw error;
@@ -94,6 +94,7 @@ const init = createAsyncThunk(
       await dispatch(setupFirebase());
       await dispatch(assetActions.init());
       await dispatch(invitesActions.init());
+      await dispatch(courseActions.init());
       // await dispatch(adminActions.init({ firebase: app }));
 
       // Set the query. For some reason the object returned from queryString is non-serializable.

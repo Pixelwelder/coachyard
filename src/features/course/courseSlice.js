@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { actions as logActions, createLog } from '../log/logSlice';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { parseUnserializables } from '../../util/firestoreUtils';
 
 const MODES = {
   VIEW: 'view',
@@ -17,6 +18,7 @@ const initialState = {
 
   // All courses.
   createdCourses: [],
+  enrolledCourses: [],
 
   // Actual loaded course.
   selectedCourse: '',
@@ -92,7 +94,7 @@ const createCourse = createAsyncThunk(
     dispatch(generatedActions.resetNewCourse());
 
     // Reload data.
-    await dispatch(_getCreatedCourses());
+    // await dispatch(_getCreatedCourses());
     await dispatch(setAndLoadSelectedCourse(course.uid));
   }
 );
@@ -128,12 +130,34 @@ const reloadCurrentCourse = createAsyncThunk(
  * Sets the currently selected course, then loads it.
  * @param selectedCourse - the uid of the course to set/load
  */
+let unsubscribeSelectedCourse;
+let unsubscribeSelectedItems;
 const setAndLoadSelectedCourse = createAsyncThunk(
   'setAndLoadSelectedCourse',
   async (selectedCourse, { dispatch }) => {
     console.log('setAndLoadSelectedCourse');
     dispatch(generatedActions.setSelectedCourse(selectedCourse));
-    dispatch(_getCurrentCourse());
+
+    if (unsubscribeSelectedCourse) unsubscribeSelectedCourse();
+    unsubscribeSelectedCourse = app.firestore().collection('courses').doc(selectedCourse)
+      .onSnapshot((snapshot) => {
+        const course = parseUnserializables(snapshot.data());
+        console.log('course snapshot', course);
+        dispatch(generatedActions.setSelectedCourseData(course));
+      }
+    );
+
+    if (unsubscribeSelectedItems) unsubscribeSelectedItems();
+    unsubscribeSelectedItems = app.firestore().collection('items')
+      .where('courseUid', '==', selectedCourse)
+      .onSnapshot(((snapshot) => {
+        const items = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        console.log('items snapshot', items);
+        dispatch(generatedActions.setSelectedCourseItems(items));
+      })
+    );
+
+    // dispatch(_getCurrentCourse());
   }
 );
 
@@ -254,7 +278,7 @@ const _resetItem = createAsyncThunk(
     dispatch(generatedActions.resetNewItem());
 
     // Reload the course with the new item.
-    await dispatch(_getCurrentCourse());
+    // await dispatch(_getCurrentCourse());
   }
 );
 
@@ -279,10 +303,8 @@ const addItemToCourse = createAsyncThunk(
       console.log('addItemToCourse: complete');
     }
 
-    // Reset UI and load the current course again.
-    await dispatch(_resetItem());
-
-    // Done.
+    // Reset UI.
+    dispatch(generatedActions.resetNewItem());
   }
 );
 
@@ -331,6 +353,45 @@ const deleteItem = createAsyncThunk(
   }
 );
 
+const init = createAsyncThunk(
+  'initCourses',
+  async (_, { getState, dispatch }) => {
+    let unsubscribeUser;
+    let unsubscribeCreated;
+
+    const handleSnapshot = (snapshot) => {
+      console.log('Course snapshot', snapshot.docs.length);
+      const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+      dispatch(generatedActions.setCreatedCourses(courses));
+    };
+
+    app.auth().onAuthStateChanged(async (authUser) => {
+      if (unsubscribeUser) unsubscribeUser();
+      if (unsubscribeCreated) unsubscribeCreated();
+
+      if (authUser) {
+        const { uid } = authUser;
+
+        // Keep an eye on the user meta object, because we need to know when the user changes enrollment.
+        unsubscribeUser = app.firestore().collection('users').doc(uid)
+          .onSnapshot((snapshot) => {
+            // Get the enrolled classes.
+            const userMeta = snapshot.data();
+            const { enrolled } = userMeta;
+
+            console.log('updating enrolled courses', enrolled);
+            dispatch(generatedActions.setEnrolledCourses(enrolled));
+          }
+        );
+
+        // Now watch for changes in created courses.
+        unsubscribeCreated = app.firestore().collection('courses')
+          .where('creatorUid', '==', uid)
+          .onSnapshot(handleSnapshot);
+      }
+    })
+  }
+);
 
 // Utility functions for setting loading and error states.
 const onPending = (state) => {
@@ -347,6 +408,10 @@ const onFulfilled = (state) => {
   state.isLoading = false;
 };
 
+const setValue = name => (state, action) => {
+  state[name] = action.payload;
+};
+
 const { actions: generatedActions, reducer } = createSlice({
   name: 'course',
   initialState,
@@ -357,7 +422,10 @@ const { actions: generatedActions, reducer } = createSlice({
     },
 
     // All created courses.
-    setCreatedCourses: (state, action) => { state.createdCourses = action.payload },
+    setCreatedCourses: setValue('createdCourses'),
+
+    // All enrolled courses.
+    setEnrolledCourses: setValue('enrolledCourses'),
 
     // Loading a course.
     setSelectedCourse: (state, action) => { state.selectedCourse = action.payload; },
@@ -463,8 +531,9 @@ const selectors = { select, selectItems };
 
 const actions = {
   ...generatedActions,
+  init,
   fetchAssets, fetchPlaybackId,
-  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, _getCreatedCourses,
+  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse,
   addItemToCourse, updateItem, deleteItem
 };
 

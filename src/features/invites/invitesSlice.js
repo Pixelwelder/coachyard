@@ -3,6 +3,7 @@ import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { DateTime } from 'luxon';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { newInvite } from '../../data';
 
 const initialState = {
   invitesTo: [],
@@ -52,32 +53,29 @@ const deleteInvite = createAsyncThunk(
 const init = createAsyncThunk(
   'initInvites',
   async (_, { dispatch }) => {
-    let fromListener;
-    let toListener;
+    let unsubscribeFrom;
+    let unsubscribeTo;
 
     // When invites change, this handler will fire.
-    const createHandleSnapshot = actionCreator => (snapshot) => {
+    const createHandler = actionCreator => (snapshot) => {
       const invites = snapshot.docs.map(doc => parseUnserializables(doc.data()));
       dispatch(actionCreator(invites));
     };
 
     app.auth().onAuthStateChanged((authUser) => {
       // Unsubscribe.
-      if (fromListener) fromListener();
-      if (toListener) toListener();
+      if (unsubscribeFrom) unsubscribeFrom();
+      if (unsubscribeTo) unsubscribeTo();
 
       // If someone logged in, listen to their invites.
       if (authUser) {
         const { uid, email } = authUser;
 
-        // TODO Change to creatorUid
-        if (fromListener) fromListener();
-        fromListener = app.firestore().collection('invites').where('creatorUid', '==', uid)
-          .onSnapshot(createHandleSnapshot(generatedActions.setInvitesFrom));
+        unsubscribeFrom = app.firestore().collection('invites').where('creatorUid', '==', uid)
+          .onSnapshot(createHandler(generatedActions.setInvitesFrom));
 
-        if (toListener) toListener();
-        toListener = app.firestore().collection('invites').where('email', '==', email)
-          .onSnapshot(createHandleSnapshot(generatedActions.setInvitesTo));
+        unsubscribeTo = app.firestore().collection('invites').where('email', '==', email)
+          .onSnapshot(createHandler(generatedActions.setInvitesTo));
       }
     });
   }
