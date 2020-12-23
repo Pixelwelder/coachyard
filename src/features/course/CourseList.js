@@ -12,6 +12,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import CourseDialog from './CourseDialog';
 import ItemDialog from './ItemDialog';
 import CourseView from './CourseView';
+import GiveCourseDialog from './GiveCourseDialog';
 
 const CoursesCreated = () => {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ const CoursesCreated = () => {
       <CourseView course={selectedCourseData} items={selectedCourseItems} />
       <CourseDialog />
       <ItemDialog />
+      <GiveCourseDialog />
     </div>
   );
 };

@@ -8,7 +8,8 @@ const MODES = {
   VIEW: 'view',
   EDIT: 'edit',
   CREATE: 'create',
-  CLOSED: 'closed'
+  CLOSED: 'closed',
+  OPEN: 'open'
 };
 
 const initialState = {
@@ -49,6 +50,11 @@ const initialState = {
     isUploading: false,
     bytesTransferred: 0,
     totalBytes: 0
+  },
+
+  giveCourseUI: {
+    mode: MODES.CLOSED,
+    email: ''
   }
 };
 
@@ -161,15 +167,6 @@ const setAndLoadSelectedCourse = createAsyncThunk(
   }
 );
 
-// const giveCourse = createAsyncThunk(
-//   'giveCourse',
-//   async (params) => {
-//     const giveCourseCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GIVE_COURSE);
-//     const result = await giveCourseCallable(params);
-//     console.log('give course:', result);
-//   }
-// );
-
 /**
  * @private - does not update load/error.
  */
@@ -198,20 +195,23 @@ const deleteSelectedCourse = createAsyncThunk(
     dispatch(generatedActions.resetSelectedCourse());
 
     // Reload courses.
-    await dispatch(_getCreatedCourses());
+    // await dispatch(_getCreatedCourses());
   }
 );
 
-/**
- * Gets all courses created by a user.
- * @private - does not set load/error
- */
-const _getCreatedCourses = createAsyncThunk(
-  'getCreatedCourses',
-  async (_, { dispatch }) => {
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_CREATED_COURSES);
-    const { data: courses } = await callable();
-    dispatch(generatedActions.setCreatedCourses(courses));
+const giveCourse = createAsyncThunk(
+  'giveCourse',
+  async (_, { getState, dispatch }) => {
+    console.log('giveCourse');
+    const {
+      giveCourseUI: { email },
+      selectedCourse
+    } = select(getState());
+
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.GIVE_COURSE);
+    const result = await callable({ email, courseUid: selectedCourse });
+    console.log('giveCourse', result);
+    dispatch(generatedActions.resetGiveCourseUI());
   }
 );
 
@@ -484,7 +484,21 @@ const { actions: generatedActions, reducer } = createSlice({
       state.upload = { ...state.upload, ...action.payload };
     },
     resetUpload: (state, action) => { state.upload = initialState.upload; },
-    setItemUI: (state, action) => { state.itemUI = { ...state.itemUI, ...action.payload }; }
+    setItemUI: (state, action) => { state.itemUI = { ...state.itemUI, ...action.payload }; },
+
+    // UI - Giving a course.
+    openGiveCourseUI: (state, action) => {
+      state.giveCourseUI = {
+        ...initialState.giveCourseUI,
+        mode: MODES.OPEN
+      };
+    },
+    setGiveCourseUI: (state, action) => {
+      state.giveCourseUI = { ...state.giveCourseUI, ...action.payload };
+    },
+    resetGiveCourseUI: (state, action) => {
+      state.giveCourseUI = initialState.giveCourseUI;
+    }
   },
   extraReducers: {
     [fetchAssets.pending]: (state) => { state.isLoading = true; },
@@ -511,6 +525,10 @@ const { actions: generatedActions, reducer } = createSlice({
     [deleteSelectedCourse.rejected]: onRejected,
     [deleteSelectedCourse.fulfilled]: onFulfilled,
 
+    [giveCourse.pending]: onPending,
+    [giveCourse.rejected]: onRejected,
+    [giveCourse.fulfilled]: onFulfilled,
+
     [addItemToCourse.pending]: onPending,
     [addItemToCourse.rejected]: onRejected,
     [addItemToCourse.fulfilled]: onFulfilled,
@@ -533,7 +551,7 @@ const actions = {
   ...generatedActions,
   init,
   fetchAssets, fetchPlaybackId,
-  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse,
+  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, giveCourse,
   addItemToCourse, updateItem, deleteItem
 };
 

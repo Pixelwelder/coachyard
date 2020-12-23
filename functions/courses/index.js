@@ -61,36 +61,49 @@ const updateCourse = async (data, context) => {
   }
 };
 
-// const giveCourse = async (data, context) => {
-//   try {
-//     checkAuth(context);
-//     const { auth: { token: { uid } } } = context;
-//     const { courseUid, userUid } = context;
-//
-//     // Get the course.
-//     const course = await admin.firestore().collection('courses').doc(courseUid).get();
-//     if (!course.exists) throw new Error(`Course ${courseUid} does not exist.`);
-//
-//     // See if the giver has the right to give it.
-//     if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
-//
-//     const gifteeDoc = await admin.firestore().collection('users').doc(userUid).get();
-//     if (!gifteeDoc.exists) throw new Error(`No user by uid ${userUid}.`);
-//
-//     const giftee = gifteeDoc.data();
-//     if (giftee.courses.find(_courseUid => _courseUid === courseUid))
-//       throw new Error(`User already owns course ${userUid}.`);
-//
-//     await admin.firestore().collection('users').doc(userUid)
-//       .update({ courses: [ ...giftee.courses, courseUid ]});
-//
-//     return { message: `User ${userUid} now owns course ${courseUid}.`};
-//
-//   } catch (error) {
-//     console.error(error);
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// };
+/**
+ * Allows one user to give a course they created to another user.
+ *
+ * @param data
+ * @param context
+ * @returns {Promise<{message: string}>}
+ */
+const giveCourse = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { auth: { token: { uid } } } = context;
+    const { courseUid, email } = data;
+
+    const user = await admin.auth().getUserByEmail(email);
+    if (!user) throw new Error(`No user with email ${email}.`);
+
+    await admin.firestore().runTransaction(async (transaction) => {
+      // Get the course.
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+
+      // See if the giver has the right to give it.
+      const course = courseDoc.data();
+      if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
+
+      const gifteeRef = admin.firestore().collection('users').doc(user.uid);
+      const gifteeDoc = await transaction.get(gifteeRef);
+
+      const giftee = gifteeDoc.data();
+      if (giftee.enrolled[courseUid]) throw new Error(`User is already enrolled in course ${courseUid}.`);
+
+      console.log('giving', giftee, courseUid);
+      await transaction.update(gifteeRef, { enrolled: { ...giftee.enrolled, [courseUid]: true } });
+    });
+
+    return { message: `User ${email} now owns course ${courseUid}.`};
+
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
 
 /**
  * Utility function - asynchronously loads a user meta.
@@ -420,7 +433,7 @@ const sendItemToStreamingService = async (data, context) => {
     // Now record the result.
     await itemRef.update(parseMuxResponse(json));
 
-    return { message: 'Done. I think.', result: json };
+    return { message: 'Done. I think.', result: json };f
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -456,7 +469,7 @@ module.exports = {
   getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
   // updateCourse: functions.https.onCall(updateCourse),
-  // giveCourse: functions.https.onCall(giveCourse),
+  giveCourse: functions.https.onCall(giveCourse),
 
   // Items
   addItemToCourse: functions.https.onCall(addItemToCourse),

@@ -5,6 +5,7 @@ import RefreshIcon from '@material-ui/icons/Cached';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import SendIcon from '@material-ui/icons/Send';
 import Item from './Item';
 import React from 'react';
 
@@ -18,8 +19,11 @@ const CourseView = ({ course, items }) => {
         <div>
           <div style={{ display: 'flex' }}>
             <p>{course.displayName}</p>
-            <Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>
-              <RefreshIcon />
+            {/*<Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>*/}
+            {/*  <RefreshIcon />*/}
+            {/*</Button>*/}
+            <Button onClick={() => dispatch(courseActions.openGiveCourseUI())}>
+              <SendIcon />
             </Button>
             {mode === MODES.EDIT && (
               <>
