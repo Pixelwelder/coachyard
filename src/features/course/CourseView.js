@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as courseActions, MODES, selectors as courseSelectors } from './courseSlice';
 import Button from '@material-ui/core/Button';
-import RefreshIcon from '@material-ui/icons/Cached';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -19,9 +18,6 @@ const CourseView = ({ course, items }) => {
         <div>
           <div style={{ display: 'flex' }}>
             <p>{course.displayName}</p>
-            {/*<Button onClick={() => dispatch(courseActions.reloadCurrentCourse())}>*/}
-            {/*  <RefreshIcon />*/}
-            {/*</Button>*/}
             <Button onClick={() => dispatch(courseActions.openGiveCourseUI())}>
               <SendIcon />
             </Button>
@@ -33,7 +29,7 @@ const CourseView = ({ course, items }) => {
                 <Button onClick={() => dispatch(courseActions.createItem())}>
                   <AddIcon />
                 </Button>
-                <Button onClick={() => dispatch(courseActions.deleteSelectedCourse())}>
+                <Button onClick={() => dispatch(courseActions.openDeleteCourseUI())}>
                   <DeleteIcon />
                 </Button>
               </>

@@ -191,7 +191,7 @@ const getCourse = async (data, context) => {
 };
 
 /**
- * Deletes a specific course.
+ * Deletes a specific course AND all its items.
  * @param.uid - the id of the course to delete
  */
 const deleteCourse = async (data, context) => {

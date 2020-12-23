@@ -24,7 +24,7 @@ const GiveCourseDialog = () => {
   return (
     <Dialog
       open={giveCourseUI.mode !== MODES.CLOSED}
-      onClose={() => dispatch(courseActions.closeItem())}
+      onClose={() => dispatch(courseActions.resetGiveCourseUI())}
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle>Give Course</DialogTitle>
@@ -44,9 +44,6 @@ const GiveCourseDialog = () => {
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>
       <DialogActions>
-        {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
-        {/*  Cancel*/}
-        {/*</Button>*/}
         <Button
           onClick={onSubmit}
           color="primary"

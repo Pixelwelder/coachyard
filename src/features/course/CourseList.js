@@ -13,6 +13,7 @@ import CourseDialog from './CourseDialog';
 import ItemDialog from './ItemDialog';
 import CourseView from './CourseView';
 import GiveCourseDialog from './GiveCourseDialog';
+import { ConfirmDeleteDialog } from './ConfirmationDialog';
 
 const CoursesCreated = () => {
   const dispatch = useDispatch();
@@ -61,6 +62,7 @@ const CoursesCreated = () => {
       <CourseDialog />
       <ItemDialog />
       <GiveCourseDialog />
+      <ConfirmDeleteDialog />
     </div>
   );
 };

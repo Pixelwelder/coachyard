@@ -36,6 +36,11 @@ const initialState = {
     description: ''
   },
 
+  // Delete course.
+  deleteCourseUI: {
+    mode: MODES.CLOSED
+  },
+
   // UI
   itemUI: {
     mode: MODES.CLOSED,
@@ -97,7 +102,7 @@ const createCourse = createAsyncThunk(
     const { data: { course } } = await createCourseCallable(newCourse);
 
     // Reset UI.
-    dispatch(generatedActions.resetNewCourse());
+    dispatch(generatedActions.resetNewCourseUI());
 
     // Reload data.
     // await dispatch(_getCreatedCourses());
@@ -119,16 +124,6 @@ const _getCurrentCourse = createAsyncThunk(
     console.log('getCurrentCourse', course);
     dispatch(generatedActions.setSelectedCourseData(course));
     dispatch(generatedActions.setSelectedCourseItems(items));
-  }
-);
-
-/**
- * Reloads the current course. Public, so it updates load/error states.
- */
-const reloadCurrentCourse = createAsyncThunk(
-  'reloadCurrentCourse',
-  async (_, { dispatch }) => {
-    await dispatch(_getCurrentCourse());
   }
 );
 
@@ -162,40 +157,23 @@ const setAndLoadSelectedCourse = createAsyncThunk(
         dispatch(generatedActions.setSelectedCourseItems(items));
       })
     );
-
-    // dispatch(_getCurrentCourse());
-  }
-);
-
-/**
- * @private - does not update load/error.
- */
-const _deleteCourse = createAsyncThunk(
-  'deleteCourse',
-  async ({ uid }, { dispatch }) => {
-    console.log('deleteCourse', uid);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
-    const result = await callable({ uid });
-    console.log('deleteCourse', result);
   }
 );
 
 /**
  * Deletes the currently selected course. No warning.
- * // TODO Add warning.
  */
 const deleteSelectedCourse = createAsyncThunk(
   'deleteCurrentCourse',
   async (_, { getState, dispatch }) => {
     const { selectedCourse } = select(getState());
     console.log('deleteSelectedCourse', selectedCourse);
-    await dispatch(_deleteCourse({ uid: selectedCourse }));
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
+    await callable({ uid: selectedCourse });
 
     // Reset UI.
-    dispatch(generatedActions.resetSelectedCourse());
-
-    // Reload courses.
-    // await dispatch(_getCreatedCourses());
+    // dispatch(generatedActions.resetSelectedCourse());
+    dispatch(generatedActions.resetDeleteCourseUI());
   }
 );
 
@@ -218,7 +196,7 @@ const giveCourse = createAsyncThunk(
 const _addItemToCourse = createAsyncThunk(
   '_addItemToCourse',
   async (_, { getState }) => {
-    const { newItem, selectedCourse, file } = select(getState());
+    const { newItem, selectedCourse } = select(getState());
 
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
@@ -359,11 +337,25 @@ const init = createAsyncThunk(
     let unsubscribeUser;
     let unsubscribeCreated;
 
-    const handleSnapshot = (snapshot) => {
-      console.log('Course snapshot', snapshot.docs.length);
+    const handleChangedCourses = (snapshot) => {
       const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
       dispatch(generatedActions.setCreatedCourses(courses));
+
+      // If the current course is not among them, reset.
+      const { selectedCourse } = select(getState());
+      if (!courses.find(course => course.uid === selectedCourse)) {
+        console.log('current course is gone!');
+        dispatch(generatedActions.resetSelectedCourse());
+      }
     };
+
+    const handleChangedUser = (snapshot) => {
+      const userMeta = snapshot.data();
+      const { enrolled } = userMeta;
+
+      console.log('updating enrolled courses', enrolled);
+      dispatch(generatedActions.setEnrolledCourses(enrolled));
+    }
 
     app.auth().onAuthStateChanged(async (authUser) => {
       if (unsubscribeUser) unsubscribeUser();
@@ -374,20 +366,12 @@ const init = createAsyncThunk(
 
         // Keep an eye on the user meta object, because we need to know when the user changes enrollment.
         unsubscribeUser = app.firestore().collection('users').doc(uid)
-          .onSnapshot((snapshot) => {
-            // Get the enrolled classes.
-            const userMeta = snapshot.data();
-            const { enrolled } = userMeta;
-
-            console.log('updating enrolled courses', enrolled);
-            dispatch(generatedActions.setEnrolledCourses(enrolled));
-          }
-        );
+          .onSnapshot(handleChangedUser);
 
         // Now watch for changes in created courses.
         unsubscribeCreated = app.firestore().collection('courses')
           .where('creatorUid', '==', uid)
-          .onSnapshot(handleSnapshot);
+          .onSnapshot(handleChangedCourses);
       }
     })
   }
@@ -456,7 +440,7 @@ const { actions: generatedActions, reducer } = createSlice({
       state.newCourse = { ...state.newCourse, ...action.payload };
     },
     // setNewCourseIsOpen: (state, action) => { state.newCourseIsOpen = action.payload; },
-    resetNewCourse: (state, action) => {
+    resetNewCourseUI: (state, action) => {
       state.newCourse = initialState.newCourse;
       state.newCourseMode = MODES.CLOSED;
     },
@@ -485,6 +469,13 @@ const { actions: generatedActions, reducer } = createSlice({
     },
     resetUpload: (state, action) => { state.upload = initialState.upload; },
     setItemUI: (state, action) => { state.itemUI = { ...state.itemUI, ...action.payload }; },
+
+    // UI - Deleting a course.
+    openDeleteCourseUI: (state) => { state.deleteCourseUI.mode = MODES.OPEN; },
+    setDeleteCourseUI: (state, action) => {
+      state.deleteCourseUI = { ...state.deleteCourseUI, ...action.payload };
+    },
+    resetDeleteCourseUI: (state) => { state.deleteCourseUI = initialState.deleteCourseUI; },
 
     // UI - Giving a course.
     openGiveCourseUI: (state, action) => {
@@ -517,10 +508,6 @@ const { actions: generatedActions, reducer } = createSlice({
     [setAndLoadSelectedCourse.rejected]: onRejected,
     [setAndLoadSelectedCourse.fulfilled]: onFulfilled,
 
-    [reloadCurrentCourse.pending]: onPending,
-    [reloadCurrentCourse.rejected]: onRejected,
-    [reloadCurrentCourse.fulfilled]: onFulfilled,
-
     [deleteSelectedCourse.pending]: onPending,
     [deleteSelectedCourse.rejected]: onRejected,
     [deleteSelectedCourse.fulfilled]: onFulfilled,
@@ -551,7 +538,7 @@ const actions = {
   ...generatedActions,
   init,
   fetchAssets, fetchPlaybackId,
-  createCourse, setAndLoadSelectedCourse, reloadCurrentCourse, deleteSelectedCourse, giveCourse,
+  createCourse, setAndLoadSelectedCourse, deleteSelectedCourse, giveCourse,
   addItemToCourse, updateItem, deleteItem
 };
 
