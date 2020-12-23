@@ -3,7 +3,6 @@ import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { DateTime } from 'luxon';
 import { parseUnserializables } from '../../util/firestoreUtils';
-import { newInvite } from '../../data';
 
 const initialState = {
   invitesTo: [],
