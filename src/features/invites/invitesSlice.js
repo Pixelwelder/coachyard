@@ -15,31 +15,6 @@ const initialState = {
   date: ''
 };
 
-let toListener = () => {};
-const getInvitesTo = createAsyncThunk(
-  'getInvitesTo',
-  async () => {
-    try {
-      console.log('getting invites to');
-      const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_INVITES_TO)();
-      console.log('got invites to', data);
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-);
-
-const getInvitesFrom = createAsyncThunk(
-  'getInvitesFrom',
-  async () => {
-    console.log('getting invites from');
-    const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_INVITES_FROM)();
-    console.log('got invites from', data);
-    return data;
-  }
-);
-
 const createInvite = createAsyncThunk(
   'createInvite',
   async (_, { getState, dispatch }) => {
@@ -47,8 +22,7 @@ const createInvite = createAsyncThunk(
     const { email, displayName, date } = selectors.select(state);
     const createInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_INVITE);
     const result = await createInviteCallable({ email, displayName, date });
-    dispatch(generatedActions.setShowNewDialog(false));
-    dispatch(getInvitesFrom());
+    console.log('result', result);
   }
 );
 
@@ -59,7 +33,7 @@ const updateInvite = createAsyncThunk(
     const updateInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_INVITE);
     const result = await updateInviteCallable(params);
     console.log('result', result);
-    await dispatch(getInvitesTo());
+    // await dispatch(getInvitesTo());
   }
 );
 
@@ -69,10 +43,49 @@ const deleteInvite = createAsyncThunk(
     console.log('deleting', params);
     const deleteInviteCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_INVITE);
     const result = await deleteInviteCallable(params);
-    console.log('result);')
-    await dispatch(getInvitesFrom());
+    console.log('result', result)
+    // await dispatch(getInvitesFrom());
   }
 );
+
+const init = createAsyncThunk(
+  'initInvites',
+  async (_, { dispatch }) => {
+    let fromListener;
+    let toListener;
+
+    // When invites change, this handler will fire.
+    const createHandleSnapshot = actionCreator => (snapshot) => {
+      console.log('invite snapshot:', snapshot.size);
+      snapshot.docChanges().forEach((change) => {
+        console.log('changed', change.type);
+      });
+
+      const invites = snapshot.docs.map(doc => doc.data());
+      dispatch(actionCreator(invites));
+    };
+
+    app.auth().onAuthStateChanged((authUser) => {
+      // Unsubscribe.
+      if (fromListener) fromListener();
+      if (toListener) toListener();
+
+      // If someone logged in, listen to their invites.
+      if (authUser) {
+        const { uid, email } = authUser;
+
+        // TODO Change to creatorUid
+        if (fromListener) fromListener();
+        fromListener = app.firestore().collection('invites').where('teacherUid', '==', uid)
+          .onSnapshot(createHandleSnapshot(generatedActions.setInvitesFrom));
+
+        if (toListener) toListener();
+        toListener = app.firestore().collection('invites').where('email', '==', email)
+          .onSnapshot(createHandleSnapshot(generatedActions.setInvitesTo));
+      }
+    });
+  }
+)
 
 const onPending = initialState => (state) => {
   state.isLoading = true;
@@ -85,13 +98,19 @@ const onRejected = initialState => (state, action) => {
 };
 
 const onFulfilled = name => (state, action) => {
+  state.displayName = initialState.displayName;
+  state.email = initialState.email;
+  state.date = initialState.date;
+
+  state.showNewDialog = false;
   state.isLoading = false;
+
   if (name) state[name] = action.payload;
 };
 
 const setValue = name => (state, action) => {
   state[name] = action.payload;
-}
+};
 
 const { reducer, actions: generatedActions } = createSlice({
   name: 'invites',
@@ -113,37 +132,28 @@ const { reducer, actions: generatedActions } = createSlice({
     setEmail: setValue('email'),
     setDate: (state, action) => {
       state.date = DateTime.fromISO(action.payload).toUTC().toString();
-    }
+    },
+    setInvitesFrom: setValue('invitesFrom'),
+    setInvitesTo: setValue('invitesTo')
   },
   extraReducers: {
-    [getInvitesTo.pending]: onPending(initialState),
-    [getInvitesTo.rejected]: onRejected(initialState),
-    [getInvitesTo.fulfilled]: onFulfilled('invitesTo'),
-
-    [getInvitesFrom.pending]: onPending(initialState),
-    [getInvitesFrom.rejected]: onRejected(initialState),
-    [getInvitesFrom.fulfilled]: onFulfilled('invitesFrom'),
-
     [createInvite.pending]: onPending(initialState),
     [createInvite.rejected]: onRejected(initialState),
-    [createInvite.fulfilled]: (state, action) => {
-      state.displayName = initialState.displayName;
-      state.email = initialState.email;
-      state.date = initialState.date;
-
-      state.showNewDialog = false;
-      state.isLoading = false;
-    },
+    [createInvite.fulfilled]: onFulfilled(),
 
     [updateInvite.pending]: onPending(initialState),
     [updateInvite.rejected]: onRejected(initialState),
     [updateInvite.fulfilled]: onFulfilled(),
+
+    [deleteInvite.pending]: onPending(initialState),
+    [deleteInvite.rejected]: onRejected(initialState),
+    [deleteInvite.fulfilled]: onFulfilled(),
   }
 });
 
 const actions = {
   ...generatedActions,
-  getInvitesFrom, getInvitesTo, createInvite, updateInvite, deleteInvite
+  init, createInvite, updateInvite, deleteInvite
 };
 
 const addIds = items => items.map(item => ({ ...item, id: item.uid }));

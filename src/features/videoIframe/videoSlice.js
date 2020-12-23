@@ -19,8 +19,8 @@ const launch = createAsyncThunk(
     const { data: { url } } = result;
     dispatch(generatedActions.setUrl(url));
     dispatch(navActions.setMainTab(MAIN_TABS.VIDEO));
-    await invitesActions.getInvitesFrom();
-    await invitesActions.getInvitesTo();
+    // await invitesActions.getInvitesFrom();
+    // await invitesActions.getInvitesTo();
 
     console.log('done launching', result);
   }
@@ -33,8 +33,8 @@ const end = createAsyncThunk(
     const launchCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.END);
     const result = await launchCallable(params);
     console.log('RESULT', result);
-    await invitesActions.getInvitesFrom();
-    await invitesActions.getInvitesTo();
+    // await invitesActions.getInvitesFrom();
+    // await invitesActions.getInvitesTo();
     console.log('done');
   }
 );

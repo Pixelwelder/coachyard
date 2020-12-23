@@ -3,12 +3,13 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/functions';
 import 'firebase/storage';
+import 'firebase/firestore';
 import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';
 import { actions as logActions } from '../log/logSlice';
 import { createLog } from '../log/logSlice';
-import { actions as adminActions } from '../admin/adminSlice';
+import { actions as invitesActions } from '../invites/invitesSlice';
 import { actions as assetActions } from '../../app/assets';
 import { actions as courseActions } from '../course/courseSlice';
 import { ERROR } from '../log/logTypes';
@@ -65,6 +66,7 @@ const setupFirebase = createAsyncThunk(
     if (window.location.hostname === 'localhost') {
       // app.auth().useEmulator('http://localhost:9099/');
       app.functions().useEmulator('localhost', 5001);
+      app.firestore().useEmulator('localhost', 8080);
     }
 
     app.auth().onAuthStateChanged(
@@ -91,6 +93,7 @@ const init = createAsyncThunk(
     try {
       await dispatch(setupFirebase());
       await dispatch(assetActions.init());
+      await dispatch(invitesActions.init());
       // await dispatch(adminActions.init({ firebase: app }));
 
       // Set the query. For some reason the object returned from queryString is non-serializable.

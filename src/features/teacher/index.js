@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import CoursesList from './CoursesList';
 import { actions as teacherActions, selectors as teacherSelectors } from './teacherSlice';
 import { selectors as appSelectors } from '../app/appSlice';
+import { actions as invitesActions } from '../invites/invitesSlice';
 import Students from './Students';
 import { InvitesFrom, InvitesTo } from '../invites';
 
@@ -15,6 +16,7 @@ const Teacher = () => {
   useEffect(() => {
     const go = async () => {
       // dispatch(teacherActions.init());
+      // dispatch(invitesActions.init());
     };
 
     if (authUser) go();

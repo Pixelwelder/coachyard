@@ -129,7 +129,7 @@ const InvitesFrom = () => {
 
   useEffect(() => {
     const go = async () => {
-      dispatch(invitesActions.getInvitesFrom());
+      // dispatch(invitesActions.init());
     };
     if (authUser.uid) go();
   }, [authUser, dispatch]);
@@ -212,7 +212,7 @@ const InvitesFrom = () => {
   return (
     <div>
       <div>
-        <Button onClick={() => dispatch(invitesActions.getInvitesFrom())}>
+        <Button onClick={() => {}}>
           <CachedIcon />
         </Button>
         <Button onClick={() => dispatch(invitesActions.setShowNewDialog(true))}>
@@ -287,7 +287,7 @@ const InvitesTo = () => {
 
   useEffect(() => {
     const go = async () => {
-      dispatch(invitesActions.getInvitesTo());
+      // dispatch(invitesActions.getInvitesTo());
     };
     if (authUser.uid) go();
   }, [authUser, dispatch]);
@@ -354,7 +354,7 @@ const InvitesTo = () => {
   return (
     <div>
       <div>
-        <Button onClick={() => dispatch(invitesActions.getInvitesTo())}>
+        <Button onClick={() => {}}>
           <CachedIcon />
         </Button>
       </div>
