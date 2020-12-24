@@ -7,13 +7,19 @@ import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import LuxonUtils from '@date-io/luxon';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
+
+const stripePromise = loadStripe('pk_test_JJ1eMdKN0Hp4UFJ6kWXWO4ix00jtXzq5XG');
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <MuiPickersUtilsProvider utils={LuxonUtils}>
-        <App />
-      </MuiPickersUtilsProvider>
+      <Elements stripe={stripePromise}>
+        <MuiPickersUtilsProvider utils={LuxonUtils}>
+          <App />
+        </MuiPickersUtilsProvider>
+      </Elements>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
