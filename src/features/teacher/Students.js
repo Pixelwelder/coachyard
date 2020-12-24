@@ -22,7 +22,7 @@ const Students = () => {
   return (
     <div>
       <div>
-        <Button onClick={() => dispatch(appActions.refreshUser())}>
+        <Button onClick={() => {}}>
           <CachedIcon />
         </Button>
         {/*<Button onClick={() => setShowNewDialog(true)}>*/}

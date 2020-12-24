@@ -12,8 +12,11 @@ import { createLog } from '../log/logSlice';
 import { actions as invitesActions } from '../invites/invitesSlice';
 import { actions as assetActions } from '../../app/assets';
 import { actions as courseActions } from '../course/courseSlice';
+import { actions as sessionActions } from '../session/sessionSlice';
+import { actions as billingActions } from '../billing/billingSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
   isInitialised: false,
@@ -21,7 +24,6 @@ const initialState = {
   error: null,
   // Just holds the basics.
   authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
-  authUserMeta: null,
   query: {}
 };
 
@@ -37,7 +39,8 @@ const refreshUser = createAsyncThunk(
       const { claims } = await authUser.getIdTokenResult(true);
 
       // Get meta
-      const { data: meta } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
+      const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
+      const meta = parseUnserializables(data);
       console.log('userMeta', meta);
 
       // return { uid, email, displayName, claims, meta };
@@ -66,7 +69,7 @@ const setupFirebase = createAsyncThunk(
     if (window.location.hostname === 'localhost') {
       // app.auth().useEmulator('http://localhost:9099/');
       app.functions().useEmulator('localhost', 5001);
-      app.firestore().useEmulator('localhost', 8080);
+      // app.firestore().useEmulator('localhost', 8080);
     }
 
     app.auth().onAuthStateChanged(
@@ -92,9 +95,11 @@ const init = createAsyncThunk(
     dispatch(logActions.log(createLog(`INITIALIZING...` )));
     try {
       await dispatch(setupFirebase());
+      await dispatch(billingActions.init());
       await dispatch(assetActions.init());
       await dispatch(invitesActions.init());
       await dispatch(courseActions.init());
+      await dispatch(sessionActions.init());
       // await dispatch(adminActions.init({ firebase: app }));
 
       // Set the query. For some reason the object returned from queryString is non-serializable.

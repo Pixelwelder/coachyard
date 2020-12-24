@@ -8,7 +8,6 @@ const newBaseItem = (overrides) => ({
 
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
-  students: [],
   enrolled: {},
   ...overrides
 });

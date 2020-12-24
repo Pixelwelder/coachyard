@@ -53,7 +53,7 @@ const createStudent = createAsyncThunk(
     const createStudent = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_STUDENT);
     const result = await createStudent(params);
     console.log('result', result);
-    dispatch(appActions.refreshUser());
+    // dispatch(appActions.refreshUser());
   }
 );
 
