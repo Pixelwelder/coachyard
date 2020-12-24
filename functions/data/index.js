@@ -13,6 +13,23 @@ const newUserMeta = (overrides) => ({
   ...overrides
 });
 
+const newStripeCustomer = (overrides) => ({
+  ...newBaseItem(),
+  customer_id: '',
+  setup_secret: '',
+  ...overrides
+});
+
+const newStripePayment = (overrides) => ({
+  amount: 0,
+  currency: '',
+  customer: '',
+  payment_method: '',
+  off_session: false,
+  confirm: true,
+  confirmation_method: 'manual'
+});
+
 // TODO - Remove.
 const newStudent = (overrides) => ({
   ...newBaseItem(),
@@ -59,6 +76,8 @@ const newCourseItem = (overrides) => ({
 
 module.exports = {
   newUserMeta,
+  newStripeCustomer,
+  newStripePayment,
   newStudent,
   newInvite,
   newCourse,

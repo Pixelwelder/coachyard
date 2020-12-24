@@ -24,7 +24,7 @@ const CoursesCreated = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
-        <h2>Course List</h2>
+        <h2>Courses Created</h2>
         {mode === MODES.VIEW && (
           <Button onClick={() => dispatch(courseActions.setMode(MODES.EDIT))}>
             <EditIcon />

@@ -1,0 +1,6 @@
+{
+  "stripe": {
+    "secret_key": "sk_test_51I1CdRISeRywORkaAtczaGQyIV4xsRo4xgALraxg9kBbYIxFk5MmUMBzdEycUDRjUSFPq7FZ1oQ6ZBxBhPly6MXA00ZVfBiZ8w",
+    "publishable_key": "pk_live_51I1CdRISeRywORkac1JeEPguX8I3ioKyLc1mMBxfYfQhweXIexiySFElnhCXwITxkpoSGP9KqqU5LPqPLw27ND7c000XCyVU4t"
+  }
+}

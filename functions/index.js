@@ -13,6 +13,7 @@ const courses = require('./courses');
 const sessions = require('./sessions');
 const users = require('./users')
 const invites = require('./invites');
+const billing = require('./billing');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -37,5 +38,6 @@ module.exports = {
   ...courses,
   ...sessions,
   ...users,
-  ...invites
+  ...invites,
+  ...billing
 };

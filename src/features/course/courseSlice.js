@@ -360,10 +360,12 @@ const init = createAsyncThunk(
 
     const handleChangedUser = (snapshot) => {
       const userMeta = snapshot.data();
-      const { enrolled } = userMeta;
+      if (userMeta) {
+        const { enrolled } = userMeta;
 
-      console.log('updating enrolled courses', enrolled);
-      dispatch(generatedActions.setEnrolledCourses(enrolled));
+        console.log('updating enrolled courses', enrolled);
+        dispatch(generatedActions.setEnrolledCourses(enrolled));
+      }
     }
 
     app.auth().onAuthStateChanged(async (authUser) => {
