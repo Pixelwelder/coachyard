@@ -55,7 +55,6 @@ const basicPrice = 'price_1I2h4fISeRywORkaFpUun2Xw';
 const addPaymentMethodDetails = functions.firestore
   .document('/stripe_customers/{userId}/payment_methods/{pushId}')
   .onCreate(async (snapshot, context) => {
-    console.log('Billing: addPaymentMethodDetails');
     try {
       // Grab and save the payment method.
       const { id: paymentMethodId } = snapshot.data();
@@ -90,7 +89,7 @@ const addPaymentMethodDetails = functions.firestore
 
       await admin.firestore()
         .collection('stripe_customers')
-        .doc(context.auth.uid)
+        .doc(context.params.userId)
         .collection('subscriptions')
         .doc(subscription.id)
         .set(subscription);

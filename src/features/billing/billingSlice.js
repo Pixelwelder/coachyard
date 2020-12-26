@@ -104,11 +104,10 @@ const init = createAsyncThunk(
           .doc(authUser.uid)
           .onSnapshot((snapshot) => {
             const customerData = snapshot.data();
+            console.log('Billing:', customerData);
             if (customerData) {
               dispatch(generatedActions.setCustomerData(parseUnserializables(customerData)));
               dispatch(_startDataListeners());
-            } else {
-              console.error(`No stripe customer for user ${authUser.uid}.`);
             }
           })
       }
