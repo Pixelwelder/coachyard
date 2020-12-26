@@ -12,6 +12,7 @@ import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import { actions as appActions, selectors as appSelectors } from '../app/appSlice';
 import { ItemDetails } from '../admin/ItemDetails';
 import PrivilegesView from '../../components/PrivilegesView';
+import Billing from '../billing';
 
 const Account = () => {
   const { showAccount } = useSelector(uiSelectors.select);
@@ -47,7 +48,8 @@ const Account = () => {
               email: authUser.email,
               // customClaims: authUser.customClaims
             }}/>
-            <PrivilegesView privileges={authUser?.claims?.privileges || 0} />
+            {/*<PrivilegesView privileges={authUser?.claims?.privileges || 0} />*/}
+            <Billing />
           </>
         )}
         {/*<Button onClick={onSignOut} variant={'contained'}>Sign Out</Button>*/}

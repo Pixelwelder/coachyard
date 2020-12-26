@@ -67,9 +67,9 @@ const setupFirebase = createAsyncThunk(
 
     await app.initializeApp(firebaseConfig);
     if (window.location.hostname === 'localhost') {
-      // app.auth().useEmulator('http://localhost:9099/');
+      app.auth().useEmulator('http://localhost:9099/');
       app.functions().useEmulator('localhost', 5001);
-      // app.firestore().useEmulator('localhost', 8080);
+      app.firestore().useEmulator('localhost', 8080);
     }
 
     app.auth().onAuthStateChanged(
@@ -153,16 +153,16 @@ const signOut = createAsyncThunk(
   }
 );
 
-const signUpServerside = createAsyncThunk(
-  'signUpServerside',
-  async (args, { dispatch }) => {
+const signUp = createAsyncThunk(
+  'signUp',
+  async ({ email, password, displayName }, { dispatch }) => {
     try {
-      console.log('creating user serverside with args', args);
-      const createUser = app.functions().httpsCallable('createUser');
-      const result = await createUser(args);
+      // const createUser = app.functions().httpsCallable('createUser');
+      const result = await app.auth().createUserWithEmailAndPassword(email, password);
+      // const result = await createUser(args);
 
-      const { email, password } = args;
-      await app.auth().signInWithEmailAndPassword(email, password);
+      // const { email, password } = args;
+      // await app.auth().signInWithEmailAndPassword(email, password);
       console.log('result', result);
     } catch (error) {
       console.log(error);
@@ -200,11 +200,11 @@ const { reducer, actions: generatedActions } = createSlice({
 
     [signIn.pending]: setIsLoading(initialState),
     [signOut.pending]: setIsLoading(initialState),
-    [signUpServerside.pending]: setIsLoading(initialState),
+    [signUp.pending]: setIsLoading(initialState),
 
     [signIn.rejected]: setError(initialState),
     [signOut.rejected]: setError(initialState),
-    [signUpServerside.rejected]: setError(initialState)
+    [signUp.rejected]: setError(initialState)
   }
 });
 
@@ -224,7 +224,7 @@ const selectCoursesEnrolled = createSelector(select, ({ authUser }) => {
 
 const selectors = { select, selectStudents, selectCoursesEnrolled };
 
-const actions = { ...generatedActions, init, signIn, signOut, signUpServerside, refreshUser };
+const actions = { ...generatedActions, init, signIn, signOut, signUp, refreshUser };
 
 export { actions, selectors };
 export default reducer;

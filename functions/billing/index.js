@@ -8,12 +8,22 @@ const stripe = new Stripe(
   { apiVersion: '2020-08-27' }
 );
 
+/**
+ * When a new user is created, create a matching Stripe Customer.
+ */
 const createStripeCustomer = functions.auth.user()
   .onCreate(async (user) => {
-    console.log('Billing: user created:', user.email);
+    console.log('Billing: user created:', user.displayName, user.email);
     const timestamp = admin.firestore.Timestamp.now();
-    const stripeCustomer = await stripe.customers.create({ email: user.email });
+    const stripeCustomer = await stripe.customers.create({
+      name: user.displayName,
+      email: user.email,
+      metadata: { uid: user.uid }
+    });
+    // TODO Do we actually want to do this?
     const stripeIntent = await stripe.setupIntents.create({ customer: stripeCustomer.id });
+
+    // Create our own object in our own database.
     const fbCustomer = newStripeCustomer({
       uid: user.uid,
       created: timestamp,
@@ -25,6 +35,9 @@ const createStripeCustomer = functions.auth.user()
     return;
   });
 
+/**
+ * Any time a user is deleted, we delete all record of (1) their Stripe Customer, and (2) their payment methods.
+ */
 const deleteStripeCustomer = functions.auth.user()
   .onDelete(async (user) => {
     console.log('Billing: user deleted', user.email);
@@ -44,7 +57,7 @@ const addPaymentMethodDetails = functions.firestore
     console.log('Billing: addPaymentMethodDetails');
     try {
       // Grab and save the payment method.
-      const paymentMethodId = snapshot.data().id;
+      const { id: paymentMethodId } = snapshot.data();
       const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
       await snapshot.ref.set(paymentMethod);
 
@@ -92,6 +105,15 @@ const createStripePayment = functions.firestore
     }
   });
 
+const createSubscription = functions.firestore
+  .document('/stripe_customers/{userId}/subscriptions/{pushId}')
+  .onCreate(async (snapshot, context) => {
+    console.log('createSubscription');
+    const { customer_id } = (await snapshot.ref.parent.parent.get()).data();
+    const { pushId: idempotencyKey } = context.params;
+    console.log('Creating subscription for', customer_id);
+  });
+
 /**
  * Reconfirm payment after authentication for 3D Secure.
  */
@@ -108,5 +130,7 @@ module.exports = {
   createStripeCustomer,
   addPaymentMethodDetails,
   createStripePayment,
+  createSubscription,
+  confirmStripePayment,
   deleteStripeCustomer
 };

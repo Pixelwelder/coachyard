@@ -52,7 +52,7 @@ const Session = () => {
     switch (mode) {
       case SESSION_MODES.SIGN_UP: {
         // await dispatch(appActions.signUp({ email, password }));
-        await dispatch(appActions.signUpServerside({ email, password, displayName, roles: 1 | 2 }));
+        await dispatch(appActions.signUp({ email, password, displayName, roles: 1 | 2 }));
         break;
       }
 

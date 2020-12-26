@@ -56,6 +56,21 @@ const createUser = async (data, context) => {
 };
 
 /**
+ * Create a meta object every time a user is created.
+ */
+const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
+  const { uid } = user;
+  const doc = admin.firestore().collection('users').doc(uid);
+  const timestamp = admin.firestore.Timestamp.now();
+  const userMeta = newUserMeta({
+    uid,
+    created: timestamp,
+    updated: timestamp
+  });
+  const result = await doc.set(userMeta);
+});
+
+/**
  * Returns the metadata for the currently logged-in user.
  */
 const getUserMeta = async (data, context) => {
@@ -64,7 +79,6 @@ const getUserMeta = async (data, context) => {
     const { uid } = context.auth;
     const snapshot = await admin.firestore().collection('users').doc(uid).get();
     const userMeta = snapshot.data();
-    console.log('userMeta', userMeta);
 
     // if (!userMeta) throw new Error(`No user meta for user ${uid}.`)
     return userMeta;
@@ -136,5 +150,6 @@ const createStudent = async (data, context) => {
 module.exports = {
   createUser: functions.https.onCall(createUser),
   getUserMeta: functions.https.onCall(getUserMeta),
-  createStudent: functions.https.onCall(createStudent)
+  createStudent: functions.https.onCall(createStudent),
+  onCreateUser
 };

@@ -46,6 +46,9 @@ service cloud.firestore {
       match /payments/{id} {
         allow read, write: if request.auth.uid == uid;
       }
+      match /subscriptions/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
     }
 
     function isSignedIn() {
