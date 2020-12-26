@@ -1,12 +1,16 @@
 import app from 'firebase/app';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
   customerData: null,
   paymentMethods: [],
   payments: [],
-  subscriptions: []
+  subscriptions: [],
+
+  ui: {
+    showConfirmCancel: false
+  }
 };
 
 /**
@@ -81,6 +85,27 @@ const createSubscription = createAsyncThunk(
   }
 );
 
+const cancelSubscription = createAsyncThunk(
+  'cancelSubscription',
+  async (_, { getState, dispatch }) => {
+    const active = selectSubscription(getState());
+    if (!active) {
+      console.error('No subscription to cancel.');
+      throw new Error('No subscription to cancel.');
+    }
+
+    const { id } = active;
+    const result = await app.firestore()
+      .collection('stripe_customers')
+      .doc(app.auth().currentUser.uid)
+      .collection('subscriptions')
+      .doc(id)
+      .update({ pending_action: 'cancel' });
+
+    dispatch(generatedActions.resetUI());
+  }
+);
+
 const init = createAsyncThunk(
   'initBilling',
   async (_, { dispatch }) => {
@@ -113,6 +138,10 @@ const setValue = name => (state, action) => {
   state[name] = action.payload;
 };
 
+const mergeValue = name => (state, action) => {
+  state[name] = { ...state[name], ...action.payload };
+};
+
 const { reducer, actions: generatedActions } = createSlice({
   name: 'billing',
   initialState,
@@ -120,14 +149,24 @@ const { reducer, actions: generatedActions } = createSlice({
     setCustomerData: setValue('customerData'),
     setPaymentMethods: setValue('paymentMethods'),
     setSubscriptions: setValue('subscriptions'),
-    setPayments: setValue('payments')
+    setPayments: setValue('payments'),
+    setUI: mergeValue('ui'),
+    resetUI: (state) => { state.ui = initialState.ui; }
   }
 });
 
-const actions = { ...generatedActions, init, createSubscription };
+const actions = { ...generatedActions, init, createSubscription, cancelSubscription };
 
 const select = ({ billing }) => billing;
-const selectors = { select };
+/**
+ * Returns the first active subscription.
+ */
+const selectSubscription = createSelector(select, ({ subscriptions }) => {
+  if (!subscriptions.length) return null;
+  const active = subscriptions.find(({ status }) => status === 'active');
+  return active === undefined ? null : active;
+});
+const selectors = { select, selectSubscription };
 
 export { selectors, actions };
 export default reducer;

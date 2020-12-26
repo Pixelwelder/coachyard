@@ -1,7 +1,10 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Stripe } = require('stripe');
-const{ newStripeCustomer, newStripePayment } = require('../data');
+const { newStripeCustomer, newStripePayment } = require('../data');
+const { checkAuth } = require('../util/auth');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 const stripe = new Stripe(
   functions.config().stripe.secret_key,
@@ -176,11 +179,103 @@ const confirmStripePayment = functions.firestore
     }
   });
 
+const cancelSubscription = functions.https.onCall(async (data, context) => {
+  checkAuth(context);
+
+  try {
+    const { id } = data;
+    const subscription = await stripe.subscriptions.del(id);
+
+    console.log('Subscription canceled.');
+    return { message: 'Subscription canceled.', subscription };
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
+// const _getCustomer = async (stripeId) => {
+//   const snapshot = await admin.firestore()
+//     .collection('stripe_customers')
+//     .where('customer_id', '==', stripeId);
+//
+//   if (!snapshot.size) throw new Error(`Stripe customer ${stripeId} not found.`);
+//   return snapshot.docs[0].data();
+// };
+
+const stripe_webhooks = express();
+stripe_webhooks.use(bodyParser.urlencoded({ extended: false }));
+stripe_webhooks.use(bodyParser.json());
+stripe_webhooks.post(
+  '/webhooks',
+  async (request, response) => {
+    console.log('stripe_webhooks');
+    try {
+      const { body } = request;
+      const {
+        type,
+        data: {
+          object: {
+            id,
+            customer
+          }
+        }
+      } = body;
+
+      // Handle the event.
+      console.log(body.type);
+      // console.log(body);
+      // const customerData =
+      // console.log(customerId);
+      switch (type) {
+        case 'customer.subscription.updated': {
+
+        }
+
+        case 'customer.subscription.deleted': {
+          const snapshot = await admin.firestore()
+            .collection('stripe_customers')
+            .where('customer_id', '==', customer)
+            .get();
+
+          if (!snapshot.size) throw new Error(`No customer by id ${customer}.`);
+
+          const snapshot2 = await snapshot.docs[0].ref
+            .collection('subscriptions')
+            .doc(id);
+
+          await snapshot2.delete();
+          console.log('Deleted');
+
+          if (!snapshot.size) {
+            console.error('No customer by id', customer);
+          }
+
+
+        }
+
+        default: {
+          // Unhandled.
+        }
+      }
+      return response.status(200).end();
+    } catch (error) {
+      console.error(error.message);
+      return response.status(500).end();
+    } finally {
+      // return response.status(200).end();
+    }
+  }
+);
+
 module.exports = {
   createStripeCustomer,
   addPaymentMethodDetails,
   createStripePayment,
   // createSubscription,
+  cancelSubscription,
   confirmStripePayment,
-  deleteStripeCustomer
+  deleteStripeCustomer,
+
+  stripe: functions.https.onRequest(stripe_webhooks)
 };

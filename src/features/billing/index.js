@@ -3,12 +3,15 @@ import app from 'firebase/app';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as billingSelectors, actions as billingActions } from './billingSlice';
+import Subscription from './Subscription';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 const Billing = () => {
   const stripe = useStripe();
   const elements = useElements();
   const dispatch = useDispatch();
-  const { setup_secret, customer_id } = useSelector(billingSelectors.select);
+  const { ui } = useSelector(billingSelectors.select);
+  const subscription = useSelector(billingSelectors.selectSubscription);
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -20,13 +23,23 @@ const Billing = () => {
     console.log('onSubmit complete');
   }
 
+  const onCancel = () => {
+    console.log('Canceling plan...');
+  };
+
   return (
     <div>
       <h2>Billing</h2>
-      <form onSubmit={onSubmit}>
-        <CardElement />
-        <button type="submit" onSubmit={onSubmit} disabled={!stripe}>Pay</button>
-      </form>
+      <Subscription
+        subscription={subscription}
+        onCancel={onCancel}
+      />
+      {!subscription && (
+        <form onSubmit={onSubmit}>
+          <CardElement />
+          <button type="submit" onSubmit={onSubmit} disabled={!stripe}>Pay</button>
+        </form>
+      )}
     </div>
   )
 };
