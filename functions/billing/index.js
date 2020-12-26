@@ -224,7 +224,7 @@ stripe_webhooks.post(
 
       // Handle the event.
       console.log(body.type);
-      // console.log(body);
+      console.log(body);
       // const customerData =
       // console.log(customerId);
       switch (type) {
