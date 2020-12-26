@@ -15,11 +15,11 @@ const parseTimestamp = (timestamp) => {
  * @returns the same object with serializable members
  */
 const parseUnserializables = (obj) => {
-  return {
-    ...obj,
-    created: parseTimestamp(obj.created),
-    updated: parseTimestamp(obj.updated)
-  };
+  const newObj = { ...obj };
+  if (newObj.created) newObj.created = parseTimestamp(newObj.created);
+  if (newObj.updated) newObj.updated = parseTimestamp(newObj.updated);
+
+  return newObj;
 };
 
 export { parseTimestamp, parseUnserializables };

@@ -51,6 +51,7 @@ const deleteStripeCustomer = functions.auth.user()
 /**
  * The payment method doc is added on the client. This function hears it and creates the Stripe counterpart.
  */
+const basicPrice = 'price_1I2h4fISeRywORkaFpUun2Xw';
 const addPaymentMethodDetails = functions.firestore
   .document('/stripe_customers/{userId}/payment_methods/{pushId}')
   .onCreate(async (snapshot, context) => {
@@ -61,11 +62,47 @@ const addPaymentMethodDetails = functions.firestore
       const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
       await snapshot.ref.set(paymentMethod);
 
-      const intent = await stripe.setupIntents.create({ customer: `${paymentMethod.customer}` });
-      await snapshot.ref.parent.parent.set(
-        { setup_secret: intent.client_secret },
-        { merge: true }
+      const customerRef = snapshot.ref.parent.parent;
+      const customerDoc = await customerRef.get();
+      const customer = customerDoc.data();
+
+      // Attach the payment method to the customer.
+      console.log(`attaching ${paymentMethodId} to ${customer.customer_id}...`)
+      const attachResult = await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.customer_id });
+
+      // Change default invoice settings to point to the payment method.
+      console.log(`Changing user's default payment method...`);
+      const changeResult = await stripe.customers.update(
+        customer.customer_id,
+        {
+          invoice_settings: { default_payment_method: paymentMethodId }
+        }
       );
+
+      // Now create the subscription.
+      console.log('creating subscription...');
+      const subscription = await stripe.subscriptions.create({
+        customer: customer.customer_id,
+        items: [{ price: basicPrice }],
+        expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
+      });
+      console.log('subscription created', subscription);
+
+      await admin.firestore()
+        .collection('stripe_customers')
+        .doc(context.auth.uid)
+        .collection('subscriptions')
+        .doc(subscription.id)
+        .set(subscription);
+
+      console.log('complete');
+
+      // Now create a setup intent.
+      // const intent = await stripe.setupIntents.create({ customer: customer.customer_id });
+      // await snapshot.ref.parent.parent.set(
+      //   { setup_secret: intent.client_secret },
+      //   { merge: true }
+      // );
       return;
     } catch (error) {
       console.error(error);
@@ -105,14 +142,14 @@ const createStripePayment = functions.firestore
     }
   });
 
-const createSubscription = functions.firestore
-  .document('/stripe_customers/{userId}/subscriptions/{pushId}')
-  .onCreate(async (snapshot, context) => {
-    console.log('createSubscription');
-    const { customer_id } = (await snapshot.ref.parent.parent.get()).data();
-    const { pushId: idempotencyKey } = context.params;
-    console.log('Creating subscription for', customer_id);
-  });
+// const createSubscription = functions.firestore
+//   .document('/stripe_customers/{userId}/subscriptions/{pushId}')
+//   .onCreate(async (snapshot, context) => {
+//     console.log('createSubscription');
+//     const { customer_id } = (await snapshot.ref.parent.parent.get()).data();
+//     const { pushId: idempotencyKey } = context.params;
+//     console.log('Creating subscription for', customer_id);
+//   });
 
 /**
  * Reconfirm payment after authentication for 3D Secure.
@@ -130,7 +167,7 @@ module.exports = {
   createStripeCustomer,
   addPaymentMethodDetails,
   createStripePayment,
-  createSubscription,
+  // createSubscription,
   confirmStripePayment,
   deleteStripeCustomer
 };

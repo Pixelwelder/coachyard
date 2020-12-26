@@ -41,6 +41,53 @@ const _startDataListeners = createAsyncThunk(
   }
 );
 
+const createSubscription = createAsyncThunk(
+  'createSubscription',
+  async ({ stripe, card }) => {
+    console.log('Billing: createSubscription', stripe, card);
+
+    // First create a payment method with the provided card.
+    const paymentMethodResult = await stripe.createPaymentMethod({
+      type: 'card',
+      card
+    });
+
+    if (paymentMethodResult.error) {
+      console.error(paymentMethodResult.error);
+      throw new Error(paymentMethodResult.error);
+    }
+
+    const { paymentMethod } = paymentMethodResult;
+    console.log('payment method created', paymentMethodResult.paymentMethod);
+
+    // Save the payment method.
+    const { uid } = app.auth().currentUser;
+    const result = await app.firestore()
+      .collection('stripe_customers')
+      .doc(uid)
+      .collection('payment_methods')
+      .doc(paymentMethod.id)
+      .set({ id: paymentMethod.id });
+
+    console.log('Payment method saved.');
+
+    // Now create a subscription.
+
+    console.log('adding to database', uid);
+    try {
+      const result = await app.firestore()
+        .collection('stripe_customers')
+        .doc(uid)
+        .collection('subscriptions')
+        .add({ type: 'subscription' });
+    } catch (error) {
+      console.error(error);
+    }
+
+    console.log('added');
+  }
+);
+
 const init = createAsyncThunk(
   'initBilling',
   async (_, { dispatch }) => {
@@ -83,7 +130,7 @@ const { reducer, actions: generatedActions } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, init };
+const actions = { ...generatedActions, init, createSubscription };
 
 const select = ({ billing }) => billing;
 const selectors = { select };
