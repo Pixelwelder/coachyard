@@ -5,7 +5,8 @@ import { parseUnserializables } from '../../util/firestoreUtils';
 const initialState = {
   customerData: null,
   paymentMethods: [],
-  payments: []
+  payments: [],
+  subscriptions: []
 };
 
 /**
@@ -13,14 +14,16 @@ const initialState = {
  */
 let unsubscribePayments = () => {};
 let unsubscribePaymentMethods = () => {};
+let unsubscribeSubscriptions = () => {};
 const _startDataListeners = createAsyncThunk(
   'startDataListeners',
   async (_, { dispatch }) => {
     console.log('billing: start data listeners');
-    unsubscribePaymentMethods = app
-      .firestore()
-      .collection('stripe_customers')
-      .doc(app.auth().currentUser.uid)
+
+    const { uid } = app.auth().currentUser;
+    const userDoc = app.firestore().collection('stripe_customers').doc(uid);
+
+    unsubscribePaymentMethods = userDoc
       .collection('payment_methods')
       .onSnapshot((snapshot) => {
         console.log('billing: payment methods updated');
@@ -28,15 +31,20 @@ const _startDataListeners = createAsyncThunk(
         dispatch(generatedActions.setPaymentMethods(paymentMethods));
       });
 
-    unsubscribePayments = app
-      .firestore()
-      .collection('stripe_customers')
-      .doc(app.auth().currentUser.uid)
+    unsubscribePayments = userDoc
       .collection('payments')
       .onSnapshot((snapshot) => {
         console.log('billing: payments updated');
         const payments = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPayments(payments));
+      });
+
+    unsubscribeSubscriptions = userDoc
+      .collection('subscriptions')
+      .onSnapshot((snapshot) => {
+        console.log('billing: subscriptions updated');
+        const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        dispatch(generatedActions.setSubscriptions(subscriptions));
       });
   }
 );
@@ -80,6 +88,7 @@ const init = createAsyncThunk(
     app.auth().onAuthStateChanged((authUser) => {
       unsubscribePayments();
       unsubscribePaymentMethods();
+      unsubscribeSubscriptions();
 
       console.log('billing: auth changed');
       if (authUser) {
@@ -110,6 +119,7 @@ const { reducer, actions: generatedActions } = createSlice({
   reducers: {
     setCustomerData: setValue('customerData'),
     setPaymentMethods: setValue('paymentMethods'),
+    setSubscriptions: setValue('subscriptions'),
     setPayments: setValue('payments')
   }
 });
