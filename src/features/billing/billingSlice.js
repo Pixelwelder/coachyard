@@ -70,21 +70,6 @@ const createSubscription = createAsyncThunk(
       .set({ id: paymentMethod.id });
 
     console.log('Payment method saved.');
-
-    // Now create a subscription.
-
-    console.log('adding to database', uid);
-    try {
-      const result = await app.firestore()
-        .collection('stripe_customers')
-        .doc(uid)
-        .collection('subscriptions')
-        .add({ type: 'subscription' });
-    } catch (error) {
-      console.error(error);
-    }
-
-    console.log('added');
   }
 );
 

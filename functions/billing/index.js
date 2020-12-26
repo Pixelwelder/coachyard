@@ -56,6 +56,9 @@ const addPaymentMethodDetails = functions.firestore
   .document('/stripe_customers/{userId}/payment_methods/{pushId}')
   .onCreate(async (snapshot, context) => {
     try {
+      const { userId } = context.params;
+      console.log('creating subscription for', userId);
+
       // Grab and save the payment method.
       const { id: paymentMethodId } = snapshot.data();
       const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
@@ -89,10 +92,21 @@ const addPaymentMethodDetails = functions.firestore
 
       await admin.firestore()
         .collection('stripe_customers')
-        .doc(context.params.userId)
+        .doc(userId)
         .collection('subscriptions')
         .doc(subscription.id)
         .set(subscription);
+      console.log('saved to firestore');
+
+      console.log('setting token...');
+      // TODO Doesn't work with emulators.
+      // const user = await admin.auth().getUser(userId);
+      // await admin.auth().setCustomUserClaims(userId, {
+      //   ...user.customClaims,
+      //   subscription: 1
+      // });
+      await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
+      console.log('token set');
 
       console.log('complete');
 
