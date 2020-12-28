@@ -15,6 +15,7 @@ import Course from './features/course';
 import Session from './features/session';
 import Account from './features/account';
 import Teacher from './features/teacher';
+import Header from './features/header';
 
 function App() {
   const dispatch = useDispatch();
@@ -36,12 +37,10 @@ function App() {
     <div className="App">
       {/*<p>{ query.toString() }</p>*/}
       <CssBaseline />
+
       <Session />
-      <Account />
-      <div className="page-section header">
-        <Typography variant="h1">Coachyard</Typography>
-        <Auth />
-      </div>
+
+      <Header />
 
       <Nav />
 
@@ -80,6 +79,8 @@ function App() {
       {/*  </ul>*/}
       {/*</div>*/}
 
+      {/* Account modal is always available. */}
+      <Account />
     </div>
   );
 }

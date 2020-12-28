@@ -1,0 +1,39 @@
+#root {
+  display: flex;
+  height: 100vh;
+  min-height: 500px;
+  padding: 10px 20px;
+  justify-content: center;
+
+  // TODO
+  border: 5px solid green;
+}
+
+.app-root {
+  border: 1px solid lightcoral;
+  flex: 1;
+  max-width: 900px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.header-container {
+  flex: 0;
+  border: 1px solid green;
+}
+
+.content-container {
+  flex: 1;
+  border: 1px solid red;
+}
+
+.footer-container {
+  flex: 0;
+  border: 1px solid mediumpurple;
+}
+
+.MuiGrid-item {
+  // TODO
+  border: 1px solid lightblue;
+}
