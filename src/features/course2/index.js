@@ -6,15 +6,17 @@ import { actions as selectedCourseActions, selectors as selectedCourseSelectors 
 
 // import { selectors}
 import './course.scss';
+import ItemList from './ItemList';
 
 const Course = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const selectedCourse = useSelector(selectedCourseSelectors.selectSelectedCourse);
-  console.log('SELECTED', selectedCourse);
+  const { course } = useSelector(selectedCourseSelectors.select);
+  // const selectedCourseItems =
+  console.log('SELECTED', course);
 
   useEffect(() => {
-    dispatch(selectedCourseActions.setId(id));
+    dispatch(selectedCourseActions.setId({ id }));
   }, [id]);
 
   return (
@@ -28,7 +30,7 @@ const Course = () => {
         sm={8}
         className="app-content-main"
       >
-        {selectedCourse && <p>Loaded</p>}
+        {course && <p>Loaded</p>}
       </Grid>
 
       <Grid
@@ -37,7 +39,8 @@ const Course = () => {
         sm={4}
         className="app-content-toc"
       >
-        {selectedCourse && <p>{selectedCourse.displayName}</p>}
+        {course && <p>{course.displayName}</p>}
+        <ItemList />
       </Grid>
     </Grid>
   );

@@ -29,6 +29,8 @@ const init = createAsyncThunk(
     app.auth().onAuthStateChanged((authUser) => {
       userListener();
       courseListener();
+      dispatch(generatedActions.resetLearning());
+      dispatch(generatedActions.resetTeaching());
 
       if (authUser) {
         const { uid } = authUser;
@@ -38,10 +40,12 @@ const init = createAsyncThunk(
           .collection('users')
           .doc(uid)
           .onSnapshot((snapshot) => {
-            console.log('user snapshot (enrolled)');
-            const { enrolled: courses } = snapshot.data();
-            console.log('enrolled', courses);
-            dispatch(generatedActions.setLearning({ courses }));
+            if (snapshot.exists) {
+              console.log('user snapshot (enrolled)');
+              const { enrolled: courses } = snapshot.data();
+              console.log('enrolled', courses);
+              dispatch(generatedActions.setLearning({ courses }));
+            }
           });
 
         courseListener = app.firestore()
@@ -71,22 +75,26 @@ const createNewCourse = createAsyncThunk(
   }
 );
 
-const onPending = name => (state, action) => {
+const onPending = name => (state) => {
   state[name].isLoading = true;
   state[name].error = null;
 };
 
-const onRejected = name => (state, action) => {
+const onRejected = name => (state) => {
   state[name].isLoading = false;
   state[name].error = state.payload;
 };
 
-const onFulfilled = name => (state, action) => {
+const onFulfilled = name => (state) => {
   state[name].isLoading = false;
 };
 
 const setValue = name => (state, action) => {
   state[name] = action.payload;
+};
+
+const resetValue = name => (state) => {
+  state[name] = initialState[name];
 };
 
 const mergeValue = name => (state, action) => {
@@ -98,9 +106,10 @@ const { actions: generatedActions, reducer } = createSlice({
   initialState,
   reducers: {
     setTeaching: mergeValue('teaching'),
-    resetTeaching: (state) => { state.teaching = initialState.teaching; },
+    resetTeaching: resetValue('teaching'),
 
-    setLearning: mergeValue('learning')
+    setLearning: mergeValue('learning'),
+    resetLearning: resetValue('learning')
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),
