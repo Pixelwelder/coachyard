@@ -13,6 +13,7 @@ import teacherReducer from '../features/teacher/teacherSlice';
 import invitesReducer from '../features/invites/invitesSlice';
 import billingReducer from '../features/billing/billingSlice';
 import catalogReducer from '../features/catalog/catalogSlice';
+import selectedCourseReducer from '../features/course2/selectedCourseSlice';
 
 export default configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export default configureStore({
     teacher: teacherReducer,
     invites: invitesReducer,
     billing: billingReducer,
-    catalog: catalogReducer
+    catalog: catalogReducer,
+    selectedCourse: selectedCourseReducer
   }
 });

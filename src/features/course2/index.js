@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 
+// import { selectors}
 import './course.scss';
 
 const Course = () => {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const selectedCourse = useSelector(selectedCourseSelectors.selectSelectedCourse);
+  console.log('SELECTED', selectedCourse);
+
+  useEffect(() => {
+    dispatch(selectedCourseActions.setId(id));
+  }, [id]);
+
   return (
     <Grid
       container
@@ -15,7 +28,7 @@ const Course = () => {
         sm={8}
         className="app-content-main"
       >
-        <p>Main</p>
+        {selectedCourse && <p>Loaded</p>}
       </Grid>
 
       <Grid
@@ -24,7 +37,7 @@ const Course = () => {
         sm={4}
         className="app-content-toc"
       >
-        <p>TOC</p>
+        {selectedCourse && <p>{selectedCourse.displayName}</p>}
       </Grid>
     </Grid>
   );
