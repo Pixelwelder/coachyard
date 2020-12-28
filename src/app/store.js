@@ -12,6 +12,7 @@ import uiReducer from '../features/ui/uiSlice';
 import teacherReducer from '../features/teacher/teacherSlice';
 import invitesReducer from '../features/invites/invitesSlice';
 import billingReducer from '../features/billing/billingSlice';
+import catalogReducer from '../features/catalog/catalogSlice';
 
 export default configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export default configureStore({
     ui: uiReducer,
     teacher: teacherReducer,
     invites: invitesReducer,
-    billing: billingReducer
+    billing: billingReducer,
+    catalog: catalogReducer
   }
 });

@@ -14,6 +14,7 @@ import { actions as assetActions } from '../../app/assets';
 import { actions as courseActions } from '../course/courseSlice';
 import { actions as sessionActions } from '../session/sessionSlice';
 import { actions as billingActions } from '../billing/billingSlice';
+import { actions as catalogActions } from '../catalog/catalogSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
@@ -100,6 +101,7 @@ const init = createAsyncThunk(
       await dispatch(invitesActions.init());
       await dispatch(courseActions.init());
       await dispatch(sessionActions.init());
+      await dispatch(catalogActions.init());
       // await dispatch(adminActions.init({ firebase: app }));
 
       // Set the query. For some reason the object returned from queryString is non-serializable.

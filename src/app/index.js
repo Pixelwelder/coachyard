@@ -10,6 +10,8 @@ import Nav from '../features/nav';
 import Account from '../features/account';
 import Grid from '@material-ui/core/Grid';
 import './app.scss';
+import Course from '../features/course2';
+import Catalog from '../features/catalog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -38,7 +40,8 @@ const App = () => {
 
       {/* Content. */}
       <div className="content-container">
-        <p>Content</p>
+        {/*<Course />*/}
+        <Catalog />
       </div>
 
       {/* Footer. */}
