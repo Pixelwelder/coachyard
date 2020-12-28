@@ -1,20 +1,43 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
+import { actions as uiActions } from '../ui/uiSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectors as catalogSelectors } from './catalogSlice';
+import CatalogItem from './CatalogItem';
 
-const CatalogList = ({ title }) => {
+const CatalogList = ({ title, onCreate, items }) => {
   return (
     <div className="catalog-list">
-      <p>{ title }</p>
-      <p>Catalog List</p>
+      <div className="catalog-list-title">
+        <p>{ title }</p>
+        {onCreate && (
+          <Button onClick={onCreate}>
+            Create
+          </Button>
+        )}
+      </div>
+      <ul>
+        {items.map(item => <CatalogItem item={item} />)}
+      </ul>
     </div>
   );
 };
 
 const TeachingCatalogList = () => {
-  return <CatalogList title="Teaching" />;
+  const courses = useSelector(catalogSelectors.selectTeachingCourses);
+  const dispatch = useDispatch();
+
+  return (
+    <CatalogList
+      title="Teaching"
+      onCreate={() => dispatch(uiActions.setUI({ showNewCourseDialog: true }))}
+      items={courses}
+    />
+  );
 };
 
 const LearningCatalogList = () => {
-  return <CatalogList title="Learning" />;
+  return <CatalogList title="Learning" items={[]} />;
 };
 
 export { TeachingCatalogList, LearningCatalogList };

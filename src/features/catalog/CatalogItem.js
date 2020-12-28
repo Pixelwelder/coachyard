@@ -1,9 +1,11 @@
 import React from 'react';
 
-const CatalogItem = () => {
+const CatalogItem = ({ item }) => {
+  const { displayName } = item;
+
   return (
     <div className="catalog-item">
-      <p>Catalog Item</p>
+      <p>{displayName}</p>
     </div>
   );
 };

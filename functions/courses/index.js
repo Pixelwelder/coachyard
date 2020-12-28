@@ -14,6 +14,8 @@ const createCourse = async (data, context) => {
     const { auth: { token: { uid } } } = context;
     const { displayName, description } = data;
 
+    // TODO Gate!
+
     // Create course object.
     const doc = admin.firestore().collection('courses').doc();
     const now = admin.firestore.Timestamp.now();

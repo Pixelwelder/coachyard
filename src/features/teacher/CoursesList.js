@@ -4,7 +4,7 @@ import { DataGrid } from '@material-ui/data-grid';
 import CachedIcon from '@material-ui/icons/Cached';
 import AddIcon from '@material-ui/icons/Add';
 
-import NewCourseDialog from './NewCourseDialog';
+import NewCourseDialog from '../../components/NewCourseDialog';
 
 const CoursesList = ({ items, onRefresh }) => {
   const columns = [

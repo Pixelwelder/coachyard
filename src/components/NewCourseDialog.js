@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as teacherSelectors, actions as teacherActions } from './teacherSlice';
+import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 import Alert from '@material-ui/lab/Alert';
 
 const NewCourseDialog = ({ open, onClose }) => {
