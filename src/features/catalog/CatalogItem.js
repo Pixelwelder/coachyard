@@ -1,11 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CatalogItem = ({ item }) => {
-  const { displayName } = item;
+  const { displayName, uid } = item;
 
   return (
-    <div className="catalog-item">
-      <p>{displayName}</p>
+    <div
+      className="catalog-item"
+      onClick={() => {}}
+    >
+      <Link to={`/course/${uid}`}>{displayName}</Link>
     </div>
   );
 };

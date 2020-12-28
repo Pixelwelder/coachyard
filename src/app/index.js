@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Switch, Route, Link } from 'react-router-dom';
 import { actions as appActions, selectors as appSelectors } from '../features/app/appSlice';
 import { MAIN_TABS, selectors as navSelectors } from '../features/nav/navSlice';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -27,7 +28,6 @@ const App = () => {
 
   if (!isInitialized) {
     return null;
-
   }
 
   return (
@@ -41,8 +41,10 @@ const App = () => {
 
       {/* Content. */}
       <div className="content-container">
-        {/*<Course />*/}
-        <Catalog />
+        <Switch>
+          <Route path="/dashboard" component={Catalog} />
+          <Route path="/course/:id" component={Course} />
+        </Switch>
       </div>
 
       {/* Footer. */}
