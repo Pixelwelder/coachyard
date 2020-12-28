@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Video from './features/videoIframe';
 import Log from './features/log';
 import './App.scss';
-import Auth from './features/auth';
+import Auth from './features/user';
 import Admin from './features/admin';
 import Nav from './features/nav';
 import { selectors as navSelectors, MAIN_TABS } from './features/nav/navSlice';

@@ -46,7 +46,12 @@ const App = () => {
         <Footer />
       </div>
 
-      {/*<Session />*/}
+      {/* MODALS */}
+      {/* Are we logged in? */}
+      <Session />
+
+      {/* User account. */}
+      <Account />
 
 
 
@@ -57,9 +62,6 @@ const App = () => {
       {/*</div>*/}
 
 
-
-      {/* Account modal is always available. */}
-      {/* <Account /> */}
 
     </div>
   );

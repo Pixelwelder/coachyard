@@ -1,0 +1,18 @@
+@import "../../app/variables";
+
+.user-image {
+  width: 16px;
+  height: 16px;
+  border: 1px solid gray;
+  margin-right: 8px;
+}
+
+.user-name {
+  display: none;
+}
+
+@media (min-width: $breakpoint-mobile) {
+  .user-name {
+    display: unset;
+  }
+}

@@ -1,12 +1,18 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import Auth from '../auth';
+import User from '../user';
+import './header.scss';
 
 const Header = () => {
   return (
-    <div>
-      <Typography variant="h1">Coachyard</Typography>
-      <Auth />
+    <div className="header">
+      <div className="title-container">
+        <Typography variant="h3">Coachyard</Typography>
+      </div>
+
+      <div className="user-container">
+        <User />
+      </div>
     </div>
   );
 };

@@ -6,9 +6,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 
-
 import { selectors as appSelectors, actions as appActions } from '../app/appSlice';
 import { actions as uiActions } from '../ui/uiSlice';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import './user.scss';
 
 const Auth = () => {
   const { authUser, isLoading } = useSelector(appSelectors.select);
@@ -49,7 +50,9 @@ const Auth = () => {
           <Button
             onClick={onOpen}
           >
-            {authUser.displayName || authUser.email}
+            <span className="user-image"></span>
+            <span className="user-name">{authUser.displayName || authUser.email}</span>
+            <ArrowDropDownIcon />
           </Button>
           <Menu
             id="simple-menu"

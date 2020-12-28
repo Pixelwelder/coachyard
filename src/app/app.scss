@@ -1,12 +1,19 @@
+@import "variables";
+//$inner-padding: 12px;
+
 #root {
   display: flex;
   height: 100vh;
   min-height: 500px;
-  padding: 10px 20px;
+  padding: $outer-padding;
   justify-content: center;
 
+  @media (min-width: $breakpoint-mobile) {
+    padding: $outer-padding-lg;
+  }
+
   // TODO
-  border: 5px solid green;
+  border: 1px solid green;
 }
 
 .app-root {
