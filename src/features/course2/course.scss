@@ -33,4 +33,15 @@
 
 .item-view {
   flex: 1;
+  width: auto;
+  height: auto;
+
+  .react-player {
+    padding-top: 56.25%;
+    position: relative;
+
+    div {
+      position: absolute;
+    }
+  }
 }
