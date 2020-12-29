@@ -3,6 +3,7 @@ import Button from '@material-ui/core/Button';
 import { actions as uiActions } from '../ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors } from './catalogSlice';
+import { selectors as uiSelectors } from '../ui/uiSlice';
 import CatalogItem from './CatalogItem';
 
 const CatalogList = ({ title, onCreate, items }) => {
@@ -17,7 +18,7 @@ const CatalogList = ({ title, onCreate, items }) => {
         )}
       </div>
       <ul>
-        {items.map(item => <CatalogItem item={item} />)}
+        {items.map((item, index) => <CatalogItem item={item} key={index} />)}
       </ul>
     </div>
   );
@@ -25,12 +26,13 @@ const CatalogList = ({ title, onCreate, items }) => {
 
 const TeachingCatalogList = () => {
   const courses = useSelector(catalogSelectors.selectTeachingCourses);
+  const { newCourseDialog } = useSelector(uiSelectors.select);
   const dispatch = useDispatch();
 
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions.setUI({ showNewCourseDialog: true }))}
+      onCreate={() => dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, show: true } }))}
       items={courses}
     />
   );

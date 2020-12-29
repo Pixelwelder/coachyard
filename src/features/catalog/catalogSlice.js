@@ -9,9 +9,6 @@ import { parseUnserializables } from '../../util/firestoreUtils';
 const initialState = {
   teaching: {
     courses: {},
-
-    displayName: '',
-    email: '',
     isLoading: false,
     error: null
   },
@@ -67,9 +64,7 @@ const init = createAsyncThunk(
 
 const createNewCourse = createAsyncThunk(
   'createNewCourse',
-  async (_, { dispatch, getState }) => {
-    const { displayName } = selectTeaching(getState());
-
+  async ({ displayName, email }, { dispatch, getState }) => {
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
     const result = await callable({ displayName, description: '' });
   }

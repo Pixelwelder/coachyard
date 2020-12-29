@@ -9,28 +9,28 @@ import TextField from '@material-ui/core/TextField';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
-import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
-import { selectors as catalogSelectors, actions as catalogActions } from '../features/catalog/catalogSlice';
+// import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
+import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
 
 const NewCourseDialog = () => {
-  const { showNewCourseDialog } = useSelector(uiSelectors.select);
-  const { isLoading, error, displayName, email } = useSelector(catalogSelectors.selectTeaching);
+  const { newCourseDialog } = useSelector(uiSelectors.select);
+  const { isLoading, error, displayName, email, show } = newCourseDialog;
   const dispatch = useDispatch();
 
   const onClose = () => {
-    dispatch(catalogActions.resetTeaching());
-    dispatch(uiActions.setUI({ showNewCourseDialog: false }));
+    dispatch(uiActions.resetUI('newCourseDialog'));
+    // dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, show: false } }));
   };
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    await dispatch(catalogActions.createNewCourse());
+    await dispatch(catalogActions.createNewCourse(newCourseDialog));
     onClose();
   };
 
   return (
-    <Dialog open={showNewCourseDialog} onClose={onClose} aria-labelledby="form-dialog-title">
+    <Dialog open={show} onClose={onClose} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
@@ -42,7 +42,7 @@ const NewCourseDialog = () => {
             variant="filled" label="Course Name" placeholder="Course Name"
             id="displayName" value={displayName} disabled={isLoading}
             onChange={({ target: { value } }) => {
-              dispatch(catalogActions.setTeaching({ displayName: value }));
+              dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, displayName: value } }));
             }}
           />
           <TextField
@@ -50,7 +50,7 @@ const NewCourseDialog = () => {
             variant="filled" label="Student Email" placeholder="Email"
             id="email" type="email" value={email} disabled={isLoading}
             onChange={({ target: { value } }) => {
-              dispatch(catalogActions.setTeaching({ email: value }));
+              dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, email: value } }));
             }}
           />
         </form>

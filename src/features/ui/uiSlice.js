@@ -1,8 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  // TODO
   showAccount: false,
-  showNewCourseDialog: false
+
+  newCourseDialog: {
+    show: false,
+    isLoading: false,
+    error: null,
+    displayName: '',
+    email: ''
+  }
 };
 
 const { actions, reducer } = createSlice({
@@ -17,6 +25,9 @@ const { actions, reducer } = createSlice({
       Object.entries(action.payload).forEach(([name, value]) => {
         state[name] = value;
       });
+    },
+    resetUI: (state, action) => {
+      state[action.payload] = initialState[action.payload];
     }
   }
 });

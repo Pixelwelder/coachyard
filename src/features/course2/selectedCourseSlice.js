@@ -14,6 +14,11 @@ const initialState = {
 
 let unsubscribeCourse = () => {};
 let unsubscribeItems = () => {};
+/**
+ * Sets the selected course.
+ * This loads the course and its items.
+ * @param id - the id of the course to load.
+ */
 const setId = createAsyncThunk(
   'setId',
   async ({ id }, { dispatch }) => {
@@ -38,7 +43,6 @@ const setId = createAsyncThunk(
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
         dispatch(generatedActions.setItems(items));
       });
-
   }
 );
 
@@ -57,7 +61,7 @@ const onFulfilled = (state) => {
 };
 
 const setValue = name => (state, action) => {
-  state[name] = action.value;
+  state[name] = action.payload;
 };
 
 const { actions: generatedActions, reducer } = createSlice({
