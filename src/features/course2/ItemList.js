@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
 import Item from './Item';
 
 const ItemList = () => {
-  const { items } = useSelector(selectedCourseSelectors.select);
-  const [selectedUid, setSelectedUid] = useState(null);
+  const { items, selectedItemUid } = useSelector(selectedCourseSelectors.select);
+  const dispatch = useDispatch();
 
   const onEdit = (item) => {
 
@@ -23,10 +23,9 @@ const ItemList = () => {
           <Item
             item={item}
             key={index}
-            isSelected={item.uid === selectedUid}
+            isSelected={item.uid === selectedItemUid}
             onSelect={() => {
-              console.log('selected', item.uid);
-              setSelectedUid(item.uid);
+              dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
             }}
             onEdit={() => onEdit(item)}
             onDelete={() => onDelete(item)}

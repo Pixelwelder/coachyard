@@ -9,7 +9,8 @@ const initialState = {
   error: null,
 
   course: null,
-  items: []
+  items: [],
+  selectedItemUid: null
 };
 
 let unsubscribeCourse = () => {};
@@ -71,7 +72,8 @@ const { actions: generatedActions, reducer } = createSlice({
   reducers: {
     _setId: setValue('id'),
     setCourse: setValue('course'),
-    setItems: setValue('items')
+    setItems: setValue('items'),
+    setSelectedItemUid: setValue('selectedItemUid')
   },
   extraReducers: {
     [setId.pending]: onPending,
