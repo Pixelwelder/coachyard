@@ -16,8 +16,13 @@
 
 .item {
   display: flex;
+  height: 24px;
 
   .item-title {
     flex: 1;
   }
+}
+
+.selected-item {
+  background: #eeeeee;
 }
