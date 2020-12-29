@@ -163,6 +163,7 @@ const setAndLoadSelectedCourse = createAsyncThunk(
 
 /**
  * Deletes the currently selected course. No warning.
+ * MOVED.
  */
 const deleteSelectedCourse = createAsyncThunk(
   'deleteCurrentCourse',

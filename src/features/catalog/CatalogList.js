@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { actions as uiActions } from '../ui/uiSlice';
+import { actions as uiActions, MODES } from '../ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
 import { selectors as uiSelectors } from '../ui/uiSlice';
@@ -26,17 +26,17 @@ const CatalogList = ({ title, onCreate, onDelete, items }) => {
 
 const TeachingCatalogList = () => {
   const courses = useSelector(catalogSelectors.selectTeachingCourses);
-  const { newCourseDialog, deleteDialog } = useSelector(uiSelectors.select);
+  const { deleteDialog } = useSelector(uiSelectors.select);
   const dispatch = useDispatch();
 
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, open: true } }))}
+      onCreate={() => dispatch(uiActions.openDialog('newCourseDialog'))}
       onDelete={(item) => dispatch(uiActions.setUI({
         deleteDialog: {
           ...deleteDialog,
-          open: true,
+          mode: MODES.VIEW,
           item,
           onConfirm: catalogActions.deleteCourse
         }

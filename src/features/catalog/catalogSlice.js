@@ -76,14 +76,14 @@ const deleteCourse = createAsyncThunk(
   async ({ uid }, { dispatch, getState }) => {
     console.log('deleting', uid);
     const { deleteDialog } = uiSelectors.select(getState());
-    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.DELETING }}));
+    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.DELETE }}));
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
 
     try {
       await callable({ uid });
       dispatch(uiActions.resetUI('deleteDialog'));
     } catch (error) {
-      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEWING }}));
+      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEW }}));
     }
   }
 );
@@ -127,7 +127,11 @@ const { actions: generatedActions, reducer } = createSlice({
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),
     [createNewCourse.rejected]: onRejected('teaching'),
-    [createNewCourse.fulfilled]: onFulfilled('teaching')
+    [createNewCourse.fulfilled]: onFulfilled('teaching'),
+
+    [deleteCourse.pending]: onPending('teaching'),
+    [deleteCourse.rejected]: onRejected('teaching'),
+    [deleteCourse.fulfilled]: onFulfilled('teaching')
   }
 });
 

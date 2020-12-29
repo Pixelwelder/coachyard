@@ -3,15 +3,19 @@ import Grid from '@material-ui/core/Grid';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { actions as uiActions, MODES, selectors as uiSelectors } from '../ui/uiSlice';
 
 // import { selectors}
 import './course.scss';
 import ItemList from './ItemList';
+import Button from '@material-ui/core/Button';
 
 const Course = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
   const { course } = useSelector(selectedCourseSelectors.select);
+  const { deleteDialog } = useSelector(uiSelectors.select);
+
+  const dispatch = useDispatch();
   // const selectedCourseItems =
   console.log('SELECTED', course);
 
@@ -41,6 +45,11 @@ const Course = () => {
       >
         {course && <p>{course.displayName}</p>}
         <ItemList />
+        <Button
+          onClick={() => dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW } }))}
+        >
+          Create New (new item dialog)
+        </Button>
       </Grid>
     </Grid>
   );

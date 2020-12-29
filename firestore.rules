@@ -18,7 +18,7 @@ service cloud.firestore {
 
     match /courses/{uid} {
       allow list: if true;
-      allow get: if isCreator() || isEnrolled();
+      allow get: if true;//isCreator();// || isEnrolled(); // TODO
       allow write: if isCreator();
 
       function isEnrolled() {

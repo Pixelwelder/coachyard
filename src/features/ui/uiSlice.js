@@ -1,12 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const MODES = {
-  VIEWING: 'viewing',
-  DELETING: 'deleting'
+  VIEW: 'view',
+  EDIT: 'edit',
+  CREATE: 'create',
+  DELETE: 'delete',
+  CLOSED: 'closed',
+  OPEN: 'open'
 };
 
 const baseDialog = {
-  open: false,
+  mode: MODES.CLOSED,
   isLoading: false,
   error: null
 };
@@ -23,12 +27,13 @@ const initialState = {
 
   newItemDialog: {
     ...baseDialog,
-    displayName: ''
+    displayName: '',
+    description: '',
+    file: ''
   },
 
   deleteDialog: {
     ...baseDialog,
-    mode: MODES.VIEWING,
     uid: ''
   }
 };
@@ -37,6 +42,12 @@ const { actions, reducer } = createSlice({
   name: 'ui',
   initialState,
   reducers: {
+    openDialog: (state, action) => {
+      state[action.payload].mode = MODES.OPEN;
+    },
+    resetDialog: (state, action) => {
+      state[action.payload] = initialState[action.payload]
+    },
     setShowAccount: (state, action) => { state.showAccount = action.payload; },
     /**
      * payload - an object that is merged with the root state.

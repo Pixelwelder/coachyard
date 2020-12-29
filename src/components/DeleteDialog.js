@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const DeleteDialog = () => {
   const { deleteDialog } = useSelector(uiSelectors.select);
-  const { mode, open, message, item, onConfirm } = deleteDialog;
+  const { mode, item, onConfirm } = deleteDialog;
 
   const dispatch = useDispatch();
 
@@ -21,24 +21,24 @@ const DeleteDialog = () => {
 
   return (
     <Dialog
-      open={open}
+      open={mode !== MODES.CLOSED}
       onClose={onClose}
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle>Delete</DialogTitle>
       <DialogContent>
-        {mode === MODES.VIEWING && (
+        {mode === MODES.VIEW && (
           <DialogContentText>
             {item && `Are you sure you want to delete "${item.displayName}"?`}
           </DialogContentText>
         )}
-        {mode === MODES.DELETING && (
+        {mode === MODES.DELETE && (
           <DialogContentText>
             {item && `Deleting "${item.displayName}" forever...`}
           </DialogContentText>
         )}
       </DialogContent>
-        {mode === MODES.VIEWING && item && (
+        {mode === MODES.VIEW && item && (
           <DialogActions>
             <Button
               onClick={onClose}

@@ -8,14 +8,14 @@ import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
+import { selectors as uiSelectors, actions as uiActions, MODES } from '../features/ui/uiSlice';
 // import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
 
 const NewCourseDialog = () => {
   const { newCourseDialog } = useSelector(uiSelectors.select);
-  const { isLoading, error, displayName, email, open } = newCourseDialog;
+  const { isLoading, error, displayName, email, mode } = newCourseDialog;
   const dispatch = useDispatch();
 
   const onClose = () => {
@@ -30,7 +30,7 @@ const NewCourseDialog = () => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title">
+    <Dialog open={mode !== MODES.CLOSED} onClose={onClose} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
