@@ -9,10 +9,12 @@ import { actions as uiActions, MODES, selectors as uiSelectors } from '../ui/uiS
 import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
+import ItemView from './ItemView';
 
 const Course = () => {
   const { id } = useParams();
   const { course } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { deleteDialog } = useSelector(uiSelectors.select);
 
   const dispatch = useDispatch();
@@ -32,7 +34,7 @@ const Course = () => {
         sm={8}
         className="app-content-main"
       >
-        {course && <p>Loaded</p>}
+        <ItemView item={selectedItem} />
       </Grid>
 
       <Grid
@@ -41,7 +43,11 @@ const Course = () => {
         sm={4}
         className="app-content-toc"
       >
-        {course && <p>{course.displayName}</p>}
+        {course && (
+          <p onClick={() => dispatch(selectedCourseActions.setSelectedItemUid(null))}>
+            {course.displayName}
+          </p>
+        )}
         <ItemList />
         <Button
           onClick={() => dispatch(uiActions.openDialog({

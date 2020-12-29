@@ -6,7 +6,11 @@ import Button from '@material-ui/core/Button';
 const ItemList = ({ item, isSelected, onSelect, onEdit, onDelete }) => {
   return (
     <li className={`item${isSelected ? ' selected-item' : ''}`}>
-      <span onClick={onSelect} className="item-title">{item.displayName}</span>
+      <span
+        onClick={onSelect} className="item-title"
+      >
+        {item.displayName}
+      </span>
       {isSelected && (
         <>
           <EditIcon onClick={onEdit} />

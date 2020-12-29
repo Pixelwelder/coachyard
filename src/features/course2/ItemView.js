@@ -1,8 +1,15 @@
 import React from 'react';
 
-const ItemView = () => {
+const ItemView = ({ item }) => {
   return (
-    <p>ItemView</p>
+    <div className="item-view">
+      {!item && (
+        <p>No item.</p>
+      )}
+      {item && (
+        <p>{item.displayName}</p>
+      )}
+    </div>
   );
 };
 

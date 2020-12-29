@@ -84,8 +84,14 @@ const { actions: generatedActions, reducer } = createSlice({
 
 const actions = { ...generatedActions, setId };
 
-const select = ({ selectedCourse }) => selectedCourse
-const selectors = { select };
+const select = ({ selectedCourse }) => selectedCourse;
+const selectSelectedItem = createSelector(
+  select,
+  ({ items, selectedItemUid }) => {
+    return items.find(({ uid }) => uid === selectedItemUid);
+  }
+);
+const selectors = { select, selectSelectedItem };
 
 export { actions, selectors };
 export default reducer;

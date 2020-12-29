@@ -3,6 +3,10 @@
   flex: 1;
 }
 
+.app-content-main {
+  display: flex;
+}
+
 .app-content-toc {
   display: flex;
   flex-direction: column;
@@ -25,4 +29,8 @@
 
 .selected-item {
   background: #eeeeee;
+}
+
+.item-view {
+  flex: 1;
 }
