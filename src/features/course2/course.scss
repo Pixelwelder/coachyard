@@ -11,4 +11,13 @@
 .item-list {
   flex: 1;
   overflow-y: scroll;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+
+  .item-title {
+    flex: 1;
+  }
 }
