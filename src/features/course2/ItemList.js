@@ -10,6 +10,11 @@ const ItemList = () => {
   return (
     <div>
       <p>ItemList</p>
+      <ul>
+        {items.map((item, index) => {
+          return <li key={index}>{item.displayName}</li>;
+        })}
+      </ul>
     </div>
   )
 };

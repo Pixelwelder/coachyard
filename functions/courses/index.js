@@ -276,7 +276,7 @@ const addItemToCourse = async (data, context) => {
     checkAuth(context);
 
     const { auth: { uid } } = context;
-    const { courseUid, newItem } = data;
+    const { courseUid, item: newItem } = data;
 
     console.log('addItemToCourse', data);
     const { item } = await admin.firestore().runTransaction(async (transaction) => {

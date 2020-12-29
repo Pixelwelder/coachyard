@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit';
 const MODES = {
   VIEW: 'view',
   EDIT: 'edit',
-  CREATE: 'create',
   PROCESSING: 'processing',
   CLOSED: 'closed',
 };
@@ -26,9 +25,13 @@ const initialState = {
 
   newItemDialog: {
     ...baseDialog,
+    courseUid: '',
     displayName: '',
     description: '',
-    file: ''
+    isChangingFile: false,
+    file: '',
+    bytesTransferred: 0,
+    totalBytes: 0
   },
 
   deleteDialog: {
@@ -44,6 +47,7 @@ const { actions, reducer } = createSlice({
     openDialog: (state, action) => {
       const { name, params = {} } = action.payload;
       state[name] = {
+        ...state[name],
         mode: MODES.VIEW,
         ...params
       };

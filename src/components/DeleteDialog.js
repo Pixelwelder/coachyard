@@ -46,7 +46,7 @@ const DeleteDialog = () => {
               Cancel
             </Button>
             <Button
-              onClick={() => dispatch(onConfirm(item))}
+              onClick={dispatch(onConfirm(item))}
               color="primary"
             >
               Confirm

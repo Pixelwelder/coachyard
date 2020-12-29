@@ -26,13 +26,17 @@ const CatalogList = ({ title, onCreate, onDelete, items }) => {
 
 const TeachingCatalogList = () => {
   const courses = useSelector(catalogSelectors.selectTeachingCourses);
-  const { deleteDialog } = useSelector(uiSelectors.select);
   const dispatch = useDispatch();
 
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions.openDialog({ name: 'newCourseDialog' }))}
+      onCreate={() => dispatch(uiActions.openDialog({
+        name: 'newCourseDialog',
+        params: {
+          onConfirm: catalogActions.addItemToCourse
+        }
+      }))}
       onDelete={(item) => dispatch(uiActions.openDialog({
         name: 'deleteDialog',
         params: {

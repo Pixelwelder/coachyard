@@ -46,10 +46,12 @@ const Course = () => {
         <Button
           onClick={() => dispatch(uiActions.openDialog({
             name: 'newItemDialog',
-            params: { uid: course.uid }
+            params: {
+              courseUid: course.uid
+            }
           }))}
         >
-          Create New (new item dialog)
+          Create New
         </Button>
       </Grid>
     </Grid>

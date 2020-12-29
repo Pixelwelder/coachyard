@@ -9,7 +9,7 @@ const initialState = {
   error: null,
 
   course: null,
-  items: {}
+  items: []
 };
 
 let unsubscribeCourse = () => {};
@@ -39,6 +39,7 @@ const setId = createAsyncThunk(
     unsubscribeItems = await app.firestore()
       .collection('items')
       .where('courseUid', '==', id)
+      .orderBy('created')
       .onSnapshot((snapshot) => {
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
         dispatch(generatedActions.setItems(items));

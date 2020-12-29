@@ -263,6 +263,7 @@ const _resetItem = createAsyncThunk(
 
 /**
  * Adds the current item to the course.
+ * MOVED
  */
 const addItemToCourse = createAsyncThunk(
   'addItemToCourse',

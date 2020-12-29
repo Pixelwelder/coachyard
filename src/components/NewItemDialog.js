@@ -9,108 +9,129 @@ import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
-import { actions as courseActions, MODES, selectors as courseSelectors } from '../features/course/courseSlice';
-import { actions as uiActions, selectors as uiSelectors } from '../features/ui/uiSlice';
+// import { actions as courseActions, MODES, selectors as courseSelectors } from '../features/course/courseSlice';
+import { actions as uiActions, selectors as uiSelectors, MODES } from '../features/ui/uiSlice';
+import { actions as catalogActions } from '../features/catalog/catalogSlice';
+import Alert from '@material-ui/lab/Alert';
 
 const NewItemDialog = () => {
   const { newItemDialog } = useSelector(uiSelectors.select);
-  const { mode } = newItemDialog;
+  const {
+    courseUid, displayName, description, mode, onSubmit, bytesTransferred, totalBytes, isChangingFile, error
+  } = newItemDialog;
 
+  // const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
   const dispatch = useDispatch();
-  const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
   const [file, setFile] = useState(null);
-  const { playbackId } = newItem;
+  // const { playbackId } = newItem;
 
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {
       setFile(null);
-      dispatch(courseActions.setNewItem({ file: '' }))
+      dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, file: file.name } }));
+      // dispatch(courseActions.setNewItem({ file: '' }))
       return;
     }
 
     const file = files[0];
     setFile(file);
-    dispatch(courseActions.setNewItem({ file: file.name }))
+    dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, file: file.name } }));
+    // dispatch(courseActions.setNewItem({ file: file.name }))
   }
 
-  const onSubmit = (event) => {
+  const _onSubmit = (event) => {
     event.preventDefault();
-    if (itemUI.mode === MODES.CREATE) {
-      dispatch(courseActions.addItemToCourse({ file }));
+    if (mode === MODES.VIEW) {
+      dispatch(catalogActions.addItemToCourse({
+        courseUid,
+        item: { displayName, description, file: file?.name || '' },
+        file
+      }));
+      // dispatch(courseActions.addItemToCourse({ file }));
     } else {
-      dispatch(courseActions.updateItem({ file }));
+      alert('TODO');
+      // dispatch(courseActions.updateItem({ file }));
     }
   };
 
   const isDisabled = () => {
     return false;
-    return upload.isUploading || !file;
+    return (totalBytes > 0) || !file;
   };
 
   return (
     <Dialog
       open={mode !== MODES.CLOSED}
-      onClose={() => dispatch(courseActions.closeItem())}
+      onClose={() => dispatch(uiActions.resetDialog('newItemDialog'))}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">{newItem.displayName || 'Create New Item'}</DialogTitle>
+      <DialogTitle id="form-dialog-title">
+        {mode === MODES.VIEW ? 'Create New Item' : `Edit Item`}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>
           Explanation...
         </DialogContentText>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={_onSubmit}>
           <TextField
             autoFocus id="displayName" label="name" type="text"
-            value={newItem.displayName}
+            value={displayName}
             onChange={({ target: { value } }) => {
-              dispatch(courseActions.setNewItem({ displayName: value }));
+              dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, displayName: value } }));
+              // dispatch(courseActions.setNewItem({ displayName: value }));
             }}
           />
           <TextField
             id="description" label="description" type="text"
-            value={newItem.description}
+            value={description}
             onChange={({ target: { value } }) => {
-              dispatch(courseActions.setNewItem({ description: value }));
+              dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, description: value } }))
+              // dispatch(courseActions.setNewItem({ description: value }));
             }}
           />
 
-          {playbackId && (
-            <ReactPlayer
-              width={400}
-              height={300}
-              style={{ border: '3px solid blue' }}
-              url={`https://stream.mux.com/${playbackId}.m3u8`}
-              controls={true}
-            />
-          )}
+          {/*{playbackId && (*/}
+          {/*  <ReactPlayer*/}
+          {/*    width={400}*/}
+          {/*    height={300}*/}
+          {/*    style={{ border: '3px solid blue' }}*/}
+          {/*    url={`https://stream.mux.com/${playbackId}.m3u8`}*/}
+          {/*    controls={true}*/}
+          {/*  />*/}
+          {/*)}*/}
 
-          {itemUI.mode === MODES.CREATE && <input type="file" id="upload" onChange={onUpload} />}
-          {itemUI.mode === MODES.EDIT && (
+          {mode === MODES.VIEW && <input type="file" id="upload" onChange={onUpload} />}
+          {mode === MODES.EDIT && (
             <>
-              {itemUI.isChangingFile && <input type="file" id="upload" onChange={onUpload} />}
-              {!itemUI.isChangingFile && (
-                <Button onClick={() => dispatch(courseActions.setItemUI({ isChangingFile: true }))}>
+              {isChangingFile && <input type="file" id="upload" onChange={onUpload} />}
+              {!isChangingFile && (
+                <Button
+                  onClick={() => {
+                    dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, isChangingFile: true }}));
+                  }}
+                >
                   Update File
                 </Button>
               )}
             </>
           )}
-          {upload.isUploading && (
-            <p>{Math.round((upload.bytesTransferred / upload.totalBytes) * 100)}%</p>
+          {(totalBytes > 0) && (
+            <p>{Math.round((bytesTransferred / totalBytes) * 100)}%</p>
           )}
           <button className="invisible" type="submit" disabled={isDisabled()} />
         </form>
+        {!!error && <Alert severity="error">{error}</Alert>}
       </DialogContent>
       <DialogActions>
         <Button onClick={() => dispatch(uiActions.resetDialog('newItemDialog'))} color="primary">
           Cancel
         </Button>
         <Button
-          onClick={onSubmit}
+          onClick={_onSubmit}
           color="primary"
           disabled={isDisabled()}
         >
-          {itemUI.mode === MODES.CREATE ? 'Create' : 'Update'}
+          {mode === MODES.VIEW ? 'Create' : 'Update'}
         </Button>
       </DialogActions>
     </Dialog>
