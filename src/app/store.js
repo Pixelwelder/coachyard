@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 
 import appReducer from '../features/app/appSlice';
 import logReducer from '../features/log/logSlice';
@@ -31,5 +31,11 @@ export default configureStore({
     billing: billingReducer,
     catalog: catalogReducer,
     selectedCourse: selectedCourseReducer
-  }
+  },
+  middleware: getDefaultMiddleware({
+    serializableCheck: {
+      // We do unspeakable things in the UI reducer.
+      ignoredActions: ['ui/setUI']
+    }
+  })
 });

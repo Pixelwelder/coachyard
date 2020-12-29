@@ -14,6 +14,7 @@ import './app.scss';
 import Course from '../features/course2';
 import Catalog from '../features/catalog';
 import NewCourseDialog from '../components/NewCourseDialog2';
+import DeleteDialog from '../components/DeleteDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -61,6 +62,7 @@ const App = () => {
 
       {/* DIALOGS */}
       <NewCourseDialog />
+      <DeleteDialog />
 
       {/*<Nav />*/}
 

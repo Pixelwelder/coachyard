@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { actions as uiActions, selectors as uiSelectors, MODES } from '../ui/uiSlice';
 
 /**
  * Provides the list of courses this user has access to.
@@ -70,6 +71,23 @@ const createNewCourse = createAsyncThunk(
   }
 );
 
+const deleteCourse = createAsyncThunk(
+  'deleteCourse',
+  async ({ uid }, { dispatch, getState }) => {
+    console.log('deleting', uid);
+    const { deleteDialog } = uiSelectors.select(getState());
+    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.DELETING }}));
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
+
+    try {
+      await callable({ uid });
+      dispatch(uiActions.resetUI('deleteDialog'));
+    } catch (error) {
+      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEWING }}));
+    }
+  }
+);
+
 const onPending = name => (state) => {
   state[name].isLoading = true;
   state[name].error = null;
@@ -113,7 +131,12 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, init, createNewCourse };
+const actions = {
+  ...generatedActions,
+  init,
+  createNewCourse,
+  deleteCourse
+};
 
 const select = ({ catalog }) => catalog;
 const selectTeaching = createSelector(select, ({ teaching }) => teaching);

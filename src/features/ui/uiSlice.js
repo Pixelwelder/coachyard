@@ -1,15 +1,35 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const MODES = {
+  VIEWING: 'viewing',
+  DELETING: 'deleting'
+};
+
+const baseDialog = {
+  open: false,
+  isLoading: false,
+  error: null
+};
+
 const initialState = {
   // TODO
   showAccount: false,
 
   newCourseDialog: {
-    show: false,
-    isLoading: false,
-    error: null,
+    ...baseDialog,
     displayName: '',
     email: ''
+  },
+
+  newItemDialog: {
+    ...baseDialog,
+    displayName: ''
+  },
+
+  deleteDialog: {
+    ...baseDialog,
+    mode: MODES.VIEWING,
+    uid: ''
   }
 };
 
@@ -35,5 +55,5 @@ const { actions, reducer } = createSlice({
 const select = ({ ui }) => ui;
 const selectors = { select };
 
-export { selectors, actions };
+export { selectors, actions, MODES };
 export default reducer;

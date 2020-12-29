@@ -15,7 +15,7 @@ import Alert from '@material-ui/lab/Alert';
 
 const NewCourseDialog = () => {
   const { newCourseDialog } = useSelector(uiSelectors.select);
-  const { isLoading, error, displayName, email, show } = newCourseDialog;
+  const { isLoading, error, displayName, email, open } = newCourseDialog;
   const dispatch = useDispatch();
 
   const onClose = () => {
@@ -30,7 +30,7 @@ const NewCourseDialog = () => {
   };
 
   return (
-    <Dialog open={show} onClose={onClose} aria-labelledby="form-dialog-title">
+    <Dialog open={open} onClose={onClose} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
