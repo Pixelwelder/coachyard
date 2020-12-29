@@ -78,7 +78,6 @@ const AssetList = () => {
         <ReactPlayer
           width={400}
           height={300}
-          style={{ border: '3px solid blue' }}
           url={`https://stream.mux.com/YQVbuUSFG0200KYkZpmoXpgBnigpw9jCX8u4X00lQvSvDY.m3u8`}
         />
       </div>

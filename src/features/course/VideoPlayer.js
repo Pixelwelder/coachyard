@@ -18,7 +18,6 @@ const VideoPlayer = () => {
         <ReactPlayer
           width={400}
           height={300}
-          style={{ border: '3px solid blue' }}
           url={`https://stream.mux.com/${playbackId}.m3u8`}
           controls={true}
         />

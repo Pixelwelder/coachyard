@@ -4,20 +4,16 @@
 #root {
   display: flex;
   height: 100vh;
-  min-height: 500px;
+  min-height: 400px;
   padding: $outer-padding;
   justify-content: center;
 
   @media (min-width: $breakpoint-mobile) {
     padding: $outer-padding-lg;
   }
-
-  // TODO
-  border: 1px solid green;
 }
 
 .app-root {
-  border: 1px solid lightcoral;
   flex: 1;
   max-width: 1200px;
 
@@ -27,21 +23,27 @@
 
 .header-container {
   flex: 0;
-  border: 1px solid green;
 }
 
 .content-container {
   flex: 1;
-  border: 1px solid red;
   display: flex;
 }
 
 .footer-container {
   flex: 0;
-  border: 1px solid mediumpurple;
+}
+
+.footer-list {
+  display: flex;
+  padding: 0;
+
+  li {
+    list-style: none;
+    margin-right: $outer-padding-lg;
+  }
 }
 
 .MuiGrid-item {
-  // TODO
-  border: 1px solid lightblue;
+
 }

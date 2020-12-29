@@ -2,7 +2,10 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <p>Footer</p>
+    <ul className="footer-list">
+      <li>Terms and Conditions</li>
+      <li>Privacy</li>
+    </ul>
   )
 };
 

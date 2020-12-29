@@ -1,10 +1,16 @@
+@import '../../app/variables';
+
 .app-content {
-  border: 1px solid blue;
   flex: 1;
 }
 
 .app-content-main {
   display: flex;
+  min-height: 80vh;
+
+  @media (min-width: $breakpoint-mobile) {
+    min-height: unset;
+  }
 }
 
 .app-content-toc {

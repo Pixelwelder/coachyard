@@ -10,6 +10,8 @@ import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
 import ItemView from './ItemView';
+import CardContent from '@material-ui/core/CardContent';
+import Card from '@material-ui/core/Card';
 
 const Course = () => {
   const { id } = useParams();
@@ -26,6 +28,7 @@ const Course = () => {
   return (
     <Grid
       container
+      spacing={2}
       className="app-content"
     >
       <Grid
@@ -43,22 +46,26 @@ const Course = () => {
         sm={4}
         className="app-content-toc"
       >
-        {course && (
-          <p onClick={() => dispatch(selectedCourseActions.setSelectedItemUid(null))}>
-            {course.displayName}
-          </p>
-        )}
-        <ItemList />
-        <Button
-          onClick={() => dispatch(uiActions.openDialog({
-            name: 'newItemDialog',
-            params: {
-              courseUid: course.uid
-            }
-          }))}
-        >
-          Create New
-        </Button>
+        <Card className="item-view">
+          {course && (
+            <p onClick={() => dispatch(selectedCourseActions.setSelectedItemUid(null))}>
+              {course.displayName}
+            </p>
+          )}
+          <CardContent>
+            <ItemList />
+            <Button
+              onClick={() => dispatch(uiActions.openDialog({
+                name: 'newItemDialog',
+                params: {
+                  courseUid: course.uid
+                }
+              }))}
+            >
+              Create New
+            </Button>
+          </CardContent>
+        </Card>
       </Grid>
     </Grid>
   );
