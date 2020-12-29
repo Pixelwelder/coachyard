@@ -14,6 +14,7 @@ import './app.scss';
 import Course from '../features/course2';
 import Catalog from '../features/catalog';
 import NewCourseDialog from '../components/NewCourseDialog2';
+import NewItemDialog from '../components/NewItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
 
 const App = () => {
@@ -62,6 +63,7 @@ const App = () => {
 
       {/* DIALOGS */}
       <NewCourseDialog />
+      <NewItemDialog />
       <DeleteDialog />
 
       {/*<Nav />*/}

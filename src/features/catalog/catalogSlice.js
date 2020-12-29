@@ -76,7 +76,7 @@ const deleteCourse = createAsyncThunk(
   async ({ uid }, { dispatch, getState }) => {
     console.log('deleting', uid);
     const { deleteDialog } = uiSelectors.select(getState());
-    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.DELETE }}));
+    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
 
     try {

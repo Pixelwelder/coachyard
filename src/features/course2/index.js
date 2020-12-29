@@ -16,8 +16,6 @@ const Course = () => {
   const { deleteDialog } = useSelector(uiSelectors.select);
 
   const dispatch = useDispatch();
-  // const selectedCourseItems =
-  console.log('SELECTED', course);
 
   useEffect(() => {
     dispatch(selectedCourseActions.setId({ id }));
@@ -46,7 +44,10 @@ const Course = () => {
         {course && <p>{course.displayName}</p>}
         <ItemList />
         <Button
-          onClick={() => dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW } }))}
+          onClick={() => dispatch(uiActions.openDialog({
+            name: 'newItemDialog',
+            params: { uid: course.uid }
+          }))}
         >
           Create New (new item dialog)
         </Button>

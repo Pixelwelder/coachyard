@@ -32,11 +32,10 @@ const TeachingCatalogList = () => {
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions.openDialog('newCourseDialog'))}
-      onDelete={(item) => dispatch(uiActions.setUI({
-        deleteDialog: {
-          ...deleteDialog,
-          mode: MODES.VIEW,
+      onCreate={() => dispatch(uiActions.openDialog({ name: 'newCourseDialog' }))}
+      onDelete={(item) => dispatch(uiActions.openDialog({
+        name: 'deleteDialog',
+        params: {
           item,
           onConfirm: catalogActions.deleteCourse
         }

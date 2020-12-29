@@ -4,9 +4,8 @@ const MODES = {
   VIEW: 'view',
   EDIT: 'edit',
   CREATE: 'create',
-  DELETE: 'delete',
+  PROCESSING: 'processing',
   CLOSED: 'closed',
-  OPEN: 'open'
 };
 
 const baseDialog = {
@@ -43,7 +42,11 @@ const { actions, reducer } = createSlice({
   initialState,
   reducers: {
     openDialog: (state, action) => {
-      state[action.payload].mode = MODES.OPEN;
+      const { name, params = {} } = action.payload;
+      state[name] = {
+        mode: MODES.VIEW,
+        ...params
+      };
     },
     resetDialog: (state, action) => {
       state[action.payload] = initialState[action.payload]

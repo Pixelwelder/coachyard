@@ -25,13 +25,13 @@ const CoursesCreated = () => {
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
         <h2>Courses Created</h2>
-        {mode === MODES.VIEW && (
+        {mode === MODES.OPEN && (
           <Button onClick={() => dispatch(courseActions.setMode(MODES.EDIT))}>
             <EditIcon />
           </Button>
         )}
         {mode === MODES.EDIT && (
-          <Button onClick={() => dispatch(courseActions.setMode(MODES.VIEW))}>
+          <Button onClick={() => dispatch(courseActions.setMode(MODES.OPEN))}>
             <DoneIcon />
           </Button>
         )}

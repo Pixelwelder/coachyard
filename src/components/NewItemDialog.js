@@ -12,9 +12,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { actions as courseActions, MODES, selectors as courseSelectors } from '../features/course/courseSlice';
 import { actions as uiActions, selectors as uiSelectors } from '../features/ui/uiSlice';
 
-const ItemDialog = () => {
+const NewItemDialog = () => {
   const { newItemDialog } = useSelector(uiSelectors.select);
-  const { open } = newItemDialog;
+  const { mode } = newItemDialog;
 
   const dispatch = useDispatch();
   const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
@@ -49,7 +49,7 @@ const ItemDialog = () => {
 
   return (
     <Dialog
-      open={itemUI.mode !== MODES.CLOSED}
+      open={mode !== MODES.CLOSED}
       onClose={() => dispatch(courseActions.closeItem())}
       aria-labelledby="form-dialog-title"
     >
@@ -102,9 +102,9 @@ const ItemDialog = () => {
         </form>
       </DialogContent>
       <DialogActions>
-        {/*<Button onClick={() => setShowNewDialog(false)} color="primary">*/}
-        {/*  Cancel*/}
-        {/*</Button>*/}
+        <Button onClick={() => dispatch(uiActions.resetDialog('newItemDialog'))} color="primary">
+          Cancel
+        </Button>
         <Button
           onClick={onSubmit}
           color="primary"

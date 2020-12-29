@@ -32,7 +32,7 @@ const DeleteDialog = () => {
             {item && `Are you sure you want to delete "${item.displayName}"?`}
           </DialogContentText>
         )}
-        {mode === MODES.DELETE && (
+        {mode === MODES.PROCESSING && (
           <DialogContentText>
             {item && `Deleting "${item.displayName}" forever...`}
           </DialogContentText>
