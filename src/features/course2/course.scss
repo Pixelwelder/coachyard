@@ -2,3 +2,13 @@
   border: 1px solid blue;
   flex: 1;
 }
+
+.app-content-toc {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-list {
+  flex: 1;
+  overflow-y: scroll;
+}

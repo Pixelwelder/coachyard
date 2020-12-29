@@ -8,14 +8,11 @@ const ItemList = () => {
   const { items } = useSelector(selectedCourseSelectors.select);
 
   return (
-    <div>
-      <p>ItemList</p>
-      <ul>
-        {items.map((item, index) => {
-          return <li key={index}>{item.displayName}</li>;
-        })}
-      </ul>
-    </div>
+    <ul className="item-list">
+      {items.map((item, index) => {
+        return <li key={index}>{item.displayName}</li>;
+      })}
+    </ul>
   )
 };
 
