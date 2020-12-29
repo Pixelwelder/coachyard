@@ -3,11 +3,18 @@ import ReactPlayer from 'react-player';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
+import Paper from '@material-ui/core/Paper';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Button from '@material-ui/core/Button';
 
 const ItemView = ({ item }) => {
+  const onEdit = () => {};
+  const onDelete = () => {};
+
   return (
-    <Card className="item-view">
-      <CardContent>
+    <Paper className="item-view" variant="outlined">
+      <div className="item-view-content">
         {!item && (
           <p>No item.</p>
         )}
@@ -26,8 +33,16 @@ const ItemView = ({ item }) => {
             )}
           </>
       )}
-      </CardContent>
-    </Card>
+      </div>
+      <div className="item-view-controls">
+        <Button>
+          <EditIcon onClick={onEdit} />
+        </Button>
+        <Button>
+          <DeleteIcon onClick={onDelete} />
+        </Button>
+      </div>
+    </Paper>
   );
 };
 

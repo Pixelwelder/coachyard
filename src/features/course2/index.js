@@ -11,7 +11,9 @@ import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
 import ItemView from './ItemView';
 import CardContent from '@material-ui/core/CardContent';
+import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
 
 const Course = () => {
   const { id } = useParams();
@@ -28,7 +30,6 @@ const Course = () => {
   return (
     <Grid
       container
-      spacing={2}
       className="app-content"
     >
       <Grid
@@ -46,14 +47,16 @@ const Course = () => {
         sm={4}
         className="app-content-toc"
       >
-        <Card className="item-view">
+        <Paper className="toc-container" variant="outlined">
+          <div className="toc-header">
           {course && (
             <p onClick={() => dispatch(selectedCourseActions.setSelectedItemUid(null))}>
               {course.displayName}
             </p>
           )}
-          <CardContent>
-            <ItemList />
+          </div>
+          <ItemList />
+          <div className="toc-footer">
             <Button
               onClick={() => dispatch(uiActions.openDialog({
                 name: 'newItemDialog',
@@ -64,8 +67,8 @@ const Course = () => {
             >
               Create New
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </Paper>
       </Grid>
     </Grid>
   );
