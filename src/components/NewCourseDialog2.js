@@ -41,6 +41,7 @@ const NewCourseDialog = () => {
         <form onSubmit={onSubmit}>
           <TextField
             fullWidth
+            autoFocus
             variant="filled" label="Course Name" placeholder="Course Name"
             id="displayName" value={displayName} disabled={isLoading}
             onChange={({ target: { value } }) => {

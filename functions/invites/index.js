@@ -78,6 +78,7 @@ const _checkRoom = async ({ name }) => {
 };
 
 const _launchRoom = async ({ name }) => {
+  console.log('_launchRoom', name);
   const result = await fetch(
     `https://api.daily.co/v1/rooms`,
     {
@@ -113,13 +114,13 @@ const deleteInvite = async (data, context) => {
 };
 
 const launch = async (data, context) => {
-  // Get invite uid.
   try {
     checkAuth(context);
     const { uid } = data;
 
-    const inviteDoc = await admin.firestore().collection('invites').doc(uid).get();
-    if (!inviteDoc) throw new Error(`No invite by uid ${uid}`);
+    console.log('launching room...');
+    const itemDoc = await admin.firestore().collection('items').doc(uid).get();
+    if (!itemDoc.exists) throw new Error(`No item by uid ${uid}.`);
 
     // Does the room already exist?
     const currentRoom = await _checkRoom({ name: uid });
@@ -129,13 +130,17 @@ const launch = async (data, context) => {
       return currentRoom;
     }
 
+    console.log('creating room...');
     const newRoom = await _launchRoom({ name: uid });
-    console.log(newRoom);
     if (newRoom.error) throw new Error(newRoom.error);
+    console.log('room created', newRoom);
 
-    await admin.firestore().collection('invites').doc(uid).update({ inProgress: true, room: newRoom });
+    // Update our record.
+    console.log('updating', uid);
+    await admin.firestore().collection('items').doc(uid)
+      .update({ isInProgress: true, room: newRoom });
+
     return newRoom;
-
   } catch (error) {
     console.log(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -148,12 +153,11 @@ const launch = async (data, context) => {
 const end = async (data, context) => {
   try {
     const { uid } = data;
-    const inviteDoc = await admin.firestore().collection('invites').doc(uid).get();
-    if (!inviteDoc.exists) throw new Error(`No invite by id ${uid}`);
+    const itemDoc = await admin.firestore().collection('items').doc(uid).get();
+    if (!itemDoc) throw new Error(`No item by id ${uid}.`);
 
-    const invite = inviteDoc.data();
-    const { creatorUid } = invite;
-    console.log(context.auth.uid, invite);
+    const item = itemDoc.data();
+    const { creatorUid } = item;
     if (context.auth.uid !== creatorUid) throw new Error('You can only end a session you began.');
 
     const result = await fetch(
@@ -169,8 +173,7 @@ const end = async (data, context) => {
     console.log(json);
 
     // TODO Now update the invite.
-    await admin.firestore().collection('invites').doc(uid)
-      .update({ inProgress: false, room: false, completed: true });
+    await itemDoc.ref.update({ isInProgress: false, isCompleted: true });
 
     return { message: 'Done.', result: json, sentData: data }
   } catch (error) {

@@ -36,7 +36,7 @@ const newStudent = (overrides) => ({
   ...overrides
 });
 
-// TODO - Remove (moved to front end).
+// TODO - Remove.
 const newInvite = (overrides) => ({
   ...newBaseItem(),
   creatorUid: '',
@@ -73,9 +73,9 @@ const newCourseItem = (overrides) => ({
 
   // This is for invites.
   date: '',
-  accepted: false,
-  completed: false,
-  inProgress: false,
+  isAccepted: false,
+  isCompleted: false,
+  isInProgress: false,
 
   // This is for associated media.
   originalFilename: '',
