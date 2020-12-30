@@ -35,7 +35,8 @@ export default configureStore({
   middleware: getDefaultMiddleware({
     serializableCheck: {
       // We do unspeakable things in the UI reducer.
-      ignoredActions: ['ui/openDialog']
+      ignoredActions: ['ui/openDialog', 'ui/setUI'],
+      ignoredPaths: ['ui.deleteDialog.onConfirm', 'ui.newCourseDialog.onConfirm']
     }
   })
 });

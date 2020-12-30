@@ -55,6 +55,7 @@ const newCourse = (overrides) => ({
   creatorUid: '',
   displayName: '',
   description: '',
+  image: '',
   ...overrides
 });
 
@@ -65,6 +66,7 @@ const newCourseItem = (overrides) => ({
   courseUid: '',
   displayName: '',
   description: '',
+  image: '',
 
   originalFilename: '',
   streamingId: '',

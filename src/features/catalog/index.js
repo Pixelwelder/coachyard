@@ -7,8 +7,8 @@ const Catalog = () => {
   return (
     <div className="catalog">
       <Link to="/courses">Courses</Link>
-      <TeachingCatalogList />
       <LearningCatalogList />
+      <TeachingCatalogList />
     </div>
   );
 };

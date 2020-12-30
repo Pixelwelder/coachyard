@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
+import { selectors as catalogSelectors, actions as catalogActions } from '../catalog/catalogSlice';
+import { actions as uiActions } from '../ui/uiSlice';
 import Item from './Item';
 
 const ItemList = () => {
@@ -13,7 +15,13 @@ const ItemList = () => {
   };
 
   const onDelete = (item) => {
-
+    dispatch(uiActions.openDialog({
+      name: 'deleteDialog',
+      params: {
+        item,
+        onConfirm: catalogActions.deleteItem
+      }
+    }));
   };
 
   return (

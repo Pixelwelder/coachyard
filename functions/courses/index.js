@@ -16,6 +16,8 @@ const createCourse = async (data, context) => {
 
     // TODO Gate!
 
+    const image = admin.storage().bucket().file('images/generic-student.png')
+
     // Create course object.
     const doc = admin.firestore().collection('courses').doc();
     const now = admin.firestore.Timestamp.now();
@@ -222,8 +224,6 @@ const deleteCourse = async (data, context) => {
       const items = itemsDocs.docs.map(doc => doc.data());
       itemsDocs.docs.forEach(doc => { transaction.delete(doc.ref); });
 
-      // TODO All videos.
-      // TODO All streaming items.
       return { items };
     });
 

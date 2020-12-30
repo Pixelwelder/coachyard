@@ -46,9 +46,11 @@ const init = createAsyncThunk(
             }
           });
 
+        // Listen for created courses.
         courseListener = app.firestore()
           .collection('courses')
           .where('creatorUid', '==', uid)
+          .orderBy('created')
           .onSnapshot((snapshot) => {
             console.log('course snapshot');
             const courses = snapshot.docs.reduce((accum, doc) => ({
@@ -75,11 +77,13 @@ const deleteCourse = createAsyncThunk(
   'deleteCourse',
   async ({ uid }, { dispatch, getState }) => {
     console.log('deleting', uid);
+
+    dispatch(uiActions.resetDialog('deleteDialog'));
     const { deleteDialog } = uiSelectors.select(getState());
     dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
 
     try {
+      const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
       await callable({ uid });
       dispatch(uiActions.resetUI('deleteDialog'));
     } catch (error) {
@@ -191,6 +195,24 @@ const addItemToCourse = createAsyncThunk(
   }
 );
 
+const deleteItem = createAsyncThunk(
+  'deleteItem',
+  async ({ uid }, { dispatch, getState }) => {
+    dispatch(uiActions.resetDialog('deleteDialog'));
+    const { deleteDialog } = uiSelectors.select(getState());
+    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
+
+    try {
+      const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
+      const result = await callable({ uid });
+      dispatch(uiActions.resetDialog('deleteDialog'));
+      console.log(result);
+    } catch (error) {
+      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
+    }
+  }
+);
+
 const onPending = name => (state) => {
   state[name].isLoading = true;
   state[name].error = null;
@@ -238,7 +260,11 @@ const { actions: generatedActions, reducer } = createSlice({
 
     [addItemToCourse.pending]: onPending('teaching'),
     [addItemToCourse.rejected]: onPending('teaching'),
-    [addItemToCourse.fulfilled]: onPending('teaching')
+    [addItemToCourse.fulfilled]: onPending('teaching'),
+
+    [deleteItem.pending]: onPending('teaching'),
+    [deleteItem.rejected]: onPending('teaching'),
+    [deleteItem.fulfilled]: onPending('teaching')
   }
 });
 
@@ -246,7 +272,7 @@ const actions = {
   ...generatedActions,
   init,
   createNewCourse, deleteCourse,
-  addItemToCourse
+  addItemToCourse, deleteItem
 };
 
 const select = ({ catalog }) => catalog;

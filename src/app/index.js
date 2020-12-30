@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Route, Link } from 'react-router-dom';
+import { Switch, Route, Link, Redirect } from 'react-router-dom';
 import { actions as appActions, selectors as appSelectors } from '../features/app/appSlice';
 import { MAIN_TABS, selectors as navSelectors } from '../features/nav/navSlice';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -46,6 +46,7 @@ const App = () => {
         <Switch>
           <Route path="/dashboard" component={Catalog} />
           <Route path="/course/:id" component={Course} />
+          <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>
 

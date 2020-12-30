@@ -8,10 +8,11 @@ import Button from '@material-ui/core/Button';
 
 import { selectors as uiSelectors, actions as uiActions, MODES } from '../features/ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import Alert from '@material-ui/lab/Alert';
 
 const DeleteDialog = () => {
   const { deleteDialog } = useSelector(uiSelectors.select);
-  const { mode, item, onConfirm } = deleteDialog;
+  const { mode, item, onConfirm, error } = deleteDialog;
 
   const dispatch = useDispatch();
 
@@ -37,6 +38,7 @@ const DeleteDialog = () => {
             {item && `Deleting "${item.displayName}" forever...`}
           </DialogContentText>
         )}
+        {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>
         {mode === MODES.VIEW && item && (
           <DialogActions>
@@ -46,7 +48,7 @@ const DeleteDialog = () => {
               Cancel
             </Button>
             <Button
-              onClick={dispatch(onConfirm(item))}
+              onClick={() => dispatch(onConfirm(item))}
               color="primary"
             >
               Confirm
