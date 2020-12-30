@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { DateTime } from 'luxon';
 
 const MODES = {
   VIEW: 'view',
@@ -20,7 +21,8 @@ const initialState = {
   newCourseDialog: {
     ...baseDialog,
     displayName: '',
-    email: ''
+    email: '',
+    date: ''
   },
 
   newItemDialog: {
@@ -28,6 +30,7 @@ const initialState = {
     courseUid: '',
     displayName: '',
     description: '',
+    date: '',
     isChangingFile: false,
     file: '',
     bytesTransferred: 0,
@@ -46,11 +49,19 @@ const { actions, reducer } = createSlice({
   reducers: {
     openDialog: (state, action) => {
       const { name, params = {} } = action.payload;
+      const subState = state[name];
       state[name] = {
-        ...state[name],
+        ...subState,
         mode: MODES.VIEW,
         ...params
       };
+
+      // Special cases.
+      if (subState.hasOwnProperty('date')) {
+        // Choose a nice date in the near future.
+        const hours = DateTime.local().hour + 2;
+        state[name].date = DateTime.local().set({ hours, minutes: 0, seconds: 0, milliseconds: 0 }).toUTC().toString();
+      }
     },
     resetDialog: (state, action) => {
       state[action.payload] = initialState[action.payload]

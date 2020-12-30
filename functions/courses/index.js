@@ -12,28 +12,55 @@ const createCourse = async (data, context) => {
     checkAuth(context);
 
     const { auth: { token: { uid } } } = context;
-    const { displayName, description } = data;
+    const { displayName, email, description = '', date } = data;
 
     // TODO Gate!
 
-    const image = admin.storage().bucket().file('images/generic-student.png')
+    const { course, item } = admin.firestore().runTransaction(async (transaction) => {
+      // Do we have the student?
+      const studentRef = await admin.firestore().collection('users')
+        .where('email', '==', email);
 
-    // Create course object.
-    const doc = admin.firestore().collection('courses').doc();
-    const now = admin.firestore.Timestamp.now();
-    const course = newCourse({
-      uid: doc.id,
-      creatorUid: uid,
-      displayName,
-      description,
-      created: now,
-      updated: now
+      const studentDoc = await transaction.get(studentRef);
+
+      // Create course object.
+      const courseRef = admin.firestore().collection('courses').doc();
+      const now = admin.firestore.Timestamp.now();
+      const course = newCourse({
+        uid: courseRef.id,
+        creatorUid: uid,
+        displayName,
+        description,
+        created: now,
+        updated: now,
+
+        // Save UID if we have it; otherwise email.
+        student: studentDoc.size ? studentDoc.docs[0].data().uid : email
+      });
+
+      // Add it.
+      await transaction.set(courseRef, course);
+
+      // Now create the first item in the course.
+      const itemRef = admin.firestore().collection('items').doc();
+      const timestamp = admin.firestore.Timestamp.now();
+      const item = newCourseItem({
+        uid: itemRef.id,
+        creatorUid: uid,
+        courseUid: courseRef.id,
+        created: timestamp,
+        updated: timestamp,
+
+        displayName: 'First Meeting',
+        date,
+      });
+
+      await transaction.set(itemRef, item);
+
+      return { course, item }
     });
 
-    // Add it.
-    await doc.set(course);
-
-    return { message: `Course '${displayName}' created.`, course };
+    return { message: `Course '${displayName}' created.`, course, item };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);

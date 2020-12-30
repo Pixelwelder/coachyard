@@ -67,9 +67,9 @@ const init = createAsyncThunk(
 
 const createNewCourse = createAsyncThunk(
   'createNewCourse',
-  async ({ displayName, email }, { dispatch, getState }) => {
+  async (params, { dispatch, getState }) => {
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
-    const result = await callable({ displayName, description: '' });
+    const result = await callable(params);
   }
 );
 

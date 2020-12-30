@@ -92,7 +92,6 @@ const ItemDialog = () => {
           {upload.isUploading && (
             <p>{Math.round((upload.bytesTransferred / upload.totalBytes) * 100)}%</p>
           )}
-          <button className="invisible" type="submit" disabled={isDisabled()} />
         </form>
       </DialogContent>
       <DialogActions>

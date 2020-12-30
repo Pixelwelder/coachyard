@@ -44,7 +44,6 @@ const CourseDialog = () => {
               dispatch(courseActions.setNewCourse({ description: value }));
             }}
           />
-          <button className="invisible" type="submit" />
         </form>
       </DialogContent>
       <DialogActions>

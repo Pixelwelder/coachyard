@@ -22,7 +22,7 @@ let unsubscribeItems = () => {};
  */
 const setId = createAsyncThunk(
   'setId',
-  async ({ id }, { dispatch }) => {
+  async ({ id, history }, { dispatch }) => {
     unsubscribeCourse();
     unsubscribeItems();
 
@@ -32,7 +32,12 @@ const setId = createAsyncThunk(
       .collection('courses')
       .where('uid', '==', id)
       .onSnapshot((snapshot) => {
-        if (!snapshot.size) throw new Error(`No course by id ${id}.`)
+        if (!snapshot.size) {
+          // TODO this is nasty.
+          history.push('/dashboard');
+          return;
+        }
+
         const course = parseUnserializables(snapshot.docs[0].data());
         dispatch(generatedActions.setCourse(course));
       });

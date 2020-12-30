@@ -59,7 +59,7 @@ const createUser = async (data, context) => {
  * Create a meta object every time a user is created.
  */
 const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
-  const { uid } = user;
+  const { uid, email } = user;
   const doc = admin.firestore().collection('users').doc(uid);
   const timestamp = admin.firestore.Timestamp.now();
   const userMeta = newUserMeta({
@@ -68,6 +68,22 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
     updated: timestamp
   });
   const result = await doc.set(userMeta);
+
+  // Load all items that mention this student and change email to uid.
+  const itemsResult = await admin.firestore().runTransaction(async (transaction) => {
+    const itemsRef = admin.firestore().collection('items')
+      .where('student', '==', email);
+
+    const itemsDocs = await transaction.get(itemsRef);
+
+    itemsDocs.forEach((doc) => {
+      transaction.update(doc.ref, { student: uid });
+    });
+
+    console.log(`Updated ${itemsDocs.size} items.`);
+  })
+
+  console.log('Update complete.');
 });
 
 /**

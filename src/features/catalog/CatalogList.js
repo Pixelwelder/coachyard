@@ -6,7 +6,7 @@ import { selectors as catalogSelectors, actions as catalogActions } from './cata
 import { selectors as uiSelectors } from '../ui/uiSlice';
 import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles({

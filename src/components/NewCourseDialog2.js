@@ -12,10 +12,12 @@ import { selectors as uiSelectors, actions as uiActions, MODES } from '../featur
 // import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
+import { actions as invitesActions } from '../features/invites/invitesSlice';
+import { DateTimePicker } from '@material-ui/pickers';
 
 const NewCourseDialog = () => {
   const { newCourseDialog } = useSelector(uiSelectors.select);
-  const { isLoading, error, displayName, email, mode } = newCourseDialog;
+  const { isLoading, error, displayName, email, date, mode } = newCourseDialog;
   const dispatch = useDispatch();
 
   const onClose = () => {
@@ -51,6 +53,12 @@ const NewCourseDialog = () => {
             id="email" type="email" value={email} disabled={isLoading}
             onChange={({ target: { value } }) => {
               dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, email: value } }));
+            }}
+          />
+          <DateTimePicker
+            value={date}
+            onChange={value => {
+              dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, date: value } }));
             }}
           />
         </form>

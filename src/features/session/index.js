@@ -105,7 +105,6 @@ const Session = () => {
                 onChange={({ target: { value }}) => setPassword(value)}
                 error={isErrorType('password')(error)}
               />
-              <button className="invisible" type="submit" />
             </form>
             {!!error && <Alert severity="error">{error.message}</Alert>}
             <p>Already got an account? <span className="link" onClick={onToggle}>Sign In</span></p>
@@ -128,7 +127,6 @@ const Session = () => {
                 onChange={({ target: { value }}) => setPassword(value)}
                 error={isErrorType('password')(error)}
               />
-              <button className="invisible" type="submit" />
             </form>
             {!!error && <Alert severity="error">{error.message}</Alert>}
             <p>Need an account? <span className="link" onClick={onToggle}>Sign Up</span></p>

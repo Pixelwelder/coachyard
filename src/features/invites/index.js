@@ -259,7 +259,6 @@ const InvitesFrom = () => {
               onChange={({ target: { value } }) => dispatch(invitesActions.setEmail(value))}
             />
             <DateTimePicker value={date} onChange={value => dispatch(invitesActions.setDate(value))} />
-            <button className="invisible" type="submit" />
           </form>
           {!!error && <Alert severity="error">{error.message}</Alert>}
         </DialogContent>

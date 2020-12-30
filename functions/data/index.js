@@ -56,18 +56,28 @@ const newCourse = (overrides) => ({
   displayName: '',
   description: '',
   image: '',
+
+  // This may be an email or a uid.
+  student: '',
+
   ...overrides
 });
 
 const newCourseItem = (overrides) => ({
   ...newBaseItem(),
-  uid: '',
   creatorUid: '',
   courseUid: '',
   displayName: '',
   description: '',
   image: '',
 
+  // This is for invites.
+  date: '',
+  accepted: false,
+  completed: false,
+  inProgress: false,
+
+  // This is for associated media.
   originalFilename: '',
   streamingId: '',
   playbackId: '',

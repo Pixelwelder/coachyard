@@ -8,7 +8,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea  from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const useStyles = makeStyles({
   media: {
@@ -37,14 +37,14 @@ const CatalogItem = ({ item, onDelete, onSelect }) => {
             {displayName}
           </Typography>
         </CardContent>
-        <CardActions>
-          {onDelete && (
-            <Button onClick={() => onDelete(item)}>
-              <DeleteIcon />
-            </Button>
-          )}
-        </CardActions>
       </CardActionArea>
+      <CardActions>
+        {onDelete && (
+          <Button onClick={() => onDelete(item)}>
+            <DeleteIcon />
+          </Button>
+        )}
+      </CardActions>
     </Card>
   );
 };

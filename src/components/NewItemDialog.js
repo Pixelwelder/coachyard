@@ -118,7 +118,6 @@ const NewItemDialog = () => {
           {(totalBytes > 0) && (
             <p>{Math.round((bytesTransferred / totalBytes) * 100)}%</p>
           )}
-          <button className="invisible" type="submit" disabled={isDisabled()} />
         </form>
         {!!error && <Alert severity="error">{error}</Alert>}
       </DialogContent>

@@ -1,19 +1,40 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import User from '../user';
-import './header.scss';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Box from '@material-ui/core/Box';
+
+const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    paddingBottom: 8,
+    marginBottom: 16
+  },
+  titleContainer: {
+    flex: 1
+  },
+  userContainer: {
+    flex: 0
+  },
+  title: {
+    textTransform: 'uppercase'
+  }
+});
 
 const Header = () => {
-  return (
-    <div className="header">
-      <div className="title-container">
-        <Typography variant="h3">Coachyard</Typography>
-      </div>
+  const styles = useStyles();
 
-      <div className="user-container">
+  return (
+    <Box borderBottom={1} borderColor="lightgray" className={styles.container}>
+      <Box className={styles.titleContainer}>
+        <Typography variant="h3" className={styles.title}>Coachyard</Typography>
+      </Box>
+
+      <Box className={styles.userContainer}>
         <User />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions, MODES, selectors as uiSelectors } from '../ui/uiSlice';
@@ -20,11 +20,11 @@ const Course = () => {
   const { course } = useSelector(selectedCourseSelectors.select);
   const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { deleteDialog } = useSelector(uiSelectors.select);
-
+  const history = useHistory();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(selectedCourseActions.setId({ id }));
+    dispatch(selectedCourseActions.setId({ id, history }));
   }, [id]);
 
   return (
