@@ -1,6 +1,6 @@
 import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { selectors as catalogSelectors } from '../catalog/catalogSlice';
+import { selectors as appSelectors } from '../app/appSlice';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
@@ -10,6 +10,7 @@ const initialState = {
 
   course: null,
   items: [],
+  selectedItem: null,
   selectedItemUid: null
 };
 
@@ -53,6 +54,27 @@ const setId = createAsyncThunk(
   }
 );
 
+let unsubscribeItem = () => {};
+const setSelectedItemUid = createAsyncThunk(
+  'setSelectedItemUid',
+  async (itemUid, { dispatch, getState }) => {
+    unsubscribeItem();
+
+    if (itemUid) {
+      unsubscribeItem = app.firestore()
+        .collection('items')
+        .doc(itemUid)
+        .onSnapshot((snapshot) => {
+          if (snapshot.exists) {
+            const data = snapshot.data();
+            dispatch(generatedActions._setSelectedItemUid(data.uid));
+            dispatch(generatedActions._setSelectedItem(data));
+          }
+        });
+    }
+  }
+);
+
 const onPending = (state) => {
   state.error = initialState.error;
   state.isLoading = true;
@@ -78,7 +100,8 @@ const { actions: generatedActions, reducer } = createSlice({
     _setId: setValue('id'),
     setCourse: setValue('course'),
     setItems: setValue('items'),
-    setSelectedItemUid: setValue('selectedItemUid')
+    _setSelectedItemUid: setValue('selectedItemUid'),
+    _setSelectedItem: setValue('selectedItem')
   },
   extraReducers: {
     [setId.pending]: onPending,
@@ -87,16 +110,21 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, setId };
+const actions = { ...generatedActions, setId, setSelectedItemUid };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(
   select,
-  ({ items, selectedItemUid }) => {
-    return items.find(({ uid }) => uid === selectedItemUid);
+  ({ selectedItem }) => selectedItem
+);
+const selectOwnsCourse = createSelector(
+  select,
+  ({ course }) => {
+    const currentUser = app.auth().currentUser;
+    return !!(course && currentUser && (currentUser.uid === course.creatorUid));
   }
 );
-const selectors = { select, selectSelectedItem };
+const selectors = { select, selectSelectedItem, selectOwnsCourse };
 
 export { actions, selectors };
 export default reducer;

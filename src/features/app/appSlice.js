@@ -102,6 +102,7 @@ const init = createAsyncThunk(
       await dispatch(courseActions.init());
       await dispatch(sessionActions.init());
       await dispatch(catalogActions.init());
+
       // await dispatch(adminActions.init({ firebase: app }));
 
       // Set the query. For some reason the object returned from queryString is non-serializable.

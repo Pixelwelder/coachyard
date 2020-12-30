@@ -12,13 +12,11 @@ const initialState = {
 const launch = createAsyncThunk(
   'launch',
   async (params, { dispatch }) => {
-    console.log('launching...');
     const launchCallable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.LAUNCH);
     const result = await launchCallable(params);
-    console.log('RESULT', result);
-    const { data: { url } } = result;
-    dispatch(generatedActions.setUrl(url));
-    dispatch(navActions.setMainTab(MAIN_TABS.VIDEO));
+    // const { data: { url, name } } = result;
+    // dispatch(generatedActions.setUrl(name));
+    // dispatch(navActions.setMainTab(MAIN_TABS.VIDEO));
     // await invitesActions.getInvitesFrom();
     // await invitesActions.getInvitesTo();
 
@@ -47,17 +45,26 @@ const join = createAsyncThunk(
   }
 );
 
+let unsubscribe = () => {};
+const init = createAsyncThunk(
+  'initVideo',
+  async () => {
+    // unsubscribe();
+    // unsubscribe = app.firestore()
+  }
+);
+
 const { actions: generatedActions, reducer } = createSlice({
   name: 'video',
   initialState,
   reducers: {
     setUrl: (state, action) => {
-      state.url = action.payload;
+      state.url = `https://coachyard.daily.co/${action.payload}`;
     }
   }
 });
 
-const actions = { ...generatedActions, launch, end, join };
+const actions = { ...generatedActions, init, launch, end, join };
 
 const selectors = {
   select: ({ video }) => video

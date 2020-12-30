@@ -8,6 +8,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import { actions as videoActions, selectors as videoSelectors } from '../videoIframe/videoSlice';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
 
@@ -88,12 +89,14 @@ const IncompleteItem = ({ item }) => {
 
 const ItemView = ({ item }) => {
   const dispatch = useDispatch();
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
   const onEdit = () => {};
   const onDelete = () => {};
 
   return (
     <Paper className="item-view" variant="outlined">
+      <p>? {ownsCourse}</p>
       <div className="item-view-content">
         {!item && <NoItem />}
         {item && (
@@ -104,32 +107,43 @@ const ItemView = ({ item }) => {
         )}
       </div>
       <div className="item-view-controls">
-        <Button>
-          <EditIcon onClick={onEdit} />
-        </Button>
-        <Button>
-          <DeleteIcon onClick={onDelete} />
-        </Button>
+        {ownsCourse && (
+          <>
+            <Button>
+              <EditIcon onClick={onEdit} />
+            </Button>
+            <Button>
+              <DeleteIcon onClick={onDelete} />
+            </Button>
+          </>
+        )}
         {item && (
           <>
-            {!item.isInProgress && (
-              <Button
-                color="primary" variant="contained"
-                onClick={() => dispatch(videoActions.launch({ uid: item.uid }))}
-              >
-                Launch
-              </Button>
-            )}
+            <Button
+              color="primary" variant="contained"
+              onClick={() => dispatch(videoActions.launch({ uid: item.uid }))}
+            >
+              Enter
+            </Button>
             {item.isInProgress && (
-              <div>
-
-                <Button
-                  color="primary" variant="contained"
-                  onClick={() => dispatch(videoActions.end({ uid: item.uid }))}
-                >
-                  End
-                </Button>
-              </div>
+              <>
+                {ownsCourse && (
+                  <Button
+                    color="primary" variant="contained"
+                    onClick={() => dispatch(videoActions.end({ uid: item.uid }))}
+                  >
+                    End
+                  </Button>
+                )}
+                {!ownsCourse && (
+                  <Button
+                    color="primary" variant="contained"
+                    onClick={() => dispatch(videoActions.join({ uid: item.uid }))}
+                  >
+                    Join
+                  </Button>
+                )}
+              </>
             )}
           </>
         )}

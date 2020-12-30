@@ -73,6 +73,7 @@ const newCourseItem = (overrides) => ({
 
   // This is for invites.
   date: '',
+  url: '',
   isAccepted: false,
   isCompleted: false,
   isInProgress: false,
