@@ -71,7 +71,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
 
   // Load all items that mention this student and change email to uid.
   const itemsResult = await admin.firestore().runTransaction(async (transaction) => {
-    const itemsRef = admin.firestore().collection('items')
+    const itemsRef = admin.firestore().collection('courses')
       .where('student', '==', email);
 
     const itemsDocs = await transaction.get(itemsRef);

@@ -11,6 +11,11 @@ import Typography from '@material-ui/core/Typography';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const useStyles = makeStyles({
+  container: {
+    minHeight: 200,
+    minWidth: 150,
+    marginRight: 8
+  },
   media: {
     height: 140,
     backgroundSize: 'stretch'
@@ -23,7 +28,7 @@ const CatalogItem = ({ item, onDelete, onSelect }) => {
 
   return (
     <Card
-      className="catalog-item"
+      className={classes.container}
       onClick={onSelect}
     >
       <CardActionArea>

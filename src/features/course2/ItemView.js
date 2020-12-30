@@ -52,7 +52,7 @@ const IncompleteItem = ({ item }) => {
           border: '1px solid black',
           'background-color': 'white',
           width: `${window.innerWidth - 32}px`,
-          height: `${window.innerHeight - 308}px`,
+          height: `${window.innerHeight - 20}px`,
           left: '16px',
           // right: '16px',
           top: '300px',

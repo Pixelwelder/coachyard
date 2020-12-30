@@ -10,6 +10,9 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles({
+  container: {
+    marginBottom: 32
+  },
   titleContainer: {
     display: 'flex',
     marginBottom: 16
@@ -31,7 +34,7 @@ const CatalogList = ({ title, onCreate, onDelete, items }) => {
   const history = useHistory();
 
   return (
-    <div className="catalog-list-component">
+    <div className={classes.container}>
       <div className={classes.titleContainer}>
         <Typography variant="h5" component="h2" className={classes.title}>{ title }</Typography>
         {onCreate && (
@@ -57,7 +60,7 @@ const CatalogList = ({ title, onCreate, onDelete, items }) => {
 };
 
 const TeachingCatalogList = () => {
-  const courses = useSelector(catalogSelectors.selectTeachingCourses);
+  const { courses } = useSelector(catalogSelectors.selectTeaching);
   const dispatch = useDispatch();
 
   return (
@@ -82,7 +85,15 @@ const TeachingCatalogList = () => {
 };
 
 const LearningCatalogList = () => {
-  return <CatalogList title="Learning" items={[]} />;
+  const { courses } = useSelector(catalogSelectors.selectLearning);
+  console.log('COURSES', courses);
+
+  return (
+    <CatalogList
+      title="Learning"
+      items={courses}
+    />
+  );
 };
 
 export { TeachingCatalogList, LearningCatalogList };

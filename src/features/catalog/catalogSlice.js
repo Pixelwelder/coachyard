@@ -9,24 +9,29 @@ import { actions as uiActions, selectors as uiSelectors, MODES } from '../ui/uiS
  */
 const initialState = {
   teaching: {
-    courses: {},
+    courses: [],
     isLoading: false,
     error: null
   },
 
   learning: {
-    courses: {}
+    courses: [],
+    isLoading: false,
+    error: null
   }
 };
 
 let userListener = () => {};
+let metaListener = () => {};
 let courseListener = () => {};
 const init = createAsyncThunk(
   'initCatalog',
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
       userListener();
+      metaListener();
       courseListener();
+
       dispatch(generatedActions.resetLearning());
       dispatch(generatedActions.resetTeaching());
 
@@ -38,27 +43,30 @@ const init = createAsyncThunk(
           .collection('users')
           .doc(uid)
           .onSnapshot((snapshot) => {
-            if (snapshot.exists) {
-              console.log('user snapshot (enrolled)');
-              const { enrolled: courses } = snapshot.data();
-              console.log('enrolled', courses);
-              dispatch(generatedActions.setLearning({ courses }));
-            }
+            // if (snapshot.exists) {
+            //   const { enrolled: courses } = snapshot.data();
+            //   dispatch(generatedActions.setLearning({ courses: Object(courses).entries }));
+            // }
+          });
+
+        // Listen for personal courses (1-on-1s).
+        courseListener = app.firestore()
+          .collection('courses')
+          .where('student', '==', uid)
+          .orderBy('created')
+          .onSnapshot((snapshot) => {
+            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            dispatch(generatedActions.setLearning({ courses }));
           });
 
         // Listen for created courses.
-        courseListener = app.firestore()
+        metaListener = app.firestore()
           .collection('courses')
           .where('creatorUid', '==', uid)
           .orderBy('created')
           .onSnapshot((snapshot) => {
-            console.log('course snapshot');
-            const courses = snapshot.docs.reduce((accum, doc) => ({
-              ...accum,
-              [doc.id]: parseUnserializables(doc.data())
-            }), {});
-            console.log('courses', courses);
-            dispatch(generatedActions.setTeaching({ courses: courses }));
+            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            dispatch(generatedActions.setTeaching({ courses }));
           });
       }
     });
@@ -277,12 +285,8 @@ const actions = {
 
 const select = ({ catalog }) => catalog;
 const selectTeaching = createSelector(select, ({ teaching }) => teaching);
-const selectTeachingCourses = createSelector(
-  selectTeaching,
-  ({ courses }) => Object.values(courses)
-);
 const selectLearning = createSelector(select, ({ learning }) => learning);
-const selectors = { select, selectLearning, selectTeaching, selectTeachingCourses };
+const selectors = { select, selectLearning, selectTeaching };
 
 export { actions, selectors };
 export default reducer;
