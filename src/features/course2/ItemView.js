@@ -189,6 +189,9 @@ const EditView = ({ onCancel, onSubmit }) => {
         <Button onClick={onCancel}>Cancel</Button>
       )}
       <Button onClick={_onSubmit}>Submit</Button>
+      <Button>
+        <DeleteIcon onClick={() => alert('Not implemented')} />
+      </Button>
     </div>
   );
 };
@@ -231,9 +234,7 @@ const ViewableMode = () => {
                 />
               )}
               <Button
-                onClick={() => {
-                  alert('Not implemented.');
-                }}
+                onClick={() => dispatch(uiActions.openDialog('editItem'))}
               >
                 <EditIcon />
               </Button>
@@ -273,12 +274,6 @@ const ItemView = () => {
           <>
             {ownsCourse && (
               <>
-                <Button>
-                  <EditIcon onClick={onEdit} />
-                </Button>
-                <Button>
-                  <DeleteIcon onClick={onDelete} />
-                </Button>
                 {item.status === 'scheduled' && (
                   <Button
                     color="primary" variant="contained"
