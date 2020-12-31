@@ -130,6 +130,14 @@ const ItemView = ({ item }) => {
                     Launch
                   </Button>
                 )}
+                {item.status === 'live' && (
+                  <Button
+                    color="primary" variant="contained"
+                    onClick={() => dispatch(catalogActions.endItem(item))}
+                  >
+                    End
+                  </Button>
+                )}
               </>
             )}
             {/*<Button*/}

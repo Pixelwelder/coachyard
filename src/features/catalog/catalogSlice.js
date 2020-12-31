@@ -226,9 +226,23 @@ const launchItem = createAsyncThunk(
   async ({ uid }) => {
     console.log('launch item', uid);
     const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
-    if (itemData.status !== 'scheduled') throw new Error(`Can't launch: status is ${itemData.status}.`);
+    if (itemData.status !== 'scheduled') throw new Error(`Can't launch ${uid}: status is ${itemData.status}.`);
 
     await app.firestore().collection('items').doc(uid).update({ status: 'live' });
+  }
+);
+
+/**
+ * Ends a previously-launched live session.
+ */
+const endItem = createAsyncThunk(
+  'endItem',
+  async ({ uid }) => {
+    console.log('end item', uid);
+    const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
+    if (itemData.status !== 'live') throw new Error(`Can't end ${uid}: status is ${itemData.status}.`);
+
+    await app.firestore().collection('items').doc(uid).update({ status: 'processing' });
   }
 );
 
@@ -291,7 +305,7 @@ const actions = {
   ...generatedActions,
   init,
   createNewCourse, deleteCourse,
-  addItemToCourse, deleteItem, launchItem
+  addItemToCourse, deleteItem, launchItem, endItem
 };
 
 const select = ({ catalog }) => catalog;

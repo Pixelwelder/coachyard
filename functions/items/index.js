@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const fetch = require('node-fetch');
 const { checkAuth } = require('../util/auth');
-const { getMuxHeaders } = require('../util/headers');
+const { getMuxHeaders, getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourseItem } = require('../data');
 
@@ -197,9 +197,123 @@ const sendItemToStreamingService = async (data, context) => {
   }
 };
 
+const _checkRoom = async ({ name }) => {
+  const result = await fetch(
+    `https://api.daily.co/v1/rooms/${name}`,
+    {
+      method: METHODS.GET,
+      headers: getDailyHeaders()
+    }
+  );
+
+  const json = await result.json();
+  return json;
+};
+
+const _launchRoom = async ({ name }) => {
+  console.log('_launchRoom', name);
+  const result = await fetch(
+    `https://api.daily.co/v1/rooms`,
+    {
+      method: METHODS.POST,
+      headers: getDailyHeaders(),
+      body: JSON.stringify({
+        name,
+        properties: {
+          enable_recording: 'local'//'rtp-tracks'
+        }
+      })
+    }
+  );
+
+  const json = await result.json();
+  return json;
+};
+
+const _deleteRoom = async ({ name }) => {
+  const result = await fetch(
+    `https://api.daily.co/v1/rooms/${name}`,
+    {
+      method: METHODS.DELETE,
+      headers: getDailyHeaders()
+    }
+  );
+
+  const json = await result.json();
+  return json;
+}
+
+const handleItemUpdate = functions.firestore
+  .document('items/{docId}')
+  .onUpdate(async (change, context) => {
+    const { docId } = context.params;
+    const oldValue = change.before.data();
+    const newValue = change.after.data();
+
+    console.log('item has changed', docId);
+
+    // If we move from 'scheduled' to 'live', start a room.
+    if (oldValue.status === 'scheduled' && newValue.status === 'live') {
+      const update = {};
+
+      console.log('checking room');
+      const existingRoom = await _checkRoom({ name: docId });
+      if (!existingRoom.error) {
+        // The room already exists, which means something is screwed up before now.
+        console.error('Room already exists.');
+        update.room = existingRoom;
+      } else {
+        // The room does not exist. Create it.
+        console.log('creating room', docId);
+        const newRoom = await _launchRoom({ name: docId });
+        if (newRoom.error) {
+          // There was a problem creating the room.
+          // Change back to previous status.
+          update.status = 'scheduled';
+        }
+
+        update.room = newRoom;
+      }
+
+      // Update record.
+      const ref = admin.firestore().collection('items').doc(docId);
+      await ref.update(update);
+
+      // If we move from 'live' to 'processing', delete a room.
+    } else if (oldValue.status === 'live' && newValue.status === 'processing') {
+      console.log('deleting room', docId);
+      const update = {};
+
+      // Does it exist?
+      const existingRoom = await _checkRoom({ name: docId });
+      if (existingRoom.error) {
+        // It does not exist, which is a problem somewhere else.
+        // Still, we can delete it.
+        console.error('Room does not exist.');
+        update.room = false;
+      } else {
+        // It exists. Delete it.
+        const room = await _deleteRoom({ name: docId });
+        if (room.error) {
+          // There was a problem deleting the (existing) room.
+          // That means we're still live.
+          console.error(room.error);
+          update.status = 'live';
+        } else {
+          // We successfully deleted the room. Update the record.
+          update.room = false;
+        }
+      }
+
+      const ref = admin.firestore().collection('items').doc(docId);
+      await ref.update(update);
+    }
+  });
+
 module.exports = {
   addItemToCourse: functions.https.onCall(addItemToCourse),
   updateItem: functions.https.onCall(updateItem),
   deleteItem: functions.https.onCall(deleteItem),
-  sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService)
+  sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService),
+  handleItemUpdate
 }
