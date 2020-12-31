@@ -34,7 +34,7 @@ const Course = () => {
     <div className="app-content">
       <div className="course-header">
         <Typography variant="h6" component="h2">
-          <Link to="/dashboard">Courses</Link> > {course.displayName}
+          <Link to="/dashboard">Courses</Link> > {course?.displayName || ''}
         </Typography>
         <Typography variant="body1">
           {courseCreator?.displayName || ''}
