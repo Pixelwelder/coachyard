@@ -13,11 +13,12 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { actions as uiActions, selectors as uiSelectors, MODES } from '../features/ui/uiSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
+import { DateTimePicker } from '@material-ui/pickers';
 
 const NewItemDialog = () => {
   const { newItemDialog } = useSelector(uiSelectors.select);
   const {
-    courseUid, displayName, description, mode, onSubmit, bytesTransferred, totalBytes, isChangingFile, error
+    courseUid, displayName, description, mode, onSubmit, bytesTransferred, totalBytes, isChangingFile, error, date
   } = newItemDialog;
 
   // const { itemUI, newItem, upload } = useSelector(courseSelectors.select);
@@ -28,7 +29,7 @@ const NewItemDialog = () => {
   const onUpload = ({ target: { files } }) => {
     if (!files.length) {
       setFile(null);
-      dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, file: file.name } }));
+      dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, file: file?.name || '', date } }));
       // dispatch(courseActions.setNewItem({ file: '' }))
       return;
     }
@@ -44,7 +45,7 @@ const NewItemDialog = () => {
     if (mode === MODES.VIEW) {
       dispatch(catalogActions.addItemToCourse({
         courseUid,
-        item: { displayName, description, file: file?.name || '' },
+        item: { displayName, description, file: file?.name || '', date },
         file
       }));
       // dispatch(courseActions.addItemToCourse({ file }));
@@ -87,6 +88,12 @@ const NewItemDialog = () => {
             onChange={({ target: { value } }) => {
               dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, description: value } }))
               // dispatch(courseActions.setNewItem({ description: value }));
+            }}
+          />
+          <DateTimePicker
+            value={date}
+            onChange={value => {
+              dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, date: value } }));
             }}
           />
 

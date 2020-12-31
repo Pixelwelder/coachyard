@@ -9,6 +9,7 @@ const initialState = {
   error: null,
 
   course: null,
+  courseCreator: null,
   items: [],
   selectedItem: null,
   selectedItemUid: null
@@ -16,6 +17,7 @@ const initialState = {
 
 let unsubscribeCourse = () => {};
 let unsubscribeItems = () => {};
+let unsubscribeCreator = () => {};
 /**
  * Sets the selected course.
  * This loads the course and its items.
@@ -24,15 +26,13 @@ let unsubscribeItems = () => {};
 const setId = createAsyncThunk(
   'setId',
   async ({ id, history }, { dispatch }) => {
-    unsubscribeCourse();
-    unsubscribeItems();
-
     dispatch(generatedActions._setId(id));
 
+    unsubscribeCourse();
     unsubscribeCourse = app.firestore()
       .collection('courses')
       .where('uid', '==', id)
-      .onSnapshot((snapshot) => {
+      .onSnapshot(async (snapshot) => {
         if (!snapshot.size) {
           // TODO this is nasty.
           history.push('/dashboard');
@@ -41,8 +41,18 @@ const setId = createAsyncThunk(
 
         const course = parseUnserializables(snapshot.docs[0].data());
         dispatch(generatedActions.setCourse(course));
+
+        unsubscribeCreator();
+        unsubscribeCreator = await app.firestore()
+          .collection('users')
+          .doc(course.creatorUid)
+          .onSnapshot((snapshot) => {
+            const creator = parseUnserializables(snapshot.data());
+            dispatch(generatedActions.setCourseCreator(creator));
+          });
       });
 
+    unsubscribeItems();
     unsubscribeItems = await app.firestore()
       .collection('items')
       .where('courseUid', '==', id)
@@ -66,7 +76,7 @@ const setSelectedItemUid = createAsyncThunk(
         .doc(itemUid)
         .onSnapshot((snapshot) => {
           if (snapshot.exists) {
-            const data = snapshot.data();
+            const data = parseUnserializables(snapshot.data());
             dispatch(generatedActions._setSelectedItemUid(data.uid));
             dispatch(generatedActions._setSelectedItem(data));
           }
@@ -99,6 +109,7 @@ const { actions: generatedActions, reducer } = createSlice({
   reducers: {
     _setId: setValue('id'),
     setCourse: setValue('course'),
+    setCourseCreator: setValue('courseCreator'),
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem')

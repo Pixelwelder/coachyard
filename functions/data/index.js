@@ -6,8 +6,13 @@ const newBaseItem = (overrides) => ({
   ...overrides
 });
 
+/**
+ * TODO - Remove. Moved to front end.
+ */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
+  displayName: '', // TODO Make sure we change this when they update elsewhere.
+  email: '',       // TODO Same.
   enrolled: {},
   ...overrides
 });
@@ -77,6 +82,7 @@ const newCourseItem = (overrides) => ({
   isAccepted: false,
   isCompleted: false,
   isInProgress: false,
+  state: 'viewable', // scheduled, live, processing, viewable
 
   // This is for associated media.
   originalFilename: '',

@@ -162,6 +162,17 @@ const signUp = createAsyncThunk(
     try {
       // const createUser = app.functions().httpsCallable('createUser');
       const result = await app.auth().createUserWithEmailAndPassword(email, password);
+      await result.user.updateProfile({ displayName });
+
+      const timestamp = app.firestore.Timestamp.now();
+      await app.firestore().collection('users').doc(result.user.uid).set({
+        uid: result.user.uid,
+        created: timestamp,
+        updated: timestamp,
+        displayName,
+        email,
+        enrolled: []
+      });
       // const result = await createUser(args);
 
       // const { email, password } = args;

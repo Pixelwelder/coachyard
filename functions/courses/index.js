@@ -22,6 +22,7 @@ const createCourse = async (data, context) => {
         .where('email', '==', email);
 
       const studentDoc = await transaction.get(studentRef);
+      console.log('found', studentDoc.size, 'student');
 
       // Create course object.
       const courseRef = admin.firestore().collection('courses').doc();
@@ -291,11 +292,13 @@ const deleteCourse = async (data, context) => {
 const filterItem = ({
   displayName,
   description,
-  file: originalFilename
+  file: originalFilename,
+  date
 }) => ({
   displayName,
   description,
-  originalFilename
+  originalFilename,
+  date
 });
 
 const addItemToCourse = async (data, context) => {

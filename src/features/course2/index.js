@@ -14,11 +14,13 @@ import CardContent from '@material-ui/core/CardContent';
 import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
+import CourseSummary from './CourseSummary';
 
 const Course = () => {
   const { id } = useParams();
   const { course } = useSelector(selectedCourseSelectors.select);
   const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { deleteDialog } = useSelector(uiSelectors.select);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -49,24 +51,22 @@ const Course = () => {
       >
         <Paper className="toc-container" variant="outlined">
           <div className="toc-header">
-          {course && (
-            <p onClick={() => dispatch(selectedCourseActions.setSelectedItemUid(null))}>
-              {course.displayName}
-            </p>
-          )}
+            <CourseSummary />
           </div>
           <ItemList />
           <div className="toc-footer">
-            <Button
-              onClick={() => dispatch(uiActions.openDialog({
-                name: 'newItemDialog',
-                params: {
-                  courseUid: course.uid
-                }
-              }))}
-            >
-              Create New
-            </Button>
+            {ownsCourse && (
+              <Button
+                onClick={() => dispatch(uiActions.openDialog({
+                  name: 'newItemDialog',
+                  params: {
+                    courseUid: course.uid
+                  }
+                }))}
+              >
+                Create New
+              </Button>
+            )}
           </div>
         </Paper>
       </Grid>
