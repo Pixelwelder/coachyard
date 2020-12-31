@@ -82,7 +82,7 @@ const newCourseItem = (overrides) => ({
   isAccepted: false,
   isCompleted: false,
   isInProgress: false,
-  state: 'viewable', // scheduled, live, processing, viewable
+  status: 'viewable', // scheduled, live, processing, viewable
 
   // This is for associated media.
   originalFilename: '',

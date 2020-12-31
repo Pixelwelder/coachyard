@@ -58,7 +58,7 @@ const createUser = async (data, context) => {
 };
 
 /**
- * Create a meta object every time a user is created.
+ * Performs some maintenance when users are created.
  */
 const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   console.log('user created', user);

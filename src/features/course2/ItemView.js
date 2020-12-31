@@ -8,6 +8,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import { actions as videoActions, selectors as videoSelectors } from '../videoIframe/videoSlice';
+import { actions as catalogActions } from '../catalog/catalogSlice';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
@@ -119,12 +120,24 @@ const ItemView = ({ item }) => {
         )}
         {item && (
           <>
-            <Button
-              color="primary" variant="contained"
-              onClick={() => dispatch(videoActions.launch({ uid: item.uid }))}
-            >
-              Enter
-            </Button>
+            {ownsCourse && (
+              <>
+                {item.status === 'scheduled' && (
+                  <Button
+                    color="primary" variant="contained"
+                    onClick={() => dispatch(catalogActions.launchItem(item))}
+                  >
+                    Launch
+                  </Button>
+                )}
+              </>
+            )}
+            {/*<Button*/}
+            {/*  color="primary" variant="contained"*/}
+            {/*  onClick={() => dispatch(videoActions.launch({ uid: item.uid }))}*/}
+            {/*>*/}
+            {/*  Enter*/}
+            {/*</Button>*/}
             {item.isInProgress && (
               <>
                 {ownsCourse && (

@@ -221,6 +221,17 @@ const deleteItem = createAsyncThunk(
   }
 );
 
+const launchItem = createAsyncThunk(
+  'launchItem',
+  async ({ uid }) => {
+    console.log('launch item', uid);
+    const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
+    if (itemData.status !== 'scheduled') throw new Error(`Can't launch: status is ${itemData.status}.`);
+
+    await app.firestore().collection('items').doc(uid).update({ status: 'live' });
+  }
+);
+
 const onPending = name => (state) => {
   state[name].isLoading = true;
   state[name].error = null;
@@ -280,7 +291,7 @@ const actions = {
   ...generatedActions,
   init,
   createNewCourse, deleteCourse,
-  addItemToCourse, deleteItem
+  addItemToCourse, deleteItem, launchItem
 };
 
 const select = ({ catalog }) => catalog;

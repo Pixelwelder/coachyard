@@ -28,8 +28,8 @@ service cloud.firestore {
 
     match /items/{uid} {
       allow list: if true;
-      allow get: if isCreator() || isEnrolledInParentCourse();
-      allow write: if isCreator() || isEnrolledInParentCourse();
+      allow get: if true; // TODO isCreator() || isEnrolledInParentCourse();
+      allow write: if isCreator();
 
       function isEnrolledInParentCourse() {
         let parentCourse = get(/databases/$(database)/documents/courses/$(resource.data.courseUid));
