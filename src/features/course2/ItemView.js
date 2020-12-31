@@ -115,16 +115,18 @@ const LiveMode = ({ size }) => {
   const [callFrame, setCallFrame] = useState(null);
 
   useEffect(() => {
-    const _callFrame = DailyIframe.createFrame({
+    const _callFrame = DailyIframe.createFrame(
+      document.getElementById('live-mode'),
+      {
       iframeStyle: {
-        position: 'absolute',
+        // position: 'absolute',
         border: '1px solid black',
         'background-color': 'white',
-        width: 300, //`${window.innerWidth - 32}px`,
-        height: 200, //`${window.innerHeight - 20}px`,
-        left: '16px',
+        width: '100%', //`${window.innerWidth - 32}px`,
+        height: '100%', //`${window.innerHeight - 20}px`,
+        // left: '16px',
         // right: '16px',
-        top: '300px',
+        top: 0,
         // right: '1em',
         // bottom: '1em'
       }
@@ -162,20 +164,20 @@ const LiveMode = ({ size }) => {
     if (callFrame) {
       console.log('resizing');
       const iframe = callFrame.iframe();
-      iframe.width = size.width;
-      iframe.height = size.height;
+      // iframe.width = size.width;
+      // iframe.height = size.height;
+      // iframe.left = size.position.left;
+      // iframe.top = size.position.top;
     }
   }, [callFrame, size]);
 
   return (
-    <div style={{ border: '1px solid red', flex: 1 }}>
-      <p>{status}</p>
-      <p>{size.width} x {size.height}</p>
-      {ownsCourse && (
-        <Button onClick={() => alert('Not implemented')}>
-          Stop
-        </Button>
-      )}
+    <div className="live-mode" id="live-mode">
+      {/*{ownsCourse && (*/}
+      {/*  <Button onClick={() => alert('Not implemented')}>*/}
+      {/*    Stop*/}
+      {/*  </Button>*/}
+      {/*)}*/}
     </div>
   );
 };
@@ -270,11 +272,13 @@ const ProcessingMode = () => {
   );
 };
 
-const ViewableMode = () => {
+const ViewingMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const { editItem } = useSelector(uiSelectors.select);
   const dispatch = useDispatch();
+
+  console.log('size', size);
 
   return (
     <div>
@@ -282,22 +286,21 @@ const ViewableMode = () => {
         editItem.mode === MODES.VIEW
           ? <EditView />
           : (
-            <div>
-              <p>Viewing {selectedItem?.playbackId}</p>
+            <>
               {selectedItem?.playbackId && (
                 <ReactPlayer
-                  width={400}
-                  height={300}
+                  width={size.width - 2}
+                  height={size.height - 2}
                   url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
                   controls={true}
                 />
               )}
-              <Button
-                onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}
-              >
-                <EditIcon />
-              </Button>
-            </div>
+              {/*<Button*/}
+              {/*  onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}*/}
+              {/*>*/}
+              {/*  <EditIcon />*/}
+              {/*</Button>*/}
+            </>
           )
       }
     </div>
@@ -316,25 +319,25 @@ const ItemView = () => {
 
   return (
     <Paper className="item-view" variant="outlined">
-      <div className="item-view-content">
-        {!item && <NoItem />}
-        {item && (
-          <>
-            {item.status === 'scheduled' && <ScheduledMode />}
-            {item.status === 'live' && (
-              <SizeMe
-                monitorHeight
-                refreshRate={500}
-                style={{ border: '1px solid blue' }}
-              >
-                {({ size }) => <LiveMode size={size} />}
-              </SizeMe>
+      <SizeMe
+        monitorHeight
+        monitorPosition
+        refreshRate={500}
+      >
+        {({ size }) => (
+          <div className="item-view-content">
+            {!item && <NoItem />}
+            {item && (
+              <>
+                {item.status === 'scheduled' && <ScheduledMode />}
+                {item.status === 'live' && <LiveMode size={size} />}
+                {item.status === 'processing' && <ProcessingMode />}
+                {item.status === 'viewing' && <ViewingMode size={size} />}
+              </>
             )}
-            {item.status === 'processing' && <ProcessingMode />}
-            {item.status === 'viewing' && <ViewableMode />}
-          </>
+          </div>
         )}
-      </div>
+      </SizeMe>
       <div className="item-view-controls">
         {item && (
           <>
