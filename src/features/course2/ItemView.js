@@ -41,55 +41,55 @@ const CompleteItem = ({ item }) => {
   );
 };
 
-const IncompleteItem = ({ item }) => {
-  const { uid, isInProgress } = item;
-  const dispatch = useDispatch();
-  const { url } = useSelector(videoSelectors.select);
-
-  useEffect(() => {
-    let callFrame;
-
-    const go = async () => {
-      console.log('--- GO ---');
-      callFrame = DailyIframe.createFrame({
-        iframeStyle: {
-          position: 'absolute',
-          border: '1px solid black',
-          'background-color': 'white',
-          width: `${window.innerWidth - 32}px`,
-          height: `${window.innerHeight - 20}px`,
-          left: '16px',
-          // right: '16px',
-          top: '300px',
-          // right: '1em',
-          // bottom: '1em'
-        }
-      });
-
-      await callFrame.join({ url });
-    };
-
-    const stop = async () => {
-      console.log('--- STOP ---');
-      if (callFrame) {
-        callFrame.stopRecording();
-        await callFrame.destroy();
-      }
-    };
-
-    if (url && isInProgress) {
-      go();
-    }
-
-    return stop;
-  }, [url, isInProgress]);
-
-  return (
-    <div>
-
-    </div>
-  );
-};
+// const IncompleteItem = ({ item }) => {
+//   const { uid, isInProgress } = item;
+//   const dispatch = useDispatch();
+//   const { url } = useSelector(videoSelectors.select);
+//
+//   useEffect(() => {
+//     let callFrame;
+//
+//     const go = async () => {
+//       console.log('--- GO ---');
+//       callFrame = DailyIframe.createFrame({
+//         iframeStyle: {
+//           position: 'absolute',
+//           border: '1px solid black',
+//           'background-color': 'white',
+//           width: `${window.innerWidth - 32}px`,
+//           height: `${window.innerHeight - 20}px`,
+//           left: '16px',
+//           // right: '16px',
+//           top: '300px',
+//           // right: '1em',
+//           // bottom: '1em'
+//         }
+//       });
+//
+//       await callFrame.join({ url });
+//     };
+//
+//     const stop = async () => {
+//       console.log('--- STOP ---');
+//       if (callFrame) {
+//         callFrame.stopRecording();
+//         await callFrame.destroy();
+//       }
+//     };
+//
+//     if (url && isInProgress) {
+//       go();
+//     }
+//
+//     return stop;
+//   }, [url, isInProgress]);
+//
+//   return (
+//     <div>
+//
+//     </div>
+//   );
+// };
 
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
@@ -108,14 +108,57 @@ const ScheduledMode = () => {
 
 const LiveMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
+  const { uid, status } = item;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    let callFrame;
+
+    const go = async () => {
+      console.log('--- GO ---');
+      callFrame = DailyIframe.createFrame({
+        iframeStyle: {
+          position: 'absolute',
+          border: '1px solid black',
+          'background-color': 'white',
+          width: 300, //`${window.innerWidth - 32}px`,
+          height: 200, //`${window.innerHeight - 20}px`,
+          left: '16px',
+          // right: '16px',
+          top: '300px',
+          // right: '1em',
+          // bottom: '1em'
+        }
+      });
+
+      const url = `https://coachyard.daily.co/${uid}`;
+      await callFrame.join({ url });
+    };
+
+    const stop = async () => {
+      console.log('--- STOP ---');
+      if (callFrame) {
+        callFrame.stopRecording();
+        await callFrame.destroy();
+      }
+    };
+
+    if (uid && (status === 'live')) {
+      go();
+    }
+
+    return stop;
+  }, [uid, status]);
 
   return (
     <div>
+      <p>{status}</p>
+      <p>{uid}</p>
       {ownsCourse && (
-        <p>Stop</p>
-      )}
-      {!ownsCourse && (
-        <p>(live)</p>
+        <Button onClick={() => alert('Not implemented')}>
+          Stop
+        </Button>
       )}
     </div>
   );
@@ -234,7 +277,7 @@ const ViewableMode = () => {
                 />
               )}
               <Button
-                onClick={() => dispatch(uiActions.openDialog('editItem'))}
+                onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}
               >
                 <EditIcon />
               </Button>
