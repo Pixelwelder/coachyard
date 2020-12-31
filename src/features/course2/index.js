@@ -19,7 +19,7 @@ import { Typography } from '@material-ui/core';
 
 const Course = () => {
   const { id } = useParams();
-  const { course } = useSelector(selectedCourseSelectors.select);
+  const { course, courseCreator } = useSelector(selectedCourseSelectors.select);
   const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { deleteDialog } = useSelector(uiSelectors.select);
@@ -32,9 +32,14 @@ const Course = () => {
 
   return (
     <div className="app-content">
-      <Typography variant="h6" component="h2" className="course-header">
-        <Link to="/dashboard">Courses</Link> > {course.displayName}
-      </Typography>
+      <div className="course-header">
+        <Typography variant="h6" component="h2">
+          <Link to="/dashboard">Courses</Link> > {course.displayName}
+        </Typography>
+        <Typography variant="body1">
+          {courseCreator?.displayName || ''}
+        </Typography>
+      </div>
       <Grid
         container
         className="app-content-container"
@@ -55,9 +60,9 @@ const Course = () => {
           className="app-content-toc"
         >
           <Paper className="toc-container" variant="outlined">
-            <div className="toc-header">
-              <CourseSummary />
-            </div>
+            {/*<div className="toc-header">*/}
+            {/*  <CourseSummary />*/}
+            {/*</div>*/}
             <ItemList />
             <div className="toc-footer">
               {ownsCourse && (
