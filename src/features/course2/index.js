@@ -40,7 +40,7 @@ const Course = () => {
         sm={8}
         className="app-content-main"
       >
-        <ItemView item={selectedItem} />
+        <ItemView />
       </Grid>
 
       <Grid

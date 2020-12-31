@@ -53,7 +53,7 @@ const createCourse = async (data, context) => {
 
         displayName: 'First Meeting',
         date,
-        status: date ? 'scheduled' : 'viewable'
+        status: date ? 'scheduled' : 'viewing'
       });
 
       await transaction.set(itemRef, item);

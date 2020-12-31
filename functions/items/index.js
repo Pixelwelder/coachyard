@@ -47,7 +47,7 @@ const addItemToCourse = async (data, context) => {
         created: timestamp,
         updated: timestamp,
         date: newItem.date,
-        status: newItem.date ? 'scheduled' : 'viewable',
+        status: newItem.date ? 'scheduled' : 'viewing',
         ...filterItem(newItem)
       });
 

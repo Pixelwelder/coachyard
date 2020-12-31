@@ -82,7 +82,7 @@ const newCourseItem = (overrides) => ({
   isAccepted: false,   // TODO Remove
   isCompleted: false,  // TODO Remove
   isInProgress: false, // TODO Remove
-  status: 'viewable', // scheduled, live, processing, viewable
+  status: 'viewing', // scheduled, live, processing, viewing
 
   // This is for associated media.
   originalFilename: '',

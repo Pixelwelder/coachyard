@@ -210,6 +210,7 @@ const ProcessingMode = () => {
 
 const ViewableMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const { editItem } = useSelector(uiSelectors.select);
   const dispatch = useDispatch();
 
@@ -220,7 +221,15 @@ const ViewableMode = () => {
           ? <EditView />
           : (
             <div>
-              <p>Viewing</p>
+              <p>Viewing {selectedItem?.playbackId}</p>
+              {selectedItem?.playbackId && (
+                <ReactPlayer
+                  width={400}
+                  height={300}
+                  url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
+                  controls={true}
+                />
+              )}
               <Button
                 onClick={() => {
                   alert('Not implemented.');
@@ -235,12 +244,15 @@ const ViewableMode = () => {
   );
 }
 
-const ItemView = ({ item }) => {
+const ItemView = () => {
   const dispatch = useDispatch();
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
 
   const onEdit = () => {};
   const onDelete = () => {};
+
+  console.log('ItemView.item', item);
 
   return (
     <Paper className="item-view" variant="outlined">
@@ -252,7 +264,7 @@ const ItemView = ({ item }) => {
             {item.status === 'scheduled' && <ScheduledMode />}
             {item.status === 'live' && <LiveMode />}
             {item.status === 'processing' && <ProcessingMode />}
-            {item.status === 'viewable' && <ViewableMode />}
+            {item.status === 'viewing' && <ViewableMode />}
           </>
         )}
       </div>
