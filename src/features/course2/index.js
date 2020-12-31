@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions, MODES, selectors as uiSelectors } from '../ui/uiSlice';
@@ -15,6 +15,7 @@ import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CourseSummary from './CourseSummary';
+import { Typography } from '@material-ui/core';
 
 const Course = () => {
   const { id } = useParams();
@@ -30,47 +31,52 @@ const Course = () => {
   }, [id]);
 
   return (
-    <Grid
-      container
-      className="app-content"
-    >
+    <div className="app-content">
+      <Typography variant="h6" component="h2" className="course-header">
+        <Link to="/dashboard">Courses</Link> > {course.displayName}
+      </Typography>
       <Grid
-        item
-        xs={12}
-        sm={8}
-        className="app-content-main"
+        container
+        className="app-content-container"
       >
-        <ItemView />
-      </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={8}
+          className="app-content-main"
+        >
+          <ItemView />
+        </Grid>
 
-      <Grid
-        item
-        xs={12}
-        sm={4}
-        className="app-content-toc"
-      >
-        <Paper className="toc-container" variant="outlined">
-          <div className="toc-header">
-            <CourseSummary />
-          </div>
-          <ItemList />
-          <div className="toc-footer">
-            {ownsCourse && (
-              <Button
-                onClick={() => dispatch(uiActions.openDialog({
-                  name: 'newItemDialog',
-                  params: {
-                    courseUid: course.uid
-                  }
-                }))}
-              >
-                Create New
-              </Button>
-            )}
-          </div>
-        </Paper>
+        <Grid
+          item
+          xs={12}
+          sm={4}
+          className="app-content-toc"
+        >
+          <Paper className="toc-container" variant="outlined">
+            <div className="toc-header">
+              <CourseSummary />
+            </div>
+            <ItemList />
+            <div className="toc-footer">
+              {ownsCourse && (
+                <Button
+                  onClick={() => dispatch(uiActions.openDialog({
+                    name: 'newItemDialog',
+                    params: {
+                      courseUid: course.uid
+                    }
+                  }))}
+                >
+                  Create New
+                </Button>
+              )}
+            </div>
+          </Paper>
+        </Grid>
       </Grid>
-    </Grid>
+    </div>
   );
 };
 

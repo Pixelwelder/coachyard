@@ -3,6 +3,16 @@
 .app-content {
   flex: 1 1 auto;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-header {
+  margin-bottom: 16px !important;
+}
+
+.app-content-container {
+  flex: 1 1 auto;
 }
 
 .app-content-main {
