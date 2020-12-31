@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
 import TextField from '@material-ui/core/TextField';
 import { DateTimePicker } from '@material-ui/pickers';
+import { SizeMe } from 'react-sizeme';
 
 const NoItem = () => {
   return (
@@ -106,55 +107,70 @@ const ScheduledMode = () => {
   );
 };
 
-const LiveMode = () => {
+const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
   const { uid, status } = item;
   const dispatch = useDispatch();
+  const [callFrame, setCallFrame] = useState(null);
 
   useEffect(() => {
-    let callFrame;
-
-    const go = async () => {
-      console.log('--- GO ---');
-      callFrame = DailyIframe.createFrame({
-        iframeStyle: {
-          position: 'absolute',
-          border: '1px solid black',
-          'background-color': 'white',
-          width: 300, //`${window.innerWidth - 32}px`,
-          height: 200, //`${window.innerHeight - 20}px`,
-          left: '16px',
-          // right: '16px',
-          top: '300px',
-          // right: '1em',
-          // bottom: '1em'
-        }
-      });
-
-      const url = `https://coachyard.daily.co/${uid}`;
-      await callFrame.join({ url });
-    };
-
-    const stop = async () => {
-      console.log('--- STOP ---');
-      if (callFrame) {
-        callFrame.stopRecording();
-        await callFrame.destroy();
+    const _callFrame = DailyIframe.createFrame({
+      iframeStyle: {
+        position: 'absolute',
+        border: '1px solid black',
+        'background-color': 'white',
+        width: 300, //`${window.innerWidth - 32}px`,
+        height: 200, //`${window.innerHeight - 20}px`,
+        left: '16px',
+        // right: '16px',
+        top: '300px',
+        // right: '1em',
+        // bottom: '1em'
       }
+    });
+
+    const stop = () => {
+      const execute = async () => {
+        _callFrame.stopRecording(); // TODO Necessary?
+        await _callFrame.destroy();
+        setCallFrame(null);
+        console.log('stopped');
+      }
+
+      execute();
     };
 
-    if (uid && (status === 'live')) {
-      go();
-    }
+    setCallFrame(_callFrame);
 
     return stop;
-  }, [uid, status]);
+  }, []);
+
+  useEffect(() => {
+    const go = async () => {
+      const url = `https://coachyard.daily.co/${uid}`;
+      await callFrame.join({ url });
+      console.log('joined');
+    };
+
+    if (callFrame && (status === 'live')) {
+      go();
+    }
+  }, [callFrame, uid, status]);
+
+  useEffect(() => {
+    if (callFrame) {
+      console.log('resizing');
+      const iframe = callFrame.iframe();
+      iframe.width = size.width;
+      iframe.height = size.height;
+    }
+  }, [callFrame, size]);
 
   return (
-    <div>
+    <div style={{ border: '1px solid red', flex: 1 }}>
       <p>{status}</p>
-      <p>{uid}</p>
+      <p>{size.width} x {size.height}</p>
       {ownsCourse && (
         <Button onClick={() => alert('Not implemented')}>
           Stop
@@ -300,13 +316,20 @@ const ItemView = () => {
 
   return (
     <Paper className="item-view" variant="outlined">
-      <p>? {ownsCourse}</p>
       <div className="item-view-content">
         {!item && <NoItem />}
         {item && (
           <>
             {item.status === 'scheduled' && <ScheduledMode />}
-            {item.status === 'live' && <LiveMode />}
+            {item.status === 'live' && (
+              <SizeMe
+                monitorHeight
+                refreshRate={500}
+                style={{ border: '1px solid blue' }}
+              >
+                {({ size }) => <LiveMode size={size} />}
+              </SizeMe>
+            )}
             {item.status === 'processing' && <ProcessingMode />}
             {item.status === 'viewing' && <ViewableMode />}
           </>
