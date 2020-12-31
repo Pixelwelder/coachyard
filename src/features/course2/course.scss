@@ -76,8 +76,14 @@
   .item-view-content {
     display: flex;
     flex: 1;
-    //overflow: auto;
-    border: 1px solid yellow
+  }
+
+  .item-view-content-viewing {
+    align-items: flex-start;
+  }
+
+  .player-wrapper {
+    width: 100%;
   }
 
   .react-player {

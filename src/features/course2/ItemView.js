@@ -118,26 +118,29 @@ const LiveMode = ({ size }) => {
     const _callFrame = DailyIframe.createFrame(
       document.getElementById('live-mode'),
       {
-      iframeStyle: {
-        // position: 'absolute',
-        border: '1px solid black',
-        'background-color': 'white',
-        width: '100%', //`${window.innerWidth - 32}px`,
-        height: '100%', //`${window.innerHeight - 20}px`,
-        // left: '16px',
-        // right: '16px',
-        top: 0,
-        // right: '1em',
-        // bottom: '1em'
+        iframeStyle: {
+          // position: 'absolute',
+          border: '1px solid black',
+          'background-color': 'white',
+          width: '100%', //`${window.innerWidth - 32}px`,
+          height: '100%', //`${window.innerHeight - 20}px`,
+          // left: '16px',
+          // right: '16px',
+          top: 0,
+          // right: '1em',
+          // bottom: '1em'
+        }
       }
-    });
+    );
 
     const stop = () => {
       const execute = async () => {
-        _callFrame.stopRecording(); // TODO Necessary?
-        await _callFrame.destroy();
-        setCallFrame(null);
-        console.log('stopped');
+        if (callFrame) {
+          callFrame.stopRecording(); // TODO Necessary?
+          await callFrame.destroy();
+          setCallFrame(null);
+          console.log('stopped');
+        }
       }
 
       execute();
@@ -281,19 +284,21 @@ const ViewingMode = ({ size }) => {
   console.log('size', size);
 
   return (
-    <div>
+    <>
       {
         editItem.mode === MODES.VIEW
           ? <EditView />
           : (
             <>
               {selectedItem?.playbackId && (
-                <ReactPlayer
-                  width={size.width - 2}
-                  height={size.height - 2}
-                  url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
-                  controls={true}
-                />
+                <div className="player-wrapper">
+                  <ReactPlayer
+                    width={"100%"}
+                    height={"100%"}
+                    url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
+                    controls={true}
+                  />
+                </div>
               )}
               {/*<Button*/}
               {/*  onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}*/}
@@ -303,7 +308,7 @@ const ViewingMode = ({ size }) => {
             </>
           )
       }
-    </div>
+    </>
   );
 }
 
@@ -325,7 +330,7 @@ const ItemView = () => {
         refreshRate={500}
       >
         {({ size }) => (
-          <div className="item-view-content">
+          <div className={`item-view-content item-view-content-${item?.status | ''}`}>
             {!item && <NoItem />}
             {item && (
               <>
