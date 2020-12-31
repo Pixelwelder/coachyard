@@ -188,7 +188,7 @@ const sendItemToStreamingService = async (data, context) => {
     console.log('result', json);
 
     // Now record the result.
-    await itemRef.update(parseMuxResponse(json));
+    await itemRef.update({ ...parseMuxResponse(json), status: 'viewing' });
 
     return { message: 'Done. I think.', result: json };
   } catch (error) {
@@ -310,10 +310,28 @@ const handleItemUpdate = functions.firestore
     }
   });
 
+// TODO Can't test these right now.
+const handleFileUpload = functions.storage
+  .bucket('coach-yard-uploads')
+  .object()
+  .onFinalize(async (object, context) => {
+    console.log('uploaded', object.name);
+  });
+
+const handleFileDelete = functions.storage
+  .bucket('coach-yard-uploads')
+  .object()
+  .onDelete((object, context) => {
+    console.log('deleted', object.name);
+  });
+
 module.exports = {
   addItemToCourse: functions.https.onCall(addItemToCourse),
   updateItem: functions.https.onCall(updateItem),
   deleteItem: functions.https.onCall(deleteItem),
   sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService),
-  handleItemUpdate
+  handleItemUpdate,
+
+  handleFileUpload,
+  handleFileDelete
 }

@@ -111,7 +111,7 @@ const _addItemToCourse = createAsyncThunk(
 );
 
 const _uploadItem = createAsyncThunk(
-  'updateItem',
+  '_uploadItem',
   async ({ uid, file }, { dispatch, getState }) => new Promise((resolve, reject) => {
     console.log('_uploadItem', uid, file);
     const { newItemDialog } = uiSelectors.select(getState());
@@ -199,6 +199,24 @@ const addItemToCourse = createAsyncThunk(
           error: error.message
         }
       }))
+    }
+  }
+);
+
+const updateItem = createAsyncThunk(
+  'updateItem',
+  async ({ uid, update, file }, { dispatch }) => {
+    // Update data object.
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
+    const updateResult = await callable({ uid, update });
+
+    // Upload new file.
+    if (file) {
+      const { payload: downloadUrl } = await dispatch(_uploadItem({ uid, file }));
+
+      // Send to streaming service.
+      await dispatch(_sendToStreamingService({ uid, downloadUrl }));
+      console.log('updateItem: complete');
     }
   }
 );
@@ -305,7 +323,7 @@ const actions = {
   ...generatedActions,
   init,
   createNewCourse, deleteCourse,
-  addItemToCourse, deleteItem, launchItem, endItem
+  addItemToCourse, updateItem, deleteItem, launchItem, endItem
 };
 
 const select = ({ catalog }) => catalog;

@@ -79,6 +79,11 @@ const setSelectedItemUid = createAsyncThunk(
             const data = parseUnserializables(snapshot.data());
             dispatch(generatedActions._setSelectedItemUid(data.uid));
             dispatch(generatedActions._setSelectedItem(data));
+          } else {
+            console.log('no item');
+            dispatch(generatedActions._setSelectedItemUid(null));
+            dispatch(generatedActions._setSelectedItem(null));
+            unsubscribeItem();
           }
         });
     }

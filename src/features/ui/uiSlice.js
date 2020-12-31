@@ -14,6 +14,18 @@ const baseDialog = {
   error: null
 };
 
+// Used by multiple UI elements.
+const baseItemElement = {
+  courseUid: '',
+  displayName: '',
+  description: '',
+  date: '',
+  isChangingFile: false,
+  file: '',
+  bytesTransferred: 0,
+  totalBytes: 0
+}
+
 const initialState = {
   // TODO
   showAccount: false,
@@ -27,19 +39,16 @@ const initialState = {
 
   newItemDialog: {
     ...baseDialog,
-    courseUid: '',
-    displayName: '',
-    description: '',
-    date: '',
-    isChangingFile: false,
-    file: '',
-    bytesTransferred: 0,
-    totalBytes: 0
+    ...baseItemElement
   },
 
   deleteDialog: {
     ...baseDialog,
     uid: ''
+  },
+
+  editItem: {
+    ...baseItemElement
   }
 };
 
