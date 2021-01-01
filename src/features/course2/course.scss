@@ -141,15 +141,6 @@ form {
   .MuiFormControl-root, .MuiDropzoneArea-root {
     margin-bottom: 16px;
   }
-
-  .form-controls {
-    display: flex;
-    justify-content: flex-end;
-
-    button:not(:last-child) {
-      margin-right: 16px;
-    }
-  }
 }
 
 .live-mode {
@@ -187,12 +178,22 @@ form {
   flex: 0;
   display: flex;
   justify-content: flex-end;
+
+  button:not(:last-child) {
+    margin-right: 16px;
+  }
 }
 
 .edit-course-mode {
   form {
     flex: 1;
   }
+}
+
+.edit-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-summary {

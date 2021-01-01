@@ -15,6 +15,7 @@ import CourseSummary from './CourseSummary';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 import ItemView from './ItemView';
+import OwnerControls from '../../components/OwnerControls';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -109,27 +110,7 @@ const CourseView = () => {
                   {!!error && <Alert severity="error">{error.message}</Alert>}
 
                   <div className="spacer" />
-                  <div className="form-controls">
-                    <Button
-                      variant="contained" color="secondary"
-                      onClick={onDelete}
-                    >
-                      Delete Course
-                    </Button>
-                    <div className="spacer" />
-                    <Button
-                      variant="outlined"
-                      onClick={onCancelEdit}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit" variant="contained" color="primary"
-                      onClick={onSubmit}
-                    >
-                      Save
-                    </Button>
-                  </div>
+                  <OwnerControls onCancelEdit={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete} />
                 </form>
               )
 

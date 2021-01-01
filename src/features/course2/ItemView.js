@@ -5,6 +5,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { MODES, selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
+import { selectors as uiSelectors2, actions as uiActions2 } from '../ui/uiSlice2';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
@@ -14,6 +15,7 @@ import { SizeMe } from 'react-sizeme';
 import { DropzoneArea } from 'material-ui-dropzone';
 import Typography from '@material-ui/core/Typography';
 import { DateTime } from 'luxon';
+import OwnerControls from '../../components/OwnerControls';
 
 const NoItem = () => {
   return (
@@ -158,6 +160,69 @@ const LiveMode = ({ size }) => {
   );
 };
 
+const EditView2 = () => {
+  const { editItem: selectors } = uiSelectors2;
+  const { editItem: actions } = uiActions2;
+
+  const item = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const editItem = useSelector(selectors.select);
+  const dispatch = useDispatch();
+
+  const { displayName, description, date, isChangingFile } = editItem;
+
+  const onEdit = () => {
+    dispatch(actions.setValues({
+      isEditing: true
+    }));
+  };
+  const onCancelEdit = () => {};
+  const onChange = () => {};
+  const onUpload = () => {};
+  const onSubmit = () => {};
+  const onDelete = () => {};
+
+  return (
+    <div className="edit-view">
+      <form className="editing-form">
+        <TextField
+          id="displayName" label="name" type="text"
+          variant="outlined"
+          value={displayName}
+          onChange={({ target: { value } }) => {
+            dispatch(uiActions.setUI({ editItem: { ...editItem, displayName: value } }));
+            // dispatch(courseActions.setNewItem({ displayName: value }));
+          }}
+        />
+        <TextField
+          id="description" label="description" type="text"
+          multiline rows={4} variant="outlined"
+          value={description}
+          onChange={({ target: { value } }) => {
+            dispatch(uiActions.setUI({ editItem: { ...editItem, description: value } }))
+            // dispatch(courseActions.setNewItem({ description: value }));
+          }}
+        />
+        {
+          isChangingFile
+          ? <DropzoneArea filesLimit={1} onChange={onUpload} />
+          : <Button>Change Video</Button>
+        }
+        {item.status === "scheduled" && (
+          <DateTimePicker
+            value={date}
+            onChange={value => {
+              dispatch(uiActions.setUI({ editItem: { ...editItem, date: value } }));
+            }}
+          />
+        )}
+      </form>
+
+      <div className="spacer" />
+      <OwnerControls onSubmit={onSubmit} onCancelEdit={onCancelEdit} onDelete={onDelete} />
+    </div>
+  );
+};
+
 const EditView = ({ onCancel, onSubmit, variant }) => {
   const { editItem } = useSelector(uiSelectors.select);
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
@@ -261,14 +326,14 @@ const ProcessingMode = () => {
 
 const ViewingMode = ({ size }) => {
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
-  const { editItem } = useSelector(uiSelectors.select);
+  const { isEditing } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
 
   return (
     <div className="item-mode viewing-mode">
       {
-        editItem.mode === MODES.EDIT
-          ? <EditView />
+        isEditing
+          ? <EditView2 />
           : (
             <>
               <Typography className="item-title" variant="h6" component="h3">{selectedItem.displayName}</Typography>
@@ -286,7 +351,7 @@ const ViewingMode = ({ size }) => {
               <div className="owner-controls">
                 <Button
                   variant="contained"
-                  onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}
+                  onClick={() => dispatch(uiActions2.editItem.setValues({ isEditing: true }))}
                 >
                   Edit
                 </Button>
