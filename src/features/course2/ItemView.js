@@ -4,7 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import { MODES, selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
+import { selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
 import { selectors as uiSelectors2, actions as uiActions2 } from '../ui/uiSlice2';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -228,7 +228,15 @@ const EditView2 = () => {
     dispatch(actions.reset());
   };
 
-  const onDelete = () => {};
+  const onDelete = () => {
+    dispatch(uiActions.openDialog({
+      name: 'deleteDialog',
+      params: {
+        item,
+        onConfirm: catalogActions.deleteItem
+      }
+    }));
+  };
 
   return (
     <div className="edit-view">

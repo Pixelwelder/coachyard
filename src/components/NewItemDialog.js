@@ -10,7 +10,8 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
 // import { actions as courseActions, MODES, selectors as courseSelectors } from '../features/course/courseSlice';
-import { actions as uiActions, selectors as uiSelectors, MODES } from '../features/ui/uiSlice';
+import { actions as uiActions, selectors as uiSelectors } from '../features/ui/uiSlice';
+import MODES from '../features/ui/Modes';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
 import { DateTimePicker } from '@material-ui/pickers';

@@ -1,10 +1,8 @@
 import React from 'react';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import { DateTime } from 'luxon';
 import Typography from '@material-ui/core/Typography';
 
-const ItemList = ({ item, isSelected, onSelect, onEdit, onDelete }) => {
+const Item = ({ item, isSelected, onSelect }) => {
 
   const formattedTime = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
   const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local()).toFormat('h:mm');
@@ -31,14 +29,8 @@ const ItemList = ({ item, isSelected, onSelect, onEdit, onDelete }) => {
           <Typography>{'-'}</Typography>
         )}
       </span>
-      {isSelected && (
-        <>
-          <EditIcon onClick={onEdit} />
-          <DeleteIcon onClick={onDelete} />
-        </>
-      )}
     </li>
   )
 };
 
-export default ItemList;
+export default Item;

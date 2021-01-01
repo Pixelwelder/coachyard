@@ -3,14 +3,7 @@ import { actions as logActions, createLog } from '../log/logSlice';
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
-
-const MODES = {
-  VIEW: 'view',
-  EDIT: 'edit',
-  CREATE: 'create',
-  CLOSED: 'closed',
-  OPEN: 'open'
-};
+import MODES from '../ui/Modes';
 
 const initialState = {
   isLoading: false,
@@ -563,5 +556,5 @@ const actions = {
   addItemToCourse, updateItem, deleteItem
 };
 
-export { selectors, actions, MODES };
+export { selectors, actions };
 export default reducer;

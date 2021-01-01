@@ -1,12 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { DateTime } from 'luxon';
 
-const MODES = {
-  VIEW: 'view',
-  EDIT: 'edit',
-  PROCESSING: 'processing',
-  CLOSED: 'closed',
-};
+import MODES from './Modes';
 
 const baseDialog = {
   mode: MODES.CLOSED,
@@ -93,5 +88,5 @@ const { actions, reducer } = createSlice({
 const select = ({ ui }) => ui;
 const selectors = { select };
 
-export { selectors, actions, MODES };
+export { selectors, actions };
 export default reducer;

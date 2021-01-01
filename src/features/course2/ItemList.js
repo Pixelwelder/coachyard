@@ -10,20 +10,6 @@ const ItemList = () => {
   const { items, selectedItemUid } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
-  const onEdit = (item) => {
-
-  };
-
-  const onDelete = (item) => {
-    dispatch(uiActions.openDialog({
-      name: 'deleteDialog',
-      params: {
-        item,
-        onConfirm: catalogActions.deleteItem
-      }
-    }));
-  };
-
   return (
     <ul className="item-list">
       {items.map((item, index) => {
@@ -35,8 +21,6 @@ const ItemList = () => {
             onSelect={() => {
               dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
             }}
-            onEdit={() => onEdit(item)}
-            onDelete={() => onDelete(item)}
           />
         );
       })}

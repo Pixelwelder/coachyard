@@ -8,7 +8,8 @@ import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as uiSelectors, actions as uiActions, MODES } from '../features/ui/uiSlice';
+import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
+import MODES from '../features/ui/Modes';
 // import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';

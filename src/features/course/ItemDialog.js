@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as courseActions, MODES, selectors as courseSelectors } from './courseSlice';
+import { actions as courseActions, selectors as courseSelectors } from './courseSlice';
+import MODES from '../ui/Modes';
 import React, { useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';

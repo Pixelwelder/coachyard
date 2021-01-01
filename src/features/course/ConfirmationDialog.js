@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as courseSelectors, actions as courseActions, MODES } from './courseSlice';
+import { selectors as courseSelectors, actions as courseActions } from './courseSlice';
+import MODES from '../ui/Modes';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 

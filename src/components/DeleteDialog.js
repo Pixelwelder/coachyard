@@ -6,7 +6,8 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
-import { selectors as uiSelectors, actions as uiActions, MODES } from '../features/ui/uiSlice';
+import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
+import MODES from '../features/ui/Modes';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@material-ui/lab/Alert';
 

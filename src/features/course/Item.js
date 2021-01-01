@@ -1,4 +1,4 @@
-import { MODES } from './courseSlice';
+import MODES from '../ui/Modes';
 import Button from '@material-ui/core/Button';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';

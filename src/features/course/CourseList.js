@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as courseSelectors, actions as courseActions, MODES } from './courseSlice';
+import { selectors as courseSelectors, actions as courseActions } from './courseSlice';
+import MODES from '../ui/Modes';
 import AddIcon from '@material-ui/icons/Add';
 import RefreshIcon from '@material-ui/icons/Cached';
 import EditIcon from '@material-ui/icons/Edit';

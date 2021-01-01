@@ -2,7 +2,8 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
-import { actions as uiActions, selectors as uiSelectors, MODES } from '../ui/uiSlice';
+import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
+import MODES from '../ui/Modes';
 
 /**
  * Provides the list of courses this user has access to.

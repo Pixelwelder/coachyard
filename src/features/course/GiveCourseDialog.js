@@ -9,7 +9,8 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as courseSelectors, actions as courseActions, MODES } from './courseSlice';
+import { selectors as courseSelectors, actions as courseActions } from './courseSlice';
+import MODES from '../ui/Modes';
 import Alert from '@material-ui/lab/Alert';
 
 const GiveCourseDialog = () => {

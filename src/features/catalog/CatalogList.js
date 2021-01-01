@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { actions as uiActions, MODES } from '../ui/uiSlice';
+import { actions as uiActions } from '../ui/uiSlice';
+import MODES from '../ui/Modes';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
 import { selectors as uiSelectors } from '../ui/uiSlice';
