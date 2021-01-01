@@ -134,6 +134,7 @@
 
   #live-mode-target {
     flex: 1;
+    margin-bottom: 16px;
   }
 }
 
@@ -141,4 +142,12 @@
   flex: 0;
   display: flex;
   justify-content: flex-end;
+}
+
+.course-summary {
+  display: flex;
+
+  .course-info {
+    flex: 1;
+  }
 }

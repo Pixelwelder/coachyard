@@ -107,7 +107,7 @@ const LiveMode = ({ size }) => {
   }, [callFrame, size]);
 
   return (
-    <div className="live-mode">
+    <div className="item-mode live-mode">
       <div id="live-mode-target">
 
       </div>
@@ -232,8 +232,9 @@ const ViewingMode = ({ size }) => {
 
   return (
     <div className="item-mode viewing-mode">
+      <p>Viewing</p>
       {
-        editItem.mode === MODES.VIEW
+        editItem.mode === MODES.EDIT
           ? <EditView />
           : (
             <>
