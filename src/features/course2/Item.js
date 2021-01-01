@@ -17,11 +17,18 @@ const ItemList = ({ item, isSelected, onSelect, onEdit, onDelete }) => {
         <Typography className="item-name">
           {item.displayName}
         </Typography>
-        {item.status !== 'live' && (
+        {item.status === 'scheduled' && (
           <Typography>{formattedTime} (in {timeRemaining})</Typography>
         )}
         {item.status === 'live' && (
           <Typography>Now live</Typography>
+        )}
+        {item.status === 'processing' && (
+          <Typography>Processing</Typography>
+        )}
+        {/* TODO Time would be super cool. */}
+        {item.status === 'viewing' && (
+          <Typography>{'-'}</Typography>
         )}
       </span>
       {isSelected && (
