@@ -29,7 +29,7 @@ const CourseView = () => {
   const error = null;
 
   const onEdit = () => {
-    dispatch(uiActions2.editCourse.setValue({
+    dispatch(uiActions2.editCourse.setValues({
       isEditing: true,
       displayName: course.displayName,
       description: course.description,
@@ -42,7 +42,7 @@ const CourseView = () => {
   }
 
   const onChange = (data) => {
-    dispatch(uiActions2.editCourse.setValue(data));
+    dispatch(uiActions2.editCourse.setValues(data));
   };
 
   const onSubmit = async (event) => {

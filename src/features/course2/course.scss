@@ -40,7 +40,7 @@
   background: #dddddd;
   padding: 10px 20px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .item-list {
@@ -112,6 +112,8 @@
 .viewing-mode {
   .player-wrapper {
     width: 100%;
+    margin-top: 8px;
+    margin-bottom: 16px;
   }
 
   //.react-player {
