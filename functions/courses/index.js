@@ -92,13 +92,27 @@ const updateCourse = async (data, context) => {
 
     console.log(data);
 
+    const filteredCourseItem = filterCourseItem(update);
+
+    // Do we need to find a user?
+    const { student } = filteredCourseItem;
+    let studentUser;
+    if (student) {
+      try {
+        studentUser = await admin.auth().getUserByEmail(student);
+        filteredCourseItem.student = studentUser.uid;
+      } catch (error) {
+        console.log(`No student ${student}.`);
+      }
+    }
+
     await admin.firestore().runTransaction(async (transaction) => {
       const ref = admin.firestore().collection('courses').doc(courseUid);
       const doc = await transaction.get(ref);
       const course = doc.data();
       if (course.creatorUid !== uid) throw new Error(`User ${uid} cannot update course ${course.uid}.`);
 
-      await transaction.update(ref, filterCourseItem(update));
+      await transaction.update(ref, filteredCourseItem);
     });
 
     console.log('Course updated.');

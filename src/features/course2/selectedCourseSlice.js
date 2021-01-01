@@ -55,15 +55,17 @@ const setId = createAsyncThunk(
             dispatch(generatedActions.setCourseCreator(creator));
           });
 
-        unsubscribeStudent();
-        unsubscribeStudent = await app.firestore()
-          .collection('users')
-          .doc(course.student)
-          .onSnapshot((snapshot) => {
-            dispatch(generatedActions.setStudent(
-              snapshot.exists ? parseUnserializables(snapshot.data()) : null
-            ));
-          })
+        if (course.student) {
+          unsubscribeStudent();
+          unsubscribeStudent = await app.firestore()
+            .collection('users')
+            .doc(course.student)
+            .onSnapshot((snapshot) => {
+              dispatch(generatedActions.setStudent(
+                snapshot.exists ? parseUnserializables(snapshot.data()) : null
+              ));
+            });
+        }
       });
 
     unsubscribeItems();

@@ -15,6 +15,7 @@ import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Alert from '@material-ui/lab/Alert';
 import { actions as invitesActions } from '../features/invites/invitesSlice';
 import { DateTimePicker } from '@material-ui/pickers';
+import Typography from '@material-ui/core/Typography';
 
 const NewCourse = () => {
 
@@ -38,16 +39,16 @@ const NewCourseDialog = () => {
 
   return (
     <Dialog open={mode !== MODES.CLOSED} onClose={onClose} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Create New Course</DialogTitle>
+      <DialogTitle id="form-dialog-title">Create Live Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Create a brand-spankin'-new course.
+          Create a brand-spankin'-new Live Course.
         </DialogContentText>
         <form onSubmit={onSubmit}>
           <TextField
             fullWidth
             autoFocus
-            variant="filled" label="Course Name" placeholder="Course Name"
+            variant="outlined" label="Course Name" placeholder="Course Name"
             id="displayName" value={displayName} disabled={isLoading}
             onChange={({ target: { value } }) => {
               dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, displayName: value } }));
@@ -55,12 +56,13 @@ const NewCourseDialog = () => {
           />
           <TextField
             fullWidth
-            variant="filled" label="Student Email" placeholder="Email"
+            variant="outlined" label="Student Email" placeholder="Email"
             id="email" type="email" value={email} disabled={isLoading}
             onChange={({ target: { value } }) => {
               dispatch(uiActions.setUI({ newCourseDialog: { ...newCourseDialog, email: value } }));
             }}
           />
+          <Typography>When is your first live session?</Typography>
           <DateTimePicker
             value={date}
             onChange={value => {
