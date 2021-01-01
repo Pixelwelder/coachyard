@@ -16,6 +16,7 @@ import { DropzoneArea } from 'material-ui-dropzone';
 import Typography from '@material-ui/core/Typography';
 import { DateTime } from 'luxon';
 import OwnerControls from '../../components/OwnerControls';
+import MODES from '../ui/Modes';
 
 const NoItem = () => {
   return (
@@ -229,12 +230,9 @@ const EditView2 = () => {
   };
 
   const onDelete = () => {
-    dispatch(uiActions.openDialog({
-      name: 'deleteDialog',
-      params: {
-        item,
-        onConfirm: catalogActions.deleteItem
-      }
+    dispatch(uiActions2.deleteItem.setValues({
+      mode: MODES.OPEN,
+      toDelete: item
     }));
   };
 

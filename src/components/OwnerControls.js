@@ -8,7 +8,7 @@ const OwnerControls = ({ onDelete, onCancelEdit, onSubmit }) => {
         variant="contained" color="secondary"
         onClick={onDelete}
       >
-        Delete Course
+        Delete
       </Button>
       <div className="spacer" />
       <Button

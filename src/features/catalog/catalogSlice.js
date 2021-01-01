@@ -233,18 +233,18 @@ const updateItem = createAsyncThunk(
 const deleteItem = createAsyncThunk(
   'deleteItem',
   async ({ uid }, { dispatch, getState }) => {
-    dispatch(uiActions.resetDialog('deleteDialog'));
+    // dispatch(uiActions.resetDialog('deleteDialog'));
     const { deleteDialog } = uiSelectors.select(getState());
-    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
+    // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
 
-    try {
+    // try {
       const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
       const result = await callable({ uid });
-      dispatch(uiActions.resetDialog('deleteDialog'));
+      // dispatch(uiActions.resetDialog('deleteDialog'));
       console.log(result);
-    } catch (error) {
-      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
-    }
+    // } catch (error) {
+      // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
+    // }
   }
 );
 

@@ -16,6 +16,7 @@ import Catalog from '../features/catalog';
 import NewCourseDialog from '../components/NewCourseDialog2';
 import NewItemDialog from '../components/NewItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
+import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -66,6 +67,9 @@ const App = () => {
       <NewCourseDialog />
       <NewItemDialog />
       <DeleteDialog />
+
+      <DeleteCourseDialog />
+      <DeleteItemDialog />
 
       {/*<Nav />*/}
 
