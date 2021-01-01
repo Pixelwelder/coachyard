@@ -112,7 +112,7 @@ const LiveMode = ({ size }) => {
 
       </div>
       {ownsCourse && (
-        <div id="live-controls">
+        <div id="owner-controls">
           <Button
             color="primary" variant="contained"
             onClick={() => dispatch(catalogActions.endItem(item))}
@@ -231,7 +231,7 @@ const ViewingMode = ({ size }) => {
   const { editItem } = useSelector(uiSelectors.select);
 
   return (
-    <>
+    <div className="item-mode viewing-mode">
       {
         editItem.mode === MODES.VIEW
           ? <EditView />
@@ -252,10 +252,13 @@ const ViewingMode = ({ size }) => {
               {/*>*/}
               {/*  <EditIcon />*/}
               {/*</Button>*/}
+              <div className="owner-controls">
+
+              </div>
             </>
           )
       }
-    </>
+    </div>
   );
 }
 

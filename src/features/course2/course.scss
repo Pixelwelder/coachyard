@@ -92,23 +92,6 @@
     display: flex;
     flex: 1;
   }
-
-  .item-view-content-viewing {
-    align-items: flex-start;
-  }
-
-  .player-wrapper {
-    width: 100%;
-  }
-
-  .react-player {
-    padding-top: 56.25%;
-    position: relative;
-
-    div {
-      position: absolute;
-    }
-  }
 }
 
 .item-mode {
@@ -116,6 +99,22 @@
   display: flex;
   flex-flow: column nowrap;
   padding: 16px;
+}
+
+.viewing-mode {
+  .player-wrapper {
+    width: 100%;
+  }
+
+  //.react-player {
+  //  padding-top: 56.25%;
+  //  position: relative;
+  //  border: 5px solid red;
+  //
+  //  div {
+  //    position: absolute;
+  //  }
+  //}
 }
 
 .editing-mode {
@@ -136,8 +135,10 @@
   #live-mode-target {
     flex: 1;
   }
+}
 
-  .live-controls {
-    flex: 0;
-  }
+.owner-controls {
+  flex: 0;
+  display: flex;
+  justify-content: flex-end;
 }
