@@ -170,13 +170,44 @@ const EditView2 = () => {
 
   const { displayName, description, date, isChangingFile } = editItem;
 
+  useEffect(() => {
+    onEdit();
+
+    return () => {
+      dispatch(actions.reset());
+    }
+  }, []);
+
   const onEdit = () => {
     dispatch(actions.setValues({
-      isEditing: true
+      isEditing: true,
+      isChangingFile: false,
+
+      displayName: item.displayName,
+      description: item.description,
+      date: item.date,
+      file: item.file
     }));
   };
-  const onCancelEdit = () => {};
-  const onChange = () => {};
+
+  const onCancelEdit = () => {
+    dispatch(actions.setValues({ isEditing: false }));
+  };
+
+  const onChange = ({ target }) => {
+    const { value } = target;
+    const name = target.getAttribute('name');
+    dispatch(actions.setValues({ [name]: value }));
+  };
+
+  const onChangeDate = (value) => {
+    console.log(value);
+  };
+
+  const onChangeVideo = (value) => {
+    dispatch(actions.setValues({ isChangingFile: value }));
+  }
+
   const onUpload = () => {};
   const onSubmit = () => {};
   const onDelete = () => {};
@@ -185,34 +216,52 @@ const EditView2 = () => {
     <div className="edit-view">
       <form className="editing-form">
         <TextField
-          id="displayName" label="name" type="text"
+          id="displayName" name="displayName" label="name" type="text"
           variant="outlined"
           value={displayName}
-          onChange={({ target: { value } }) => {
-            dispatch(uiActions.setUI({ editItem: { ...editItem, displayName: value } }));
-            // dispatch(courseActions.setNewItem({ displayName: value }));
-          }}
+          onChange={onChange}
         />
         <TextField
-          id="description" label="description" type="text"
+          id="description" name="description" label="description" type="text"
           multiline rows={4} variant="outlined"
           value={description}
-          onChange={({ target: { value } }) => {
-            dispatch(uiActions.setUI({ editItem: { ...editItem, description: value } }))
-            // dispatch(courseActions.setNewItem({ description: value }));
-          }}
+          onChange={onChange}
         />
         {
           isChangingFile
-          ? <DropzoneArea filesLimit={1} onChange={onUpload} />
-          : <Button>Change Video</Button>
+            ? (
+              <DropzoneArea filesLimit={1} onChange={onUpload} />
+            )
+            : (
+              <>
+                {
+                  item.streamingId && (
+                    <>
+                      <ReactPlayer
+                        className="edit-player"
+                        width={300}
+                        height={200}
+                        url={`https://stream.mux.com/${item.playbackId}.m3u8`}
+                        controls={true}
+                      />
+                    </>
+                  )
+                }
+              </>
+            )
         }
+        <Button
+          className="change-video-btn"
+          variant="outlined"
+          onClick={() => onChangeVideo(!isChangingFile)}
+        >
+          {isChangingFile ? 'Cancel' : 'Upload Video'}
+        </Button>
+
         {item.status === "scheduled" && (
           <DateTimePicker
             value={date}
-            onChange={value => {
-              dispatch(uiActions.setUI({ editItem: { ...editItem, date: value } }));
-            }}
+            onChange={onChangeDate}
           />
         )}
       </form>

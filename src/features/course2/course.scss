@@ -196,10 +196,19 @@ form {
   flex-direction: column;
 }
 
+.change-video-btn {
+  align-self: flex-start;
+  margin-bottom: 16px;
+}
+
 .course-summary {
   display: flex;
   flex-flow: column nowrap;
   cursor: pointer;
+}
+
+.edit-player {
+  margin-bottom: 16px;
 }
 
 .course-details {

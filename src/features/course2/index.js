@@ -29,6 +29,12 @@ const CourseView = () => {
   const isLoading = false;
   const error = null;
 
+  useEffect(() => {
+    return () => {
+      dispatch(uiActions2.editCourse.reset());
+    }
+  }, [])
+
   const onEdit = () => {
     dispatch(uiActions2.editCourse.setValues({
       isEditing: true,
@@ -74,7 +80,7 @@ const CourseView = () => {
                   <TextField
                     fullWidth
                     autoFocus
-                    variant="filled"
+                    variant="outlined"
                     label="Course Name" placeholder="Course Name" id="displayName"
                     value={displayName} disabled={isLoading}
                     onChange={({ target: { value } }) => onChange({ displayName: value })}
@@ -83,7 +89,7 @@ const CourseView = () => {
                   <TextField
                     fullWidth
                     multiline rows={4}
-                    variant="filled"
+                    variant="outlined"
                     label="Course Description" placeholder="This is a short description of the course."
                     id="description" value={description} disabled={isLoading}
                     onChange={({ target: { value } }) => onChange({ description: value })}
@@ -94,14 +100,14 @@ const CourseView = () => {
                     ? (
                       <TextField
                         fullWidth disabled
-                        variant="filled" label="Student" placeholder="Student"
+                        variant="outlined" label="Student" placeholder="Student"
                         id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}
                       />
                     )
                     : (
                       <TextField
                         fullWidth
-                        variant="filled" label="Student" placeholder="Student"
+                        variant="outlined" label="Student" placeholder="Student"
                         id="student" type="email" value={student} disabled={isLoading}
                         onChange={({ target: { value } }) => onChange({ student: value })}
                       />
