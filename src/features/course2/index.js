@@ -10,7 +10,7 @@ import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
-import { Typography } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 import CourseSummary from './CourseSummary';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
@@ -21,7 +21,7 @@ import ItemView from './ItemView';
  */
 const CourseView = () => {
   const { course, student: existingStudent } = useSelector(selectedCourseSelectors.select);
-  const editCourse = useSelector(uiSelectors2.selectEditCourse);
+  const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
 
   const { displayName, student, description, isEditing } = editCourse;

@@ -56,18 +56,26 @@
 
 .item {
   display: flex;
-  padding: 6px 20px;
-  min-height: 40px;
+  padding: 16px 20px;
+  min-height: 80px;
   align-items: center;
   cursor: pointer;
 
   .item-title {
     flex: 1;
   }
+
+  .item-name {
+    font-weight: bold;
+  }
 }
 
 .selected-item {
   background: #eeeeee;
+}
+
+.item-live {
+  background: lightpink;
 }
 
 .toc-container {

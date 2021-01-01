@@ -12,7 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import { DateTimePicker } from '@material-ui/pickers';
 import { SizeMe } from 'react-sizeme';
 import { DropzoneArea } from 'material-ui-dropzone';
-import { Typography } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 import { DateTime } from 'luxon';
 
 const NoItem = () => {
@@ -216,7 +216,7 @@ const EditView = ({ onCancel, onSubmit, variant }) => {
             // dispatch(courseActions.setNewItem({ description: value }));
           }}
         />
-        <DropzoneArea onChange={onUpload} />
+        <DropzoneArea filesLimit={1} onChange={onUpload} />
         {variant !== "processing" && (
           <DateTimePicker
             value={date}
@@ -262,15 +262,16 @@ const ProcessingMode = () => {
 const ViewingMode = ({ size }) => {
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const { editItem } = useSelector(uiSelectors.select);
+  const dispatch = useDispatch();
 
   return (
     <div className="item-mode viewing-mode">
-      <p>Viewing</p>
       {
         editItem.mode === MODES.EDIT
           ? <EditView />
           : (
             <>
+              <Typography className="item-title" variant="h6" component="h3">{selectedItem.displayName}</Typography>
               {selectedItem?.playbackId && (
                 <div className="player-wrapper">
                   <ReactPlayer
@@ -281,13 +282,14 @@ const ViewingMode = ({ size }) => {
                   />
                 </div>
               )}
-              {/*<Button*/}
-              {/*  onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}*/}
-              {/*>*/}
-              {/*  <EditIcon />*/}
-              {/*</Button>*/}
+              <div className="spacer" />
               <div className="owner-controls">
-
+                <Button
+                  variant="contained"
+                  onClick={() => dispatch(uiActions.openDialog({ name: 'editItem' }))}
+                >
+                  Edit
+                </Button>
               </div>
             </>
           )
