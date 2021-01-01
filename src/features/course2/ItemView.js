@@ -167,6 +167,7 @@ const EditView2 = () => {
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
   const editItem = useSelector(selectors.select);
   const dispatch = useDispatch();
+  const [file, setFile] = useState(null);
 
   const { displayName, description, date, isChangingFile } = editItem;
 
@@ -201,20 +202,37 @@ const EditView2 = () => {
   };
 
   const onChangeDate = (value) => {
-    console.log(value);
+    dispatch(actions.setValues({ date: value }));
   };
 
   const onChangeVideo = (value) => {
     dispatch(actions.setValues({ isChangingFile: value }));
   }
 
-  const onUpload = () => {};
-  const onSubmit = () => {};
+  const onUpload = (files) => {
+    if (!files.length) {
+      setFile(null);
+      dispatch(actions.setValues({ file: '' }));
+    } else {
+      const newFile = files[0];
+      setFile(newFile);
+      dispatch(actions.setValues({ file: newFile.name }));
+    }
+  }
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
+    const update = { displayName, description, file, date };
+    await dispatch(catalogActions.updateItem({ uid: item.uid, update, file }));
+    dispatch(actions.reset());
+  };
+
   const onDelete = () => {};
 
   return (
     <div className="edit-view">
-      <form className="editing-form">
+      <form className="editing-form" onSubmit={onSubmit}>
         <TextField
           id="displayName" name="displayName" label="name" type="text"
           variant="outlined"
