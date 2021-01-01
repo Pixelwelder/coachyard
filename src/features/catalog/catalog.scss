@@ -1,0 +1,13 @@
+.catalog {
+  flex: 1;
+}
+
+.catalog-item {
+  flex: 0 0 150px;
+  margin-right: 8px;
+
+  .media {
+    height: 140px;
+    background-size: stretch;
+  }
+}

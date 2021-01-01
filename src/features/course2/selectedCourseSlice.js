@@ -90,6 +90,15 @@ const setSelectedItemUid = createAsyncThunk(
   }
 );
 
+const init = createAsyncThunk(
+  'initSelectedCourse',
+  async (_, { dispatch }) => {
+    app.auth().onAuthStateChanged((authUser) => {
+      if (!authUser) dispatch(generatedActions.reset());
+    })
+  }
+);
+
 const onPending = (state) => {
   state.error = initialState.error;
   state.isLoading = true;
@@ -117,7 +126,8 @@ const { actions: generatedActions, reducer } = createSlice({
     setCourseCreator: setValue('courseCreator'),
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
-    _setSelectedItem: setValue('selectedItem')
+    _setSelectedItem: setValue('selectedItem'),
+    reset: (state, action) => initialState
   },
   extraReducers: {
     [setId.pending]: onPending,
@@ -126,7 +136,7 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, setId, setSelectedItemUid };
+const actions = { ...generatedActions, init, setId, setSelectedItemUid };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(

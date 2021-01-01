@@ -15,6 +15,7 @@ import { actions as courseActions } from '../course/courseSlice';
 import { actions as sessionActions } from '../session/sessionSlice';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
+import { actions as selectedCourseActions } from '../course2/selectedCourseSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
@@ -102,6 +103,7 @@ const init = createAsyncThunk(
       await dispatch(courseActions.init());
       await dispatch(sessionActions.init());
       await dispatch(catalogActions.init());
+      await dispatch(selectedCourseActions.init());
 
       // await dispatch(adminActions.init({ firebase: app }));
 

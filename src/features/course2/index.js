@@ -3,26 +3,20 @@ import Grid from '@material-ui/core/Grid';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import { actions as uiActions, MODES, selectors as uiSelectors } from '../ui/uiSlice';
+import { actions as uiActions } from '../ui/uiSlice';
 
-// import { selectors}
 import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
 import ItemView from './ItemView';
-import CardContent from '@material-ui/core/CardContent';
 import Paper from '@material-ui/core/Paper';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CourseSummary from './CourseSummary';
 import { Typography } from '@material-ui/core';
+import CourseSummary from './CourseSummary';
 
 const Course = () => {
   const { id } = useParams();
   const { course, courseCreator } = useSelector(selectedCourseSelectors.select);
-  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { deleteDialog } = useSelector(uiSelectors.select);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -60,13 +54,15 @@ const Course = () => {
           className="app-content-toc"
         >
           <Paper className="toc-container" variant="outlined">
-            {/*<div className="toc-header">*/}
-            {/*  <CourseSummary />*/}
-            {/*</div>*/}
+            <div className="toc-header">
+              <CourseSummary />
+            </div>
             <ItemList />
             <div className="toc-footer">
               {ownsCourse && (
                 <Button
+                  variant="contained"
+                  color="primary"
                   onClick={() => dispatch(uiActions.openDialog({
                     name: 'newItemDialog',
                     params: {

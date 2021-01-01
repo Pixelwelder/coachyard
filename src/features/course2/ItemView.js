@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
 import Paper from '@material-ui/core/Paper';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
-import { actions as videoActions, selectors as videoSelectors } from '../videoIframe/videoSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { MODES, selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
@@ -16,6 +11,8 @@ import DailyIframe from '@daily-co/daily-js';
 import TextField from '@material-ui/core/TextField';
 import { DateTimePicker } from '@material-ui/pickers';
 import { SizeMe } from 'react-sizeme';
+import { DropzoneArea } from 'material-ui-dropzone';
+import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 
 const NoItem = () => {
   return (
@@ -23,82 +20,20 @@ const NoItem = () => {
   );
 };
 
-const CompleteItem = ({ item }) => {
-  return (
-    <>
-      {!item.playbackId && (
-        <p>No video.</p>
-      )}
-
-      {item.playbackId && (
-        <ReactPlayer
-          width={'100%'}
-          height={'100%'}
-          url={`https://stream.mux.com/${item.playbackId}.m3u8`}
-          controls={true}
-        />
-      )}
-    </>
-  );
-};
-
-// const IncompleteItem = ({ item }) => {
-//   const { uid, isInProgress } = item;
-//   const dispatch = useDispatch();
-//   const { url } = useSelector(videoSelectors.select);
-//
-//   useEffect(() => {
-//     let callFrame;
-//
-//     const go = async () => {
-//       console.log('--- GO ---');
-//       callFrame = DailyIframe.createFrame({
-//         iframeStyle: {
-//           position: 'absolute',
-//           border: '1px solid black',
-//           'background-color': 'white',
-//           width: `${window.innerWidth - 32}px`,
-//           height: `${window.innerHeight - 20}px`,
-//           left: '16px',
-//           // right: '16px',
-//           top: '300px',
-//           // right: '1em',
-//           // bottom: '1em'
-//         }
-//       });
-//
-//       await callFrame.join({ url });
-//     };
-//
-//     const stop = async () => {
-//       console.log('--- STOP ---');
-//       if (callFrame) {
-//         callFrame.stopRecording();
-//         await callFrame.destroy();
-//       }
-//     };
-//
-//     if (url && isInProgress) {
-//       go();
-//     }
-//
-//     return stop;
-//   }, [url, isInProgress]);
-//
-//   return (
-//     <div>
-//
-//     </div>
-//   );
-// };
-
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const item = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const dispatch = useDispatch();
 
   return (
     <div>
       {ownsCourse && (
-        <p>Start</p>
+        <Button
+          color="primary" variant="contained"
+          onClick={() => dispatch(catalogActions.launchItem(item))}
+        >
+          Launch
+        </Button>
       )}
       {!ownsCourse && (
         <p>Waiting to start...</p>
@@ -116,7 +51,7 @@ const LiveMode = ({ size }) => {
 
   useEffect(() => {
     const _callFrame = DailyIframe.createFrame(
-      document.getElementById('live-mode'),
+      document.getElementById('live-mode-target'),
       {
         iframeStyle: {
           // position: 'absolute',
@@ -139,7 +74,6 @@ const LiveMode = ({ size }) => {
           callFrame.stopRecording(); // TODO Necessary?
           await callFrame.destroy();
           setCallFrame(null);
-          console.log('stopped');
         }
       }
 
@@ -155,7 +89,6 @@ const LiveMode = ({ size }) => {
     const go = async () => {
       const url = `https://coachyard.daily.co/${uid}`;
       await callFrame.join({ url });
-      console.log('joined');
     };
 
     if (callFrame && (status === 'live')) {
@@ -165,7 +98,6 @@ const LiveMode = ({ size }) => {
 
   useEffect(() => {
     if (callFrame) {
-      console.log('resizing');
       const iframe = callFrame.iframe();
       // iframe.width = size.width;
       // iframe.height = size.height;
@@ -175,17 +107,25 @@ const LiveMode = ({ size }) => {
   }, [callFrame, size]);
 
   return (
-    <div className="live-mode" id="live-mode">
-      {/*{ownsCourse && (*/}
-      {/*  <Button onClick={() => alert('Not implemented')}>*/}
-      {/*    Stop*/}
-      {/*  </Button>*/}
-      {/*)}*/}
+    <div className="live-mode">
+      <div id="live-mode-target">
+
+      </div>
+      {ownsCourse && (
+        <div id="live-controls">
+          <Button
+            color="primary" variant="contained"
+            onClick={() => dispatch(catalogActions.endItem(item))}
+          >
+            End
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
 
-const EditView = ({ onCancel, onSubmit }) => {
+const EditView = ({ onCancel, onSubmit, variant }) => {
   const { editItem } = useSelector(uiSelectors.select);
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
@@ -199,7 +139,8 @@ const EditView = ({ onCancel, onSubmit }) => {
     courseUid, displayName, description, mode, bytesTransferred, totalBytes, isChangingFile, error, date
   } = editItem;
 
-  const onUpload = ({ target: { files } }) => {
+  // const onUpload = ({ target: { files } }) => {
+  const onUpload = (files) => {
     if (!files.length) {
       setFile(null);
       dispatch(uiActions.setUI({ editItem: { ...editItem, file: file?.name || '', date } }));
@@ -207,9 +148,9 @@ const EditView = ({ onCancel, onSubmit }) => {
       return;
     }
 
-    const file = files[0];
-    setFile(file);
-    dispatch(uiActions.setUI({ editItem: { ...editItem, file: file.name } }));
+    const newFile = files[0];
+    setFile(newFile);
+    dispatch(uiActions.setUI({ editItem: { ...editItem, file: newFile.name } }));
     // dispatch(courseActions.setNewItem({ file: file.name }))
   }
 
@@ -222,11 +163,11 @@ const EditView = ({ onCancel, onSubmit }) => {
   }
 
   return (
-    <div>
-      <p>Editing...</p>
-      <form>
+    <div className="item-mode editing-mode">
+      <form className="editing-form">
         <TextField
-          autoFocus id="displayName" label="name" type="text"
+          id="displayName" label="name" type="text"
+          variant="outlined"
           value={displayName}
           onChange={({ target: { value } }) => {
             dispatch(uiActions.setUI({ editItem: { ...editItem, displayName: value } }));
@@ -235,27 +176,37 @@ const EditView = ({ onCancel, onSubmit }) => {
         />
         <TextField
           id="description" label="description" type="text"
+          multiline rows={4} variant="outlined"
           value={description}
           onChange={({ target: { value } }) => {
             dispatch(uiActions.setUI({ editItem: { ...editItem, description: value } }))
             // dispatch(courseActions.setNewItem({ description: value }));
           }}
         />
-        <input type="file" id="upload" onChange={onUpload} />
-        <DateTimePicker
-          value={date}
-          onChange={value => {
-            dispatch(uiActions.setUI({ editItem: { ...editItem, date: value } }));
-          }}
-        />
+        <DropzoneArea onChange={onUpload} />
+        {variant !== "processing" && (
+          <DateTimePicker
+            value={date}
+            onChange={value => {
+              dispatch(uiActions.setUI({ editItem: { ...editItem, date: value } }));
+            }}
+          />
+        )}
       </form>
       {onCancel && (
         <Button onClick={onCancel}>Cancel</Button>
       )}
-      <Button onClick={_onSubmit}>Submit</Button>
-      <Button>
-        <DeleteIcon onClick={() => alert('Not implemented')} />
+      <div className="spacer" />
+      <Button variant="contained" color="primary" onClick={_onSubmit}>
+        Save
       </Button>
+      {variant !== "processing" && (
+        <>
+          <Button onClick={() => alert('Not implemented')}>
+            <DeleteIcon />
+          </Button>
+        </>
+      )}
     </div>
   );
 };
@@ -264,9 +215,9 @@ const ProcessingMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
   return (
-    <div>
+    <div className="item-mode processing-mode">
       {ownsCourse && (
-        <EditView />
+        <EditView variant="processing" />
       )}
       {!ownsCourse && (
         <p>Processing...</p>
@@ -276,12 +227,8 @@ const ProcessingMode = () => {
 };
 
 const ViewingMode = ({ size }) => {
-  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const { editItem } = useSelector(uiSelectors.select);
-  const dispatch = useDispatch();
-
-  console.log('size', size);
 
   return (
     <>
@@ -320,8 +267,6 @@ const ItemView = () => {
   const onEdit = () => {};
   const onDelete = () => {};
 
-  console.log('ItemView.item', item);
-
   return (
     <Paper className="item-view" variant="outlined">
       <SizeMe
@@ -343,32 +288,6 @@ const ItemView = () => {
           </div>
         )}
       </SizeMe>
-      <div className="item-view-controls">
-        {item && (
-          <>
-            {ownsCourse && (
-              <>
-                {item.status === 'scheduled' && (
-                  <Button
-                    color="primary" variant="contained"
-                    onClick={() => dispatch(catalogActions.launchItem(item))}
-                  >
-                    Launch
-                  </Button>
-                )}
-                {item.status === 'live' && (
-                  <Button
-                    color="primary" variant="contained"
-                    onClick={() => dispatch(catalogActions.endItem(item))}
-                  >
-                    End
-                  </Button>
-                )}
-              </>
-            )}
-          </>
-        )}
-      </div>
     </Paper>
   );
 };
