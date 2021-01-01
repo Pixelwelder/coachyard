@@ -10,6 +10,7 @@ const initialState = {
 
   course: null,
   courseCreator: null,
+  student: null,
   items: [],
   selectedItem: null,
   selectedItemUid: null
@@ -18,6 +19,7 @@ const initialState = {
 let unsubscribeCourse = () => {};
 let unsubscribeItems = () => {};
 let unsubscribeCreator = () => {};
+let unsubscribeStudent = () => {};
 /**
  * Sets the selected course.
  * This loads the course and its items.
@@ -27,6 +29,8 @@ const setId = createAsyncThunk(
   'setId',
   async ({ id, history }, { dispatch }) => {
     dispatch(generatedActions._setId(id));
+    dispatch(generatedActions._setSelectedItemUid(null));
+    dispatch(generatedActions._setSelectedItem(null));
 
     unsubscribeCourse();
     unsubscribeCourse = app.firestore()
@@ -50,6 +54,16 @@ const setId = createAsyncThunk(
             const creator = parseUnserializables(snapshot.data());
             dispatch(generatedActions.setCourseCreator(creator));
           });
+
+        unsubscribeStudent();
+        unsubscribeStudent = await app.firestore()
+          .collection('users')
+          .doc(course.student)
+          .onSnapshot((snapshot) => {
+            dispatch(generatedActions.setStudent(
+              snapshot.exists ? parseUnserializables(snapshot.data()) : null
+            ));
+          })
       });
 
     unsubscribeItems();
@@ -83,9 +97,11 @@ const setSelectedItemUid = createAsyncThunk(
             console.log('no item');
             dispatch(generatedActions._setSelectedItemUid(null));
             dispatch(generatedActions._setSelectedItem(null));
-            unsubscribeItem();
           }
         });
+    } else {
+      dispatch(generatedActions._setSelectedItemUid(null));
+      dispatch(generatedActions._setSelectedItem(null));
     }
   }
 );
@@ -124,6 +140,7 @@ const { actions: generatedActions, reducer } = createSlice({
     _setId: setValue('id'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
+    setStudent: setValue('student'),
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem'),

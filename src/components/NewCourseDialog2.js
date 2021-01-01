@@ -15,6 +15,10 @@ import Alert from '@material-ui/lab/Alert';
 import { actions as invitesActions } from '../features/invites/invitesSlice';
 import { DateTimePicker } from '@material-ui/pickers';
 
+const NewCourse = () => {
+
+};
+
 const NewCourseDialog = () => {
   const { newCourseDialog } = useSelector(uiSelectors.select);
   const { isLoading, error, displayName, email, date, mode } = newCourseDialog;

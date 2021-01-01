@@ -68,21 +68,37 @@ const createCourse = async (data, context) => {
   }
 };
 
+/**
+ * Filter out the junk.
+ */
+const filterCourseItem = ({
+  displayName,
+  description,
+  student,
+}) => {
+  const courseItem = { displayName, description };
+
+  // Don't change the student if there's nothing there. Could me there's a real student.
+  if (student) courseItem.student = student;
+
+  return courseItem;
+};
+
 const updateCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { auth: { uid } } = context;
+    const { uid: courseUid, update } = data;
 
     console.log(data);
 
     await admin.firestore().runTransaction(async (transaction) => {
-      const ref = admin.firestore().collection('courses').doc(data.uid);
+      const ref = admin.firestore().collection('courses').doc(courseUid);
       const doc = await transaction.get(ref);
       const course = doc.data();
-      console.log(course);
       if (course.creatorUid !== uid) throw new Error(`User ${uid} cannot update course ${course.uid}.`);
 
-      await transaction.update(ref, data); // TODO Correct?
+      await transaction.update(ref, filterCourseItem(update));
     });
 
     console.log('Course updated.');

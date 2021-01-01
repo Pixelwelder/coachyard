@@ -120,11 +120,24 @@
 .editing-mode {
 
   .editing-form {
-    display: flex;
-    flex-direction: column;
 
-    .MuiFormControl-root, .MuiDropzoneArea-root {
-      margin-bottom: 16px;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+
+  .MuiFormControl-root, .MuiDropzoneArea-root {
+    margin-bottom: 16px;
+  }
+
+  .form-controls {
+    display: flex;
+    justify-content: flex-end;
+
+    button:not(:last-child) {
+      margin-right: 16px;
     }
   }
 }
@@ -144,10 +157,28 @@
   justify-content: flex-end;
 }
 
+.edit-course-mode {
+  form {
+    flex: 1;
+  }
+}
+
 .course-summary {
   display: flex;
+  flex-flow: column nowrap;
+  cursor: pointer;
+}
 
-  .course-info {
-    flex: 1;
+.course-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  .MuiTypography-root {
+    margin-bottom: 16px;
+  }
+
+  .course-description {
+    min-height: 200px;
   }
 }

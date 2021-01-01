@@ -9,6 +9,7 @@ import courseReducer from '../features/course/courseSlice';
 import assetsReducer from '../app/assets';
 import sessionReducer from '../features/session/sessionSlice';
 import uiReducer from '../features/ui/uiSlice';
+import uiReducer2 from '../features/ui/uiSlice2';
 import teacherReducer from '../features/teacher/teacherSlice';
 import invitesReducer from '../features/invites/invitesSlice';
 import billingReducer from '../features/billing/billingSlice';
@@ -26,6 +27,7 @@ export default configureStore({
     assets: assetsReducer,
     session: sessionReducer,
     ui: uiReducer,
+    ui2: uiReducer2,
     teacher: teacherReducer,
     invites: invitesReducer,
     billing: billingReducer,

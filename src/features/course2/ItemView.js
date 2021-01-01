@@ -264,12 +264,7 @@ const ViewingMode = ({ size }) => {
 }
 
 const ItemView = () => {
-  const dispatch = useDispatch();
-  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
-
-  const onEdit = () => {};
-  const onDelete = () => {};
 
   return (
     <Paper className="item-view" variant="outlined">

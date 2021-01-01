@@ -81,6 +81,14 @@ const createNewCourse = createAsyncThunk(
   }
 );
 
+const updateCourse = createAsyncThunk(
+  'updateCourse',
+  async (params, { dispatch }) => {
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
+    const result = await callable(params);
+  }
+);
+
 const deleteCourse = createAsyncThunk(
   'deleteCourse',
   async ({ uid }, { dispatch, getState }) => {
@@ -322,7 +330,7 @@ const { actions: generatedActions, reducer } = createSlice({
 const actions = {
   ...generatedActions,
   init,
-  createNewCourse, deleteCourse,
+  createNewCourse, updateCourse, deleteCourse,
   addItemToCourse, updateItem, deleteItem, launchItem, endItem
 };
 
