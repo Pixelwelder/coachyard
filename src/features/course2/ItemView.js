@@ -12,7 +12,8 @@ import TextField from '@material-ui/core/TextField';
 import { DateTimePicker } from '@material-ui/pickers';
 import { SizeMe } from 'react-sizeme';
 import { DropzoneArea } from 'material-ui-dropzone';
-import TextareaAutosize from '@material-ui/core/TextareaAutosize';
+import { Typography } from '@material-ui/core';
+import { DateTime } from 'luxon';
 
 const NoItem = () => {
   return (
@@ -23,21 +24,53 @@ const NoItem = () => {
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const { course, student } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
+  const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
+  const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local())
+    .toFormat('h:mm');
+
+  const Teacher = () => {
+    return (
+      <>
+        <div className="scheduled-mode-inner">
+          <div className="item-info">
+            <Typography className="participant-name" variant="h6" component="p">
+              {student ? student.displayName : course.student}
+            </Typography>
+            <Typography className="meeting-date">{formattedDate} (in {timeRemaining})</Typography>
+          </div>
+          <Button
+            color="primary" variant="contained"
+            onClick={() => dispatch(catalogActions.launchItem(item))}
+          >
+            Launch
+          </Button>
+        </div>
+        <div className="owner-controls">
+          <Button variant="contained">
+            Edit
+          </Button>
+        </div>
+      </>
+
+    );
+  };
+
+  const Student = () => {
+    return (
+      <Typography>Waiting to start...</Typography>
+    );
+  };
+
   return (
-    <div>
-      {ownsCourse && (
-        <Button
-          color="primary" variant="contained"
-          onClick={() => dispatch(catalogActions.launchItem(item))}
-        >
-          Launch
-        </Button>
-      )}
-      {!ownsCourse && (
-        <p>Waiting to start...</p>
-      )}
+    <div className="item-mode scheduled-mode">
+      {
+        ownsCourse
+          ? <Teacher />
+          : <Student />
+      }
     </div>
   );
 };
@@ -274,7 +307,7 @@ const ItemView = () => {
         refreshRate={500}
       >
         {({ size }) => (
-          <div className={`item-view-content item-view-content-${item?.status | ''}`}>
+          <div className={`item-view-content item-view-content-${item?.status || ''}`}>
             {!item && <NoItem />}
             {item && (
               <>

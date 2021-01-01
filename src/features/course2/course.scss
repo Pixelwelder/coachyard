@@ -151,6 +151,28 @@ form {
   }
 }
 
+.scheduled-mode {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+
+  .scheduled-mode-inner {
+    flex: 1;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .item-info {
+    margin-bottom: 16px;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+}
+
 .owner-controls {
   flex: 0;
   display: flex;
