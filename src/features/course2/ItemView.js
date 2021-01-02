@@ -29,7 +29,7 @@ const NoItem = () => {
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
-  const { course, student } = useSelector(selectedCourseSelectors.select);
+  const { course, student, courseCreator } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
@@ -41,12 +41,12 @@ const ScheduledMode = () => {
   const Teacher = () => {
     return (
       <>
-        <div className="scheduled-mode-inner">
+        <div className="mode-inner">
           <div className="item-info">
             <Typography className="participant-name" variant="h6" component="p">
               {student ? student.displayName : course.student}
             </Typography>
-            <Typography className="meeting-date">{formattedDate} (in {timeRemaining})</Typography>
+            <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
           </div>
           <Button
             color="primary" variant="contained"
@@ -67,7 +67,15 @@ const ScheduledMode = () => {
 
   const Student = () => {
     return (
-      <Typography>Waiting to start...</Typography>
+      <div className="mode-inner">
+        <div className="item-info">
+          <Typography>Waiting for</Typography>
+          <Typography className="participant-name" variant="h6" component="p">
+            {courseCreator.displayName}
+          </Typography>
+          <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
+        </div>
+      </div>
     );
   };
 
@@ -333,96 +341,6 @@ const EditView2 = () => {
   );
 };
 
-const EditView = ({ onCancel, onSubmit, variant }) => {
-  const { editItem } = useSelector(uiSelectors.select);
-  const { selectedItem } = useSelector(selectedCourseSelectors.select);
-  const dispatch = useDispatch();
-  const [file, setFile] = useState(null);
-
-  useEffect(() => {
-    dispatch(uiActions.setUI({ editItem: { ...editItem, ...selectedItem } }));
-  }, [selectedItem])
-
-  const {
-    courseUid, displayName, description, mode, bytesTransferred, totalBytes, isChangingFile, error, date
-  } = editItem;
-
-  // const onUpload = ({ target: { files } }) => {
-  const onUpload = (files) => {
-    if (!files.length) {
-      setFile(null);
-      dispatch(uiActions.setUI({ editItem: { ...editItem, file: file?.name || '', date } }));
-      // dispatch(courseActions.setNewItem({ file: '' }))
-      return;
-    }
-
-    const newFile = files[0];
-    setFile(newFile);
-    dispatch(uiActions.setUI({ editItem: { ...editItem, file: newFile.name } }));
-    // dispatch(courseActions.setNewItem({ file: file.name }))
-  }
-
-  const _onSubmit = (event) => {
-    event.preventDefault();
-
-    const update = { displayName, description, file, date };
-    dispatch(catalogActions.updateItem({ uid: selectedItem.uid, update, file }))
-    // onSubmit();
-  }
-
-  return (
-    <div className="item-mode editing-mode">
-      <form className="editing-form">
-        <TextField
-          id="displayName" label="Name" name="displayName" type="text"
-          variant="outlined"
-          value={displayName}
-          onChange={({ target: { value } }) => {
-            dispatch(uiActions.setUI({ editItem: { ...editItem, displayName: value } }));
-            // dispatch(courseActions.setNewItem({ displayName: value }));
-          }}
-        />
-        <TextField
-          id="description" label="Description" name="description" type="text"
-          multiline rows={4} variant="outlined"
-          value={description}
-          onChange={({ target: { value } }) => {
-            dispatch(uiActions.setUI({ editItem: { ...editItem, description: value } }))
-            // dispatch(courseActions.setNewItem({ description: value }));
-          }}
-        />
-        <DropzoneArea
-          filesLimit={1}
-          maxFileSize={5000000000}
-          onChange={onUpload}
-        />
-        {variant !== "processing" && (
-          <DateTimePicker
-            value={date}
-            onChange={value => {
-              dispatch(uiActions.setUI({ editItem: { ...editItem, date: value } }));
-            }}
-          />
-        )}
-      </form>
-      {onCancel && (
-        <Button onClick={onCancel}>Cancel</Button>
-      )}
-      <div className="spacer" />
-      <Button variant="contained" color="primary" onClick={_onSubmit}>
-        Save
-      </Button>
-      {variant !== "processing" && (
-        <>
-          <Button onClick={() => alert('Not implemented')}>
-            <DeleteIcon />
-          </Button>
-        </>
-      )}
-    </div>
-  );
-};
-
 const ProcessingMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
@@ -432,7 +350,14 @@ const ProcessingMode = () => {
         <EditView2 />
       )}
       {!ownsCourse && (
-        <p>Processing...</p>
+        <div className="mode-inner">
+          <div className="item-info">
+            <Typography className="participant-name" variant="h6" component="p">
+              Live Session complete!
+            </Typography>
+            <Typography>Your video is processing and will be available shortly.</Typography>
+          </div>
+        </div>
       )}
     </div>
   );

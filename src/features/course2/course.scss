@@ -157,14 +157,6 @@ form {
   display: flex;
   flex-flow: column nowrap;
 
-  .scheduled-mode-inner {
-    flex: 1;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
-  }
-
   .item-info {
     margin-bottom: 16px;
     display: flex;
@@ -172,6 +164,15 @@ form {
     align-items: center;
     margin-bottom: 16px;
   }
+}
+
+.mode-inner {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .owner-controls {
