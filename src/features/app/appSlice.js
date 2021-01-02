@@ -9,13 +9,10 @@ import queryString from 'query-string';
 import firebaseConfig from '../../__config__/firebase.json';
 import { actions as logActions } from '../log/logSlice';
 import { createLog } from '../log/logSlice';
-import { actions as invitesActions } from '../invites/invitesSlice';
-import { actions as assetActions } from '../../app/assets';
-import { actions as courseActions } from '../course/courseSlice';
-import { actions as sessionActions } from '../session/sessionSlice';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course2/selectedCourseSlice';
+import { actions as sessionActions } from '../session/sessionSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
@@ -98,9 +95,9 @@ const init = createAsyncThunk(
     try {
       await dispatch(setupFirebase());
       await dispatch(billingActions.init());
-      await dispatch(assetActions.init());
-      await dispatch(invitesActions.init());
-      await dispatch(courseActions.init());
+      // await dispatch(assetActions.init());
+      // await dispatch(invitesActions.init());
+      // await dispatch(courseActions.init());
       await dispatch(sessionActions.init());
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
