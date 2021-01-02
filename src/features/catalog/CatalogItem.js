@@ -8,13 +8,14 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea  from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 
-const CatalogItem = ({ item, onDelete, onSelect }) => {
-  const { displayName, uid } = item;
+const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
+  const { displayName = '' } = item;
 
   return (
     <Card
-      className="catalog-item"
+      className={`catalog-item${onSelect ? '' : ' placeholder'}`}
       onClick={onSelect}
+      disabled={!onSelect}
       variant="outlined"
     >
       <CardActionArea>

@@ -285,6 +285,7 @@ const deleteCourse = async (data, context) => {
     });
 
     // Now delete from streaming server.
+    // TODO Move this into a listener.
     const promises = items.map(async item => {
       const { streamingId } = item;
       console.log('deleting', streamingId);

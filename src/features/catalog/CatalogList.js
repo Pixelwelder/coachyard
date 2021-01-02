@@ -11,52 +11,43 @@ import CatalogItem from './CatalogItem';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles({
-  container: {
-    marginBottom: 32
-  },
-  titleContainer: {
-    display: 'flex',
-    marginBottom: 16
-  },
-  title: {
-    marginRight: 16
-  },
-  list: {
-    display: 'flex',
-    overflowX: 'scroll',
-    maxWidth: '100vw',
-    padding: 0,
-    margin: 0
-  }
-});
-
-const CatalogList = ({ title, onCreate, onDelete, items }) => {
-  const classes = useStyles();
+const CatalogList = ({ title, onCreate, onDelete, items, hideIfEmpty = false }) => {
   const history = useHistory();
 
+  if (hideIfEmpty && !items.length) return null;
+
   return (
-    <div className={classes.container}>
-      <div className={classes.titleContainer}>
-        <Typography variant="h5" component="h2" className={classes.title}>{ title }</Typography>
+    <div className="catalog-list-container">
+      <div className="title-container">
+        <Typography variant="h5" component="h2" className="title">{title}</Typography>
         {onCreate && (
           <Button onClick={onCreate} variant="outlined" size="small">
             Create New
           </Button>
         )}
       </div>
-      <ul className={classes.list}>
-        {items.map((item, index) => (
-          <CatalogItem
-            item={item}
-            key={index}
-            onSelect={() => {
-              history.push(`/course/${item.uid}`);
-            }}
-            onDelete={onDelete}
-          />
-        ))}
-      </ul>
+      {
+        items.length
+          ? (
+            <ul className="catalog-list">
+              {items.map((item, index) => (
+                <CatalogItem
+                  item={item}
+                  key={index}
+                  onSelect={() => {
+                    history.push(`/course/${item.uid}`);
+                  }}
+                  onDelete={onDelete}
+                />
+              ))}
+            </ul>
+          )
+          : (
+            <div className="catalog-list-placeholder">
+              <Typography>You have not been invited to a course yet.</Typography>
+            </div>
+          )
+      }
     </div>
   );
 };
@@ -88,6 +79,7 @@ const LearningCatalogList = () => {
   return (
     <CatalogList
       title="Learning"
+      hideIfEmpty
       items={courses}
     />
   );

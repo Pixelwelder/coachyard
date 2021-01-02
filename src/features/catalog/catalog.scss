@@ -2,12 +2,49 @@
   flex: 1;
 }
 
+.catalog-list-container {
+  margin-bottom: 32px;
+
+  .title-container {
+    display: flex;
+    margin-bottom: 16px
+  }
+
+  .title {
+    margin-right: 16px;
+  }
+}
+
+.catalog-list {
+  display: flex;
+  overflowX: scroll;
+  maxWidth: 100vw;
+  padding: 0;
+  margin: 0;
+}
+
+.catalog-list-placeholder {
+  border-color: lightgray;
+  border-style: dashed;
+  border-width: 5px;
+  border-radius: 5px;
+  height: 200px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
 .catalog-item {
   flex: 0 0 150px;
   margin-right: 8px;
 
   .media {
     height: 140px;
-    background-size: stretch;
+    //background-size: stretch;
+  }
+
+  &.placeholder {
+    opacity: 0.5;
   }
 }
