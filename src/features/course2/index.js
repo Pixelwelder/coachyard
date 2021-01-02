@@ -21,7 +21,8 @@ import OwnerControls from '../../components/OwnerControls';
  * This component is similar to ItemView but displays Courses instead of Items.
  */
 const CourseView = () => {
-  const { course, student: existingStudent } = useSelector(selectedCourseSelectors.select);
+  const { course, student: existingStudent, courseCreator } = useSelector(selectedCourseSelectors.select);
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
 
@@ -125,9 +126,11 @@ const CourseView = () => {
                   <Typography variant="h6" component="h3">{course.displayName}</Typography>
                   <Typography className="course-student">
                     {
-                      existingStudent
-                        ? `Student: ${existingStudent.displayName} (${existingStudent.email})`
-                        : `Student: ${course.student}`
+                      !ownsCourse
+                        ? `Instructor: ${courseCreator.displayName}`
+                        : existingStudent
+                          ? `Student: ${existingStudent.displayName} (${existingStudent.email})`
+                          : `Student: ${course.student}`
                     }
                   </Typography>
                   <Typography className="course-description">{course.description}</Typography>
