@@ -11,10 +11,12 @@ import CatalogItem from './CatalogItem';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useHistory } from 'react-router-dom';
 
-const CatalogList = ({ title, onCreate, onDelete, items, hideIfEmpty = false }) => {
+const CatalogList = ({
+  title, onCreate, onDelete, items, emptyMessage
+}) => {
   const history = useHistory();
 
-  if (hideIfEmpty && !items.length) return null;
+  if (!emptyMessage && !items.length) return null;
 
   return (
     <div className="catalog-list-container">
@@ -44,7 +46,7 @@ const CatalogList = ({ title, onCreate, onDelete, items, hideIfEmpty = false }) 
           )
           : (
             <div className="catalog-list-placeholder">
-              <Typography>You have not been invited to a course yet.</Typography>
+              <Typography className="empty-message">{emptyMessage}</Typography>
             </div>
           )
       }
@@ -68,6 +70,7 @@ const TeachingCatalogList = () => {
         }
       }))}
       items={courses}
+      emptyMessage="You have not created any courses yet."
     />
   );
 };
@@ -79,7 +82,6 @@ const LearningCatalogList = () => {
   return (
     <CatalogList
       title="Learning"
-      hideIfEmpty
       items={courses}
     />
   );

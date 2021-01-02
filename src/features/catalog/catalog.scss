@@ -33,6 +33,10 @@
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
+
+  .empty-message {
+    color: gray;
+  }
 }
 
 .catalog-item {

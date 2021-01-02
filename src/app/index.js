@@ -14,6 +14,7 @@ import CreateCourseDialog from '../components/CreateCourseDialog3';
 import CreateItemDialog from '../components/CreateItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
+import CreateAccountDialog from '../components/CreateAccountDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -53,7 +54,8 @@ const App = () => {
 
       {/* MODALS */}
       {/* Are we logged in? */}
-      <Session />
+      <CreateAccountDialog />
+      {/*<Session />*/}
 
       {/* User account. */}
       <Account />

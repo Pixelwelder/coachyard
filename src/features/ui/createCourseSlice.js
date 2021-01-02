@@ -1,5 +1,4 @@
 import { createUISlice } from './createUISlice';
-import { DateTime } from 'luxon';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {

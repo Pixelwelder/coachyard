@@ -73,8 +73,8 @@ const setupFirebase = createAsyncThunk(
 
     app.auth().onAuthStateChanged(
       async (authUser) => {
+        dispatch({ type: 'auth/stateChanged', payload: authUser });
         if (authUser) {
-
           dispatch(refreshUser());
           // dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
 
