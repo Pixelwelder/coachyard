@@ -1,6 +1,7 @@
 import { combineReducers, createSelector } from '@reduxjs/toolkit';
 import createCourseSlice from './createCourseSlice';
 import editCourseSlice from './editCourseSlice';
+import createItemSlice from './createItemSlice';
 import editItemSlice from './editItemSlice';
 import { deleteCourseSlice, deleteItemSlice } from './deleteSlice';
 
@@ -8,6 +9,7 @@ import { deleteCourseSlice, deleteItemSlice } from './deleteSlice';
 export default combineReducers({
   createCourse: createCourseSlice.reducer,
   editCourse: editCourseSlice.reducer,
+  createItem: createItemSlice.reducer,
   editItem: editItemSlice.reducer,
   deleteCourse: deleteCourseSlice.reducer,
   deleteItem: deleteItemSlice.reducer
@@ -16,6 +18,7 @@ export default combineReducers({
 const select = ({ ui2 }) => ui2;
 const selectCreateCourse = createSelector(select, ({ createCourse }) => createCourse);
 const selectEditCourse = createSelector(select, ({ editCourse }) => editCourse);
+const selectCreateItem = createSelector(select, ({ createItem }) => createItem);
 const selectEditItem = createSelector(select, ({ editItem }) => editItem);
 const selectDeleteCourse = createSelector(select, ({ deleteCourse }) => deleteCourse);
 const selectDeleteItem = createSelector(select, ({ deleteItem }) => deleteItem);
@@ -23,6 +26,7 @@ const selectors = {
   select,
   createCourse: { select: selectCreateCourse },
   editCourse: { select: selectEditCourse },
+  createItem: { select: selectCreateItem },
   editItem: { select: selectEditItem },
   deleteCourse: { select: selectDeleteCourse },
   deleteItem: { select: selectDeleteItem }
@@ -31,6 +35,7 @@ const selectors = {
 const actions = {
   createCourse: createCourseSlice.actions,
   editCourse: editCourseSlice.actions,
+  createItem: createItemSlice.actions,
   editItem: editItemSlice.actions,
   deleteCourse: deleteCourseSlice.actions,
   deleteItem: deleteItemSlice.actions

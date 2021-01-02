@@ -201,12 +201,7 @@ const Course = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => dispatch(uiActions.openDialog({
-                    name: 'newItemDialog',
-                    params: {
-                      courseUid: course.uid
-                    }
-                  }))}
+                  onClick={() => dispatch(uiActions2.createItem.open())}
                 >
                   Create New
                 </Button>

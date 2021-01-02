@@ -176,11 +176,9 @@ const _sendToStreamingService = createAsyncThunk(
  * @param item - the item to add
  * @param file - the matching file to upload
  */
-const addItemToCourse = createAsyncThunk(
-  'addItemToCourse',
+const createItem = createAsyncThunk(
+  'createItem',
   async ({ courseUid, item, file }, { dispatch, getState }) => {
-    const { newItemDialog } = uiSelectors.select(getState());
-
     try {
       // Create the data object.
       const { payload } = await dispatch(_addItemToCourse({ courseUid, item }));
@@ -196,18 +194,12 @@ const addItemToCourse = createAsyncThunk(
 
         // Send to streaming service.
         await dispatch(_sendToStreamingService({ uid, downloadUrl }));
-        console.log('addItemToCourse: complete');
+        console.log('createItem: complete');
       }
       // Reset UI.
-      dispatch(uiActions.resetDialog('newItemDialog'));
     } catch (error) {
-      dispatch(uiActions.setUI({
-        newItemDialog: {
-          ...newItemDialog,
-          mode: MODES.VIEW,
-          error: error.message
-        }
-      }))
+      console.error(error);
+      throw error;
     }
   }
 );
@@ -318,9 +310,9 @@ const { actions: generatedActions, reducer } = createSlice({
     [deleteCourse.rejected]: onRejected('teaching'),
     [deleteCourse.fulfilled]: onFulfilled('teaching'),
 
-    [addItemToCourse.pending]: onPending('teaching'),
-    [addItemToCourse.rejected]: onPending('teaching'),
-    [addItemToCourse.fulfilled]: onPending('teaching'),
+    [createItem.pending]: onPending('teaching'),
+    [createItem.rejected]: onPending('teaching'),
+    [createItem.fulfilled]: onPending('teaching'),
 
     [deleteItem.pending]: onPending('teaching'),
     [deleteItem.rejected]: onPending('teaching'),
@@ -332,7 +324,7 @@ const actions = {
   ...generatedActions,
   init,
   createNewCourse, updateCourse, deleteCourse,
-  addItemToCourse, updateItem, deleteItem, launchItem, endItem
+  createItem, updateItem, deleteItem, launchItem, endItem
 };
 
 const select = ({ catalog }) => catalog;

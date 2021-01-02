@@ -14,7 +14,7 @@ const bodyParser = require('body-parser');
 const filterItem = ({
   displayName,
   description,
-  file: originalFilename,
+  file: originalFilename = '',
   date
 }) => ({
   displayName,

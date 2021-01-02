@@ -258,8 +258,8 @@ const _resetItem = createAsyncThunk(
  * Adds the current item to the course.
  * MOVED
  */
-const addItemToCourse = createAsyncThunk(
-  'addItemToCourse',
+const createItem = createAsyncThunk(
+  'createItem',
   async ({ file }, { dispatch, getState }) => {
 
     // Create the data object.
@@ -273,7 +273,7 @@ const addItemToCourse = createAsyncThunk(
 
       // Send to streaming service.
       await dispatch(_sendToStreamingService({ uid, downloadUrl }));
-      console.log('addItemToCourse: complete');
+      console.log('createItem: complete');
     }
 
     // Reset UI.
@@ -530,9 +530,9 @@ const { actions: generatedActions, reducer } = createSlice({
     [giveCourse.rejected]: onRejected,
     [giveCourse.fulfilled]: onFulfilled,
 
-    [addItemToCourse.pending]: onPending,
-    [addItemToCourse.rejected]: onRejected,
-    [addItemToCourse.fulfilled]: onFulfilled,
+    [createItem.pending]: onPending,
+    [createItem.rejected]: onRejected,
+    [createItem.fulfilled]: onFulfilled,
 
     [updateItem.pending]: onPending,
     [updateItem.rejected]: onRejected,
@@ -553,7 +553,7 @@ const actions = {
   init,
   fetchAssets, fetchPlaybackId,
   createCourse, setAndLoadSelectedCourse, deleteSelectedCourse, giveCourse,
-  addItemToCourse, updateItem, deleteItem
+  createItem, updateItem, deleteItem
 };
 
 export { selectors, actions };

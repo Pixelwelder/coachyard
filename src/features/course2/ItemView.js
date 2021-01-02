@@ -341,7 +341,7 @@ const EditView = ({ onCancel, onSubmit, variant }) => {
     <div className="item-mode editing-mode">
       <form className="editing-form">
         <TextField
-          id="displayName" label="name" type="text"
+          id="displayName" label="Name" name="displayName" type="text"
           variant="outlined"
           value={displayName}
           onChange={({ target: { value } }) => {
@@ -350,7 +350,7 @@ const EditView = ({ onCancel, onSubmit, variant }) => {
           }}
         />
         <TextField
-          id="description" label="description" type="text"
+          id="description" label="Description" name="description" type="text"
           multiline rows={4} variant="outlined"
           value={description}
           onChange={({ target: { value } }) => {

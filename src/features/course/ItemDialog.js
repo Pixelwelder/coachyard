@@ -32,7 +32,7 @@ const ItemDialog = () => {
   const onSubmit = (event) => {
     event.preventDefault();
     if (itemUI.mode === MODES.CREATE) {
-      dispatch(courseActions.addItemToCourse({ file }));
+      dispatch(courseActions.createItem({ file }));
     } else {
       dispatch(courseActions.updateItem({ file }));
     }

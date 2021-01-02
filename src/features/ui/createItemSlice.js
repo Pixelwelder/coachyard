@@ -1,17 +1,20 @@
 import { createUISlice } from './createUISlice';
-import { DateTime } from 'luxon';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {
-  isOpen: false,
+  courseUid: '',
   displayName: '',
-  student: '',
   description: '',
-  date: ''
+  date: '',
+  file: '',
+
+  isChangingFile: false,
+  bytesTransferred: 0,
+  totalBytes: 0
 };
 
 export default createUISlice({
-  name: 'createCourse',
+  name: 'createItem',
   initialState,
   reducers: {
     open: () => ({
