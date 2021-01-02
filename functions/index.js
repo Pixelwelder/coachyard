@@ -38,6 +38,8 @@ if (functionName) {
     module.exports = require('./users');
   } else if (functionName.includes('stripe')) {
     module.exports = require('./billing');
+  } else if (functionName.includes('mux')) {
+    module.exports = require('./mux');
   }
 } else {
   console.log('Initializing, not calling');
@@ -60,6 +62,7 @@ if (functionName) {
     ...require('./courses'),
     ...require('./items'),
     ...require('./users'),
-    ...require('./billing')
+    ...require('./billing'),
+    ...require('./mux')
   };
 }

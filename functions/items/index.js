@@ -5,6 +5,8 @@ const { checkAuth } = require('../util/auth');
 const { getMuxHeaders, getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourseItem } = require('../data');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 /**
  * Filters user input for item creation.
@@ -145,11 +147,6 @@ const deleteItem = async (data, context) => {
   }
 };
 
-const parseMuxResponse = ({ data: { playback_ids, id } }) => ({
-  playbackId: playback_ids[0].id,
-  streamingId: id
-});
-
 const sendItem = async (data, context) => {
   try {
     checkAuth(context);
@@ -188,7 +185,7 @@ const sendItem = async (data, context) => {
     console.log('result', json);
 
     // Now record the result.
-    await itemRef.update({ ...parseMuxResponse(json), status: 'viewing' });
+    await itemRef.update({ streamingId: json.data.id, status: 'processing' });
 
     return { message: 'Done. I think.', result: json };
   } catch (error) {
