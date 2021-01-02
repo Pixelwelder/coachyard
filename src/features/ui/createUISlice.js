@@ -8,7 +8,12 @@ import { isFulfilledAction, isPendingAction, isRejectedAction } from '../../util
  * @param initialState
  * @returns {Slice<unknown, {setValues: setValues, setIsEditing: (function(*, *): void), reset: (function(): *), open: reducers.open}, string>}
  */
-export const createUISlice = ({ name, initialState: _initialState, reducers = {} }) => {
+export const createUISlice = ({
+  name,
+  initialState: _initialState,
+  reducers = {},
+  builderFunc
+}) => {
   const initialState = {
     error: null,
     isOpen: false,
@@ -51,7 +56,11 @@ export const createUISlice = ({ name, initialState: _initialState, reducers = {}
             state.isOpen = false;
             console.log('FULFILLED', action.type);
           }
-        })
+        });
+
+      if (builderFunc) {
+        builderFunc(builder);
+      }
     }
   })
 };

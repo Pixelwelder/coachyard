@@ -45,11 +45,11 @@ const NewCourseDialog = () => {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title">
+    <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
       <DialogTitle id="form-dialog-title">Create Live Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          NEW - Create a brand-spankin'-new Live Course.
+          Create a brand-spankin'-new Live Course.
         </DialogContentText>
         <form onSubmit={onSubmit}>
           <TextField

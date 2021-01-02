@@ -116,7 +116,7 @@ const CourseView = () => {
                   {!!error && <Alert severity="error">{error.message}</Alert>}
 
                   <div className="spacer" />
-                  <OwnerControls onCancelEdit={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete} />
+                  <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete} />
                 </form>
               )
 

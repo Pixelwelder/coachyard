@@ -10,6 +10,7 @@ import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
 import TextField from '@material-ui/core/TextField';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { DateTimePicker } from '@material-ui/pickers';
 import { SizeMe } from 'react-sizeme';
 import { DropzoneArea } from 'material-ui-dropzone';
@@ -170,8 +171,8 @@ const EditView2 = () => {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
 
-  const { displayName, description, date, isChangingFile, isLoading } = editItem;
-  console.log('editIte', editItem);
+  const { displayName, description, date, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
+  const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
   useEffect(() => {
     onEdit();
@@ -224,8 +225,7 @@ const EditView2 = () => {
     event.preventDefault();
 
     const update = { displayName, description, file, date };
-    await dispatch(catalogActions.updateItem({ uid: item.uid, update, file }));
-    dispatch(actions.reset());
+    dispatch(catalogActions.updateItem({ uid: item.uid, update, file }));
   };
 
   const onDelete = () => {
@@ -235,29 +235,41 @@ const EditView2 = () => {
     }));
   };
 
+  const isDisabled = () => {
+    return isLoading;
+  }
+
   return (
     <div className="edit-view">
       <form className="editing-form" onSubmit={onSubmit}>
         <TextField
           id="displayName" name="displayName" label="name" type="text"
           variant="outlined"
+          disabled={isDisabled()}
           value={displayName}
           onChange={onChange}
         />
         <TextField
           id="description" name="description" label="description" type="text"
           multiline rows={4} variant="outlined"
+          disabled={isDisabled()}
           value={description}
           onChange={onChange}
         />
         {
           isChangingFile
             ? (
-              <DropzoneArea
-                filesLimit={1}
-                maxFileSize={5000000000}
-                onChange={onUpload}
-              />
+              <>
+                {
+                  totalBytes > 0
+                  ? <LinearProgress variant="determinate" value={percentUploaded} />
+                  : <DropzoneArea
+                      filesLimit={1}
+                      maxFileSize={5000000000}
+                      onChange={onUpload}
+                    />
+                }
+              </>
             )
             : (
               <>
@@ -277,13 +289,15 @@ const EditView2 = () => {
               </>
             )
         }
-        <Button
-          className="change-video-btn"
-          variant="outlined"
-          onClick={() => onChangeVideo(!isChangingFile)}
-        >
-          {isChangingFile ? 'Cancel' : 'Upload Video'}
-        </Button>
+        {!isLoading && (
+          <Button
+            className="change-video-btn"
+            variant="outlined"
+            onClick={() => onChangeVideo(!isChangingFile)}
+          >
+            {isChangingFile ? 'Cancel' : 'Upload Video'}
+          </Button>
+        )}
 
         {item.status === "scheduled" && (
           <DateTimePicker
@@ -294,7 +308,11 @@ const EditView2 = () => {
       </form>
 
       <div className="spacer" />
-      <OwnerControls onSubmit={onSubmit} onCancelEdit={onCancelEdit} onDelete={onDelete} />
+      <OwnerControls
+        onSubmit={!isDisabled() && onSubmit}
+        onCancel={!isDisabled() && onCancelEdit}
+        onDelete={!isDisabled() && onDelete}
+      />
     </div>
   );
 };

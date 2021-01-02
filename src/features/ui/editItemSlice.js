@@ -1,4 +1,5 @@
 import { createUISlice } from './createUISlice';
+import { isPendingAction, isThisAction } from '../../util/reduxUtils';
 
 const initialState = {
   isChangingFile: false,
@@ -12,4 +13,30 @@ const initialState = {
   file: ''
 };
 
-export default createUISlice({ name: 'editItem', initialState });
+const isUploadProgress = action => action.type === 'upload/progress';
+const isUploadError = action => action.type === 'upload/error';
+const isUploadComplete = action => action.type === 'upload/complete';
+
+export default createUISlice({
+  name: 'updateItem',
+  initialState,
+  builderFunc: (builder) => {
+    builder
+      .addMatcher(isUploadProgress, (state, action) => {
+        // state.isLoading = true;
+        state.bytesTransferred = action.payload.bytesTransferred;
+        state.totalBytes = action.payload.totalBytes;
+      })
+      .addMatcher(
+        action => action.type == '_uploadItem/pending',
+        (state, action) => {
+
+      })
+      // .addMatcher(isUploadError, (state, action) => {
+      //   // state.isLoading = false;
+      // })
+      // .addMatcher(isUploadComplete, (state, action) => {
+      //   // state.isLoading = false;
+      // });
+  }
+});

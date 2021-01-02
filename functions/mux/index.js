@@ -11,10 +11,7 @@ const parseMuxResponse = ({ data: { playback_ids, id } }) => ({
 const mux_webhooks = express();
 mux_webhooks.use(bodyParser.urlencoded({ extended: false }));
 mux_webhooks.use(bodyParser.json());
-mux_webhooks.get('/', (request, response) => {
-  return response.status(200).end();
-});
-mux_webhooks.post('/', async (request, response) => {
+mux_webhooks.post('/webhooks', async (request, response) => {
   try {
     const { body } = request;
     console.log('received mux webhook', body);
@@ -42,5 +39,5 @@ mux_webhooks.post('/', async (request, response) => {
 });
 
 module.exports = {
-  mux_webhooks: functions.https.onRequest(mux_webhooks)
+  mux: functions.https.onRequest(mux_webhooks)
 }

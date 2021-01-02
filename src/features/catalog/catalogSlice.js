@@ -123,8 +123,6 @@ const _uploadItem = createAsyncThunk(
   '_uploadItem',
   async ({ uid, file }, { dispatch, getState }) => new Promise((resolve, reject) => {
     console.log('_uploadItem', uid, file);
-    const { newItemDialog } = uiSelectors.select(getState());
-    dispatch(uiActions.setUI({ newItemDialog: { ...newItemDialog, mode: MODES.PROCESSING } }));
 
     // Upload the file to Firebase Storage.
     const storageRef = app.storage().ref(`raw`);
@@ -135,21 +133,17 @@ const _uploadItem = createAsyncThunk(
     uploadTask.on('state_changed',
       (snapshot) => {
         const { bytesTransferred, totalBytes } = snapshot;
-        dispatch(uiActions.setUI({
-          newItemDialog: {
-            ...newItemDialog,
-            bytesTransferred,
-            totalBytes
-          }
-        }));
+        dispatch({ type: 'upload/progress', payload: { bytesTransferred, totalBytes }});
       },
       (error) => {
         console.error(error.message);
+        dispatch({ type: 'upload/error', error });
         return reject(error);
       },
       async () => {
         // Now get a url for streaming service.
         console.log('upload complete', file);
+        dispatch({ type: 'upload/complete' });
         return resolve(fileRef.getDownloadURL());
       }
     );
@@ -299,7 +293,9 @@ const { actions: generatedActions, reducer } = createSlice({
     resetTeaching: resetValue('teaching'),
 
     setLearning: mergeValue('learning'),
-    resetLearning: resetValue('learning')
+    resetLearning: resetValue('learning'),
+
+    setUpload: mergeValue('upload')
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),
