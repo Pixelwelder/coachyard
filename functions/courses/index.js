@@ -17,7 +17,7 @@ const createCourse = async (data, context) => {
     const { course, item } = admin.firestore().runTransaction(async (transaction) => {
       // Do we have the student?
       const studentRef = await admin.firestore().collection('users')
-        .where('student', '==', student);
+        .where('email', '==', student);
 
       const studentDoc = await transaction.get(studentRef);
       console.log('found', studentDoc.size, 'student');

@@ -16,7 +16,7 @@ const CatalogList = ({
 }) => {
   const history = useHistory();
 
-  if (!emptyMessage && !items.length) return null;
+  // if (!emptyMessage && !items.length) return null;
 
   return (
     <div className="catalog-list-container">
@@ -83,6 +83,7 @@ const LearningCatalogList = () => {
     <CatalogList
       title="Learning"
       items={courses}
+      emptyMessage="You are not learning anything yet."
     />
   );
 };

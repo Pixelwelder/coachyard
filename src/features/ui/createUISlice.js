@@ -22,19 +22,6 @@ export const createUISlice = ({
     ..._initialState
   };
 
-  const master = (state, action) => {
-    console.log('---', name, 'master', action.type);
-    if (isPendingAction(action)) {
-      state.isLoading = true;
-      state.error = initialState.error;
-    } else if (isRejectedAction(action)) {
-      state.isLoading = false;
-      state.error = action.error;
-    } else if (isFulfilledAction(action)) {
-      return initialState;
-    }
-  };
-
   return createSlice({
     name,
     initialState,
@@ -50,7 +37,16 @@ export const createUISlice = ({
         console.log('--- adding', name);
         builder
           .addMatcher(isThisAction(name), (state, action) => {
-            master(state, action);
+            if (isPendingAction(action)) {
+              state.isLoading = true;
+              state.error = initialState.error;
+            } else if (isRejectedAction(action)) {
+              state.isLoading = false;
+              state.error = action.error;
+            } else if (isFulfilledAction(action)) {
+              console.log('--- FULFILLED ---');
+              return initialState;
+            }
           })
       })
 

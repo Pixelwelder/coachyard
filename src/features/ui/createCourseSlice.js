@@ -2,7 +2,6 @@ import { createUISlice } from './createUISlice';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {
-  isOpen: false,
   displayName: '',
   student: '',
   description: '',
