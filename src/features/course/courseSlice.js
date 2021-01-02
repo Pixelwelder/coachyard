@@ -192,7 +192,7 @@ const _addItemToCourse = createAsyncThunk(
   async (_, { getState }) => {
     const { newItem, selectedCourse } = select(getState());
 
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.ADD_ITEM_TO_COURSE);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_ITEM);
     const { data } = await callable({ courseUid: selectedCourse, newItem });
     const { item } = data;
     console.log('item added', data);
@@ -233,7 +233,7 @@ const _sendToStreamingService = createAsyncThunk(
   '_sendToStreamingService',
   async ({ uid, downloadUrl }) => {
     console.log('Sending to streaming service:', downloadUrl);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM_TO_STREAMING_SERVICE);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM);
     const streamResult = await callable({
       uid: uid,
       params: { input: downloadUrl, playback_policy: ['public'] }

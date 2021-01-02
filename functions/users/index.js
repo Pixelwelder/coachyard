@@ -92,7 +92,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
 /**
  * Returns the metadata for the currently logged-in user.
  */
-const getUserMeta = async (data, context) => {
+const getUser = async (data, context) => {
   try {
     checkAuth(context);
     const { uid } = context.auth;
@@ -168,7 +168,7 @@ const createStudent = async (data, context) => {
 
 module.exports = {
   createUser: functions.https.onCall(createUser),
-  getUserMeta: functions.https.onCall(getUserMeta),
-  createStudent: functions.https.onCall(createStudent),
+  getUser: functions.https.onCall(getUser),
+  // createStudent: functions.https.onCall(createStudent),
   onCreateUser
 };

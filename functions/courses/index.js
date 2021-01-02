@@ -345,7 +345,7 @@ module.exports = {
   getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
   // updateCourse: functions.https.onCall(updateCourse),
-  giveCourse: functions.https.onCall(giveCourse),
+  // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
-  getCreatedCourses: functions.https.onCall(getCreatedCourses)
+  // getCreatedCourses: functions.https.onCall(getCreatedCourses)
 };

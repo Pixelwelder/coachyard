@@ -8,7 +8,7 @@ const CALLABLE_FUNCTIONS = {
   SET_PRIVILEGE: 'setPrivilege',
 
   CREATE_USER: 'createUser',
-  GET_USER_META: 'getUserMeta',
+  GET_USER: 'getUser',
 
   CREATE_STUDENT: 'createStudent',
 
@@ -27,10 +27,12 @@ const CALLABLE_FUNCTIONS = {
   DELETE_COURSE: 'deleteCourse',
   GET_CREATED_COURSES: 'getCreatedCourses',
 
-  ADD_ITEM_TO_COURSE: 'addItemToCourse',
+  CREATE_ITEM: 'createItem',
   UPDATE_ITEM: 'updateItem',
   DELETE_ITEM: 'deleteItem',
-  SEND_ITEM_TO_STREAMING_SERVICE: 'sendItemToStreamingService',
+  SEND_ITEM: 'sendItem',
+
+  STRIPE_CANCEL_SUBSCRIPTION: 'cancelSubscription',
 
   GET_ALL_COURSES: 'getAllCourses'
 };

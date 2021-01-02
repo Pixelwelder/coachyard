@@ -254,7 +254,11 @@ const EditView2 = () => {
         {
           isChangingFile
             ? (
-              <DropzoneArea filesLimit={1} onChange={onUpload} />
+              <DropzoneArea
+                filesLimit={1}
+                maxFileSize={5000000000}
+                onChange={onUpload}
+              />
             )
             : (
               <>
@@ -354,7 +358,11 @@ const EditView = ({ onCancel, onSubmit, variant }) => {
             // dispatch(courseActions.setNewItem({ description: value }));
           }}
         />
-        <DropzoneArea filesLimit={1} onChange={onUpload} />
+        <DropzoneArea
+          filesLimit={1}
+          maxFileSize={5000000000}
+          onChange={onUpload}
+        />
         {variant !== "processing" && (
           <DateTimePicker
             value={date}

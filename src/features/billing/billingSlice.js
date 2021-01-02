@@ -1,6 +1,7 @@
 import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const initialState = {
   customerData: null,
@@ -95,7 +96,7 @@ const cancelSubscription = createAsyncThunk(
     }
 
     const { id } = active;
-    const callable = app.functions().httpsCallable('cancelSubscription');
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.STRIPE_CANCEL_SUBSCRIPTION);
     await callable({ id });
     // const result = await app.firestore()
     //   .collection('stripe_customers')

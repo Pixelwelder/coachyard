@@ -14,7 +14,7 @@ const stripe = new Stripe(
 /**
  * When a new user is created, create a matching Stripe Customer.
  */
-const createStripeCustomer = functions.auth.user()
+const stripe_onCreateUser = functions.auth.user()
   .onCreate(async (user) => {
     console.log('Billing: user created:', user.displayName, user.email);
     const timestamp = admin.firestore.Timestamp.now();
@@ -41,7 +41,7 @@ const createStripeCustomer = functions.auth.user()
 /**
  * Any time a user is deleted, we delete all record of (1) their Stripe Customer, and (2) their payment methods.
  */
-const deleteStripeCustomer = functions.auth.user()
+const stripe_onDeleteUser = functions.auth.user()
   .onDelete(async (user) => {
     console.log('Billing: user deleted', user.email);
     const dbRef = admin.firestore().collection('stripe_customers');
@@ -55,7 +55,7 @@ const deleteStripeCustomer = functions.auth.user()
  * The payment method doc is added on the client. This function hears it and creates the Stripe counterpart.
  */
 const basicPrice = 'price_1I2h4fISeRywORkaFpUun2Xw';
-const addPaymentMethodDetails = functions.firestore
+const stripe_onCreatePaymentMethod = functions.firestore
   .document('/stripe_customers/{userId}/payment_methods/{pushId}')
   .onCreate(async (snapshot, context) => {
     try {
@@ -132,7 +132,7 @@ const addPaymentMethodDetails = functions.firestore
 /**
  * The payment doc is added on the client. This function hears it and creates the payment itself.
  */
-const createStripePayment = functions.firestore
+const stripe_onCreatePayment = functions.firestore
   .document('/stripe_customers/{userId}/payments/{pushId}')
   .onCreate(async (snapshot, context) => {
     const { amount, currency, payment_method } = snapshot.data();
@@ -170,7 +170,7 @@ const createStripePayment = functions.firestore
 /**
  * Reconfirm payment after authentication for 3D Secure.
  */
-const confirmStripePayment = functions.firestore
+const stripe_onConfirmPayment = functions.firestore
   .document('/stripe_customers/{userId}/payments/{pushId}')
   .onUpdate(async (change, context) => {
     if (change.after.data().status === 'requires_confirmation') {
@@ -179,7 +179,7 @@ const confirmStripePayment = functions.firestore
     }
   });
 
-const cancelSubscription = functions.https.onCall(async (data, context) => {
+const stripe_cancelSubscription = functions.https.onCall(async (data, context) => {
   checkAuth(context);
 
   try {
@@ -269,13 +269,12 @@ stripe_webhooks.post(
 );
 
 module.exports = {
-  createStripeCustomer,
-  addPaymentMethodDetails,
-  createStripePayment,
-  // createSubscription,
-  cancelSubscription,
-  confirmStripePayment,
-  deleteStripeCustomer,
+  stripe_onCreateUser,
+  stripe_onCreatePaymentMethod,
+  stripe_onCreatePayment,
+  stripe_onConfirmPayment,
+  stripe_onDeleteUser,
 
+  stripe_cancelSubscription,
   stripe: functions.https.onRequest(stripe_webhooks)
 };

@@ -41,7 +41,7 @@ const refreshUser = createAsyncThunk(
       const { claims } = await authUser.getIdTokenResult(true);
 
       // Get meta
-      const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER_META)();
+      const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER)();
       const meta = parseUnserializables(data);
       console.log('userMeta', meta);
 

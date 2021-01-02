@@ -21,7 +21,7 @@ const filterItem = ({
   date
 });
 
-const addItemToCourse = async (data, context) => {
+const createItem = async (data, context) => {
   try {
     checkAuth(context);
 
@@ -150,7 +150,7 @@ const parseMuxResponse = ({ data: { playback_ids, id } }) => ({
   streamingId: id
 });
 
-const sendItemToStreamingService = async (data, context) => {
+const sendItem = async (data, context) => {
   try {
     checkAuth(context);
     const {
@@ -326,12 +326,13 @@ const handleFileDelete = functions.storage
   });
 
 module.exports = {
-  addItemToCourse: functions.https.onCall(addItemToCourse),
+  createItem: functions.https.onCall(createItem),
   updateItem: functions.https.onCall(updateItem),
   deleteItem: functions.https.onCall(deleteItem),
-  sendItemToStreamingService: functions.https.onCall(sendItemToStreamingService),
+  sendItem: functions.https.onCall(sendItem),
+
   handleItemUpdate,
 
-  handleFileUpload,
-  handleFileDelete
+  // handleFileUpload,
+  // handleFileDelete
 }

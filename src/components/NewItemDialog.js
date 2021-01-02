@@ -78,7 +78,7 @@ const NewItemDialog = () => {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`Schedule a new Live Session with your student ${studentName}`}
+          {`Schedule a new Live Session with your student ${studentName}.`}
         </DialogContentText>
         <form onSubmit={_onSubmit}>
           <TextField
