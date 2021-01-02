@@ -75,7 +75,7 @@ const init = createAsyncThunk(
 );
 
 const createNewCourse = createAsyncThunk(
-  'createNewCourse',
+  'createCourse',
   async (params, { dispatch, getState }) => {
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
     const result = await callable(params);

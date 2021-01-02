@@ -20,28 +20,9 @@ const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
   const { createCourse: actions } = uiActions2;
 
-  const [lastMode, setLastMode] = useState(MODES.CLOSED);
+  const [lastIsOpen, setLastIsOpen] = useState(MODES.CLOSED);
   const dispatch = useDispatch();
-  const { mode, displayName, student, description, date } = useSelector(selectors.select);
-  const isLoading = false;
-  const error = null;
-
-  useEffect(() => {
-    const go = () => {
-      if (mode === MODES.OPEN) {
-        // Default to a date/time that's a nice round number in the future.
-        // At least an hour away, at the top of the hour.
-        const hours = DateTime.local().hour + 2;
-        const newDate = DateTime.local().set({ hours, minutes: 0, seconds: 0, milliseconds: 0 }).toUTC().toString();
-        dispatch(actions.setValues({ date: newDate }));
-      }
-    };
-
-    if (mode !== lastMode) {
-      go();
-      setLastMode(mode);
-    }
-  }, [mode]);
+  const { isOpen, displayName, student, description, date, isLoading, error } = useSelector(selectors.select);
 
   const onChange = ({ target }) => {
     const { value } = target;
@@ -54,7 +35,7 @@ const NewCourseDialog = () => {
   };
 
   const onClose = () => {
-    dispatch(actions.setValues({ mode: MODES.CLOSED }));
+    dispatch(actions.reset());
   };
 
   const onSubmit = async () => {
@@ -64,7 +45,7 @@ const NewCourseDialog = () => {
   };
 
   return (
-    <Dialog open={mode !== MODES.CLOSED} onClose={onClose} aria-labelledby="form-dialog-title">
+    <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create Live Course</DialogTitle>
       <DialogContent>
         <DialogContentText>

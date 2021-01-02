@@ -10,10 +10,11 @@ import Account from '../features/account';
 import './app.scss';
 import Course from '../features/course2';
 import Catalog from '../features/catalog';
-import NewCourseDialog from '../components/NewCourseDialog3';
-import NewItemDialog from '../components/NewItemDialog';
+import CreateCourseDialog from '../components/CreateCourseDialog3';
+// import CreateItemDialog from '../components/CreateItemDialog2';
 import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
+import NewItemDialog from '../components/NewItemDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -59,10 +60,10 @@ const App = () => {
       <Account />
 
       {/* DIALOGS */}
-      <NewCourseDialog />
-      <NewItemDialog />
       <DeleteDialog />
 
+      <CreateCourseDialog />
+      {/*<CreateItemDialog />*/}
       <DeleteCourseDialog />
       <DeleteItemDialog />
 

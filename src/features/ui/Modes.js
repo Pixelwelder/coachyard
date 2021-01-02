@@ -3,5 +3,6 @@ export default {
   EDIT: 'edit',
   CREATE: 'create',
   CLOSED: 'closed',
-  OPEN: 'open'
+  OPEN: 'open',
+  PROCESSING: 'processing'
 };

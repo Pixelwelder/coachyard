@@ -14,3 +14,6 @@ export const setValues = (state, action) => {
 
 export const isPendingAction = action => action.type.endsWith('/pending');
 export const isRejectedAction = action => action.type.endsWith('/rejected');
+export const isFulfilledAction = action => action.type.endsWith('/fulfilled');
+export const isThisAction = name => action => action.type.startsWith(name);
+
