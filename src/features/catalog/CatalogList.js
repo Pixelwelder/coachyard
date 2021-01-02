@@ -4,6 +4,7 @@ import { actions as uiActions } from '../ui/uiSlice';
 import MODES from '../ui/Modes';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
+import { actions as uiActions2 } from '../ui/uiSlice2';
 import { selectors as uiSelectors } from '../ui/uiSlice';
 import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
@@ -67,12 +68,7 @@ const TeachingCatalogList = () => {
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions.openDialog({
-        name: 'newCourseDialog',
-        params: {
-          onConfirm: catalogActions.addItemToCourse
-        }
-      }))}
+      onCreate={() => dispatch(uiActions2.createCourse.open())}
       onDelete={(item) => dispatch(uiActions.openDialog({
         name: 'deleteDialog',
         params: {

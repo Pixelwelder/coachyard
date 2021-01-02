@@ -11,14 +11,13 @@ const createCourse = async (data, context) => {
     checkAuth(context);
 
     const { auth: { token: { uid } } } = context;
-    const { displayName, email, description = '', date } = data;
+    const { displayName, student, description = '', date } = data;
 
     // TODO Gate!
-
     const { course, item } = admin.firestore().runTransaction(async (transaction) => {
       // Do we have the student?
       const studentRef = await admin.firestore().collection('users')
-        .where('email', '==', email);
+        .where('student', '==', student);
 
       const studentDoc = await transaction.get(studentRef);
       console.log('found', studentDoc.size, 'student');
@@ -35,7 +34,7 @@ const createCourse = async (data, context) => {
         updated: now,
 
         // Save UID if we have it; otherwise email.
-        student: studentDoc.size ? studentDoc.docs[0].data().uid : email
+        student: studentDoc.size ? studentDoc.docs[0].data().uid : student
       });
 
       // Add it.
