@@ -8,15 +8,16 @@ import { isFulfilledAction, isPendingAction, isRejectedAction } from '../../util
  * @param initialState
  * @returns {Slice<unknown, {setValues: setValues, setIsEditing: (function(*, *): void), reset: (function(): *), open: reducers.open}, string>}
  */
-export const createUISlice = ({ name, initialState, reducers = {} }) => {
+export const createUISlice = ({ name, initialState: _initialState, reducers = {} }) => {
+  const initialState = {
+    error: null,
+    isOpen: false,
+    isLoading: false,
+    ..._initialState
+  };
   return createSlice({
     name,
-    initialState: {
-      error: null,
-      isOpen: false,
-      isLoading: false,
-      ...initialState,
-    },
+    initialState,
     reducers: {
       open: (state) => ({ ...initialState, isOpen: true }),
       reset: reset(initialState),

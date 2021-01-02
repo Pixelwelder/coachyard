@@ -170,7 +170,8 @@ const EditView2 = () => {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
 
-  const { displayName, description, date, isChangingFile } = editItem;
+  const { displayName, description, date, isChangingFile, isLoading } = editItem;
+  console.log('editIte', editItem);
 
   useEffect(() => {
     onEdit();
@@ -181,10 +182,8 @@ const EditView2 = () => {
   }, []);
 
   const onEdit = () => {
+    dispatch(actions.open());
     dispatch(actions.setValues({
-      isEditing: true,
-      isChangingFile: false,
-
       displayName: item.displayName,
       description: item.description,
       date: item.date,
@@ -193,7 +192,7 @@ const EditView2 = () => {
   };
 
   const onCancelEdit = () => {
-    dispatch(actions.setValues({ isEditing: false }));
+    dispatch(actions.reset());
   };
 
   const onChange = ({ target }) => {
@@ -407,13 +406,13 @@ const ProcessingMode = () => {
 
 const ViewingMode = ({ size }) => {
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
-  const { isEditing } = useSelector(uiSelectors2.editItem.select);
+  const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
 
   return (
     <div className="item-mode viewing-mode">
       {
-        isEditing
+        isOpen
           ? <EditView2 />
           : (
             <>
@@ -432,7 +431,7 @@ const ViewingMode = ({ size }) => {
               <div className="owner-controls">
                 <Button
                   variant="contained"
-                  onClick={() => dispatch(uiActions2.editItem.setValues({ isEditing: true }))}
+                  onClick={() => dispatch(uiActions2.editItem.open())}
                 >
                   Edit
                 </Button>

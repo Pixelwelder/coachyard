@@ -134,7 +134,7 @@ const CourseView = () => {
 
                   <div className="spacer" />
                   <div className="owner-controls">
-                    <Button onClick={onEdit} variant="contained" color="primary">
+                    <Button onClick={onEdit} variant="contained">
                       Edit
                     </Button>
                   </div>
