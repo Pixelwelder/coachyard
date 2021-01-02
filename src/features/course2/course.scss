@@ -182,6 +182,11 @@ form {
   button:not(:last-child) {
     margin-right: 16px;
   }
+
+  .recording-warning {
+    flex: 1;
+    margin-right: 16px;
+  }
 }
 
 .edit-course-mode {

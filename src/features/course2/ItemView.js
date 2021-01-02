@@ -18,6 +18,7 @@ import Typography from '@material-ui/core/Typography';
 import { DateTime } from 'luxon';
 import OwnerControls from '../../components/OwnerControls';
 import MODES from '../ui/Modes';
+import Alert from '@material-ui/lab/Alert';
 
 const NoItem = () => {
   return (
@@ -85,6 +86,8 @@ const LiveMode = ({ size }) => {
   const { uid, status } = item;
   const dispatch = useDispatch();
   const [callFrame, setCallFrame] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasRecorded, setHasRecorded] = useState(false);
 
   useEffect(() => {
     const _callFrame = DailyIframe.createFrame(
@@ -104,6 +107,12 @@ const LiveMode = ({ size }) => {
         }
       }
     );
+
+    _callFrame.on('recording-started', () => {
+      setIsRecording(true);
+      setHasRecorded(true);
+    });
+    _callFrame.on('recording-stopped', () => setIsRecording(false));
 
     const stop = () => {
       const execute = async () => {
@@ -149,10 +158,12 @@ const LiveMode = ({ size }) => {
 
       </div>
       {ownsCourse && (
-        <div id="owner-controls">
+        <div className="owner-controls">
+          {!hasRecorded && !isRecording && <Alert className="recording-warning" severity="error">Not recording!</Alert>}
           <Button
             color="primary" variant="contained"
             onClick={() => dispatch(catalogActions.endItem(item))}
+            disabled={hasRecorded && isRecording}
           >
             End
           </Button>
