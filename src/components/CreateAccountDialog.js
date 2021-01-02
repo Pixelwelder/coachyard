@@ -44,7 +44,9 @@ const CreateAccountDialog = () => {
   };
 
   const isDisabled = () => {
-    return !displayName || !email || !password || isLoading;
+    return mode === SESSION_MODES.SIGN_UP
+      ? (!displayName || !email || !password || isLoading)
+      : (!email || !password || isLoading);
   };
 
   return (
