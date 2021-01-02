@@ -136,11 +136,13 @@ const CourseView = () => {
                   <Typography className="course-description">{course.description}</Typography>
 
                   <div className="spacer" />
-                  <div className="owner-controls">
-                    <Button onClick={onEdit} variant="contained">
-                      Edit
-                    </Button>
-                  </div>
+                  {ownsCourse && (
+                    <div className="owner-controls">
+                      <Button onClick={onEdit} variant="contained">
+                        Edit
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )
           }

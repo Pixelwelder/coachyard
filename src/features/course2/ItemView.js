@@ -55,11 +55,12 @@ const ScheduledMode = () => {
             Launch
           </Button>
         </div>
-        <div className="owner-controls">
-          <Button variant="contained" onClick={onEdit}>
-            Edit
-          </Button>
-        </div>
+        {/* TODO Put this back. */}
+        {/*<div className="owner-controls">*/}
+        {/*  <Button variant="contained" onClick={onEdit}>*/}
+        {/*    Edit*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
       </>
 
     );
