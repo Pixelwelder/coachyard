@@ -4,7 +4,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import TextField from '@material-ui/core/TextField';
-import { actions as uiActions } from '../features/ui/uiSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import Typography from '@material-ui/core/Typography';
@@ -14,7 +13,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
-import { DateTime } from 'luxon';
 
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
@@ -69,12 +67,17 @@ const NewCourseDialog = () => {
           <DateTimePicker
             value={date}
             onChange={onChangeDate}
+            disabled={isLoading}
           />
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Button
+          onClick={onClose}
+          color="primary"
+          disabled={!displayName || isLoading}
+        >
           Cancel
         </Button>
         <Button

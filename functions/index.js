@@ -27,22 +27,22 @@ admin.initializeApp({
 // Only export the function family that was called.
 // This is not ideal; I haven't figured out how this works yet.
 const functionName = process.env.FUNCTION_NAME || process.env.K_SERVICE;
-if (functionName) {
-
-  console.log('calling function', functionName);
-  if (functionName.includes('Course')) {
-    module.exports = require('./courses');
-  } else if (functionName.includes('Item')) {
-    module.exports = require('./items');
-  } else if (functionName.includes('User')) {
-    module.exports = require('./users');
-  } else if (functionName.includes('stripe')) {
-    module.exports = require('./billing');
-  } else if (functionName.includes('mux')) {
-    module.exports = require('./mux');
-  }
-} else {
-  console.log('Initializing, not calling');
+// if (functionName) {
+//
+//   console.log('calling function', functionName);
+//   if (functionName.includes('Course')) {
+//     module.exports = require('./courses');
+//   } else if (functionName.includes('Item')) {
+//     module.exports = require('./items');
+//   } else if (functionName.includes('User')) {
+//     module.exports = require('./users');
+//   } else if (functionName.includes('stripe')) {
+//     module.exports = require('./billing');
+//   } else if (functionName.includes('mux')) {
+//     module.exports = require('./mux');
+//   }
+// } else {
+//   console.log('Initializing, not calling');
   module.exports = {
     // rooms,
     // roomsFE,
@@ -65,4 +65,4 @@ if (functionName) {
     ...require('./billing'),
     ...require('./mux')
   };
-}
+// }

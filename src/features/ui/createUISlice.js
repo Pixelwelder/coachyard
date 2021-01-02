@@ -10,6 +10,7 @@ import { isFulfilledAction, isPendingAction, isRejectedAction } from '../../util
  */
 export const createUISlice = ({
   name,
+  extraNames = [],
   initialState: _initialState,
   reducers = {},
   builderFunc
@@ -20,6 +21,20 @@ export const createUISlice = ({
     isLoading: false,
     ..._initialState
   };
+
+  const master = (state, action) => {
+    console.log('---', name, 'master', action.type);
+    if (isPendingAction(action)) {
+      state.isLoading = true;
+      state.error = initialState.error;
+    } else if (isRejectedAction(action)) {
+      state.isLoading = false;
+      state.error = action.error;
+    } else if (isFulfilledAction(action)) {
+      return initialState;
+    }
+  };
+
   return createSlice({
     name,
     initialState,
@@ -31,32 +46,38 @@ export const createUISlice = ({
       ...reducers
     },
     extraReducers: (builder) => {
-      builder
-        .addMatcher(isThisAction(name), (state, action) => {
-          if (isPendingAction(action)) {
-            // console.log(name, 'is definitely pending');
-          }
-        })
-        .addMatcher(isPendingAction, (state, action) => {
-          if (isThisAction(name)(action)) {
-            state.isLoading = true;
-            state.error = initialState.error;
-          }
-        })
-        .addMatcher(isRejectedAction, (state, action) => {
-          if (isThisAction(name)(action)) {
-            state.isLoading = false;
-            state.error = action.payload;
-            console.log('REJECTED', action.type);
-          }
-        })
-        .addMatcher(isFulfilledAction, (state, action) => {
-          if (isThisAction(name)(action)) {
-            state.isLoading = false;
-            state.isOpen = false;
-            console.log('FULFILLED', action.type);
-          }
-        });
+      [name, ...extraNames].forEach((name) => {
+        console.log('--- adding', name);
+        builder
+          .addMatcher(isThisAction(name), (state, action) => {
+            master(state, action);
+          })
+      })
+
+      // builder
+      //   .addMatcher(isThisAction(name), (state, action) => {
+      //     master(name, action);
+      //   })
+      //   .addMatcher(isPendingAction, (state, action) => {
+      //     if (isThisAction(name)(action)) {
+      //       state.isLoading = true;
+      //       state.error = initialState.error;
+      //     }
+      //   })
+      //   .addMatcher(isRejectedAction, (state, action) => {
+      //     if (isThisAction(name)(action)) {
+      //       state.isLoading = false;
+      //       state.error = action.payload;
+      //       console.log('REJECTED', action.type);
+      //     }
+      //   })
+      //   .addMatcher(isFulfilledAction, (state, action) => {
+      //     if (isThisAction(name)(action)) {
+      //       state.isLoading = false;
+      //       state.isOpen = false;
+      //       console.log('FULFILLED', action.type);
+      //     }
+      //   });
 
       if (builderFunc) {
         builderFunc(builder);

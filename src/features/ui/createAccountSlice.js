@@ -10,6 +10,8 @@ const initialState = {
 
 export default createUISlice({
   name: 'createAccount',
+  extraNames: ['signIn', 'signUp'],
+
   initialState,
   builderFunc: (builder) => {
     builder.addMatcher(

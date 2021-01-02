@@ -30,7 +30,8 @@ const CreateAccountDialog = () => {
 
   const onToggle = () => {
     dispatch(actions.setValues({
-      mode: mode === SESSION_MODES.SIGN_IN ? SESSION_MODES.SIGN_UP : SESSION_MODES.SIGN_IN
+      mode: mode === SESSION_MODES.SIGN_IN ? SESSION_MODES.SIGN_UP : SESSION_MODES.SIGN_IN,
+      error: null // TODO Ugly.
     }));
   }
 
