@@ -36,6 +36,8 @@ const ScheduledMode = () => {
   const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local())
     .toFormat('h:mm');
 
+  const onEdit = () => {};
+
   const Teacher = () => {
     return (
       <>
@@ -54,7 +56,7 @@ const ScheduledMode = () => {
           </Button>
         </div>
         <div className="owner-controls">
-          <Button variant="contained">
+          <Button variant="contained" onClick={onEdit}>
             Edit
           </Button>
         </div>
@@ -268,7 +270,7 @@ const EditView2 = () => {
           onChange={onChange}
         />
         {
-          isChangingFile
+          (isChangingFile || !item.streamingId)
             ? (
               <>
                 {
@@ -300,7 +302,7 @@ const EditView2 = () => {
               </>
             )
         }
-        {!isLoading && (
+        {!!item.streamingId && !isLoading && (
           <Button
             className="change-video-btn"
             variant="outlined"
@@ -320,9 +322,12 @@ const EditView2 = () => {
 
       <div className="spacer" />
       <OwnerControls
-        onSubmit={!isDisabled() && onSubmit}
-        onCancel={!isDisabled() && onCancelEdit}
-        onDelete={!isDisabled() && onDelete}
+        onSubmit={onSubmit}
+        enableSubmit={!isDisabled() && !!file}
+        onCancel={onCancelEdit}
+        enableCancel={!!item.streamingId && !isDisabled()}
+        onDelete={onDelete}
+        enableDelete={!isDisabled()}
       />
     </div>
   );
@@ -424,7 +429,7 @@ const ProcessingMode = () => {
   return (
     <div className="item-mode processing-mode">
       {ownsCourse && (
-        <EditView variant="processing" />
+        <EditView2 />
       )}
       {!ownsCourse && (
         <p>Processing...</p>

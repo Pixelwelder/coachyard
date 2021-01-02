@@ -1,13 +1,15 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 
-const OwnerControls = ({ onDelete, onCancel, onSubmit }) => {
+const OwnerControls = ({
+  onDelete, enableDelete = true, onCancel, enableCancel = true, onSubmit, enableSubmit = true
+}) => {
   return (
     <div className="owner-controls">
       <Button
         variant="contained" color="secondary"
         onClick={onDelete}
-        disabled={!onDelete}
+        disabled={!enableDelete}
       >
         Delete
       </Button>
@@ -15,14 +17,14 @@ const OwnerControls = ({ onDelete, onCancel, onSubmit }) => {
       <Button
         variant="outlined"
         onClick={onCancel}
-        disabled={!onCancel}
+        disabled={!enableCancel}
       >
         Cancel
       </Button>
       <Button
         type="submit" variant="contained" color="primary"
         onClick={onSubmit}
-        disabled={!onSubmit}
+        disabled={!enableSubmit}
       >
         Save
       </Button>
