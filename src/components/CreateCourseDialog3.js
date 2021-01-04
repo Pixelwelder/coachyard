@@ -13,6 +13,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
+import { DateTime } from 'luxon';
 
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
@@ -29,7 +30,7 @@ const NewCourseDialog = () => {
   };
 
   const onChangeDate = (value) => {
-    // dispatch(actions.setValues({ date: value }));
+    dispatch(actions.setValues({ date: value.toUTC().toString() }));
   };
 
   const onClose = () => {

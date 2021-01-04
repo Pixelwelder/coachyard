@@ -123,14 +123,14 @@ const CourseView = () => {
 
               : (
                 <div className="course-details">
-                  <Typography variant="h6" component="h3">{course.displayName}</Typography>
+                  <Typography variant="h6" component="h3">{course?.displayName || ''}</Typography>
                   <Typography className="course-student">
                     {
                       !ownsCourse
-                        ? `Instructor: ${courseCreator.displayName}`
+                        ? `Instructor: ${courseCreator?.displayName || ''}`
                         : existingStudent
                           ? `Student: ${existingStudent.displayName} (${existingStudent.email})`
-                          : `Student: ${course.student}`
+                          : `Student: ${course?.student || ''}`
                     }
                   </Typography>
                   <Typography className="course-description">{course.description}</Typography>
