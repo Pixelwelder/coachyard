@@ -45,29 +45,41 @@ const Auth = () => {
 
   return (
     <div className="component auth-status">
-      {!!authUser.uid && (
-        <div className="auth-form">
-          <Button
-            onClick={onOpen}
-          >
-            <span className="user-image"></span>
-            <span className="user-name">{authUser.displayName || authUser.email}</span>
-            <ArrowDropDownIcon />
-          </Button>
-          <Menu
-            id="simple-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={!!anchorEl}
-            onClose={onClose}
-          >
-            <MenuItem onClick={onShowAccount}>Account</MenuItem>
-            <MenuItem onClick={onLogOut}>Logout</MenuItem>
-          </Menu>
-          {/*<span className="email">{authUser.email}</span>*/}
-          {/*<Button disabled={isLoading} onClick={onLogOut} variant="outlined">Sign Out</Button>*/}
-        </div>
-      )}
+      <div className="auth-form">
+
+          <>
+            <Button
+              onClick={onOpen}
+              disabled={!authUser.uid}
+            >
+              {!!authUser.uid
+                ? (
+                  <>
+                    <span className="user-image"></span>
+                    <span className="user-name">{authUser.displayName || authUser.email}</span>
+                    <ArrowDropDownIcon />
+                  </>
+                )
+                : (
+                  <span className="user-name">No user</span>
+                )
+              }
+            </Button>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={!!anchorEl}
+              onClose={onClose}
+            >
+              <MenuItem onClick={onShowAccount}>Account</MenuItem>
+              <MenuItem onClick={onLogOut}>Logout</MenuItem>
+            </Menu>
+          </>
+
+        {/*<span className="email">{authUser.email}</span>*/}
+        {/*<Button disabled={isLoading} onClick={onLogOut} variant="outlined">Sign Out</Button>*/}
+      </div>
       {/*{!authUser.uid && (*/}
       {/*  <form className="auth-form" onSubmit={onLogIn}>*/}
       {/*    <FormControl>*/}

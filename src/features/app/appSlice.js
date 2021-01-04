@@ -16,11 +16,13 @@ import { actions as sessionActions } from '../session/sessionSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { setValue } from '../../util/reduxUtils';
 
 const initialState = {
   isInitialised: false,
   isLoading: false, // TODO
   error: null,
+  signInAttempted: false,
   // Just holds the basics.
   authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
   query: {}
@@ -28,14 +30,16 @@ const initialState = {
 
 const refreshUser = createAsyncThunk(
   'refreshUser',
-  async (_, { dispatch }) => {
+  async ({ authUser }, { dispatch }) => {
     try {
-      console.log('refreshing user');
-      const authUser = app.auth().currentUser;
+      console.log('refreshing user', authUser);
       const { uid, email, displayName } = authUser;
 
-      // Get token.
-      const { claims } = await authUser.getIdTokenResult(true);
+      // Get token. TODO
+      // const { claims } = await authUser.getIdTokenResult(true);
+      const claims = {};
+
+      console.log('claims', claims);
 
       // Get meta
       const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER)();
@@ -57,6 +61,7 @@ const refreshUser = createAsyncThunk(
 const setupFirebase = createAsyncThunk(
   'setupFirebase',
   async (_, { dispatch, getState }) => {
+    console.log('Initialize Firebase...');
     dispatch(logActions.log(createLog(`Initializing Firebase...` )));
     const state = getState();
     const { isInitialized } = select(state);
@@ -74,8 +79,13 @@ const setupFirebase = createAsyncThunk(
     app.auth().onAuthStateChanged(
       async (authUser) => {
         dispatch({ type: 'auth/stateChanged', payload: authUser });
+        dispatch(generatedActions.setSignInAttempted(true));
+        console.log('auth state changed', authUser);
         if (authUser) {
-          dispatch(refreshUser());
+          setTimeout(() => {
+            dispatch(refreshUser({ authUser }));
+          }, 1000)
+          // dispatch(refreshUser({ authUser }));
           // dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
 
         } else {
@@ -206,7 +216,8 @@ const { reducer, actions: generatedActions } = createSlice({
   reducers: {
     setAuthUser: (state, action) => { state.authUser = action.payload; },
     clearError: (state) => { state.error = initialState.error; },
-    setQuery: (state, action) => { state.query = action.payload; }
+    setQuery: (state, action) => { state.query = action.payload; },
+    setSignInAttempted: setValue('signInAttempted')
   },
   extraReducers: {
     [init.fulfilled]: (state) => { state.isInitialized = true; },

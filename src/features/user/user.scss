@@ -9,6 +9,7 @@
 
 .user-name {
   display: none;
+  white-space: nowrap;
 }
 
 @media (min-width: $breakpoint-mobile) {

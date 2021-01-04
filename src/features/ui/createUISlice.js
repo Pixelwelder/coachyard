@@ -34,7 +34,6 @@ export const createUISlice = ({
     },
     extraReducers: (builder) => {
       [name, ...extraNames].forEach((name) => {
-        console.log('--- adding', name);
         builder
           .addMatcher(isThisAction(name), (state, action) => {
             if (isPendingAction(action)) {
@@ -44,7 +43,6 @@ export const createUISlice = ({
               state.isLoading = false;
               state.error = action.error;
             } else if (isFulfilledAction(action)) {
-              console.log('--- FULFILLED ---');
               return initialState;
             }
           })

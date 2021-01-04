@@ -15,6 +15,7 @@ import CreateItemDialog from '../components/CreateItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
 import CreateAccountDialog from '../components/CreateAccountDialog';
+import FirebaseSignIn from '../components/FirebaseSignIn';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -54,10 +55,12 @@ const App = () => {
 
       {/* MODALS */}
       {/* Are we logged in? */}
-      <CreateAccountDialog />
       {/*<Session />*/}
 
       {/* User account. */}
+      {/* TODO FirebaseSignIn always signs out. */}
+      {/*<FirebaseSignIn />*/}
+      <CreateAccountDialog />
       <Account />
 
       {/* DIALOGS */}

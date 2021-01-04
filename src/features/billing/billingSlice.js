@@ -118,7 +118,7 @@ const init = createAsyncThunk(
       unsubscribePaymentMethods();
       unsubscribeSubscriptions();
 
-      console.log('billing: auth changed');
+      console.log('billing: auth changed', authUser);
       if (authUser) {
         app
           .firestore()
