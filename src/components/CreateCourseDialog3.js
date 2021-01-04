@@ -82,7 +82,7 @@ const NewCourseDialog = () => {
         </Button>
         <Button
           color="primary"
-          disabled={!displayName || isLoading}
+          disabled={!displayName || !student || isLoading}
           onClick={onSubmit}
         >
           Create!
