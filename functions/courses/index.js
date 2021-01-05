@@ -70,6 +70,7 @@ const createCourse = async (data, context) => {
         courseUid: courseRef.id,
         access: 'admin',
         displayName,
+        description,
         image
       });
 
@@ -86,6 +87,7 @@ const createCourse = async (data, context) => {
           courseUid: courseRef.id,
           access: 'student',
           displayName,
+          description,
           image
         });
 
@@ -374,6 +376,30 @@ const getCreatedCourses = async (data, context) => {
   }
 };
 
+const onCourseUpdated = functions.firestore
+  .document('/courses/{docId}')
+  .onUpdate(async (change, context) => {
+    // Update all tokens.
+    const result = await admin.firestore().runTransaction((async (transaction) => {
+      const { displayName, description, image } = change.after.data();
+      const tokensRef = admin.firestore()
+        .collection('tokens')
+        .where('courseUid', '==', course.uid)
+        .select();
+
+      const tokens = await transaction.get(tokensRef);
+      const promises = tokens.docs.map((doc) => {
+        return transaction.update(doc.ref, {
+          displayName,
+          description,
+          image
+        })
+      });
+
+      await Promise.all(promises);
+    }));
+  });
+
 module.exports = {
   // Courses
   createCourse: functions.https.onCall(createCourse),
@@ -383,5 +409,6 @@ module.exports = {
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
-  // getCreatedCourses: functions.https.onCall(getCreatedCourses)
+  // getCreatedCourses: functions.https.onCall(getCreatedCourses),
+  onCourseUpdated
 };

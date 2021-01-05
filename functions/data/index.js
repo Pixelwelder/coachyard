@@ -100,6 +100,7 @@ const newCourseToken = (overrides) => ({
 
   // Abbreviated Course
   displayName: '',
+  description: '',
   image: '',
 
   ...overrides
