@@ -16,14 +16,20 @@ service cloud.firestore {
       allow write: if isCreator();
     }
 
+    match /tokens/{uid} {
+      allow list: if true;
+      allow get: if true;
+      allow write: if false; // Admin only.
+    }
+
     match /courses/{uid} {
       allow list: if true;
       allow get: if true;//isCreator();// || isEnrolled(); // TODO
       allow write: if isCreator();
 
-      function isEnrolled() {
-        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
-      }
+      // function isEnrolled() {
+      //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
+      // }
     }
 
     match /items/{uid} {
@@ -31,10 +37,10 @@ service cloud.firestore {
       allow get: if true; // TODO isCreator() || isEnrolledInParentCourse();
       allow write: if isCreator();
 
-      function isEnrolledInParentCourse() {
-        let parentCourse = get(/databases/$(database)/documents/courses/$(resource.data.courseUid));
-        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
-      }
+      // function isEnrolledInParentCourse() {
+      //   let parentCourse = get(/databases/$(database)/documents/courses/$(resource.data.courseUid));
+      //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
+      // }
     }
 
     match /stripe_customers/{uid} {
@@ -51,9 +57,9 @@ service cloud.firestore {
       }
     }
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
+    // function isSignedIn() {
+    //   return request.auth != null;
+    // }
 
     function isCreator() {
       return resource.data.creatorUid == request.auth.uid;

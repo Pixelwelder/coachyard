@@ -1,4 +1,4 @@
-// TODO - Duped in front end.
+// TODO Factory method that handles timestamps.
 const newBaseItem = (overrides) => ({
   uid: '', // Always store the uid when created.
   created: '',
@@ -13,7 +13,6 @@ const newUserMeta = (overrides) => ({
   ...newBaseItem(),
   displayName: '', // TODO Make sure we change this when they update elsewhere.
   email: '',       // TODO Same.
-  enrolled: {},
   ...overrides
 });
 
@@ -61,10 +60,6 @@ const newCourse = (overrides) => ({
   displayName: '',
   description: '',
   image: '',
-
-  // This may be an email or a uid.
-  student: '',
-
   ...overrides
 });
 
@@ -92,6 +87,24 @@ const newCourseItem = (overrides) => ({
   ...overrides
 });
 
+/**
+ * This represents the relationship between a user and a course.
+ * It contains basic info about a course that can be used to display it.
+ * It must be updated every time its course is updated.
+ */
+const newCourseToken = (overrides) => ({
+  ...newBaseItem(),
+  user: '', // Could be email (if pending) or uid.
+  courseUid: '',
+  access: 'student', // 'student' | 'editor' | 'admin'
+
+  // Abbreviated Course
+  displayName: '',
+  image: '',
+
+  ...overrides
+});
+
 module.exports = {
   newUserMeta,
   newStripeCustomer,
@@ -99,5 +112,6 @@ module.exports = {
   newStudent,
   newInvite,
   newCourse,
-  newCourseItem
+  newCourseItem,
+  newCourseToken
 };

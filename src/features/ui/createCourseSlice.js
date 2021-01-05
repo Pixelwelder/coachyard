@@ -3,7 +3,7 @@ import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {
   displayName: '',
-  student: '',
+  students: '',
   description: '',
   date: ''
 };

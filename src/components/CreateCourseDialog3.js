@@ -13,7 +13,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
-import { DateTime } from 'luxon';
 
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
@@ -21,7 +20,7 @@ const NewCourseDialog = () => {
 
   const [lastIsOpen, setLastIsOpen] = useState(MODES.CLOSED);
   const dispatch = useDispatch();
-  const { isOpen, displayName, student, description, date, isLoading, error } = useSelector(selectors.select);
+  const { isOpen, displayName, students, description, date, isLoading, error } = useSelector(selectors.select);
 
   const onChange = ({ target }) => {
     const { value } = target;
@@ -39,18 +38,20 @@ const NewCourseDialog = () => {
 
   const onSubmit = async () => {
     await dispatch(catalogActions.createNewCourse({
-      displayName, student, description, date
+      displayName, students, description, date
     }));
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
+    <Dialog
+      open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth
+    >
       <DialogTitle id="form-dialog-title">Create Live Course</DialogTitle>
       <DialogContent>
         <DialogContentText>
           Create a brand-spankin'-new Live Course.
         </DialogContentText>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className="create-course-form">
           <TextField
             fullWidth
             autoFocus
@@ -60,8 +61,8 @@ const NewCourseDialog = () => {
           />
           <TextField
             fullWidth
-            variant="outlined" label="Student Email" placeholder="studentemail@gmail.com"
-            id="student" name="student" type="email" value={student} disabled={isLoading}
+            variant="outlined" label="Student Email" placeholder="student1@gmail.com, student2@gmail.com, ..."
+            id="students" name="students" type="email" value={students} disabled={isLoading}
             onChange={onChange}
           />
           <Typography>When is your first live session?</Typography>
@@ -83,7 +84,7 @@ const NewCourseDialog = () => {
         </Button>
         <Button
           color="primary"
-          disabled={!displayName || !student || isLoading}
+          disabled={!displayName || !students || isLoading}
           onClick={onSubmit}
         >
           Create!

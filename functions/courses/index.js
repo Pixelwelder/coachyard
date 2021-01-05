@@ -4,37 +4,41 @@ const fetch = require('node-fetch');
 const { checkAuth } = require('../util/auth');
 const { getMuxHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { newCourse, newCourseItem } = require('../data');
+const { newCourse, newCourseItem, newCourseToken } = require('../data');
 
 const createCourse = async (data, context) => {
   try {
     checkAuth(context);
 
-    const { auth: { token: { uid } } } = context;
-    const { displayName, student, description = '', date } = data;
+    const { auth: { token: { uid, email } } } = context;
+    const { displayName, students: _students, description = '', date, image = '' } = data;
 
-    // TODO Gate!
+    // This is an array of emails.
+    const students = _students.split(',').map(s => s.trim().toLowerCase());
+
     const { course, item } = admin.firestore().runTransaction(async (transaction) => {
-      // Do we have the student?
-      const studentRef = await admin.firestore().collection('users')
-        .where('email', '==', student);
 
-      const studentDoc = await transaction.get(studentRef);
-      console.log('found', studentDoc.size, 'student');
+      // For all students that exist, replace the email with their uid.
+      const studentPromises = students.map(student => {
+        const ref = admin.firestore().collection('users').where('email', '==', student);
+        return transaction.get(ref);
+      });
+
+      const studentResults = await Promise.all(studentPromises);
+      const studentUids = studentResults.map(result => {
+        return result.size ? result.docs[0].data().uid : null
+      });
 
       // Create course object.
       const courseRef = admin.firestore().collection('courses').doc();
-      const now = admin.firestore.Timestamp.now();
+      const timestamp = admin.firestore.Timestamp.now();
       const course = newCourse({
         uid: courseRef.id,
         creatorUid: uid,
         displayName,
         description,
-        created: now,
-        updated: now,
-
-        // Save UID if we have it; otherwise email.
-        student: studentDoc.size ? studentDoc.docs[0].data().uid : student
+        created: timestamp,
+        updated: timestamp
       });
 
       // Add it.
@@ -42,7 +46,6 @@ const createCourse = async (data, context) => {
 
       // Now create the first item in the course.
       const itemRef = admin.firestore().collection('items').doc();
-      const timestamp = admin.firestore.Timestamp.now();
       const item = newCourseItem({
         uid: itemRef.id,
         creatorUid: uid,
@@ -57,7 +60,39 @@ const createCourse = async (data, context) => {
 
       await transaction.set(itemRef, item);
 
-      return { course, item }
+      // Now create access tokens.
+      const teacherTokenRef = admin.firestore().collection('tokens').doc();
+      const teacherToken = newCourseToken({
+        uid: teacherTokenRef.id,
+        created: timestamp,
+        updated: timestamp,
+        user: uid,
+        courseUid: courseRef.id,
+        access: 'admin',
+        displayName,
+        image
+      });
+
+      await transaction.create(teacherTokenRef, teacherToken)
+
+      const studentTokenPromises = students.map((studentEmail, index) => {
+        const studentTokenRef = admin.firestore().collection('tokens').doc();
+        const studentUid = studentUids[index];
+        const studentToken = newCourseToken({
+          uid: studentTokenRef.id,
+          created: timestamp,
+          updated: timestamp,
+          user: studentUid || studentEmail,
+          courseUid: courseRef.id,
+          access: 'student',
+          displayName,
+          image
+        });
+
+        return transaction.set(studentTokenRef, studentToken);
+      });
+
+      await Promise.all(studentTokenPromises);
     });
 
     return { message: `Course '${displayName}' created.`, course, item };
@@ -124,47 +159,48 @@ const updateCourse = async (data, context) => {
 
 /**
  * Allows one user to give a course they created to another user.
+ * TODO - Must be rewritten
  *
  * @param data
  * @param context
  * @returns {Promise<{message: string}>}
  */
-const giveCourse = async (data, context) => {
-  try {
-    checkAuth(context);
-    const { auth: { token: { uid } } } = context;
-    const { courseUid, email } = data;
-
-    const user = await admin.auth().getUserByEmail(email);
-    if (!user) throw new Error(`No user with email ${email}.`);
-
-    await admin.firestore().runTransaction(async (transaction) => {
-      // Get the course.
-      const courseRef = admin.firestore().collection('courses').doc(courseUid);
-      const courseDoc = await transaction.get(courseRef);
-      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-
-      // See if the giver has the right to give it.
-      const course = courseDoc.data();
-      if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
-
-      const gifteeRef = admin.firestore().collection('users').doc(user.uid);
-      const gifteeDoc = await transaction.get(gifteeRef);
-
-      const giftee = gifteeDoc.data();
-      if (giftee.enrolled[courseUid]) throw new Error(`User is already enrolled in course ${courseUid}.`);
-
-      console.log('giving', giftee, courseUid);
-      await transaction.update(gifteeRef, { enrolled: { ...giftee.enrolled, [courseUid]: true } });
-    });
-
-    return { message: `User ${email} now owns course ${courseUid}.`};
-
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
+// const giveCourse = async (data, context) => {
+//   try {
+//     checkAuth(context);
+//     const { auth: { token: { uid } } } = context;
+//     const { courseUid, email } = data;
+//
+//     const user = await admin.auth().getUserByEmail(email);
+//     if (!user) throw new Error(`No user with email ${email}.`);
+//
+//     await admin.firestore().runTransaction(async (transaction) => {
+//       // Get the course.
+//       const courseRef = admin.firestore().collection('courses').doc(courseUid);
+//       const courseDoc = await transaction.get(courseRef);
+//       if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+//
+//       // See if the giver has the right to give it.
+//       const course = courseDoc.data();
+//       if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
+//
+//       const gifteeRef = admin.firestore().collection('users').doc(user.uid);
+//       const gifteeDoc = await transaction.get(gifteeRef);
+//
+//       const giftee = gifteeDoc.data();
+//       if (giftee.enrolled[courseUid]) throw new Error(`User is already enrolled in course ${courseUid}.`);
+//
+//       console.log('giving', giftee, courseUid);
+//       await transaction.update(gifteeRef, { enrolled: { ...giftee.enrolled, [courseUid]: true } });
+//     });
+//
+//     return { message: `User ${email} now owns course ${courseUid}.`};
+//
+//   } catch (error) {
+//     console.error(error);
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// };
 
 /**
  * Utility function - asynchronously loads a user meta.

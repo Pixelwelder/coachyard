@@ -8,8 +8,10 @@ const { newStudent, newUserMeta } = require('../data');
  */
 const createUser = async (data, context) => {
   try {
-    const { email, password, roles, displayName } = data;
     console.log('creating user', data);
+
+    const { email: _email, password, roles, displayName } = data;
+    const email = _email.toLowerCase();
 
     // Create the user in the auth database.
     const userRecord = await admin.auth().createUser({

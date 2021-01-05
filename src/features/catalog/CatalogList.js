@@ -55,7 +55,7 @@ const CatalogList = ({
 };
 
 const TeachingCatalogList = () => {
-  const { courses } = useSelector(catalogSelectors.selectTeaching);
+  const courses = useSelector(catalogSelectors.selectTeachingTokens);
   const dispatch = useDispatch();
 
   return (
@@ -76,7 +76,7 @@ const TeachingCatalogList = () => {
 };
 
 const LearningCatalogList = () => {
-  const { courses } = useSelector(catalogSelectors.selectLearning);
+  const courses = useSelector(catalogSelectors.selectLearningTokens);
   console.log('COURSES', courses);
 
   return (

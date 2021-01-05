@@ -4,6 +4,7 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import MODES from '../ui/Modes';
+import { setValue } from '../../util/reduxUtils';
 
 /**
  * Provides the list of courses this user has access to.
@@ -19,7 +20,9 @@ const initialState = {
     courses: [],
     isLoading: false,
     error: null
-  }
+  },
+
+  tokens: []
 };
 
 let userListener = () => {};
@@ -50,25 +53,38 @@ const init = createAsyncThunk(
             // }
           });
 
-        // Listen for personal courses (1-on-1s).
+        // Listen for all courses.
         courseListener = app.firestore()
-          .collection('courses')
-          .where('student', '==', uid)
+          .collection('tokens')
+          .where('user', '==', uid)
           .orderBy('created')
           .onSnapshot((snapshot) => {
-            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-            dispatch(generatedActions.setLearning({ courses }));
+            let tokens = [];
+            console.log('snapshot', snapshot.size);
+            if (snapshot.size) {
+              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            }
+            dispatch(generatedActions.setTokens(tokens));
           });
 
+        // courseListener = app.firestore()
+        //   .collection('courses')
+        //   .where('student', '==', uid)
+        //   .orderBy('created')
+        //   .onSnapshot((snapshot) => {
+        //     const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        //     dispatch(generatedActions.setLearning({ courses }));
+        //   });
+
         // Listen for created courses.
-        metaListener = app.firestore()
-          .collection('courses')
-          .where('creatorUid', '==', uid)
-          .orderBy('created')
-          .onSnapshot((snapshot) => {
-            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-            dispatch(generatedActions.setTeaching({ courses }));
-          });
+        // metaListener = app.firestore()
+        //   .collection('courses')
+        //   .where('creatorUid', '==', uid)
+        //   .orderBy('created')
+        //   .onSnapshot((snapshot) => {
+        //     const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        //     dispatch(generatedActions.setTeaching({ courses }));
+        //   });
       }
     });
   }
@@ -273,10 +289,6 @@ const onFulfilled = name => (state) => {
   state[name].isLoading = false;
 };
 
-const setValue = name => (state, action) => {
-  state[name] = action.payload;
-};
-
 const resetValue = name => (state) => {
   state[name] = initialState[name];
 };
@@ -295,7 +307,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setLearning: mergeValue('learning'),
     resetLearning: resetValue('learning'),
 
-    setUpload: mergeValue('upload')
+    setTokens: setValue('tokens')
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),
@@ -324,9 +336,16 @@ const actions = {
 };
 
 const select = ({ catalog }) => catalog;
-const selectTeaching = createSelector(select, ({ teaching }) => teaching);
-const selectLearning = createSelector(select, ({ learning }) => learning);
-const selectors = { select, selectLearning, selectTeaching };
+
+const selectTokens = createSelector(select, ({ tokens }) => tokens);
+const selectTeachingTokens = createSelector(selectTokens, tokens => {
+  return tokens.filter(token => token.access === 'admin');
+});
+const selectLearningTokens = createSelector(selectTokens, tokens => {
+  return tokens.filter(token => token.access === 'read')
+});
+
+const selectors = { select, selectTeachingTokens, selectLearningTokens };
 
 export { actions, selectors };
 export default reducer;
