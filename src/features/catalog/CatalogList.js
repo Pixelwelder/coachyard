@@ -37,7 +37,7 @@ const CatalogList = ({
                   item={item}
                   key={index}
                   onSelect={() => {
-                    history.push(`/course/${item.uid}`);
+                    history.push(`/course/${item.courseUid}`);
                   }}
                   onDelete={onDelete}
                 />
