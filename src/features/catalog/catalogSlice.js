@@ -36,8 +36,7 @@ const init = createAsyncThunk(
       metaListener();
       courseListener();
 
-      dispatch(generatedActions.resetLearning());
-      dispatch(generatedActions.resetTeaching());
+      dispatch(generatedActions.reset());
 
       if (authUser) {
         const { uid } = authUser;
@@ -307,7 +306,8 @@ const { actions: generatedActions, reducer } = createSlice({
     setLearning: mergeValue('learning'),
     resetLearning: resetValue('learning'),
 
-    setTokens: setValue('tokens')
+    setTokens: setValue('tokens'),
+    reset: (state) => initialState
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),
@@ -342,7 +342,7 @@ const selectTeachingTokens = createSelector(selectTokens, tokens => {
   return tokens.filter(token => token.access === 'admin');
 });
 const selectLearningTokens = createSelector(selectTokens, tokens => {
-  return tokens.filter(token => token.access === 'read')
+  return tokens.filter(token => token.access === 'student')
 });
 
 const selectors = { select, selectTeachingTokens, selectLearningTokens };

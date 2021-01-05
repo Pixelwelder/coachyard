@@ -25,32 +25,20 @@ const createUser = async (data, context) => {
     const { uid } = userRecord;
     await admin.auth().setCustomUserClaims(uid, { roles });
 
-    // Now we need a user meta for additional information.
-    const timestamp = admin.firestore.Timestamp.now();
-    let userMeta;
-
-    // If this user was created by a teacher, the user meta will already exist.
-    const snapshot = await admin.firestore()
-      .collection('users')
-      .where('email', '==', email)
-      .get();
-
-    if (!snapshot.empty) {
-      // It exists
-      userMeta = snapshot.docs[0].data();
-    } else {
-      userMeta = newUserMeta({
+    const result = admin.firestore().runTransaction(async (transaction) => {
+      // Now we need a user meta for additional information.
+      const timestamp = admin.firestore.Timestamp.now();
+      const userMeta = newUserMeta({
         uid,
         displayName,
         created: timestamp,
         updated: timestamp
       });
-    }
 
-    userMeta.updated = timestamp;
+      // Use the same ID for the user meta.
+      await admin.firestore().collection('users').doc(uid).set(userMeta);
+    });
 
-    // Use the same ID for both.
-    await admin.firestore().collection('users').doc(uid).set(userMeta);
     return { message: 'Done.', data: { uid } }
   } catch (error) {
     console.log('error', error.message)
@@ -76,16 +64,22 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
 
   // Load all items that mention this student and change email to uid.
   const itemsResult = await admin.firestore().runTransaction(async (transaction) => {
-    const itemsRef = admin.firestore().collection('courses')
-      .where('student', '==', email);
 
-    const itemsDocs = await transaction.get(itemsRef);
+    const tokensRef = admin.firestore()
+      .collection('tokens')
+      .where('user', '==', email)
+      .select();
 
-    itemsDocs.forEach((doc) => {
-      transaction.update(doc.ref, { student: uid });
-    });
+    const result = await transaction.get(tokensRef);
+    console.log('found', result.size);
+    const promises = result.docs.map((doc) => {
+      console.log('updating', doc.id);
+      return transaction.update(doc.ref, { user: uid });
+    })
 
-    console.log(`Updated ${itemsDocs.size} items.`);
+    await Promise.all(promises);
+
+    console.log(`Updated ${result.size} items.`);
   })
 
   console.log('Update complete.');
