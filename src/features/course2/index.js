@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
+import { selectors as appSelectors } from '../app/appSlice';
 import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
@@ -14,15 +15,28 @@ import ItemView from './ItemView';
 import CourseView from './CourseView';
 
 const Course = () => {
-  const { id } = useParams();
+  const { uid, itemUid } = useParams();
   const { course, courseCreator, selectedItem } = useSelector(selectedCourseSelectors.select);
+  const { authUser } = useSelector(appSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(selectedCourseActions.setId({ id, history }));
-  }, [id]);
+    const go = async () => {
+      console.log('Item.go', uid);
+      await dispatch(selectedCourseActions.setUid({ uid, history }));
+      await dispatch(selectedCourseActions.setSelectedItemUid({ uid: itemUid, history }));
+    }
+
+    if (authUser.uid) {
+      go();
+    }
+
+    return () => {
+      console.log('UNMOUNT', uid, itemUid);
+    }
+  }, [uid, itemUid, authUser]);
 
   return (
     <div className="app-content">

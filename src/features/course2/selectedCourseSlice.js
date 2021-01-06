@@ -4,7 +4,7 @@ import { selectors as appSelectors } from '../app/appSlice';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
-  id: '',
+  uid: '',
   isLoading: false,
   error: null,
 
@@ -25,21 +25,28 @@ let unsubscribeStudent = () => {};
  * This loads the course and its items.
  * @param id - the id of the course to load.
  */
-const setId = createAsyncThunk(
-  'setId',
-  async ({ id, history }, { dispatch }) => {
-    dispatch(generatedActions._setId(id));
+const setUid = createAsyncThunk(
+  'setUid',
+  async ({ uid, history }, { dispatch, getState }) => {
+    console.log('setUid', uid);
+    const { uid: oldUid } = selectors.select(getState());
+    if (oldUid === uid) {
+      console.log('uid unchanged');
+      return;
+    }
+
+    dispatch(generatedActions._setUid(uid));
     dispatch(generatedActions._setSelectedItemUid(null));
     dispatch(generatedActions._setSelectedItem(null));
 
     unsubscribeCourse();
     unsubscribeCourse = app.firestore()
       .collection('courses')
-      .where('uid', '==', id)
+      .where('uid', '==', uid)
       .onSnapshot(async (snapshot) => {
         if (!snapshot.size) {
           // TODO this is nasty.
-          history.push('/dashboard');
+          // history.push('/dashboard');
           return;
         }
 
@@ -71,7 +78,7 @@ const setId = createAsyncThunk(
     unsubscribeItems();
     unsubscribeItems = await app.firestore()
       .collection('items')
-      .where('courseUid', '==', id)
+      .where('courseUid', '==', uid)
       .orderBy('created')
       .onSnapshot((snapshot) => {
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
@@ -83,20 +90,25 @@ const setId = createAsyncThunk(
 let unsubscribeItem = () => {};
 const setSelectedItemUid = createAsyncThunk(
   'setSelectedItemUid',
-  async (itemUid, { dispatch, getState }) => {
+  async ({ uid, history }, { dispatch, getState }) => {
+    const { uid: oldUid } = selectors.select(getState());
+    if (uid === oldUid) {
+      console.log('item uid is unchanged');
+      return;
+    }
+
     unsubscribeItem();
 
-    if (itemUid) {
+    if (uid) {
       unsubscribeItem = app.firestore()
         .collection('items')
-        .doc(itemUid)
+        .doc(uid)
         .onSnapshot((snapshot) => {
           if (snapshot.exists) {
             const data = parseUnserializables(snapshot.data());
             dispatch(generatedActions._setSelectedItemUid(data.uid));
             dispatch(generatedActions._setSelectedItem(data));
           } else {
-            console.log('no item');
             dispatch(generatedActions._setSelectedItemUid(null));
             dispatch(generatedActions._setSelectedItem(null));
           }
@@ -136,10 +148,10 @@ const setValue = name => (state, action) => {
 };
 
 const { actions: generatedActions, reducer } = createSlice({
-  name: 'course',
+  name: 'selectedCourse',
   initialState,
   reducers: {
-    _setId: setValue('id'),
+    _setUid: setValue('uid'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
     setStudent: setValue('student'),
@@ -149,13 +161,13 @@ const { actions: generatedActions, reducer } = createSlice({
     reset: (state, action) => initialState
   },
   extraReducers: {
-    [setId.pending]: onPending,
-    [setId.rejected]: onRejected,
-    [setId.fulfilled]: onFulfilled
+    [setUid.pending]: onPending,
+    [setUid.rejected]: onRejected,
+    [setUid.fulfilled]: onFulfilled
   }
 });
 
-const actions = { ...generatedActions, init, setId, setSelectedItemUid };
+const actions = { ...generatedActions, init, setUid, setSelectedItemUid };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(

@@ -16,8 +16,6 @@ const CatalogList = ({
 }) => {
   const history = useHistory();
 
-  // if (!emptyMessage && !items.length) return null;
-
   return (
     <div className="catalog-list-container">
       <div className="title-container">
@@ -77,7 +75,6 @@ const TeachingCatalogList = () => {
 
 const LearningCatalogList = () => {
   const courses = useSelector(catalogSelectors.selectLearningTokens);
-  console.log('COURSES', courses);
 
   return (
     <CatalogList

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
-import { selectors as catalogSelectors, actions as catalogActions } from '../catalog/catalogSlice';
-import { actions as uiActions } from '../ui/uiSlice';
 import Item from './Item';
 
 const ItemList = () => {
   const { items, selectedItemUid } = useSelector(selectedCourseSelectors.select);
-  const dispatch = useDispatch();
+  const history = useHistory();
 
   return (
     <ul className="item-list">
@@ -19,7 +18,8 @@ const ItemList = () => {
             key={index}
             isSelected={item.uid === selectedItemUid}
             onSelect={() => {
-              dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
+              history.push(`/course/${item.courseUid}/${item.uid}`);
+              // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
             }}
           />
         );
