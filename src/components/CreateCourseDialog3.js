@@ -78,7 +78,7 @@ const NewCourseDialog = () => {
         <Button
           onClick={onClose}
           color="primary"
-          disabled={!displayName || isLoading}
+          disabled={isLoading}
         >
           Cancel
         </Button>

@@ -99,6 +99,7 @@ const LiveMode = ({ size }) => {
   const [callFrame, setCallFrame] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
     const _callFrame = DailyIframe.createFrame(
@@ -128,6 +129,7 @@ const LiveMode = ({ size }) => {
     const stop = () => {
       const execute = async () => {
         if (callFrame) {
+          setHasJoined(false);
           callFrame.stopRecording(); // TODO Necessary?
           await callFrame.destroy();
           setCallFrame(null);
@@ -144,14 +146,15 @@ const LiveMode = ({ size }) => {
 
   useEffect(() => {
     const go = async () => {
+      setHasJoined(true);
       const url = `https://coachyard.daily.co/${uid}`;
       await callFrame.join({ url });
     };
 
-    if (callFrame && (status === 'live')) {
+    if (!hasJoined && callFrame && (status === 'live')) {
       go();
     }
-  }, [callFrame, uid, status]);
+  }, [callFrame, uid, status, hasJoined]);
 
   useEffect(() => {
     if (callFrame) {
