@@ -38,24 +38,6 @@ const Course = () => {
     }
   }, [uid, itemUid, authUser]);
 
-  useEffect(() => {
-    const onBeforeUnload = (event) => {
-      if (course.status === 'live') {
-        event.preventDefault();
-      }
-    };
-
-    const go = () => {
-      window.addEventListener('beforeunload', onBeforeUnload);
-    };
-
-    const stop = () => {
-      window.removeEventListener('beforeunload', onBeforeUnload);
-    };
-
-    return stop;
-  }, [course]);
-
   return (
     <div className="app-content">
       <div className="course-header">

@@ -10,7 +10,8 @@ const Item = ({ item, isSelected, onSelect }) => {
   return (
     <li className={`item item${isSelected ? ' selected-item' : ''} item-${item.status}`}>
       <span
-        onClick={onSelect} className="item-title"
+        onClick={onSelect}
+        className="item-title"
       >
         <Typography className="item-name">
           {item.displayName}

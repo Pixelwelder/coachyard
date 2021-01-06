@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
 import { selectors as uiSelectors2, actions as uiActions2 } from '../ui/uiSlice2';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
 import TextField from '@material-ui/core/TextField';
@@ -108,11 +108,10 @@ const InitializingMode = () => {
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem: item, isRecording } = useSelector(selectedCourseSelectors.select);
   const { uid, status } = item;
   const dispatch = useDispatch();
   const [callFrame, setCallFrame] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -136,10 +135,10 @@ const LiveMode = ({ size }) => {
     );
 
     _callFrame.on('recording-started', () => {
-      setIsRecording(true);
+      dispatch(selectedCourseActions.setIsRecording(true));
       setHasRecorded(true);
     });
-    _callFrame.on('recording-stopped', () => setIsRecording(false));
+    _callFrame.on('recording-stopped', () => dispatch(selectedCourseActions.setIsRecording(false)));
 
     const stop = () => {
       const execute = async () => {

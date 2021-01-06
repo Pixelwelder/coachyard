@@ -6,7 +6,7 @@ import { selectors as selectedCourseSelectors, actions as selectedCourseActions 
 import Item from './Item';
 
 const ItemList = () => {
-  const { items, selectedItemUid } = useSelector(selectedCourseSelectors.select);
+  const { items, selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
   const history = useHistory();
 
   return (
@@ -18,8 +18,12 @@ const ItemList = () => {
             key={index}
             isSelected={item.uid === selectedItemUid}
             onSelect={() => {
-              history.push(`/course/${item.courseUid}/${item.uid}`);
-              // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
+              if (isRecording) {
+                alert('Please stop the recording before navigating away.');
+              } else {
+                history.push(`/course/${item.courseUid}/${item.uid}`);
+                // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
+              }
             }}
           />
         );

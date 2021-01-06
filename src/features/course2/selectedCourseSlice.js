@@ -7,6 +7,8 @@ const initialState = {
   isLoading: false,
   error: null,
 
+  isRecording: false,
+
   course: null,
   courseCreator: null,
   student: null,
@@ -159,6 +161,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem'),
+    setIsRecording: setValue('isRecording'),
     reset: (state, action) => initialState
   },
   extraReducers: {
