@@ -4,7 +4,6 @@ import { selectors as appSelectors } from '../app/appSlice';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
-  uid: '',
   isLoading: false,
   error: null,
 
@@ -29,13 +28,14 @@ const setUid = createAsyncThunk(
   'setUid',
   async ({ uid, history }, { dispatch, getState }) => {
     console.log('setUid', uid);
-    const { uid: oldUid } = selectors.select(getState());
-    if (oldUid === uid) {
+    const { course } = selectors.select(getState());
+    console.log('course');
+    if (course && (course.uid === uid)) {
       console.log('uid unchanged');
       return;
     }
 
-    dispatch(generatedActions._setUid(uid));
+    // dispatch(generatedActions._setUid(uid));
     dispatch(generatedActions._setSelectedItemUid(null));
     dispatch(generatedActions._setSelectedItem(null));
 
@@ -46,7 +46,8 @@ const setUid = createAsyncThunk(
       .onSnapshot(async (snapshot) => {
         if (!snapshot.size) {
           // TODO this is nasty.
-          // history.push('/dashboard');
+          dispatch(generatedActions.reset());
+          history.push('/dashboard');
           return;
         }
 
@@ -91,9 +92,9 @@ let unsubscribeItem = () => {};
 const setSelectedItemUid = createAsyncThunk(
   'setSelectedItemUid',
   async ({ uid, history }, { dispatch, getState }) => {
-    const { uid: oldUid } = selectors.select(getState());
-    if (uid === oldUid) {
-      console.log('item uid is unchanged');
+    const { selectedItem } = selectors.select(getState());
+    if (selectedItem && selectedItem.uid === uid) {
+      console.log(`item uid ${uid} is unchanged`);
       return;
     }
 
@@ -151,7 +152,7 @@ const { actions: generatedActions, reducer } = createSlice({
   name: 'selectedCourse',
   initialState,
   reducers: {
-    _setUid: setValue('uid'),
+    // _setUid: setValue('uid'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
     setStudent: setValue('student'),

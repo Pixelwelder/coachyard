@@ -29,7 +29,7 @@ const NoItem = () => {
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
-  const { course, student, courseCreator } = useSelector(selectedCourseSelectors.select);
+  const { course, student, selectedItem, courseCreator } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
@@ -44,7 +44,7 @@ const ScheduledMode = () => {
         <div className="mode-inner">
           <div className="item-info">
             <Typography className="participant-name" variant="h6" component="p">
-              {student ? student.displayName : course.student}
+              {selectedItem.displayName}
             </Typography>
             <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
           </div>

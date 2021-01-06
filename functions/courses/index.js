@@ -45,6 +45,7 @@ const createCourse = async (data, context) => {
       await transaction.set(courseRef, course);
 
       // Now create the first item in the course.
+      // TODO Move this into a handler if possible... though date is tricky.
       const itemRef = admin.firestore().collection('items').doc();
       const item = newCourseItem({
         uid: itemRef.id,
@@ -77,6 +78,11 @@ const createCourse = async (data, context) => {
       await transaction.create(teacherTokenRef, teacherToken)
 
       const studentTokenPromises = students.map((studentEmail, index) => {
+        if (studentEmail === email) {
+          console.log('Cannot take your own course. Skipping', studentEmail);
+          return null;
+        }
+
         const studentTokenRef = admin.firestore().collection('tokens').doc();
         const studentUid = studentUids[index];
         const studentToken = newCourseToken({
@@ -94,7 +100,7 @@ const createCourse = async (data, context) => {
         return transaction.set(studentTokenRef, studentToken);
       });
 
-      await Promise.all(studentTokenPromises);
+      await Promise.all(studentTokenPromises.filter(promise => !!promise));
     });
 
     return { message: `Course '${displayName}' created.`, course, item };
@@ -302,44 +308,27 @@ const deleteCourse = async (data, context) => {
 
     const { auth: { uid } } = context;
 
-    const { items } = await admin.firestore().runTransaction(async (transaction) => {
-      const courseRef = admin.firestore().collection('courses').doc(data.uid);
+    const result = await admin.firestore().runTransaction(async (transaction) => {
+      console.log('deleteCourse', data);
+      const { uid: courseUid } = data;
+
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
       const courseDoc = await transaction.get(courseRef);
       const course = courseDoc.data();
-      if (course.creatorUid !== uid) throw new Error(`User ${uid} did not create ${data.uid}.`);
+      if (course.creatorUid !== uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
 
-      const itemsRef = admin.firestore().collection('items')
-        .where('courseUid', '==', data.uid);
-      const itemsDocs = await transaction.get(itemsRef);
-
-      console.log(`found ${itemsDocs.size} items`);
+      // const itemsRef = admin.firestore().collection('items')
+      //   .where('courseUid', '==', courseUid);
+      // const itemsDocs = await transaction.get(itemsRef);
+      //
+      // console.log(`found ${itemsDocs.size} items`);
       transaction.delete(courseRef);
 
       // Should this be async?
-      const items = itemsDocs.docs.map(doc => doc.data());
-      itemsDocs.docs.forEach(doc => { transaction.delete(doc.ref); });
+      // const items = itemsDocs.docs.map(doc => doc.data());
+      // itemsDocs.docs.forEach(doc => { transaction.delete(doc.ref); });
 
-      return { items };
     });
-
-    // Now delete from streaming server.
-    // TODO Move this into a listener.
-    const promises = items.map(async item => {
-      const { streamingId } = item;
-      console.log('deleting', streamingId);
-      const result = await fetch(
-        `https://api.mux.com/video/v1/assets/${streamingId}`,
-        {
-          method: METHODS.DELETE,
-          headers: getMuxHeaders()
-        }
-      );
-      console.log(result);
-    });
-
-    await Promise.all(promises);
-
-    console.log(`Deleted ${items.length}.`);
 
     // Now remove it from the user.
     // const { doc: userDoc, data: { coursesCreated } } = await _getUserMeta({ uid: context.auth.uid });
@@ -347,29 +336,7 @@ const deleteCourse = async (data, context) => {
     // await userDoc.ref.update({ coursesCreated: filteredCourses, updated: admin.firestore.Timestamp.now() });
 
     // Done.
-    return { message: `Course ${data.uid} and ${items.length} items deleted.` };
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-/**
- * Gets the courses created by the signed-in user.
- */
-const getCreatedCourses = async (data, context) => {
-  try {
-    checkAuth(context);
-
-    const { auth: { token: { uid } } } = context;
-    const snapshot = await admin.firestore()
-      .collection('courses').where('creatorUid', '==', uid)
-      .get();
-
-    const courses = snapshot.docs.map(doc => doc.data());
-
-    console.log(courses.length, 'found');
-    return courses;
+    return { message: `Course ${data.uid} deleted.` };
   } catch (error) {
     console.error(error);
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -381,10 +348,10 @@ const onCourseUpdated = functions.firestore
   .onUpdate(async (change, context) => {
     // Update all tokens.
     const result = await admin.firestore().runTransaction((async (transaction) => {
-      const { displayName, description, image } = change.after.data();
+      const { displayName, description, image, uid } = change.after.data();
       const tokensRef = admin.firestore()
         .collection('tokens')
-        .where('courseUid', '==', course.uid)
+        .where('courseUid', '==', uid)
         .select();
 
       const tokens = await transaction.get(tokensRef);
@@ -400,6 +367,67 @@ const onCourseUpdated = functions.firestore
     }));
   });
 
+const onCourseDeleted = functions.firestore
+  .document('/courses/{docId}')
+  .onDelete(async (change, context) => {
+    // Delete all tokens.
+    const { uid } = change.data();
+    console.log(uid, 'was deleted');
+
+    const { streamingIds } = await admin.firestore().runTransaction(async (transaction) => {
+      const tokensRef = admin.firestore()
+        .collection('tokens')
+        .where('courseUid', '==', uid)
+      const tokens = await transaction.get(tokensRef);
+      console.log(`found ${tokens.size} tokens`);
+
+      const itemsRef = admin.firestore()
+        .collection('items')
+        .where('courseUid', '==', uid)
+      const items = await transaction.get(itemsRef);
+      console.log(`found ${items.size} items`);
+
+      // Delete tokens.
+      const tokenPromises = tokens.docs.map((doc) => transaction.delete(doc.ref));
+
+      // Delete items, saving streamingIds for the last step.
+      const { promises: itemPromises, streamingIds } = items.docs.reduce((accum, doc) => {
+        const item = doc.data();
+        const newAccum = {
+          promises: [...accum.promises, transaction.delete(doc.ref)],
+          streamingIds: [...accum.streamingIds]
+        };
+
+        if (item.streamingId) newAccum.streamingIds.push(item.streamingId);
+
+        return newAccum;
+      }, { promises: [], streamingIds: [] });
+
+      console.log('Deleting...');
+      await Promise.all([...tokenPromises, itemPromises]);
+      console.log('Deleted all items and tokens.');
+
+      return { streamingIds };
+    });
+
+    // Now delete from streaming server.
+    const promises = streamingIds.map(async (streamingId) => {
+      console.log(`deleting ${streamingId} from streaming server...`);
+      const result = await fetch(
+        `https://api.mux.com/video/v1/assets/${streamingId}`,
+        {
+          method: METHODS.DELETE,
+          headers: getMuxHeaders()
+        }
+      );
+      console.log(result);
+    });
+
+    await Promise.all(promises);
+    console.log('All items deleted from streaming server.');
+  });
+
+
 module.exports = {
   // Courses
   createCourse: functions.https.onCall(createCourse),
@@ -410,5 +438,6 @@ module.exports = {
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
   // getCreatedCourses: functions.https.onCall(getCreatedCourses),
-  onCourseUpdated
+  onCourseUpdated,
+  onCourseDeleted
 };

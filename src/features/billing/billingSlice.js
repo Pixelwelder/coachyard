@@ -23,15 +23,12 @@ let unsubscribeSubscriptions = () => {};
 const _startDataListeners = createAsyncThunk(
   'startDataListeners',
   async (_, { dispatch }) => {
-    console.log('billing: start data listeners');
-
     const { uid } = app.auth().currentUser;
     const userDoc = app.firestore().collection('stripe_customers').doc(uid);
 
     unsubscribePaymentMethods = userDoc
       .collection('payment_methods')
       .onSnapshot((snapshot) => {
-        console.log('billing: payment methods updated');
         const paymentMethods = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPaymentMethods(paymentMethods));
       });
@@ -39,7 +36,6 @@ const _startDataListeners = createAsyncThunk(
     unsubscribePayments = userDoc
       .collection('payments')
       .onSnapshot((snapshot) => {
-        console.log('billing: payments updated');
         const payments = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPayments(payments));
       });
@@ -47,7 +43,6 @@ const _startDataListeners = createAsyncThunk(
     unsubscribeSubscriptions = userDoc
       .collection('subscriptions')
       .onSnapshot((snapshot) => {
-        console.log('billing: subscriptions updated');
         const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setSubscriptions(subscriptions));
       });
@@ -112,13 +107,11 @@ const cancelSubscription = createAsyncThunk(
 const init = createAsyncThunk(
   'initBilling',
   async (_, { dispatch }) => {
-    console.log('billing: init');
     app.auth().onAuthStateChanged((authUser) => {
       unsubscribePayments();
       unsubscribePaymentMethods();
       unsubscribeSubscriptions();
 
-      console.log('billing: auth changed', authUser);
       if (authUser) {
         app
           .firestore()

@@ -66,11 +66,15 @@ const NewCourseDialog = () => {
             onChange={onChange}
           />
           <Typography>When is your first live session?</Typography>
-          <DateTimePicker
-            value={date}
-            onChange={onChangeDate}
-            disabled={isLoading}
-          />
+          {
+            date && (
+              <DateTimePicker
+                value={date}
+                onChange={onChangeDate}
+                disabled={isLoading}
+              />
+            )
+          }
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>

@@ -67,6 +67,7 @@ const CreateItemDialog = () => {
         </DialogContentText>
         <form onSubmit={onSubmit}>
           <TextField
+            autoFocus
             id="displayName" name="displayName" label="name" type="text"
             variant="outlined"
             value={displayName}

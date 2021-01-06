@@ -45,7 +45,7 @@ const App = () => {
           <Route path="/dashboard" component={Catalog} />
           {/*<Route path="/course/:uid" component={Course} />*/}
           <Route path="/course/:uid/:itemUid?" component={Course} />
-          {/*<Route path="/" render={() => <Redirect to="/dashboard" />} />*/}
+          <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>
 
