@@ -207,6 +207,9 @@ const _checkRoom = async ({ name }) => {
   return json;
 };
 
+const local = 'http://3e8a8d635196.ngrok.io/coach-yard/us-central1/daily/webhooks';
+const production = 'https://us-central1-coach-yard.cloudfunctions.net/daily/webhooks';
+const webhookUrl = local;
 const _launchRoom = async ({ name }) => {
   console.log('_launchRoom', name);
   const result = await fetch(
@@ -217,11 +220,19 @@ const _launchRoom = async ({ name }) => {
       body: JSON.stringify({
         name,
         properties: {
-          enable_recording: 'local'//'rtp-tracks'
+          enable_recording: 'local',//'rtp-tracks'
+          meeting_join_hook: webhookUrl
         }
       })
     }
   );
+
+  // This is ugly, but we don't have a webhook.
+  // Therefore we add a delay before the "launch" is complete.
+  // console.log('delaying...');
+  // const delay = ms => new Promise(r => setTimeout(r, ms));
+  // await delay(2000);
+  // console.log('delay complete');
 
   const json = await result.json();
   return json;
@@ -247,10 +258,10 @@ const handleItemUpdate = functions.firestore
     const oldValue = change.before.data();
     const newValue = change.after.data();
 
-    console.log('item has changed', docId);
+    console.log('item has changed', docId, newValue);
 
-    // If we move from 'scheduled' to 'live', start a room.
-    if (oldValue.status === 'scheduled' && newValue.status === 'live') {
+    // If we move from 'scheduled' to 'initializing', start a room.
+    if (oldValue.status === 'scheduled' && newValue.status === 'initializing') {
       const update = {};
 
       console.log('checking room');
@@ -270,6 +281,7 @@ const handleItemUpdate = functions.firestore
         }
 
         update.room = newRoom;
+        update.status = 'live';
       }
 
       // Update record.
@@ -322,6 +334,17 @@ const handleFileDelete = functions.storage
     console.log('deleted', object.name);
   });
 
+// Webhooks.
+const daily_webhooks = express();
+daily_webhooks.use(bodyParser.urlencoded({ extended: false }));
+daily_webhooks.use(bodyParser.json());
+daily_webhooks.post('/webhooks', async (request, response) => {
+  const { body } = request;
+  console.log('daily webhook', body);
+
+  return response.status(200).end();
+});
+
 module.exports = {
   createItem: functions.https.onCall(createItem),
   updateItem: functions.https.onCall(updateItem),
@@ -329,6 +352,8 @@ module.exports = {
   sendItem: functions.https.onCall(sendItem),
 
   handleItemUpdate,
+
+  daily: functions.https.onRequest(daily_webhooks)
 
   // handleFileUpload,
   // handleFileDelete

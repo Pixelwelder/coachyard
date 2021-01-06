@@ -256,7 +256,7 @@ const launchItem = createAsyncThunk(
     const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
     if (itemData.status !== 'scheduled') throw new Error(`Can't launch ${uid}: status is ${itemData.status}.`);
 
-    await app.firestore().collection('items').doc(uid).update({ status: 'live' });
+    await app.firestore().collection('items').doc(uid).update({ status: 'initializing' });
   }
 );
 

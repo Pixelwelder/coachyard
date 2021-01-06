@@ -91,6 +91,21 @@ const ScheduledMode = () => {
   );
 };
 
+const InitializingMode = () => {
+  return (
+    <div className="item-mode processing-mode">
+        <div className="mode-inner">
+          <div className="item-info">
+            <Typography className="participant-name" variant="h6" component="p">
+              Starting Up Live Session
+            </Typography>
+            <Typography>Be with you in a sec...</Typography>
+          </div>
+        </div>
+    </div>
+  );
+};
+
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
@@ -422,6 +437,7 @@ const ItemView = () => {
             {item && (
               <>
                 {item.status === 'scheduled' && <ScheduledMode />}
+                {item.status === 'initializing' && <InitializingMode />}
                 {item.status === 'live' && <LiveMode size={size} />}
                 {item.status === 'processing' && <ProcessingMode />}
                 {item.status === 'viewing' && <ViewingMode size={size} />}

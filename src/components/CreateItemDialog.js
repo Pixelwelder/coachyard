@@ -87,7 +87,7 @@ const CreateItemDialog = () => {
         {!!error && <Alert severity="error">{error}</Alert>}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel} color="primary">
+        <Button onClick={onCancel} disabled={isLoading} color="primary">
           Cancel
         </Button>
         <Button
