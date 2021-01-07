@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import DailyIframe from '@daily-co/daily-js';
 import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import { DateTimePicker } from '@material-ui/pickers';
 import { SizeMe } from 'react-sizeme';
 import { DropzoneArea } from 'material-ui-dropzone';
@@ -108,7 +110,7 @@ const InitializingMode = () => {
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { selectedItem: item, isRecording } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem: item, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
   const { uid, status } = item;
   const dispatch = useDispatch();
   const [callFrame, setCallFrame] = useState(null);
@@ -182,8 +184,13 @@ const LiveMode = ({ size }) => {
 
   return (
     <div className="item-mode live-mode">
-      <div id="live-mode-target">
-
+      <div id="live-mode-target" className={isFullscreen ? 'full-screen' : ''}>
+        <Button
+          className="full-screen-button" variant="contained" color="primary"
+          onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))}
+        >
+          {!isFullscreen ? <FullscreenIcon /> : <FullscreenExitIcon />}
+        </Button>
       </div>
       {ownsCourse && (
         <div className="owner-controls">

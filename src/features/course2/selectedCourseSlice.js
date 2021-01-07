@@ -8,6 +8,7 @@ const initialState = {
   error: null,
 
   isRecording: false,
+  isFullscreen: false,
 
   course: null,
   courseCreator: null,
@@ -162,6 +163,7 @@ const { actions: generatedActions, reducer } = createSlice({
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem'),
     setIsRecording: setValue('isRecording'),
+    setIsFullscreen: setValue('isFullscreen'),
     reset: (state, action) => initialState
   },
   extraReducers: {

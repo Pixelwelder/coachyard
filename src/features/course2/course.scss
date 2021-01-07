@@ -149,6 +149,27 @@ form {
   #live-mode-target {
     flex: 1;
     margin-bottom: 16px;
+
+    button {
+      z-index: 2;
+      position: absolute;
+      right: 32px;
+      top: 32px;
+    }
+
+    &.full-screen {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1;
+
+      button {
+        right: 16px;
+        top: 16px;
+      }
+    }
   }
 }
 
