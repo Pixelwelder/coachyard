@@ -249,7 +249,7 @@ const EditView2 = () => {
   };
 
   const onChangeDate = (value) => {
-    dispatch(actions.setValues({ date: value }));
+    dispatch(actions.setValues({ date: value.toUTC().toString() }));
   };
 
   const onChangeVideo = (value) => {
