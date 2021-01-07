@@ -7,13 +7,16 @@ import { actions as selectedCourseActions } from './selectedCourseSlice';
 import { useHistory } from 'react-router-dom';
 
 const CourseSummary = () => {
-  const { course, courseCreator } = useSelector(selectedCourseSelectors.select);
-  const dispatch = useDispatch();
+  const { course, courseCreator, isRecording } = useSelector(selectedCourseSelectors.select);
   const history = useHistory();
 
   const onSelect = () => {
-    history.push(`/course/${course.uid}`);
-    // dispatch(selectedCourseActions.setSelectedItemUid({ uid: null, history }));
+    if (isRecording) {
+      alert('Please stop the recording before navigating away.');
+    } else {
+      history.push(`/course/${course.uid}`);
+      // dispatch(selectedCourseActions.setSelectedItemUid({ uid: null, history }));
+    }
   }
 
   return (

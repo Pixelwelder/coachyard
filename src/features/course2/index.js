@@ -16,7 +16,7 @@ import CourseView from './CourseView';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
-  const { course, courseCreator, selectedItem } = useSelector(selectedCourseSelectors.select);
+  const { course, courseCreator, selectedItem, isRecording } = useSelector(selectedCourseSelectors.select);
   const { authUser } = useSelector(appSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
@@ -42,7 +42,17 @@ const Course = () => {
     <div className="app-content">
       <div className="course-header">
         <Typography variant="h6" component="h2">
-          <Link to="/dashboard">Courses</Link> > {course?.displayName || ''}
+          <Link
+            to="/dashboard"
+            onClick={(event) => {
+              if (isRecording) {
+                event.preventDefault();
+                alert('Please stop the recording before navigating away.');
+              }
+            }}
+          >
+              Courses
+          </Link> > {course?.displayName || ''}
         </Typography>
         <Typography variant="body1">
           {courseCreator?.displayName || ''}
