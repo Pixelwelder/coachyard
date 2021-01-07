@@ -35,7 +35,7 @@ const CreateItemDialog = () => {
   };
 
   const onChangeDate = (value) => {
-    dispatch(actions.setValues({ date: value }));
+    dispatch(actions.setValues({ date: value.toUTC().toString() }));
   };
 
   const onSubmit = (event) => {
