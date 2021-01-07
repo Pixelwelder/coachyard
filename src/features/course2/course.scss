@@ -177,14 +177,14 @@ form {
   flex: 1;
   display: flex;
   flex-flow: column nowrap;
+}
 
-  .item-info {
-    margin-bottom: 16px;
-    display: flex;
-    flex-flow: column;
-    align-items: center;
-    margin-bottom: 16px;
-  }
+.item-info {
+  margin-bottom: 16px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .mode-inner {
@@ -192,8 +192,16 @@ form {
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   text-align: center;
+}
+
+.centered-mode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .owner-controls {

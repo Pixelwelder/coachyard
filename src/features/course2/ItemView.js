@@ -32,37 +32,45 @@ const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { course, student, selectedItem, courseCreator } = useSelector(selectedCourseSelectors.select);
+  const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
 
   const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
   const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local())
     .toFormat('h:mm');
 
-  const onEdit = () => {};
-
   const Teacher = () => {
     return (
       <>
         <div className="mode-inner">
-          <div className="item-info">
-            <Typography className="participant-name" variant="h6" component="p">
-              {selectedItem.displayName}
-            </Typography>
-            <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
-          </div>
-          <Button
-            color="primary" variant="contained"
-            onClick={() => dispatch(catalogActions.launchItem(item))}
-          >
-            Launch
-          </Button>
+          {
+            isOpen
+              ? <EditView />
+              : (
+                <>
+                  <div className="centered-mode">
+                    <div className="item-info">
+                      <Typography className="participant-name" variant="h6" component="p">
+                        {selectedItem.displayName}
+                      </Typography>
+                      <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
+                    </div>
+                    <Button
+                      color="primary" variant="contained"
+                      onClick={() => dispatch(catalogActions.launchItem(item))}
+                    >
+                      Launch
+                    </Button>
+                  </div>
+                  {/*<div className="owner-controls">*/}
+                  {/*  <Button variant="contained" onClick={() => {}}>*/}
+                  {/*    Edit*/}
+                  {/*  </Button>*/}
+                  {/*</div>*/}
+                </>
+              )
+          }
         </div>
-        {/* TODO Put this back. */}
-        {/*<div className="owner-controls">*/}
-        {/*  <Button variant="contained" onClick={onEdit}>*/}
-        {/*    Edit*/}
-        {/*  </Button>*/}
-        {/*</div>*/}
       </>
 
     );
@@ -208,7 +216,7 @@ const LiveMode = ({ size }) => {
   );
 };
 
-const EditView2 = () => {
+const EditView = () => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
 
@@ -372,7 +380,7 @@ const ProcessingMode = () => {
   return (
     <div className="item-mode processing-mode">
       {ownsCourse && (
-        <EditView2 />
+        <EditView />
       )}
       {!ownsCourse && (
         <div className="mode-inner">
@@ -397,7 +405,7 @@ const ViewingMode = ({ size }) => {
     <div className="item-mode viewing-mode">
       {
         isOpen
-          ? <EditView2 />
+          ? <EditView />
           : (
             <>
               <Typography className="item-title" variant="h6" component="h3">{selectedItem.displayName}</Typography>
