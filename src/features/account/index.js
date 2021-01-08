@@ -10,7 +10,7 @@ import app from 'firebase/app';
 
 import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import { actions as appActions, selectors as appSelectors } from '../app/appSlice';
-import { ItemDetails } from '../admin/ItemDetails';
+import ItemDetails from '../../components/ItemDetails';
 import PrivilegesView from '../../components/PrivilegesView';
 import Billing from '../billing';
 

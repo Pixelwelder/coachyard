@@ -7,7 +7,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
 
-export const ItemDetails = ({ item }) => {
+const ItemDetails = ({ item }) => {
   return (
     <TableContainer>
       <Table>
@@ -39,3 +39,5 @@ export const ItemDetails = ({ item }) => {
     </TableContainer>
   );
 };
+
+export default ItemDetails;
