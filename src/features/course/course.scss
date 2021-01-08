@@ -153,7 +153,7 @@ form {
     button {
       z-index: 2;
       position: absolute;
-      right: 32px;
+      left: 32px;
       top: 32px;
     }
 
@@ -166,7 +166,7 @@ form {
       z-index: 1;
 
       button {
-        right: 16px;
+        left: 16px;
         top: 16px;
       }
     }

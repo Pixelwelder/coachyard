@@ -109,7 +109,7 @@ const createCourse = async (data, context) => {
       });
     });
 
-    log({ message: `Course ${displayName} (${item.uid}) created.`, data: item, context });
+    log({ message: `Course created.`, data: item, context });
     return { message: `Course '${displayName}' created.`, course, item };
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
