@@ -2,9 +2,9 @@ const functions = require('firebase-functions');
 const fetch = require('node-fetch');
 const express = require('express');
 
-const { METHODS, getMethod } = require('./util/methods');
-const { getDailyHeaders, getMuxHeaders } = require('./util/headers');
-const { checkAuth } = require('./util/auth');
+const { METHODS, getMethod } = require('../util/methods');
+const { getDailyHeaders, getMuxHeaders } = require('../util/headers');
+const { checkAuth } = require('../util/auth');
 
 const createCompositeFE = async (data, context) => {
   if (!context.auth) {
