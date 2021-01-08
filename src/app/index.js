@@ -4,7 +4,7 @@ import { Switch, Route, Link, Redirect } from 'react-router-dom';
 import { actions as appActions, selectors as appSelectors } from '../features/app/appSlice';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Session from '../features/session';
-import Header from '../features/header';
+import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Account from '../features/account';
 import './app.scss';
