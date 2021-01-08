@@ -19,13 +19,13 @@ const Barebones = () => {
 
   useEffect(() => {
     const callFrame = DailyIframe.createFrame({
-      iframeStyle: {
-        position: 'absolute',
-        width: '100vw',
-        height: '100vh',
-        top: 0,
-        left: 0,
-      }
+      // iframeStyle: {
+      //   position: 'absolute',
+      //   width: '100vw',
+      //   height: '100vh',
+      //   top: 0,
+      //   left: 0,
+      // }
     });
     callFrame.on('recording-started', () => {
       dispatch(selectedCourseActions.setIsRecording(true));
