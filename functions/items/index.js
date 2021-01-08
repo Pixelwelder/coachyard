@@ -209,7 +209,7 @@ const _checkRoom = async ({ name }) => {
 
 const local = 'http://3e8a8d635196.ngrok.io/coach-yard/us-central1/daily/webhooks';
 const production = 'https://us-central1-coach-yard.cloudfunctions.net/daily/webhooks';
-const webhookUrl = local;
+const webhookUrl = production;
 const _launchRoom = async ({ name }) => {
   console.log('_launchRoom', name);
   const result = await fetch(
@@ -235,6 +235,7 @@ const _launchRoom = async ({ name }) => {
   // console.log('delay complete');
 
   const json = await result.json();
+  console.log('result', json);
   return json;
 };
 
