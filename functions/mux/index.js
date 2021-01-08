@@ -17,7 +17,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
     const { type } = body;
     console.log('mux webhook:', type);
 
-    if (type === 'video.asset.ready') {
+    if (type === '_video.asset.ready') {
       const muxData = parseMuxResponse(body);
       console.log(muxData);
 

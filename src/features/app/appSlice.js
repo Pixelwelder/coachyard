@@ -7,13 +7,9 @@ import 'firebase/firestore';
 import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';
-import { actions as logActions } from '../log/logSlice';
-import { createLog } from '../log/logSlice';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
-import { actions as sessionActions } from '../session/sessionSlice';
-import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { setValue } from '../../util/reduxUtils';
@@ -62,7 +58,6 @@ const setupFirebase = createAsyncThunk(
   'setupFirebase',
   async (_, { dispatch, getState }) => {
     console.log('Initialize Firebase...');
-    dispatch(logActions.log(createLog(`Initializing Firebase...` )));
     const state = getState();
     const { isInitialized } = select(state);
     if (isInitialized) {
@@ -89,26 +84,19 @@ const setupFirebase = createAsyncThunk(
           // dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
 
         } else {
-          dispatch(logActions.log(createLog(`User logged out.` )));
           dispatch(generatedActions.setAuthUser(initialState.authUser));
         }
       }
     );
-    dispatch(logActions.log(createLog(`Firebase initialized` )));
   }
 );
 
 const init = createAsyncThunk(
   'initApp',
   async (_, { getState, dispatch }) => {
-    dispatch(logActions.log(createLog(`INITIALIZING...` )));
     try {
       await dispatch(setupFirebase());
       await dispatch(billingActions.init());
-      // await dispatch(assetActions.init());
-      // await dispatch(invitesActions.init());
-      // await dispatch(courseActions.init());
-      await dispatch(sessionActions.init());
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
 
@@ -126,10 +114,8 @@ const init = createAsyncThunk(
       }
     } catch (error) {
       console.error(error);
-      dispatch(logActions.log(createLog(error.message, ERROR)));
       throw error;
     }
-    dispatch(logActions.log(createLog(`INITIALIZATION COMPLETE` )));
   }
 );
 
@@ -138,13 +124,10 @@ const signIn = createAsyncThunk(
   async ({ email, password }, { dispatch }) => {
     console.log('signIn action thunk');
     try {
-      dispatch(logActions.log(createLog('Attempting sign in...')));
       await app.auth().signInWithEmailAndPassword(email, password);
       console.log('signed in');
-      dispatch(logActions.log(createLog('Sign in successful.')));
     } catch (error) {
       console.log('error', error);
-      dispatch(logActions.log(createLog(`Firebase error: ${error.message}`, ERROR)));
       throw error;
     }
   }
@@ -154,12 +137,9 @@ const signOut = createAsyncThunk(
   'signOut',
   async (_, { dispatch }) => {
     try {
-      dispatch(logActions.log(createLog('Attempting sign out...')));
       const result = await app.auth().signOut();
       console.log(result);
-      dispatch(logActions.log(createLog('Sign out successful.')));
     } catch (error) {
-      dispatch(logActions.log(createLog(`Firebase error: ${error.message}`, ERROR)));
       throw error;
     }
   }

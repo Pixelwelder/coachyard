@@ -1,6 +1,6 @@
 import React from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import SESSION_MODES from '../features/session/sessionModes';
+import SESSION_MODES from '../constants/sessionModes';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import TextField from '@material-ui/core/TextField';

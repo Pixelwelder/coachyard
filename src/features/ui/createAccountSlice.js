@@ -1,5 +1,5 @@
 import { createUISlice } from './createUISlice';
-import SESSION_MODES from '../session/sessionModes';
+import SESSION_MODES from '../../constants/sessionModes';
 
 const initialState = {
   displayName: '',

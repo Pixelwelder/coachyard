@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import app from 'firebase/app';
 import { StyledFirebaseAuth } from 'react-firebaseui';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import SESSION_MODES from '../features/session/sessionModes';
+import SESSION_MODES from '../constants/sessionModes';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import Dialog from '@material-ui/core/Dialog';

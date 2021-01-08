@@ -3,7 +3,7 @@
 // const { createCompositeFE, compositesFE } = require('./composites');
 // const { assetsFE } = require('./assets');
 // const { processVideo } = require('./ffmpegTest');
-// const { video, videoFE } = require('./video');
+// const { _video, videoFE } = require('./_video');
 // const { setPrivilege, addPrivilege } = require('./admin/users');
 // const { initDatabase } = require('./admin/init');
 
@@ -51,7 +51,7 @@ const functionName = process.env.FUNCTION_NAME || process.env.K_SERVICE;
     // processVideo,
     // compositesFE,
     // createCompositeFE,
-    // video,
+    // _video,
     // videoFE,
     // setPrivilege,
     // addPrivilege,

@@ -6,8 +6,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 
-import { selectors as appSelectors, actions as appActions } from '../app/appSlice';
-import { actions as uiActions } from '../ui/uiSlice';
+import { selectors as appSelectors, actions as appActions } from '../../features/app/appSlice';
+import { actions as uiActions } from '../../features/ui/uiSlice';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import './user.scss';
 
