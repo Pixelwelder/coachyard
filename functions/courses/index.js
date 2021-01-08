@@ -427,7 +427,7 @@ const onCourseDeleted = functions.firestore
     });
 
     await Promise.all(promises).catch(error => {
-      log({ message: error.message, data: error, context, level: error });
+      log({ message: error.message, data: error, context, level: 'error' });
     });
     log({ message: `Deleted ${promises.length} items from streaming server.`, context });
   });

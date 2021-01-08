@@ -3,6 +3,7 @@ const admin = require('firebase-admin');
 const { Stripe } = require('stripe');
 const { newStripeCustomer, newStripePayment } = require('../data');
 const { checkAuth } = require('../util/auth');
+const { log } = require ('../logging');
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -16,7 +17,7 @@ const stripe = new Stripe(
  */
 const stripe_onCreateUser = functions.auth.user()
   .onCreate(async (user) => {
-    console.log('Billing: user created:', user.displayName, user.email);
+    log({ message: 'Billing: a user was created.', data: user });
     const timestamp = admin.firestore.Timestamp.now();
     const stripeCustomer = await stripe.customers.create({
       name: user.displayName,
@@ -35,7 +36,6 @@ const stripe_onCreateUser = functions.auth.user()
       setup_secret: stripeIntent.client_secret
     });
     await admin.firestore().collection('stripe_customers').doc(user.uid).set(fbCustomer);
-    return;
   });
 
 /**
@@ -43,7 +43,7 @@ const stripe_onCreateUser = functions.auth.user()
  */
 const stripe_onDeleteUser = functions.auth.user()
   .onDelete(async (user) => {
-    console.log('Billing: user deleted', user.email);
+    log({ message: 'Billing: a user was deleted.', data: user });
     const dbRef = admin.firestore().collection('stripe_customers');
     const customer = (await dbRef.doc(user.uid).get()).data();
     const snapshot = await dbRef.doc(user.uid).collection('payment_methods').get();
@@ -60,7 +60,7 @@ const stripe_onCreatePaymentMethod = functions.firestore
   .onCreate(async (snapshot, context) => {
     try {
       const { userId } = context.params;
-      console.log('creating subscription for', userId);
+      log({ message: `Billing: creating a subscription for ${userId}...`, data: snapshot.data(), context });
 
       // Grab and save the payment method.
       const { id: paymentMethodId } = snapshot.data();
@@ -72,11 +72,9 @@ const stripe_onCreatePaymentMethod = functions.firestore
       const customer = customerDoc.data();
 
       // Attach the payment method to the customer.
-      console.log(`attaching ${paymentMethodId} to ${customer.customer_id}...`)
       const attachResult = await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.customer_id });
 
       // Change default invoice settings to point to the payment method.
-      console.log(`Changing user's default payment method...`);
       const changeResult = await stripe.customers.update(
         customer.customer_id,
         {
@@ -85,13 +83,11 @@ const stripe_onCreatePaymentMethod = functions.firestore
       );
 
       // Now create the subscription.
-      console.log('creating subscription...');
       const subscription = await stripe.subscriptions.create({
         customer: customer.customer_id,
         items: [{ price: basicPrice }],
         expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
       });
-      console.log('subscription created', subscription);
 
       await admin.firestore()
         .collection('stripe_customers')
@@ -99,9 +95,8 @@ const stripe_onCreatePaymentMethod = functions.firestore
         .collection('subscriptions')
         .doc(subscription.id)
         .set(subscription);
-      console.log('saved to firestore');
 
-      console.log('setting token...');
+      // console.log('setting token...');
       // TODO Doesn't work with emulators.
       // const user = await admin.auth().getUser(userId);
       // await admin.auth().setCustomUserClaims(userId, {
@@ -109,9 +104,6 @@ const stripe_onCreatePaymentMethod = functions.firestore
       //   subscription: 1
       // });
       await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
-      console.log('token set');
-
-      console.log('complete');
 
       // Now create a setup intent.
       // const intent = await stripe.setupIntents.create({ customer: customer.customer_id });
@@ -119,9 +111,9 @@ const stripe_onCreatePaymentMethod = functions.firestore
       //   { setup_secret: intent.client_secret },
       //   { merge: true }
       // );
-      return;
+      log({ message: `Billing: created a subscription for ${userId}...`, data: { id: subscription.id }, context });
     } catch (error) {
-      console.error(error);
+      log({ message: error.message, data: error, context, level: 'error' });
       await snapshot.ref.set(
         { error: error.message },
         { merge: true }
@@ -135,6 +127,7 @@ const stripe_onCreatePaymentMethod = functions.firestore
 const stripe_onCreatePayment = functions.firestore
   .document('/stripe_customers/{userId}/payments/{pushId}')
   .onCreate(async (snapshot, context) => {
+    log({ message: 'Billing: a payment was created.', data: snapshot.data(), context });
     const { amount, currency, payment_method } = snapshot.data();
     try {
       const { customer_id: customer } = (await snapshot.ref.parent.parent.get()).data();
@@ -150,7 +143,7 @@ const stripe_onCreatePayment = functions.firestore
       );
       await snapshot.ref.set(payment);
     } catch (error) {
-      console.error(error);
+      log({ message: error.message, data: error, context, level: 'error' });
       await snapshot.ref.set(
         { error: error.message },
         { merge: true }
@@ -173,6 +166,7 @@ const stripe_onCreatePayment = functions.firestore
 const stripe_onConfirmPayment = functions.firestore
   .document('/stripe_customers/{userId}/payments/{pushId}')
   .onUpdate(async (change, context) => {
+    log({ message: 'Billing: a payment was confirmed.', data: change.after.data(), context });
     if (change.after.data().status === 'requires_confirmation') {
       const payment = await stripe.paymentIntents.confirm(change.after.data().id);
       await change.after.ref.set(payment);
@@ -180,16 +174,17 @@ const stripe_onConfirmPayment = functions.firestore
   });
 
 const stripe_cancelSubscription = functions.https.onCall(async (data, context) => {
+  log({ message: 'Billing: attempting to cancel subscription.', data: data, context });
   checkAuth(context);
 
   try {
     const { id } = data;
     const subscription = await stripe.subscriptions.del(id);
 
-    console.log('Subscription canceled.');
+    log({ message: 'Billing: subscription canceled.', data: { id: subscription.id }, context });
     return { message: 'Subscription canceled.', subscription };
   } catch (error) {
-    console.error(error);
+    log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 });
@@ -209,9 +204,9 @@ stripe_webhooks.use(bodyParser.json());
 stripe_webhooks.post(
   '/webhooks',
   async (request, response) => {
-    console.log('stripe_webhooks');
     try {
       const { body } = request;
+      log({ message: 'Billing: Received Stripe webhook.', data: body });
       const {
         type,
         data: {
@@ -223,10 +218,6 @@ stripe_webhooks.post(
       } = body;
 
       // Handle the event.
-      console.log(body.type);
-      console.log(body);
-      // const customerData =
-      // console.log(customerId);
       switch (type) {
         case 'customer.subscription.updated': {
 
@@ -260,10 +251,8 @@ stripe_webhooks.post(
       }
       return response.status(200).end();
     } catch (error) {
-      console.error(error.message);
+      log({ message: error.message, data: error, level: 'error' });
       return response.status(500).end();
-    } finally {
-      // return response.status(200).end();
     }
   }
 );

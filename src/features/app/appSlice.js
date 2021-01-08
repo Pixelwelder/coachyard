@@ -24,6 +24,7 @@ const initialState = {
   query: {}
 };
 
+// TODO Get this (and the serverside function) the hell out of here.
 const refreshUser = createAsyncThunk(
   'refreshUser',
   async ({ authUser }, { dispatch }) => {
@@ -228,7 +229,7 @@ const selectCoursesEnrolled = createSelector(select, ({ authUser }) => {
 
 const selectors = { select, selectStudents, selectCoursesEnrolled };
 
-const actions = { ...generatedActions, init, signIn, signOut, signUp, refreshUser };
+const actions = { ...generatedActions, init, signIn, signOut, signUp };
 
 export { actions, selectors };
 export default reducer;

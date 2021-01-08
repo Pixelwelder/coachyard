@@ -1,57 +1,58 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newStudent, newUserMeta } = require('../data');
 
 /**
  * Creates a user but does not log them in.
  */
-const createUser = async (data, context) => {
-  try {
-    console.log('creating user', data);
-
-    const { email: _email, password, roles, displayName } = data;
-    const email = _email.toLowerCase();
-
-    // Create the user in the auth database.
-    const userRecord = await admin.auth().createUser({
-      email,
-      emailVerified: false,
-      password,
-      displayName
-    });
-
-    // Add custom user claims.
-    const { uid } = userRecord;
-    await admin.auth().setCustomUserClaims(uid, { roles });
-
-    const result = admin.firestore().runTransaction(async (transaction) => {
-      // Now we need a user meta for additional information.
-      const timestamp = admin.firestore.Timestamp.now();
-      const userMeta = newUserMeta({
-        uid,
-        displayName,
-        created: timestamp,
-        updated: timestamp
-      });
-
-      // Use the same ID for the user meta.
-      await admin.firestore().collection('users').doc(uid).set(userMeta);
-    });
-
-    return { message: 'Done.', data: { uid } }
-  } catch (error) {
-    console.log('error', error.message)
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-  // const result2 = await admin.auth().setCustomUserClaims()
-};
+// const createUser = async (data, context) => {
+//   try {
+//     log({ message: 'Attempting to create user...', data, context });
+//
+//     const { email: _email, password, roles, displayName } = data;
+//     const email = _email.toLowerCase();
+//
+//     // Create the user in the auth database.
+//     const userRecord = await admin.auth().createUser({
+//       email,
+//       emailVerified: false,
+//       password,
+//       displayName
+//     });
+//
+//     // Add custom user claims.
+//     const { uid } = userRecord;
+//     await admin.auth().setCustomUserClaims(uid, { roles });
+//
+//     const result = admin.firestore().runTransaction(async (transaction) => {
+//       // Now we need a user meta for additional information.
+//       const timestamp = admin.firestore.Timestamp.now();
+//       const userMeta = newUserMeta({
+//         uid,
+//         displayName,
+//         created: timestamp,
+//         updated: timestamp
+//       });
+//
+//       // Use the same ID for the user meta.
+//       await admin.firestore().collection('users').doc(uid).set(userMeta);
+//     });
+//
+//     return { message: 'Done.', data: { uid } }
+//   } catch (error) {
+//     console.log('error', error.message)
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+//   // const result2 = await admin.auth().setCustomUserClaims()
+// };
 
 /**
  * Performs some maintenance when users are created.
  */
 const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
-  console.log('user created', user);
+  log({ message: 'User was created.', data: user, context });
   const { uid, email } = user;
   // const doc = admin.firestore().collection('users').doc(uid);
   // const timestamp = admin.firestore.Timestamp.now();
@@ -64,32 +65,30 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
 
   // Load all items that mention this student and change email to uid.
   const itemsResult = await admin.firestore().runTransaction(async (transaction) => {
-
     const tokensRef = admin.firestore()
       .collection('tokens')
       .where('user', '==', email)
       .select();
 
     const result = await transaction.get(tokensRef);
-    console.log('found', result.size);
+    log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
     const promises = result.docs.map((doc) => {
-      console.log('updating', doc.id);
       return transaction.update(doc.ref, { user: uid });
     })
 
-    await Promise.all(promises);
-
-    console.log(`Updated ${result.size} items.`);
+    await Promise.all(promises).catch(error => {
+      log({ message: error.message, data: error, context, level: 'error' });
+    });
   })
-
-  console.log('Update complete.');
 });
 
 /**
  * Returns the metadata for the currently logged-in user.
+ * TODO Remove this.
  */
 const getUser = async (data, context) => {
   try {
+    log({ message: 'Getting user...', data, context });
     checkAuth(context);
     const { uid } = context.auth;
     const snapshot = await admin.firestore().collection('users').doc(uid).get();
@@ -98,72 +97,13 @@ const getUser = async (data, context) => {
     // if (!userMeta) throw new Error(`No user meta for user ${uid}.`)
     return userMeta;
   } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-/**
- * Creates a student for the logged-in teacher.
- */
-const createStudent = async (data, context) => {
-  try {
-    console.log('createStudent', data);
-    checkAuth(context);
-
-    // Grab the teacher.
-    console.log('getting teacher');
-    const { uid } = context.auth;
-    const snapshot = await admin.firestore().collection('users').doc(uid).get();
-    const teacherMeta = snapshot.data();
-    const students = teacherMeta.students || [];
-
-    const email = data.email.toLowerCase();
-
-    console.log('checking current students');
-    // Make sure this teacher doesn't already have this student.
-    const existingStudent = students.find((student) => {
-      console.log('comparing', student.email, email);
-      return student.email === email;
-    });
-    if (existingStudent) {
-      throw new Error(`Looks like you already have a student with email ${email}.`);
-    }
-
-    console.log('checking for student as existing auth user');
-    // If this student exists, grab them.
-    let userRecord;
-    try {
-      userRecord = await admin.auth().getUserByEmail(email);
-      if (userRecord) console.log('FOUND');
-    } catch {
-      // User doesn't exist.
-    }
-
-    // Now create a new student.
-    console.log('creating student');
-    const { displayName } = data;
-    const timestamp = admin.firestore.Timestamp.now();
-    const student = newStudent({
-      uid: (userRecord && userRecord.uid) || '',
-      email,
-      displayName,
-      created: timestamp,
-      updated: timestamp
-    });
-
-    students.push(student);
-    await admin.firestore().collection('users').doc(uid).update({ students });
-    console.log('Done.');
-    return { message: 'Student added.', data: student };
-  } catch (error) {
-    console.log('error', error.message);
+    log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
 
 module.exports = {
-  createUser: functions.https.onCall(createUser),
+  // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),
   // createStudent: functions.https.onCall(createStudent),
   onCreateUser
