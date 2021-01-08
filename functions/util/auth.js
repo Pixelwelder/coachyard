@@ -1,7 +1,5 @@
-const functions = require('firebase-functions');
-
 const checkAuth = (context) => {
-  return !!context.auth;
+  if (!context.auth) throw new Error('User is not logged in.');
 };
 
 const checkPrivilege = (auth, privilege) => {
