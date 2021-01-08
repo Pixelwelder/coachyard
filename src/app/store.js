@@ -10,8 +10,6 @@ import appReducer from '../features/app/appSlice';
 import sessionReducer from '../features/session/sessionSlice';
 import uiReducer from '../features/ui/uiSlice';
 import uiReducer2 from '../features/ui/uiSlice2';
-import teacherReducer from '../features/teacher/teacherSlice';
-import invitesReducer from '../features/invites/invitesSlice';
 import billingReducer from '../features/billing/billingSlice';
 import catalogReducer from '../features/catalog/catalogSlice';
 import selectedCourseReducer from '../features/course/selectedCourseSlice';
