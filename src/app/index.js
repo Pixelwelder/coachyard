@@ -8,7 +8,7 @@ import Header from '../features/header';
 import Footer from '../features/footer';
 import Account from '../features/account';
 import './app.scss';
-import Course from '../features/course2';
+import Course from '../features/course';
 import Catalog from '../features/catalog';
 import CreateCourseDialog from '../components/CreateCourseDialog3';
 import CreateItemDialog from '../components/CreateItemDialog';

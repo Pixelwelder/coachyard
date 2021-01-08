@@ -11,7 +11,7 @@ import { actions as logActions } from '../log/logSlice';
 import { createLog } from '../log/logSlice';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import { actions as selectedCourseActions } from '../course2/selectedCourseSlice';
+import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { actions as sessionActions } from '../session/sessionSlice';
 import { ERROR } from '../log/logTypes';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';

@@ -14,7 +14,7 @@ import teacherReducer from '../features/teacher/teacherSlice';
 import invitesReducer from '../features/invites/invitesSlice';
 import billingReducer from '../features/billing/billingSlice';
 import catalogReducer from '../features/catalog/catalogSlice';
-import selectedCourseReducer from '../features/course2/selectedCourseSlice';
+import selectedCourseReducer from '../features/course/selectedCourseSlice';
 
 export default configureStore({
   reducer: {

@@ -13,7 +13,7 @@ import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from '../features/course2/selectedCourseSlice';
+import { selectors as selectedCourseSelectors } from '../features/course/selectedCourseSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 
 const CreateItemDialog = () => {
