@@ -14,7 +14,7 @@ import CreateItemDialog from '../components/CreateItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
 import CreateAccountDialog from '../components/CreateAccountDialog';
-import FirebaseSignIn from '../components/FirebaseSignIn';
+import Barebones from '../features/barebones';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -44,6 +44,7 @@ const App = () => {
           <Route path="/dashboard" component={Catalog} />
           {/*<Route path="/course/:uid" component={Course} />*/}
           <Route path="/course/:uid/:itemUid?" component={Course} />
+          <Route path="/barebones" component={Barebones} />
           <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>

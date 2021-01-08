@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import Paper from '@material-ui/core/Paper';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { useLocation, Redirect } from 'react-router-dom';
+import queryString from 'query-string';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
@@ -21,6 +23,7 @@ import { DateTime } from 'luxon';
 import OwnerControls from '../../components/OwnerControls';
 import MODES from '../ui/Modes';
 import Alert from '@material-ui/lab/Alert';
+import Barebones from '../barebones';
 
 const NoItem = () => {
   return (
@@ -216,7 +219,7 @@ const LiveMode = ({ size }) => {
   );
 };
 
-const EditView = () => {
+const EditView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
 
@@ -364,7 +367,7 @@ const EditView = () => {
       <div className="spacer" />
       <OwnerControls
         onSubmit={onSubmit}
-        enableSubmit={!isDisabled() && !!file}
+        enableSubmit={!isDisabled() && !(requireUpload && !file)}
         onCancel={onCancelEdit}
         enableCancel={!!item.streamingId && !isDisabled()}
         onDelete={onDelete}
@@ -380,7 +383,7 @@ const ProcessingMode = () => {
   return (
     <div className="item-mode processing-mode">
       {ownsCourse && (
-        <EditView />
+        <EditView requireUpload />
       )}
       {!ownsCourse && (
         <div className="mode-inner">
@@ -437,6 +440,10 @@ const ViewingMode = ({ size }) => {
 
 const ItemView = () => {
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const location = useLocation();
+  const query = queryString.parse(location.search);
+  const { barebones } = query;
 
   return (
     <Paper className="item-view" variant="outlined">
@@ -452,7 +459,15 @@ const ItemView = () => {
               <>
                 {item.status === 'scheduled' && <ScheduledMode />}
                 {item.status === 'initializing' && <InitializingMode />}
-                {item.status === 'live' && <LiveMode size={size} />}
+                {item.status === 'live' && (
+                  <>
+                    {
+                      barebones === 'true'
+                        ? <Redirect to={`/barebones?id=${item.uid}`} />
+                        : <LiveMode size={size} />
+                    }
+                  </>
+                )}
                 {item.status === 'processing' && <ProcessingMode />}
                 {item.status === 'viewing' && <ViewingMode size={size} />}
               </>

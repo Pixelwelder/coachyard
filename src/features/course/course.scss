@@ -173,6 +173,15 @@ form {
   }
 }
 
+.barebones {
+  button {
+    z-index: 2;
+    position: absolute;
+    left: 32px;
+    top: 32px;
+  }
+}
+
 .scheduled-mode {
   flex: 1;
   display: flex;
