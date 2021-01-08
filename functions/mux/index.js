@@ -17,7 +17,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
     const { type } = body;
     console.log('mux webhook:', type);
 
-    if (type === '_video.asset.ready') {
+    if (type === 'video.asset.ready') {
       const muxData = parseMuxResponse(body);
       console.log(muxData);
 
@@ -29,7 +29,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
         if (docs.size) {
           const doc = docs.docs[0];
           await transaction.update(doc.ref, { ...muxData, status: 'viewing' });
-        } else {
+        } else {781
           console.error('No doc for', muxData.streamingId);
         }
       });

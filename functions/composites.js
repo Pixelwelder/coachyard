@@ -30,7 +30,7 @@ const createCompositeFE = async (data, context) => {
   const body = {
     composite_mode: 'tracks-layout',
     size: '1280x720',
-    // Assume we get _video, audio, _video, audio
+    // Assume we get video, audio, video, audio
     tracks: json.tracks.map((track, index) => {
       const { id } = track;
       const trackObj = { id, title: id };

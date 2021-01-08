@@ -7,8 +7,8 @@ const ffmpeg_static = require('ffmpeg-static');
 const ffprobe_static = require('ffprobe-static');
 const path = require('path');
 
-const v1 = './_video/test/v1.webm';
-const v2 = './_video/test/v2.webm';
+const v1 = './video/test/v1.webm';
+const v2 = './video/test/v2.webm';
 
 const promisifyCommand = (command) => new Promise((resolve, reject) => {
   command
@@ -43,7 +43,7 @@ module.exports = {
       const bucket = storage.bucket();
 
       // ---
-      console.log('Attempting _video merge...');
+      console.log('Attempting video merge...');
       const startTime = performance.now()
       const pipScale = 'iw/4:ih/4';
       const pipPosition = '10:main_h-overlay_h-10';
