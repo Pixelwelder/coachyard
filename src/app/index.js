@@ -5,7 +5,7 @@ import { actions as appActions, selectors as appSelectors } from '../features/ap
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Session from '../features/session';
 import Header from '../features/header';
-import Footer from '../features/footer';
+import Footer from '../components/Footer';
 import Account from '../features/account';
 import './app.scss';
 import Course from '../features/course';
