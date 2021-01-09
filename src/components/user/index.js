@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import app from 'firebase/app';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 
-import { actions as appActions } from '../../features/app/appSlice';
-import { selectors as userSelectors } from '../../features/app/userSlice';
+import { actions as userActions, selectors as userSelectors } from '../../features/app/userSlice';
 import { actions as uiActions } from '../../features/ui/uiSlice';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import './user.scss';
 
 const Auth = () => {
-  const { isSignedIn, meta } = useSelector(userSelectors.select);
+  const { isSignedIn } = useSelector(userSelectors.select);
   const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const authUser = app.auth().currentUser;
 
   // Menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -27,14 +26,9 @@ const Auth = () => {
     setAnchorEl(null);
   };
 
-  const onLogIn = (event) => {
-    event.preventDefault();
-    dispatch(appActions.signIn({ email, password }));
-  };
-
   const onLogOut = () => {
     onClose();
-    dispatch(appActions.signOut());
+    dispatch(userActions.signOut());
   }
 
   const onShowAccount = () => {
@@ -45,7 +39,6 @@ const Auth = () => {
   return (
     <div className="component auth-status">
       <div className="auth-form">
-
           <>
             <Button
               onClick={onOpen}
@@ -55,7 +48,7 @@ const Auth = () => {
                 ? (
                   <>
                     <span className="user-image"></span>
-                    <span className="user-name">{meta.displayName || meta.email}</span>
+                    <span className="user-name">{authUser.displayName || authUser.email}</span>
                     <ArrowDropDownIcon />
                   </>
                 )

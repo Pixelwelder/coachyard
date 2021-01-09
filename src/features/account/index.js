@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import app from 'firebase/app';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -13,7 +14,8 @@ import Billing from '../billing';
 
 const Account = () => {
   const { showAccount } = useSelector(uiSelectors.select);
-  const { isSignedIn, meta } = useSelector(userSelectors.select);
+  const { isSignedIn } = useSelector(userSelectors.select);
+  const authUser = app.auth().currentUser;
   const dispatch = useDispatch();
 
   const onClose = () => {
@@ -27,8 +29,8 @@ const Account = () => {
         {isSignedIn && (
           <>
             <ItemDetails item={{
-              uid: meta.uid,
-              email: meta.email
+              uid: authUser.uid,
+              email: authUser.email
             }}/>
             <Billing />
           </>

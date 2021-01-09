@@ -109,15 +109,14 @@ const signUp = createAsyncThunk(
       const result = await app.auth().createUserWithEmailAndPassword(email, password);
       await result.user.updateProfile({ displayName });
 
-      const timestamp = app.firestore.Timestamp.now();
-      await app.firestore().collection('users').doc(result.user.uid).set({
-        uid: result.user.uid,
-        created: timestamp,
-        updated: timestamp,
-        displayName,
-        email,
-        enrolled: []
-      });
+      // const timestamp = app.firestore.Timestamp.now();
+      // await app.firestore().collection('users').doc(result.user.uid).set({
+      //   uid: result.user.uid,
+      //   created: timestamp,
+      //   updated: timestamp,
+      //   displayName,
+      //   email
+      // });
     } catch (error) {
       console.log(error);
       throw error;

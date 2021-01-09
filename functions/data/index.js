@@ -11,8 +11,6 @@ const newBaseItem = (overrides) => ({
  */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
-  displayName: '', // TODO Make sure we change this when they update elsewhere.
-  email: '',       // TODO Same.
   ...overrides
 });
 

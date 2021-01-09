@@ -54,17 +54,9 @@ const { newStudent, newUserMeta } = require('../data');
 const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   log({ message: 'User was created.', data: user, context });
   const { uid, email } = user;
-  // const doc = admin.firestore().collection('users').doc(uid);
-  // const timestamp = admin.firestore.Timestamp.now();
-  // const userMeta = newUserMeta({
-  //   uid,
-  //   created: timestamp,
-  //   updated: timestamp
-  // });
-  // const result = await doc.set(userMeta);
 
-  // Load all items that mention this student and change email to uid.
-  const itemsResult = await admin.firestore().runTransaction(async (transaction) => {
+  await admin.firestore().runTransaction(async (transaction) => {
+    // Update all tokens that mention this user.
     const tokensRef = admin.firestore()
       .collection('tokens')
       .where('user', '==', email)
@@ -79,6 +71,16 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
     await Promise.all(promises).catch(error => {
       log({ message: error.message, data: error, context, level: 'error' });
     });
+
+    // Create user meta.
+    const metaRef = admin.firestore().collection('users').doc(uid);
+    const timestamp = admin.firestore.Timestamp.now();
+    const meta = newUserMeta({
+      uid,
+      created: timestamp,
+      updated: timestamp
+    });
+    await transaction.create(metaRef, meta);
   })
 });
 

@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as appActions } from '../features/app/appSlice';
+import { actions as userActions } from '../features/app/userSlice';
 
 const isErrorType = type => error => !!error && error.message.toLowerCase().includes(type);
 
@@ -38,9 +38,9 @@ const CreateAccountDialog = () => {
   const onSubmit = (event) => {
     event.preventDefault();
     if (mode === SESSION_MODES.SIGN_UP) {
-      dispatch(appActions.signUp({ email, password, displayName }));
+      dispatch(userActions.signUp({ email, password, displayName }));
     } else if (mode === SESSION_MODES.SIGN_IN) {
-      dispatch(appActions.signIn({ email, password }));
+      dispatch(userActions.signIn({ email, password }));
     }
   };
 

@@ -40,6 +40,28 @@ const init = createAsyncThunk(
   }
 );
 
+const signUp = createAsyncThunk(
+  'signUp',
+  async ({ email, password, displayName }) => {
+    const result = await app.auth().createUserWithEmailAndPassword(email, password);
+    await result.user.updateProfile({ displayName });
+  }
+);
+
+const signIn = createAsyncThunk(
+  'signIn',
+  ({ email, password }) => {
+    app.auth().signInWithEmailAndPassword(email, password);
+  }
+);
+
+const signOut = createAsyncThunk(
+  'signOut',
+  () => {
+    app.auth().signOut();
+  }
+);
+
 const { actions: generatedActions, reducer } = createSlice({
   name: 'user',
   initialState,
@@ -54,7 +76,7 @@ const { actions: generatedActions, reducer } = createSlice({
 const select = ({ user }) => user;
 const selectors = { select };
 
-const actions = { ...generatedActions, init };
+const actions = { ...generatedActions, init, signUp, signIn, signOut };
 
 export { selectors, actions };
 export default reducer;
