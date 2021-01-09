@@ -257,46 +257,46 @@ const _canGetCourse = ({ userMeta, course }) => {
 //   return { doc, data: doc.data() };
 // };
 
-/**
- * Gets a specific course.
- * @param.uid - the id of the course to return
- */
-const getCourse = async (data, context) => {
-  try {
-    log({ message: 'Attempting to get course...', data, context });
-    checkAuth(context);
-
-    const { course, items } = await admin.firestore().runTransaction(async (transaction) => {
-      const { auth: { uid } } = context;
-
-      // Grab the user.
-      const userRef = admin.firestore().collection('users').doc(uid);
-      const userDoc = await transaction.get(userRef);
-      const userMeta = userDoc.data();
-
-      // Grab the course.
-      const courseRef = admin.firestore().collection('courses').doc(data.uid);
-      const courseDoc = await transaction.get(courseRef);
-      const course = courseDoc.data();
-
-      // Does the user have access?
-      if (!_canGetCourse({ userMeta, course })) throw new Error(`User ${uid} can't get course ${data.uid}.`);
-
-      // Now grab the items in the course.
-      const itemsRef = admin.firestore().collection('items')
-        .where('courseUid', '==', data.uid );
-      const itemsDoc = await transaction.get(itemsRef);
-      const items = itemsDoc.docs.map(item => item.data());
-
-      return { course, items };
-    });
-
-    return { course, items };
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
+// /**
+//  * Gets a specific course.
+//  * @param.uid - the id of the course to return
+//  */
+// const getCourse = async (data, context) => {
+//   try {
+//     log({ message: 'Attempting to get course...', data, context });
+//     checkAuth(context);
+//
+//     const { course, items } = await admin.firestore().runTransaction(async (transaction) => {
+//       const { auth: { uid } } = context;
+//
+//       // Grab the user.
+//       const userRef = admin.firestore().collection('users').doc(uid);
+//       const userDoc = await transaction.get(userRef);
+//       const userMeta = userDoc.data();
+//
+//       // Grab the course.
+//       const courseRef = admin.firestore().collection('courses').doc(data.uid);
+//       const courseDoc = await transaction.get(courseRef);
+//       const course = courseDoc.data();
+//
+//       // Does the user have access?
+//       if (!_canGetCourse({ userMeta, course })) throw new Error(`User ${uid} can't get course ${data.uid}.`);
+//
+//       // Now grab the items in the course.
+//       const itemsRef = admin.firestore().collection('items')
+//         .where('courseUid', '==', data.uid );
+//       const itemsDoc = await transaction.get(itemsRef);
+//       const items = itemsDoc.docs.map(item => item.data());
+//
+//       return { course, items };
+//     });
+//
+//     return { course, items };
+//   } catch (error) {
+//     log({ message: error.message, data: error, context, level: 'error' });
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// };
 
 /**
  * Deletes a specific course AND all its items.
@@ -437,7 +437,7 @@ module.exports = {
   // Courses
   createCourse: functions.https.onCall(createCourse),
   updateCourse: functions.https.onCall(updateCourse),
-  getCourse: functions.https.onCall(getCourse),
+  // getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),

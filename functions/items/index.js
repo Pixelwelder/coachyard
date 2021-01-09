@@ -6,8 +6,6 @@ const { checkAuth } = require('../util/auth');
 const { getMuxHeaders, getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourseItem } = require('../data');
-const express = require('express');
-const bodyParser = require('body-parser');
 
 /**
  * Filters user input for item creation.
@@ -342,17 +340,6 @@ const handleFileDelete = functions.storage
     console.log('deleted', object.name);
   });
 
-// Webhooks.
-const daily_webhooks = express();
-daily_webhooks.use(bodyParser.urlencoded({ extended: false }));
-daily_webhooks.use(bodyParser.json());
-daily_webhooks.post('/webhooks', async (request, response) => {
-  const { body } = request;
-  log({ message: 'Received Daily.co webhook.', data: body });
-
-  return response.status(200).end();
-});
-
 module.exports = {
   createItem: functions.https.onCall(createItem),
   updateItem: functions.https.onCall(updateItem),
@@ -360,8 +347,6 @@ module.exports = {
   sendItem: functions.https.onCall(sendItem),
 
   handleItemUpdate,
-
-  daily: functions.https.onRequest(daily_webhooks)
 
   // handleFileUpload,
   // handleFileDelete

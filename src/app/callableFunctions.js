@@ -22,7 +22,6 @@ const CALLABLE_FUNCTIONS = {
   CREATE_COURSE: 'createCourse',
   UPDATE_COURSE: 'updateCourse',
   GIVE_COURSE: 'giveCourse',
-  GET_COURSE: 'getCourse',
   DELETE_COURSE: 'deleteCourse',
   GET_CREATED_COURSES: 'getCreatedCourses',
 

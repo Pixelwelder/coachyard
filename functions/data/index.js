@@ -11,6 +11,7 @@ const newBaseItem = (overrides) => ({
  */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
+  email: '', // TODO Update this when the authUser updates.
   ...overrides
 });
 

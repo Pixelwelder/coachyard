@@ -19,6 +19,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
       .where('user', '==', email)
       .select();
 
+    // Update tokens that should belong to this user.
     const result = await transaction.get(tokensRef);
     log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
     const promises = result.docs.map((doc) => {
@@ -34,6 +35,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
     const timestamp = admin.firestore.Timestamp.now();
     const meta = newUserMeta({
       uid,
+      email,
       created: timestamp,
       updated: timestamp
     });
