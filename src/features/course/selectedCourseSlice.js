@@ -16,8 +16,18 @@ const initialState = {
   studentImageUrl: '',
   items: [],
   selectedItem: null,
-  selectedItemUid: null
+  selectedItemUid: null,
+
+  adminImageUrl: '',
+  studentImageUrls: []
 };
+
+const _loadItems = createAsyncThunk(
+  'selectedCourse/loadItems',
+  async ({ uid }) => {
+
+  }
+);
 
 let unsubscribeCourse = () => {};
 let unsubscribeToken = () => {};
@@ -41,12 +51,6 @@ const setUid = createAsyncThunk(
     dispatch(generatedActions._setSelectedItemUid(null));
     dispatch(generatedActions._setSelectedItem(null));
 
-    unsubscribeCourse();
-    unsubscribeCreator();
-    unsubscribeStudent();
-    unsubscribeToken();
-    unsubscribeItems();
-
     const abandon = () => {
       history.push('/dashboard');
       return;
@@ -54,6 +58,7 @@ const setUid = createAsyncThunk(
 
     // TODO Ensure we only have one.
     let token = null;
+    unsubscribeToken();
     unsubscribeToken = app.firestore()
       .collection('tokens')
       .where('user', '==', app.auth().currentUser.uid)
@@ -66,7 +71,8 @@ const setUid = createAsyncThunk(
           return abandon();
         }
 
-        // If there's a token, grab the course it refers to.
+        // If there's a token, grab the course and items it refers to.
+        unsubscribeCourse();
         unsubscribeCourse = app.firestore()
           .collection('courses')
           .where('uid', '==', uid)
@@ -80,6 +86,7 @@ const setUid = createAsyncThunk(
             dispatch(generatedActions.setCourse(course));
 
             // Get the creator.
+            unsubscribeCreator();
             unsubscribeCreator = app.firestore()
               .collection('users')
               .doc(course.creatorUid)
@@ -91,8 +98,30 @@ const setUid = createAsyncThunk(
                 const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
                 dispatch(generatedActions.setCourseCreatorImageUrl(url));
               });
+
+            // If this user is the creator, get all students.
+
+
+            // Get the student.
+            unsubscribeStudent();
+            unsubscribeStudent = app.firestore()
+              .collection('users')
+              .doc(token.user)
+              .onSnapshot(async (snapshot) => {
+                console.log('students!', snapshot.data());
+                if (snapshot.exists) {
+                  dispatch(generatedActions.setStudent(parseUnserializables(snapshot.data())));
+
+                  const url = await app.storage().ref(`/avatars/${token.user}.png`).getDownloadURL();
+                  dispatch(generatedActions.setStudentImageUrl(url));
+                } else {
+                  dispatch(generatedActions.setStudent(initialState.student));
+                  dispatch(generatedActions.setStudentImageUrl(initialState.studentImageUrl));
+                }
+              });
           });
 
+        unsubscribeItems();
         unsubscribeItems = app.firestore()
           .collection('items')
           .where('courseUid', '==', uid)
@@ -101,23 +130,6 @@ const setUid = createAsyncThunk(
             console.log('received', snapshot.size, 'items');
             const items = snapshot.docs.map(item => parseUnserializables(item.data()));
             dispatch(generatedActions.setItems(items));
-          });
-
-        console.log('watching student', token.user);
-        unsubscribeStudent = app.firestore()
-          .collection('users')
-          .doc(token.user)
-          .onSnapshot(async (snapshot) => {
-            console.log('students!', snapshot.data());
-            if (snapshot.exists) {
-              dispatch(generatedActions.setStudent(parseUnserializables(snapshot.data())));
-
-              const url = await app.storage().ref(`/avatars/${token.user}.png`).getDownloadURL();
-              dispatch(generatedActions.setStudentImageUrl(url));
-            } else {
-              dispatch(generatedActions.setStudent(initialState.student));
-              dispatch(generatedActions.setStudentImageUrl(initialState.studentImageUrl));
-            }
           });
 
       });
@@ -199,6 +211,9 @@ const { actions: generatedActions, reducer } = createSlice({
     _setSelectedItem: setValue('selectedItem'),
     setIsRecording: setValue('isRecording'),
     setIsFullscreen: setValue('isFullscreen'),
+
+    setAdminImageUrl: setValue('adminImageUrl'),
+    setStudentImageUrls: setValue('studentImageUrls'),
     reset: (state, action) => initialState
   },
   extraReducers: {

@@ -48,7 +48,6 @@ const init = createAsyncThunk(
           .orderBy('created')
           .onSnapshot((snapshot) => {
             let tokens = [];
-            console.log('snapshot', snapshot.size);
             if (snapshot.size) {
               tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
             }

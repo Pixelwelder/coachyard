@@ -34,7 +34,7 @@ const NoItem = () => {
 const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
-  const { course, student, selectedItem, courseCreator } = useSelector(selectedCourseSelectors.select);
+  const { course, student, selectedItem, courseCreator, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
 
@@ -53,6 +53,7 @@ const ScheduledMode = () => {
                 <>
                   <div className="centered-mode">
                     <div className="item-info">
+                      <img className="item-info-image" src={courseCreatorImageUrl} />
                       <Typography className="participant-name" variant="h6" component="p">
                         {selectedItem.displayName}
                       </Typography>
@@ -84,8 +85,9 @@ const ScheduledMode = () => {
       <div className="mode-inner">
         <div className="item-info">
           <Typography>Waiting for</Typography>
+          <img className="item-info-image" src={courseCreatorImageUrl} />
           <Typography className="participant-name" variant="h6" component="p">
-            {courseCreator.displayName}
+            {courseCreator?.displayName}
           </Typography>
           <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
         </div>
