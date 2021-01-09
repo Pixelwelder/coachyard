@@ -1,6 +1,5 @@
 import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { selectors as appSelectors } from '../app/appSlice';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 const initialState = {
@@ -30,34 +29,41 @@ let unsubscribeStudent = () => {};
 const setUid = createAsyncThunk(
   'setUid',
   async ({ uid, history }, { dispatch, getState }) => {
-    console.log('setUid', uid);
     const { course } = selectors.select(getState());
-    console.log('course');
     if (course && (course.uid === uid)) {
-      console.log('uid unchanged');
       return;
     }
 
-    // dispatch(generatedActions._setUid(uid));
     dispatch(generatedActions._setSelectedItemUid(null));
     dispatch(generatedActions._setSelectedItem(null));
 
     unsubscribeCourse();
+    unsubscribeCreator();
+    unsubscribeStudent();
     unsubscribeCourse = app.firestore()
       .collection('courses')
       .where('uid', '==', uid)
       .onSnapshot(async (snapshot) => {
-        if (!snapshot.size) {
-          // TODO this is nasty.
-          dispatch(generatedActions.reset());
+        dispatch(generatedActions.reset());
+
+        const abandon = () => {
           history.push('/dashboard');
           return;
-        }
+        };
+
+        if (!snapshot.size) abandon();
+
+        const tokens = await app.firestore().collection('tokens')
+          .where('user', '==', app.auth().currentUser.uid)
+          .where('courseUid', '==', uid)
+          .get();
+
+        // TODO Ensure there's only one.
+        if (!tokens.size) abandon();
 
         const course = parseUnserializables(snapshot.docs[0].data());
         dispatch(generatedActions.setCourse(course));
 
-        unsubscribeCreator();
         unsubscribeCreator = await app.firestore()
           .collection('users')
           .doc(course.creatorUid)
@@ -67,7 +73,6 @@ const setUid = createAsyncThunk(
           });
 
         if (course.student) {
-          unsubscribeStudent();
           unsubscribeStudent = await app.firestore()
             .collection('users')
             .doc(course.student)

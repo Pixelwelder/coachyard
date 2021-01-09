@@ -11,6 +11,8 @@ export const setValues = (state, action) => {
   });
 };
 
+export const setError = (state, action) => { state.error = action.error; };
+
 export const isPendingAction = action => action.type.endsWith('/pending');
 export const isRejectedAction = action => action.type.endsWith('/rejected');
 export const isFulfilledAction = action => action.type.endsWith('/fulfilled');

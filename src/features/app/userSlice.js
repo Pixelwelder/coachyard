@@ -1,10 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { reset, setValue } from '../../util/reduxUtils';
+import { reset, setError, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import app from 'firebase/app';
 
 const initialState = {
   isSignedIn: false,
+  error: null,
   meta: {},
   claims: {}
 };
@@ -50,15 +51,15 @@ const signUp = createAsyncThunk(
 
 const signIn = createAsyncThunk(
   'signIn',
-  ({ email, password }) => {
-    app.auth().signInWithEmailAndPassword(email, password);
+  async ({ email, password }) => {
+    await app.auth().signInWithEmailAndPassword(email, password);
   }
 );
 
 const signOut = createAsyncThunk(
   'signOut',
-  () => {
-    app.auth().signOut();
+  async () => {
+    await app.auth().signOut();
   }
 );
 
@@ -70,6 +71,11 @@ const { actions: generatedActions, reducer } = createSlice({
     setMeta: setValue('meta'),
     setClaims: setValue('claims'),
     reset: reset(initialState)
+  },
+  extraReducers: {
+    [signUp.rejected]: setError,
+    [signIn.rejected]: setError,
+    [signOut.rejected]: setError
   }
 });
 

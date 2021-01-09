@@ -23,10 +23,14 @@ service cloud.firestore {
     }
 
     match /courses/{uid} {
-      allow list: if true;
-      allow get: if true;//isCreator();// || isEnrolled(); // TODO
+      allow list: if hasAccess();
+      allow get: if hasAccess();
       allow write: if isCreator();
 
+      // TODO
+      function hasAccess() {
+        return true;
+      }
       // function isEnrolled() {
       //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[uid] != null;
       // }

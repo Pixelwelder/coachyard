@@ -17,7 +17,7 @@ import CourseView from './CourseView';
 const Course = () => {
   const { uid, itemUid } = useParams();
   const { course, courseCreator, selectedItem, isRecording } = useSelector(selectedCourseSelectors.select);
-  const { isLoggedIn } = useSelector(userSelectors.select);
+  const { isSignedIn } = useSelector(userSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -28,10 +28,10 @@ const Course = () => {
       await dispatch(selectedCourseActions.setSelectedItemUid({ uid: itemUid, history }));
     }
 
-    if (isLoggedIn) {
+    if (isSignedIn) {
       go();
     }
-  }, [uid, itemUid, isLoggedIn]);
+  }, [uid, itemUid, isSignedIn]);
 
   return (
     <div className="app-content">

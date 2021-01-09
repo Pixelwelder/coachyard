@@ -40,7 +40,6 @@ const setupFirebase = createAsyncThunk(
   'setupFirebase',
   async (_, { dispatch, getState }) => {
     await dispatch(_initApp());
-    console.log('AFTER');
 
     app.auth().onAuthStateChanged(
       async (authUser) => {
