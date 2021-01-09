@@ -5,50 +5,6 @@ const { checkAuth } = require('../util/auth');
 const { newStudent, newUserMeta } = require('../data');
 
 /**
- * Creates a user but does not log them in.
- */
-// const createUser = async (data, context) => {
-//   try {
-//     log({ message: 'Attempting to create user...', data, context });
-//
-//     const { email: _email, password, roles, displayName } = data;
-//     const email = _email.toLowerCase();
-//
-//     // Create the user in the auth database.
-//     const userRecord = await admin.auth().createUser({
-//       email,
-//       emailVerified: false,
-//       password,
-//       displayName
-//     });
-//
-//     // Add custom user claims.
-//     const { uid } = userRecord;
-//     await admin.auth().setCustomUserClaims(uid, { roles });
-//
-//     const result = admin.firestore().runTransaction(async (transaction) => {
-//       // Now we need a user meta for additional information.
-//       const timestamp = admin.firestore.Timestamp.now();
-//       const userMeta = newUserMeta({
-//         uid,
-//         displayName,
-//         created: timestamp,
-//         updated: timestamp
-//       });
-//
-//       // Use the same ID for the user meta.
-//       await admin.firestore().collection('users').doc(uid).set(userMeta);
-//     });
-//
-//     return { message: 'Done.', data: { uid } }
-//   } catch (error) {
-//     console.log('error', error.message)
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-//   // const result2 = await admin.auth().setCustomUserClaims()
-// };
-
-/**
  * Performs some maintenance when users are created.
  */
 const onCreateUser = functions.auth.user().onCreate(async (user, context) => {

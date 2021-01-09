@@ -20,7 +20,7 @@ export default configureStore({
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {
-
+      ignoredActions: ['auth/stateChanged']
     }
   })
 });
