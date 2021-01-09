@@ -4,7 +4,7 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import MODES from '../ui/Modes';
-import { setValue } from '../../util/reduxUtils';
+import { reset, setValue } from '../../util/reduxUtils';
 
 /**
  * Provides the list of courses this user has access to.
@@ -41,17 +41,6 @@ const init = createAsyncThunk(
       if (authUser) {
         const { uid } = authUser;
 
-        // Listen for enrolled courses.
-        userListener = app.firestore()
-          .collection('users')
-          .doc(uid)
-          .onSnapshot((snapshot) => {
-            // if (snapshot.exists) {
-            //   const { enrolled: courses } = snapshot.data();
-            //   dispatch(generatedActions.setLearning({ courses: Object(courses).entries }));
-            // }
-          });
-
         // Listen for all courses.
         courseListener = app.firestore()
           .collection('tokens')
@@ -65,25 +54,6 @@ const init = createAsyncThunk(
             }
             dispatch(generatedActions.setTokens(tokens));
           });
-
-        // courseListener = app.firestore()
-        //   .collection('courses')
-        //   .where('student', '==', uid)
-        //   .orderBy('created')
-        //   .onSnapshot((snapshot) => {
-        //     const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-        //     dispatch(generatedActions.setLearning({ courses }));
-        //   });
-
-        // Listen for created courses.
-        // metaListener = app.firestore()
-        //   .collection('courses')
-        //   .where('creatorUid', '==', uid)
-        //   .orderBy('created')
-        //   .onSnapshot((snapshot) => {
-        //     const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-        //     dispatch(generatedActions.setTeaching({ courses }));
-        //   });
       }
     });
   }
@@ -307,7 +277,7 @@ const { actions: generatedActions, reducer } = createSlice({
     resetLearning: resetValue('learning'),
 
     setTokens: setValue('tokens'),
-    reset: (state) => initialState
+    reset: reset(initialState)
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),

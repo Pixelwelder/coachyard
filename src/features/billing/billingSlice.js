@@ -2,6 +2,7 @@ import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { reset } from '../../util/reduxUtils';
 
 const initialState = {
   customerData: null,
@@ -112,6 +113,8 @@ const init = createAsyncThunk(
       unsubscribePaymentMethods();
       unsubscribeSubscriptions();
 
+      dispatch(generatedActions.reset());
+
       if (authUser) {
         app
           .firestore()
@@ -147,7 +150,8 @@ const { reducer, actions: generatedActions } = createSlice({
     setSubscriptions: setValue('subscriptions'),
     setPayments: setValue('payments'),
     setUI: mergeValue('ui'),
-    resetUI: (state) => { state.ui = initialState.ui; }
+    resetUI: (state) => { state.ui = initialState.ui; },
+    reset: reset(initialState)
   }
 });
 

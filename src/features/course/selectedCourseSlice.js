@@ -128,7 +128,7 @@ const init = createAsyncThunk(
   'initSelectedCourse',
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
-      if (!authUser) dispatch(generatedActions.reset());
+      dispatch(generatedActions.reset());
     })
   }
 );
