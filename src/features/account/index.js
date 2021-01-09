@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import app from 'firebase/app';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -11,10 +11,11 @@ import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import { selectors as userSelectors } from '../app/userSlice';
 import ItemDetails from '../../components/ItemDetails';
 import Billing from '../billing';
+import { Typography } from '@material-ui/core';
 
 const Account = () => {
   const { showAccount } = useSelector(uiSelectors.select);
-  const { isSignedIn } = useSelector(userSelectors.select);
+  const { isSignedIn, meta, image } = useSelector(userSelectors.select);
   const authUser = app.auth().currentUser;
   const dispatch = useDispatch();
 
@@ -25,16 +26,16 @@ const Account = () => {
   return (
     <Dialog open={showAccount} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
       <DialogTitle id="account-dialog">Account</DialogTitle>
-      <DialogContent>
-        {isSignedIn && (
-          <>
-            <ItemDetails item={{
-              uid: authUser.uid,
-              email: authUser.email
-            }}/>
-            <Billing />
-          </>
+      <DialogContent className="account-dialog-content">
+        {image && (
+          <img
+            src={image}
+            width={200}
+            height={200}
+          />
         )}
+        <Typography variant="h4">{authUser?.displayName}</Typography>
+        <Billing />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

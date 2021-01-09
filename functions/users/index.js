@@ -1,8 +1,11 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const jdenticon = require('jdenticon');
+const fs = require('fs');
+const { v4: uuid } = require('uuid');
 const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
-const { newStudent, newUserMeta } = require('../data');
+const { newUserMeta } = require('../data');
 
 /**
  * Performs some maintenance when users are created.
@@ -11,7 +14,22 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   log({ message: 'User was created.', data: user, context });
   const { uid, email } = user;
 
-  console.log('+++', uid, email);
+  // Create icon.
+  const png = jdenticon.toPng(uid, 200);
+  const path = `./${uid}.png`;
+  fs.writeFileSync(path, png);
+
+  await admin.storage().bucket().upload(path, {
+    destination: `avatars/${uid}.png`,
+    metadata: {
+      fileType: 'image/png',
+      metadata: {
+        firebaseStorageDownloadTokens: uuid()
+      }
+    }
+  });
+  fs.unlinkSync(path);
+
   await admin.firestore().runTransaction(async (transaction) => {
     // Update all tokens that mention this user.
     const tokensRef = admin.firestore()
@@ -29,17 +47,6 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
     await Promise.all(promises).catch(error => {
       log({ message: error.message, data: error, context, level: 'error' });
     });
-
-    // Create user meta.
-    const metaRef = admin.firestore().collection('users').doc(uid);
-    const timestamp = admin.firestore.Timestamp.now();
-    const meta = newUserMeta({
-      uid,
-      email,
-      created: timestamp,
-      updated: timestamp
-    });
-    await transaction.create(metaRef, meta);
   })
 });
 

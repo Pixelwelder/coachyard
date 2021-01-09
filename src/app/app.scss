@@ -61,3 +61,19 @@
 .create-course-form {
   margin-top: 16px;
 }
+
+.account-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.billing {
+  align-self: stretch;
+}
+
+.header-user-image {
+  width: 30px;
+  height: 30px;
+  margin-right: 4px;
+}

@@ -11,7 +11,9 @@ const initialState = {
 
   course: null,
   courseCreator: null,
+  courseCreatorImageUrl: '',
   student: null,
+  studentImageUrl: '',
   items: [],
   selectedItem: null,
   selectedItemUid: null
@@ -30,7 +32,8 @@ let unsubscribeStudent = () => {};
 const setUid = createAsyncThunk(
   'setUid',
   async ({ uid, history }, { dispatch, getState }) => {
-    const { course } = selectors.select(getState());
+    const slice = selectors.select(getState());
+    const { course } = slice;
     if (course && (course.uid === uid)) {
       return;
     }
@@ -42,70 +45,81 @@ const setUid = createAsyncThunk(
     unsubscribeCreator();
     unsubscribeStudent();
     unsubscribeToken();
+    unsubscribeItems();
 
     const abandon = () => {
       history.push('/dashboard');
       return;
     };
 
+    // TODO Ensure we only have one.
+    let token = null;
     unsubscribeToken = app.firestore()
       .collection('tokens')
       .where('user', '==', app.auth().currentUser.uid)
       .where('courseUid', '==', uid)
       .onSnapshot((snapshot) => {
         console.log('Found', snapshot.size, 'tokens');
+        token = snapshot.docs[0].data();
+        console.log('token', token);
         if (!snapshot.size) {
           return abandon();
         }
-      });
 
-    unsubscribeCourse = app.firestore()
-      .collection('courses')
-      .where('uid', '==', uid)
-      .onSnapshot(async (snapshot) => {
-        dispatch(generatedActions.reset());
+        // If there's a token, grab the course it refers to.
+        unsubscribeCourse = app.firestore()
+          .collection('courses')
+          .where('uid', '==', uid)
+          .onSnapshot(async (snapshot) => {
+            dispatch(generatedActions.reset());
 
-        if (!snapshot.size) abandon();
+            if (!snapshot.size) abandon();
+            console.log('received course', snapshot.docs[0].data())
 
-        const tokens = await app.firestore().collection('tokens')
-          .where('user', '==', app.auth().currentUser.uid)
-          .where('courseUid', '==', uid)
-          .get();
+            const course = parseUnserializables(snapshot.docs[0].data());
+            dispatch(generatedActions.setCourse(course));
 
-        // TODO Ensure there's only one.
-        if (!tokens.size) abandon();
+            // Get the creator.
+            unsubscribeCreator = app.firestore()
+              .collection('users')
+              .doc(course.creatorUid)
+              .onSnapshot(async (snapshot) => {
+                console.log('got creator', snapshot.data());
+                const creator = parseUnserializables(snapshot.data());
+                dispatch(generatedActions.setCourseCreator(creator));
 
-        const course = parseUnserializables(snapshot.docs[0].data());
-        dispatch(generatedActions.setCourse(course));
-
-        unsubscribeCreator = await app.firestore()
-          .collection('users')
-          .doc(course.creatorUid)
-          .onSnapshot((snapshot) => {
-            const creator = parseUnserializables(snapshot.data());
-            dispatch(generatedActions.setCourseCreator(creator));
+                const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
+                dispatch(generatedActions.setCourseCreatorImageUrl(url));
+              });
           });
 
-        if (course.student) {
-          unsubscribeStudent = await app.firestore()
-            .collection('users')
-            .doc(course.student)
-            .onSnapshot((snapshot) => {
-              dispatch(generatedActions.setStudent(
-                snapshot.exists ? parseUnserializables(snapshot.data()) : null
-              ));
-            });
-        }
-      });
+        unsubscribeItems = app.firestore()
+          .collection('items')
+          .where('courseUid', '==', uid)
+          .orderBy('created')
+          .onSnapshot((snapshot) => {
+            console.log('received', snapshot.size, 'items');
+            const items = snapshot.docs.map(item => parseUnserializables(item.data()));
+            dispatch(generatedActions.setItems(items));
+          });
 
-    unsubscribeItems();
-    unsubscribeItems = await app.firestore()
-      .collection('items')
-      .where('courseUid', '==', uid)
-      .orderBy('created')
-      .onSnapshot((snapshot) => {
-        const items = snapshot.docs.map(item => parseUnserializables(item.data()));
-        dispatch(generatedActions.setItems(items));
+        console.log('watching student', token.user);
+        unsubscribeStudent = app.firestore()
+          .collection('users')
+          .doc(token.user)
+          .onSnapshot(async (snapshot) => {
+            console.log('students!', snapshot.data());
+            if (snapshot.exists) {
+              dispatch(generatedActions.setStudent(parseUnserializables(snapshot.data())));
+
+              const url = await app.storage().ref(`/avatars/${token.user}.png`).getDownloadURL();
+              dispatch(generatedActions.setStudentImageUrl(url));
+            } else {
+              dispatch(generatedActions.setStudent(initialState.student));
+              dispatch(generatedActions.setStudentImageUrl(initialState.studentImageUrl));
+            }
+          });
+
       });
   }
 );
@@ -177,7 +191,9 @@ const { actions: generatedActions, reducer } = createSlice({
     // _setUid: setValue('uid'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
+    setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
     setStudent: setValue('student'),
+    setStudentImageUrl: setValue('studentImageUrl'),
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem'),

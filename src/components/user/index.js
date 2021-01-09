@@ -11,7 +11,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import './user.scss';
 
 const Auth = () => {
-  const { isSignedIn } = useSelector(userSelectors.select);
+  const { isSignedIn, image } = useSelector(userSelectors.select);
   const dispatch = useDispatch();
   const authUser = app.auth().currentUser;
 
@@ -47,7 +47,12 @@ const Auth = () => {
               {isSignedIn
                 ? (
                   <>
-                    <span className="user-image"></span>
+                    {image && (
+                      <img
+                        className="header-user-image"
+                        src={image}
+                      />
+                    )}
                     <span className="user-name">{authUser.displayName || authUser.email}</span>
                     <ArrowDropDownIcon />
                   </>

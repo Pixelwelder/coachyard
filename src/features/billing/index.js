@@ -28,7 +28,7 @@ const Billing = () => {
   };
 
   return (
-    <div>
+    <div className="billing">
       <h2>Billing</h2>
       <Subscription
         subscription={subscription}

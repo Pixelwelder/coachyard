@@ -7,7 +7,8 @@ const initialState = {
   isSignedIn: false,
   error: null,
   meta: {},
-  claims: {}
+  claims: {},
+  image: ''
 };
 
 let unsubscribeUser = null;
@@ -25,10 +26,14 @@ const init = createAsyncThunk(
 
         // Listen to user meta.
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
-          .onSnapshot((snapshot) => {
-            dispatch(generatedActions.setMeta(
-              snapshot.exists ? parseUnserializables(snapshot.data()) : initialState.meta
-            ));
+          .onSnapshot(async (snapshot) => {
+            if (snapshot.exists) {
+              generatedActions.setMeta(parseUnserializables(snapshot.data()));
+              const url = await app.storage().ref(`/avatars/${authUser.uid}.png`).getDownloadURL();
+              dispatch(generatedActions.setImage(url));
+            } else {
+              generatedActions.setMeta(initialState.meta);
+            }
           });
 
         // Grab claims.
@@ -44,8 +49,20 @@ const init = createAsyncThunk(
 const signUp = createAsyncThunk(
   'signUp',
   async ({ email, password, displayName }) => {
+    // Create the user first.
     const result = await app.auth().createUserWithEmailAndPassword(email, password);
     await result.user.updateProfile({ displayName });
+
+    // Now create meta.
+    // Have to do it here because we have displayName.
+    const timestamp = app.firestore.Timestamp.now();
+    await app.firestore().collection('users').doc(result.user.uid).set({
+      uid: result.user.uid,
+      email,
+      displayName,
+      created: timestamp,
+      updated: timestamp
+    });
   }
 );
 
@@ -70,6 +87,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setIsSignedIn: setValue('isSignedIn'),
     setMeta: setValue('meta'),
     setClaims: setValue('claims'),
+    setImage: setValue('image'),
     reset: reset(initialState)
   },
   extraReducers: {
