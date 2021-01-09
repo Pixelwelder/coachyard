@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -7,9 +7,21 @@ import CardActions from '@material-ui/core/CardActions';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea  from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
+import app from 'firebase';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
-  const { displayName = '' } = item;
+  const { displayName = '', user } = item;
+  const [imageUrl, setImageUrl] = useState('');
+  console.log('CatalogItem', item);
+
+  useEffect(() => {
+    const go = async () => {
+      const url = await app.storage().ref(`/avatars/${user}.png`).getDownloadURL();
+      setImageUrl(url);
+    }
+
+    if (item) go();
+  }, [item]);
 
   return (
     <Card
@@ -22,6 +34,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
         <CardMedia
           className="media"
           title={displayName}
+          // image={imageUrl || '/images/generic-teacher-cropped.png'}
           image={'/images/generic-teacher-cropped.png'}
         />
         <CardContent>
