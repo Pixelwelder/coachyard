@@ -11,6 +11,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   log({ message: 'User was created.', data: user, context });
   const { uid, email } = user;
 
+  console.log('+++', uid, email);
   await admin.firestore().runTransaction(async (transaction) => {
     // Update all tokens that mention this user.
     const tokensRef = admin.firestore()

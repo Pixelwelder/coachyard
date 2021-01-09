@@ -18,6 +18,7 @@ const initialState = {
 };
 
 let unsubscribeCourse = () => {};
+let unsubscribeToken = () => {};
 let unsubscribeItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeStudent = () => {};
@@ -40,16 +41,29 @@ const setUid = createAsyncThunk(
     unsubscribeCourse();
     unsubscribeCreator();
     unsubscribeStudent();
+    unsubscribeToken();
+
+    const abandon = () => {
+      history.push('/dashboard');
+      return;
+    };
+
+    unsubscribeToken = app.firestore()
+      .collection('tokens')
+      .where('user', '==', app.auth().currentUser.uid)
+      .where('courseUid', '==', uid)
+      .onSnapshot((snapshot) => {
+        console.log('Found', snapshot.size, 'tokens');
+        if (!snapshot.size) {
+          return abandon();
+        }
+      });
+
     unsubscribeCourse = app.firestore()
       .collection('courses')
       .where('uid', '==', uid)
       .onSnapshot(async (snapshot) => {
         dispatch(generatedActions.reset());
-
-        const abandon = () => {
-          history.push('/dashboard');
-          return;
-        };
 
         if (!snapshot.size) abandon();
 
