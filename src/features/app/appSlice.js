@@ -10,9 +10,8 @@ import firebaseConfig from '../../__config__/firebase.json';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
-import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
-import { parseUnserializables } from '../../util/firestoreUtils';
-import { setValue } from '../../util/reduxUtils';
+import { actions as userActions } from './userSlice';
+import { resetValue, setValue } from '../../util/reduxUtils';
 
 const initialState = {
   isInitialised: false,
@@ -20,50 +19,14 @@ const initialState = {
   error: null,
   signInAttempted: false,
   // Just holds the basics.
-  authUser: { uid: null, email: null, displayName: null, claims: null, meta: null },
   query: {}
 };
 
-// TODO Get this (and the serverside function) the hell out of here.
-const refreshUser = createAsyncThunk(
-  'refreshUser',
-  async ({ authUser }, { dispatch }) => {
-    try {
-      console.log('refreshing user', authUser);
-      const { uid, email, displayName } = authUser;
-
-      // Get token. TODO
-      // const { claims } = await authUser.getIdTokenResult(true);
-      const claims = {};
-
-      console.log('claims', claims);
-
-      // Get meta
-      const { data } = await app.functions().httpsCallable(CALLABLE_FUNCTIONS.GET_USER)();
-      const meta = parseUnserializables(data);
-      console.log('userMeta', meta);
-
-      // return { uid, email, displayName, claims, meta };
-      dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
-
-      // Load courses.
-      // await dispatch(courseActions._getCreatedCourses());
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-);
-
-const setupFirebase = createAsyncThunk(
-  'setupFirebase',
-  async (_, { dispatch, getState }) => {
-    console.log('Initialize Firebase...');
-    const state = getState();
-    const { isInitialized } = select(state);
-    if (isInitialized) {
-      throw new Error('Firebase is already initialized.');
-    }
+const _initApp = createAsyncThunk(
+  'appInit',
+  async (_, { getState }) => {
+    const { isInitialized } = select(getState());
+    if (isInitialized) throw new Error('Firebase is already initialized.');
 
     await app.initializeApp(firebaseConfig);
     if (window.location.hostname === 'localhost') {
@@ -71,22 +34,19 @@ const setupFirebase = createAsyncThunk(
       app.functions().useEmulator('localhost', 5001);
       app.firestore().useEmulator('localhost', 8080);
     }
+  }
+);
+
+const setupFirebase = createAsyncThunk(
+  'setupFirebase',
+  async (_, { dispatch, getState }) => {
+    await dispatch(_initApp());
+    console.log('AFTER');
 
     app.auth().onAuthStateChanged(
       async (authUser) => {
         dispatch({ type: 'auth/stateChanged', payload: authUser });
         dispatch(generatedActions.setSignInAttempted(true));
-        console.log('auth state changed', authUser);
-        if (authUser) {
-          setTimeout(() => {
-            dispatch(refreshUser({ authUser }));
-          }, 1000)
-          // dispatch(refreshUser({ authUser }));
-          // dispatch(generatedActions.setAuthUser({ uid, email, displayName, claims, meta }));
-
-        } else {
-          dispatch(generatedActions.setAuthUser(initialState.authUser));
-        }
       }
     );
   }
@@ -97,6 +57,7 @@ const init = createAsyncThunk(
   async (_, { getState, dispatch }) => {
     try {
       await dispatch(setupFirebase());
+      await dispatch(userActions.init());
       await dispatch(billingActions.init());
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
@@ -108,11 +69,6 @@ const init = createAsyncThunk(
       const queryObj = Object.entries(query)
         .reduce((accum, [name, val]) => ({ ...accum, [name]: val}), {});
       dispatch(generatedActions.setQuery(queryObj));
-
-      // Do we have an invitation to deal with?
-      if (queryObj.invite) {
-        console.log('INVITE', queryObj.invite);
-      }
     } catch (error) {
       console.error(error);
       throw error;
@@ -138,8 +94,7 @@ const signOut = createAsyncThunk(
   'signOut',
   async (_, { dispatch }) => {
     try {
-      const result = await app.auth().signOut();
-      console.log(result);
+      await app.auth().signOut();
     } catch (error) {
       throw error;
     }
@@ -163,11 +118,6 @@ const signUp = createAsyncThunk(
         email,
         enrolled: []
       });
-      // const result = await createUser(args);
-
-      // const { email, password } = args;
-      // await app.auth().signInWithEmailAndPassword(email, password);
-      console.log('result', result);
     } catch (error) {
       console.log(error);
       throw error;
@@ -195,9 +145,8 @@ const { reducer, actions: generatedActions } = createSlice({
   name: 'init',
   initialState,
   reducers: {
-    setAuthUser: (state, action) => { state.authUser = action.payload; },
-    clearError: (state) => { state.error = initialState.error; },
-    setQuery: (state, action) => { state.query = action.payload; },
+    clearError: resetValue('error', initialState.error),
+    setQuery: setValue('query'),
     setSignInAttempted: setValue('signInAttempted')
   },
   extraReducers: {
@@ -214,20 +163,7 @@ const { reducer, actions: generatedActions } = createSlice({
 });
 
 const select = ({ app }) => app;
-/**
- * Selects students as an array ready for a datagrid (i.e. with an id property).
- */
-const selectStudents = createSelector(select, ({ authUser }) => {
-  const arr = authUser?.meta?.students || [];
-  const students = arr.map(item => ({ ...item, id: item.email }));
-  return students;
-});
-
-const selectCoursesEnrolled = createSelector(select, ({ authUser }) => {
-  return authUser?.meta?.coursesEnrolled || [];
-});
-
-const selectors = { select, selectStudents, selectCoursesEnrolled };
+const selectors = { select };
 
 const actions = { ...generatedActions, init, signIn, signOut, signUp };
 

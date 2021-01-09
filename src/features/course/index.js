@@ -4,7 +4,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
-import { selectors as appSelectors } from '../app/appSlice';
+import { selectors as userSelectors } from '../app/userSlice';
 import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
@@ -17,26 +17,21 @@ import CourseView from './CourseView';
 const Course = () => {
   const { uid, itemUid } = useParams();
   const { course, courseCreator, selectedItem, isRecording } = useSelector(selectedCourseSelectors.select);
-  const { authUser } = useSelector(appSelectors.select);
+  const { isLoggedIn } = useSelector(userSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const go = async () => {
-      console.log('Item.go', uid);
       await dispatch(selectedCourseActions.setUid({ uid, history }));
       await dispatch(selectedCourseActions.setSelectedItemUid({ uid: itemUid, history }));
     }
 
-    if (authUser.uid) {
+    if (isLoggedIn) {
       go();
     }
-
-    return () => {
-      console.log('UNMOUNT', uid, itemUid);
-    }
-  }, [uid, itemUid, authUser]);
+  }, [uid, itemUid, isLoggedIn]);
 
   return (
     <div className="app-content">
