@@ -56,82 +56,55 @@ const setUid = createAsyncThunk(
       return;
     };
 
+    // We check for a token when the UID is set, but we don't subscribe.
     // TODO Ensure we only have one.
-    let token = null;
-    unsubscribeToken();
-    unsubscribeToken = app.firestore()
+    const tokenDocs = await app.firestore()
       .collection('tokens')
       .where('user', '==', app.auth().currentUser.uid)
       .where('courseUid', '==', uid)
-      .onSnapshot((snapshot) => {
-        console.log('Found', snapshot.size, 'tokens');
-        token = snapshot.docs[0].data();
-        console.log('token', token);
-        if (!snapshot.size) {
-          return abandon();
-        }
+      .get();
 
-        // If there's a token, grab the course and items it refers to.
-        unsubscribeCourse();
-        unsubscribeCourse = app.firestore()
-          .collection('courses')
-          .where('uid', '==', uid)
+    if (!tokenDocs.size) abandon();
+
+    // If there's a token, grab the course and items it refers to.
+    unsubscribeCourse();
+    unsubscribeCourse = app.firestore()
+      .collection('courses')
+      .where('uid', '==', uid)
+      .onSnapshot(async (snapshot) => {
+        dispatch(generatedActions.reset());
+
+        if (!snapshot.size) abandon();
+        console.log('received course', snapshot.docs[0].data())
+
+        const course = parseUnserializables(snapshot.docs[0].data());
+        dispatch(generatedActions.setCourse(course));
+
+        // Get the creator.
+        unsubscribeCreator();
+        unsubscribeCreator = app.firestore()
+          .collection('users')
+          .doc(course.creatorUid)
           .onSnapshot(async (snapshot) => {
-            dispatch(generatedActions.reset());
+            console.log('got creator', snapshot.data());
+            const creator = parseUnserializables(snapshot.data());
+            dispatch(generatedActions.setCourseCreator(creator));
 
-            if (!snapshot.size) abandon();
-            console.log('received course', snapshot.docs[0].data())
-
-            const course = parseUnserializables(snapshot.docs[0].data());
-            dispatch(generatedActions.setCourse(course));
-
-            // Get the creator.
-            unsubscribeCreator();
-            unsubscribeCreator = app.firestore()
-              .collection('users')
-              .doc(course.creatorUid)
-              .onSnapshot(async (snapshot) => {
-                console.log('got creator', snapshot.data());
-                const creator = parseUnserializables(snapshot.data());
-                dispatch(generatedActions.setCourseCreator(creator));
-
-                const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
-                dispatch(generatedActions.setCourseCreatorImageUrl(url));
-              });
-
-            // If this user is the creator, get all students.
-
-
-            // Get the student.
-            unsubscribeStudent();
-            unsubscribeStudent = app.firestore()
-              .collection('users')
-              .doc(token.user)
-              .onSnapshot(async (snapshot) => {
-                console.log('students!', snapshot.data());
-                if (snapshot.exists) {
-                  dispatch(generatedActions.setStudent(parseUnserializables(snapshot.data())));
-
-                  const url = await app.storage().ref(`/avatars/${token.user}.png`).getDownloadURL();
-                  dispatch(generatedActions.setStudentImageUrl(url));
-                } else {
-                  dispatch(generatedActions.setStudent(initialState.student));
-                  dispatch(generatedActions.setStudentImageUrl(initialState.studentImageUrl));
-                }
-              });
+            const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
+            dispatch(generatedActions.setCourseCreatorImageUrl(url));
           });
+      });
 
-        unsubscribeItems();
-        unsubscribeItems = app.firestore()
-          .collection('items')
-          .where('courseUid', '==', uid)
-          .orderBy('created')
-          .onSnapshot((snapshot) => {
-            console.log('received', snapshot.size, 'items');
-            const items = snapshot.docs.map(item => parseUnserializables(item.data()));
-            dispatch(generatedActions.setItems(items));
-          });
-
+    // Get the items.
+    unsubscribeItems();
+    unsubscribeItems = app.firestore()
+      .collection('items')
+      .where('courseUid', '==', uid)
+      .orderBy('created')
+      .onSnapshot((snapshot) => {
+        console.log('received', snapshot.size, 'items');
+        const items = snapshot.docs.map(item => parseUnserializables(item.data()));
+        dispatch(generatedActions.setItems(items));
       });
   }
 );
