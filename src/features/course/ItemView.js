@@ -280,6 +280,10 @@ const EditView = ({ requireUpload = false }) => {
     }
   }
 
+  const onInputUpload = ({ target: { files } }) => {
+    onUpload(files);
+  }
+
   const onSubmit = async (event) => {
     event.preventDefault();
 
@@ -322,11 +326,12 @@ const EditView = ({ requireUpload = false }) => {
                 {
                   totalBytes > 0
                   ? <LinearProgress variant="determinate" value={percentUploaded} />
-                  : <DropzoneArea
-                      filesLimit={1}
-                      maxFileSize={5000000000}
-                      onChange={onUpload}
-                    />
+                  : <input className="upload-input" type="file" onChange={onInputUpload} />
+                  // : <DropzoneArea
+                  //     filesLimit={1}
+                  //     maxFileSize={5000000000}
+                  //     onChange={onUpload}
+                  //   />
                 }
               </>
             )

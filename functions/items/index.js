@@ -180,7 +180,7 @@ const sendItem = async (data, context) => {
       {
         headers: getMuxHeaders(),
         method: METHODS.POST,
-        body: JSON.stringify({ input, playback_policy })
+        body: JSON.stringify({ input, playback_policy, test: true })
       }
     );
 
