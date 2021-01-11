@@ -16,7 +16,7 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
 
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
-  const path = `./${uid}.png`;
+  const path = `/tmp/${uid}.png`;
   fs.writeFileSync(path, png);
 
   await admin.storage().bucket().upload(path, {
