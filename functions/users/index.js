@@ -7,13 +7,7 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newUserMeta } = require('../data');
 
-/**
- * Performs some maintenance when users are created.
- */
-const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
-  log({ message: 'User was created.', data: user, context });
-  const { uid, email } = user;
-
+const _createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
   const path = `/tmp/${uid}.png`;
@@ -28,7 +22,61 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
       }
     }
   });
-  fs.unlinkSync(path);
+  // fs.unlinkSync(path);
+};
+
+/**
+ * Converts a data object to a new schema.
+ * @param item
+ * @param factoryFunc
+ */
+const _convert = ({ item, factoryFunc }) => {
+  const template = factoryFunc();
+  const newItem = Object.keys(template).reduce((accum, key) => {
+    const newAccum = { ...accum };
+    if (item.hasOwnProperty(key)) newAccum[key] = item[key];
+    return newAccum;
+  }, template);
+
+  return newItem;
+};
+
+/**
+ * Updates a user object to the current schema plus adds an image.
+ * @param uid
+ */
+const _updateMeta = async ({ uid }) => {
+  const result = await admin.firestore().runTransaction(async (transaction) => {
+    const ref = admin.firestore().collection('users').doc(uid);
+    const doc = await transaction.get(ref);
+
+    const newItem = _convert({ item: doc.data(), factoryFunc: newUserMeta });
+    await transaction.set(ref, newItem);
+  });
+};
+
+const updateUserToCurrent = async (data, context) => {
+  try {
+    log({ message: 'Updating user meta to current schema.', data, context });
+    const { auth: { uid } } = context;
+    await _createIcon({ uid });
+    await _updateMeta({ uid });
+    log({ message: 'User meta updated.', data, context });
+  } catch (error) {
+    console.error(error);
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+/**
+ * Performs some maintenance when users are created.
+ */
+const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
+  log({ message: 'User was created.', data: user, context });
+  const { uid, email } = user;
+
+  // Create icon.
+ await _createIcon({ uid });
 
   await admin.firestore().runTransaction(async (transaction) => {
     // Update all tokens that mention this user.
@@ -73,6 +121,6 @@ const getUser = async (data, context) => {
 module.exports = {
   // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),
-  // createStudent: functions.https.onCall(createStudent),
+  updateUserToCurrent: functions.https.onCall(updateUserToCurrent),
   onCreateUser
 };

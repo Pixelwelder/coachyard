@@ -74,6 +74,7 @@ const setUid = createAsyncThunk(
       .onSnapshot(async (snapshot) => {
         dispatch(generatedActions.reset());
 
+        console.log('snapshot size', snapshot.size);
         if (!snapshot.size) abandon();
         console.log('received course', snapshot.docs[0].data())
 

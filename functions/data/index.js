@@ -1,5 +1,6 @@
 // TODO Factory method that handles timestamps.
 const newBaseItem = (overrides) => ({
+  version: 0,
   uid: '', // Always store the uid when created.
   created: '',
   updated: '',
@@ -11,6 +12,7 @@ const newBaseItem = (overrides) => ({
  */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
+  version: 1,
   email: '', // TODO Update this when the authUser updates.
   image: '',
   ...overrides

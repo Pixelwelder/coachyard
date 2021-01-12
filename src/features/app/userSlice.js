@@ -28,7 +28,14 @@ const init = createAsyncThunk(
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
             if (snapshot.exists) {
-              generatedActions.setMeta(parseUnserializables(snapshot.data()));
+              const meta = parseUnserializables(snapshot.data());
+              generatedActions.setMeta(meta);
+
+              // Update to current version.
+              if (meta.version != 1) {
+                console.log('Updating user...');
+                await app.functions().httpsCallable('updateUserToCurrent')();
+              }
               const url = await app.storage().ref(`/avatars/${authUser.uid}.png`).getDownloadURL();
               dispatch(generatedActions.setImage(url));
             } else {

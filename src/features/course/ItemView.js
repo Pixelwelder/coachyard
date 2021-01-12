@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 import Paper from '@material-ui/core/Paper';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useLocation, Redirect } from 'react-router-dom';
 import queryString from 'query-string';
+import { FileDrop } from 'react-file-drop';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { selectors as uiSelectors, actions as uiActions } from '../ui/uiSlice';
@@ -221,6 +222,30 @@ const LiveMode = ({ size }) => {
   );
 };
 
+const Uploader = ({ onChange }) => {
+  const fileInputRef = useRef(null);
+
+  const onTargetClick = () => {
+    fileInputRef.current.click();
+  }
+
+  return (
+    <>
+      {/*<FileDrop*/}
+      {/*  onDrop={() => {}}*/}
+      {/*  onTargetClick={onTargetClick}*/}
+      {/*/>*/}
+      <input className="upload-input" ref={fileInputRef} type="file" onChange={onChange} />
+    </>
+    // <input className="upload-input" type="file" onChange={onChange} />
+    // : <DropzoneArea
+    //     filesLimit={1}
+    //     maxFileSize={5000000000}
+    //     onChange={onUpload}
+    //   />
+  );
+};
+
 const EditView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
@@ -326,12 +351,7 @@ const EditView = ({ requireUpload = false }) => {
                 {
                   totalBytes > 0
                   ? <LinearProgress variant="determinate" value={percentUploaded} />
-                  : <input className="upload-input" type="file" onChange={onInputUpload} />
-                  // : <DropzoneArea
-                  //     filesLimit={1}
-                  //     maxFileSize={5000000000}
-                  //     onChange={onUpload}
-                  //   />
+                  : <Uploader onChange={onInputUpload} />
                 }
               </>
             )
@@ -451,6 +471,11 @@ const ItemView = () => {
   const location = useLocation();
   const query = queryString.parse(location.search);
   const { barebones } = query;
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(uiActions2.editItem.reset());
+  }, [item]);
 
   return (
     <Paper className="item-view" variant="outlined">
