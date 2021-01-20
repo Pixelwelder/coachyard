@@ -264,7 +264,7 @@ const EditView = ({ requireUpload = false }) => {
     return () => {
       dispatch(actions.reset());
     }
-  }, []);
+  }, [item]);
 
   const onEdit = () => {
     dispatch(actions.open());
@@ -330,20 +330,24 @@ const EditView = ({ requireUpload = false }) => {
   return (
     <div className="edit-view">
       <form className="editing-form" onSubmit={onSubmit}>
-        <TextField
-          id="displayName" name="displayName" label="name" type="text"
-          variant="outlined"
-          disabled={isDisabled()}
-          value={displayName}
-          onChange={onChange}
-        />
-        <TextField
-          id="description" name="description" label="description" type="text"
-          multiline rows={4} variant="outlined"
-          disabled={isDisabled()}
-          value={description}
-          onChange={onChange}
-        />
+        {true && (
+          <>
+            <TextField
+              id="displayName" name="displayName" label="name" type="text"
+              variant="outlined"
+              disabled={isDisabled()}
+              value={displayName}
+              onChange={onChange}
+            />
+            <TextField
+              id="description" name="description" label="description" type="text"
+              multiline rows={4} variant="outlined"
+              disabled={isDisabled()}
+              value={description}
+              onChange={onChange}
+            />
+          </>
+        )}
         {
           (isChangingFile || !item.streamingId)
             ? (
@@ -383,7 +387,7 @@ const EditView = ({ requireUpload = false }) => {
           </Button>
         )}
 
-        {item.status === "scheduled" && (
+        {item.status === "scheduled" && !requireUpload && (
           <DateTimePicker
             value={date}
             onChange={onChangeDate}
@@ -404,6 +408,10 @@ const EditView = ({ requireUpload = false }) => {
   );
 };
 
+/**
+ * To a Student, processing mode is monolithic.
+ * To a Teacher, it is split into uploading and processing.
+ */
 const ProcessingMode = ({ status }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
@@ -475,7 +483,7 @@ const ItemView = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(uiActions2.editItem.reset());
+    // dispatch(uiActions2.editItem.reset());
   }, [item]);
 
   return (
