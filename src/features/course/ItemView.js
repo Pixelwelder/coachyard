@@ -404,24 +404,26 @@ const EditView = ({ requireUpload = false }) => {
   );
 };
 
-const ProcessingMode = () => {
+const ProcessingMode = ({ status }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
   return (
     <div className="item-mode processing-mode">
-      {ownsCourse && (
-        <EditView requireUpload />
-      )}
-      {!ownsCourse && (
-        <div className="mode-inner">
-          <div className="item-info">
-            <Typography className="participant-name" variant="h6" component="p">
-              Live Session complete!
-            </Typography>
-            <Typography>Your video is processing and will be available shortly.</Typography>
+      {(ownsCourse && status === 'uploading')
+        ? (
+          <EditView requireUpload />
+        )
+        : (
+          <div className="mode-inner">
+            <div className="item-info">
+              <Typography className="participant-name" variant="h6" component="p">
+                Live Session complete!
+              </Typography>
+              <Typography>Your video is processing and will be available shortly.</Typography>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   );
 };
@@ -467,7 +469,6 @@ const ViewingMode = ({ size }) => {
 
 const ItemView = () => {
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
-  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const location = useLocation();
   const query = queryString.parse(location.search);
   const { barebones } = query;
@@ -500,7 +501,9 @@ const ItemView = () => {
                     }
                   </>
                 )}
-                {item.status === 'processing' && <ProcessingMode />}
+                {(item.status === 'uploading' || item.status === 'processing') && (
+                  <ProcessingMode status={item.status} />
+                )}
                 {item.status === 'viewing' && <ViewingMode size={size} />}
               </>
             )}

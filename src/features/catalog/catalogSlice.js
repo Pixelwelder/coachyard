@@ -239,7 +239,7 @@ const endItem = createAsyncThunk(
     const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
     if (itemData.status !== 'live') throw new Error(`Can't end ${uid}: status is ${itemData.status}.`);
 
-    await app.firestore().collection('items').doc(uid).update({ status: 'processing' });
+    await app.firestore().collection('items').doc(uid).update({ status: 'uploading' });
   }
 );
 

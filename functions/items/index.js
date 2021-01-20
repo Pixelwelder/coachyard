@@ -182,7 +182,7 @@ const sendItem = async (data, context) => {
         method: METHODS.POST,
         body: JSON.stringify({
           input,
-          playback_policy
+          playback_policy,
           // test: true
         })
       }
@@ -297,8 +297,8 @@ const handleItemUpdate = functions.firestore
       const ref = admin.firestore().collection('items').doc(docId);
       await ref.update(update);
 
-      // If we move from 'live' to 'processing', delete a room.
-    } else if (oldValue.status === 'live' && newValue.status === 'processing') {
+      // If we move from 'live' to 'uploading', delete a room.
+    } else if (oldValue.status === 'live' && newValue.status === 'uploading') {
       const update = {};
 
       // Does it exist?

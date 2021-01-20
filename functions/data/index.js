@@ -77,10 +77,7 @@ const newCourseItem = (overrides) => ({
   // This is for invites.
   date: '',
   room: false,
-  isAccepted: false,   // TODO Remove
-  isCompleted: false,  // TODO Remove
-  isInProgress: false, // TODO Remove
-  status: 'viewing', // scheduled, initializing, live, processing, viewing
+  status: 'viewing', // scheduled, initializing, live, uploading, processing, viewing
 
   // This is for associated media.
   originalFilename: '',
