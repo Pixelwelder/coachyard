@@ -8,13 +8,16 @@ import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 
 import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
-import ItemDetails from '../../components/ItemDetails';
 import Billing from '../billing';
 import { Typography } from '@material-ui/core';
 
 const Account = () => {
-  const { showAccount } = useSelector(uiSelectors.select);
+  const { account: selectors } = uiSelectors2;
+  const { account: actions } = uiActions2;
+  const { isOpen, isLoading, error } = useSelector(selectors.select);
+
   const { isSignedIn, meta, image } = useSelector(userSelectors.select);
   const authUser = app.auth().currentUser;
   const dispatch = useDispatch();
@@ -24,7 +27,7 @@ const Account = () => {
   };
 
   return (
-    <Dialog open={showAccount} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
+    <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
       <DialogTitle id="account-dialog">Account</DialogTitle>
       <DialogContent className="account-dialog-content">
         {image && (

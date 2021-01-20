@@ -6,7 +6,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 
 import { actions as userActions, selectors as userSelectors } from '../../features/app/userSlice';
-import { actions as uiActions } from '../../features/ui/uiSlice';
+import { actions as uiActions2 } from '../../features/ui/uiSlice2';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import './user.scss';
 
@@ -33,7 +33,7 @@ const Auth = () => {
 
   const onShowAccount = () => {
     onClose();
-    dispatch(uiActions.setShowAccount(true));
+    dispatch(uiActions2.account.open());
   };
 
   return (

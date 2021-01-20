@@ -15,6 +15,9 @@ import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
 import CreateAccountDialog from '../components/CreateAccountDialog';
 import Barebones from '../features/barebones';
+import Button from '@material-ui/core/Button';
+import app from 'firebase/app';
+import Billing from '../features/billing2';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -45,6 +48,7 @@ const App = () => {
           {/*<Route path="/course/:uid" component={Course} />*/}
           <Route path="/course/:uid/:itemUid?" component={Course} />
           <Route path="/barebones" component={Barebones} />
+          <Route path="/billing" component={Billing} />
           <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>

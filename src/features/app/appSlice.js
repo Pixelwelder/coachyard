@@ -11,6 +11,7 @@ import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { actions as userActions } from './userSlice';
+import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { resetValue, setValue } from '../../util/reduxUtils';
 
 const initialState = {
@@ -57,6 +58,7 @@ const init = createAsyncThunk(
       await dispatch(setupFirebase());
       await dispatch(userActions.init());
       await dispatch(billingActions.init());
+      await dispatch(billingActions2.init());
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
 

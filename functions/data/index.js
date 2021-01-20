@@ -12,9 +12,10 @@ const newBaseItem = (overrides) => ({
  */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
-  version: 1,
+  version: 2,
   email: '', // TODO Update this when the authUser updates.
   image: '',
+  tier: 0,
   ...overrides
 });
 

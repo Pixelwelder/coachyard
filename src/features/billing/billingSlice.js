@@ -11,7 +11,8 @@ const initialState = {
   subscriptions: [],
 
   ui: {
-    showConfirmCancel: false
+    showConfirmCancel: false,
+    isLoading: false
   }
 };
 

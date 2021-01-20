@@ -22,7 +22,7 @@ const _createIcon = async ({ uid }) => {
       }
     }
   });
-  // fs.unlinkSync(path);
+  fs.unlinkSync(path);
 };
 
 /**

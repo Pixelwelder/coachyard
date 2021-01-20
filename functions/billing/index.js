@@ -189,14 +189,20 @@ const stripe_cancelSubscription = functions.https.onCall(async (data, context) =
   }
 });
 
-// const _getCustomer = async (stripeId) => {
-//   const snapshot = await admin.firestore()
-//     .collection('stripe_customers')
-//     .where('customer_id', '==', stripeId);
-//
-//   if (!snapshot.size) throw new Error(`Stripe customer ${stripeId} not found.`);
-//   return snapshot.docs[0].data();
-// };
+/**
+ * Sets billing tier for the user.
+ * @param id - id of the new billing tier.
+ */
+const setTier = functions.https.onCall(async (data, context) => {
+  checkAuth(context);
+  const { id } = data;
+  const { auth: { uid } } = context;
+
+  // This should be custom claims, but for now we just put it on the user meta.
+  const result = await admin.firestore().collection('users').doc(uid).update({
+    tier: id
+  });
+});
 
 const stripe_webhooks = express();
 stripe_webhooks.use(bodyParser.urlencoded({ extended: false }));
@@ -258,6 +264,8 @@ stripe_webhooks.post(
 );
 
 module.exports = {
+  setTier,
+
   stripe_onCreateUser,
   stripe_onCreatePaymentMethod,
   stripe_onCreatePayment,
