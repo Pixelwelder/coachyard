@@ -83,6 +83,7 @@ const newCourseItem = (overrides) => ({
   originalFilename: '',
   streamingId: '',
   playbackId: '',
+  streamingInfo: false,
 
   ...overrides
 });

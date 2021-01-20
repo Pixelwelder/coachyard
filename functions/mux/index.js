@@ -29,7 +29,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
         const docs = await transaction.get(itemRef);
         if (docs.size) {
           const doc = docs.docs[0];
-          await transaction.update(doc.ref, { ...muxData, status: 'viewing' });
+          await transaction.update(doc.ref, { ...muxData, status: 'viewing', streamingInfo: body });
         } else {
           log({ message: `Did not find a doc for streaming id ${muxData.streamingId}.`, data: body, level: 'error' });
         }
