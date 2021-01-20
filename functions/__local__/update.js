@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 const fs = require('fs');
 const { v4: uuid } = require('uuid');
 const jdenticon = require('jdenticon');
-const serviceAccount = require('../__config__/firebase-service-account.json');
+const serviceAccount = require('../__config__/firebase-prod.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

@@ -1,11 +1,12 @@
+const yargs = require('yargs');
 const admin = require('firebase-admin');
-const serviceAccount = require('./__config__/firebase-service-account.json');
+const { project_id, service_account } = require('./__config__/firebase.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://coach-yard.firebaseio.com',
-  storageBucket: 'coach-yard.appspot.com',
-  projectId: 'coach-yard'
+  credential: admin.credential.cert(service_account),
+  databaseURL: `https://${project_id}.firebaseio.com`,
+  storageBucket: `${project_id}.appspot.com`,
+  projectId: project_id
 });
 
 // Only export the function family that was called.

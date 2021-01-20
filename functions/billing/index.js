@@ -6,9 +6,10 @@ const { checkAuth } = require('../util/auth');
 const { log } = require ('../logging');
 const express = require('express');
 const bodyParser = require('body-parser');
+const { secret_key } = require('../__config__/stripe.json');
 
 const stripe = new Stripe(
-  functions.config().stripe.secret_key,
+  secret_key,
   { apiVersion: '2020-08-27' }
 );
 

@@ -20,6 +20,7 @@
     "history": "^5.0.0",
     "luxon": "^1.25.0",
     "material-ui-dropzone": "^3.5.0",
+    "node-sass": "^4.14.1",
     "query-string": "^6.13.8",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -35,7 +36,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prep-client:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
+    "prep-client:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
+
+    "deploy:dev": "firebase use dev && npm run build && npm run prep-functions:dev && firebase deploy",
+
+    "start-client:dev": "firebase use dev && npm run prep-client:dev && npm run start",
+    "start-client:prod": "firebase use prod && npm run prep-client:prod && npm run start"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -53,6 +61,6 @@
     ]
   },
   "devDependencies": {
-    "node-sass": "^4.14.1"
+    "yargs": "^15.4.1"
   }
 }

@@ -6,7 +6,11 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "prep-functions:dev": "cp __config__/firebase-dev.json __config__/firebase.json",
+    "prep-functions:prod": "cp __config__/firebase-prod.json __config__/firebase.json",
+    "start-functions:dev": "firebase use dev && npm run prep-functions:dev && firebase emulators:start",
+    "start-functions:prod": "firebase use prod && npm run prep-functions:prod && firebase emulators:start"
   },
   "engines": {
     "node": "12"

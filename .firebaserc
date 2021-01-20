@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "coach-yard"
+    "default": "coach-yard",
+    "dev": "coachyard-dev",
+    "prod": "coach-yard"
   }
 }
