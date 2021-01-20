@@ -26,7 +26,13 @@ export const createUISlice = ({
     name,
     initialState,
     reducers: {
-      open: (state) => ({ ...initialState, isOpen: true }),
+      open: (state, action) => {
+        const { payload = {} } = action;
+        const newState = Object.keys(initialState).map((accum, key) => ({
+          ...accum, [key]: payload[key] || initialState[key]
+        }), {});
+        return { ...newState, isOpen: true };
+      },
       reset: reset(initialState),
       setValues,
       setIsEditing: setValue('isEditing'),
