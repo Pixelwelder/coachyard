@@ -17,7 +17,6 @@ const ItemView = () => {
   const location = useLocation();
   const query = queryString.parse(location.search);
   const { barebones } = query;
-  const dispatch = useDispatch();
 
   useEffect(() => {
     // dispatch(uiActions2.editItem.reset());
