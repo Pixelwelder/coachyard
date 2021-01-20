@@ -8,7 +8,7 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import Alert from '@material-ui/lab/Alert';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 
-export const LiveMode = ({ size }) => {
+const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem: item, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
   const { uid, status } = item;
@@ -107,3 +107,5 @@ export const LiveMode = ({ size }) => {
     </div>
   );
 };
+
+export default LiveMode;

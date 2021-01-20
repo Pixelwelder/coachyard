@@ -12,7 +12,7 @@ import Button from '@material-ui/core/Button';
 import { DateTimePicker } from '@material-ui/pickers';
 import OwnerControls from '../../components/OwnerControls';
 
-export const EditView = ({ requireUpload = false }) => {
+const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
 
@@ -173,3 +173,5 @@ export const EditView = ({ requireUpload = false }) => {
     </div>
   );
 };
+
+export default EditItemView;

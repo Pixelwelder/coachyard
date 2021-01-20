@@ -5,12 +5,12 @@ import queryString from 'query-string';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { SizeMe } from 'react-sizeme';
-import { ProcessingMode } from './ProcessingMode';
-import { ViewingMode } from './ViewingMode';
-import { LiveMode } from './LiveMode';
-import { InitializingMode } from './InitializingMode';
-import { ScheduledMode } from './ScheduledMode';
-import { NoItem } from './NoItem';
+import ProcessingMode from './ProcessingMode';
+import ViewingMode from './ViewingMode';
+import LiveMode from './LiveMode';
+import InitializingMode from './InitializingMode';
+import ScheduledMode from './ScheduledMode';
+import NoItem from './NoItem';
 
 const ItemView = () => {
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);

@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { DateTime } from 'luxon';
-import { EditView } from './EditView';
+import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
@@ -45,7 +45,7 @@ const Teacher = () => {
     <div className="mode-inner">
       {
         isOpen
-          ? <EditView/>
+          ? <EditItemView/>
           : (
             <>
               <div className="centered-mode">
@@ -78,7 +78,7 @@ const Teacher = () => {
   );
 };
 
-export const ScheduledMode = () => {
+const ScheduledMode = () => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
 
   return (
@@ -91,3 +91,5 @@ export const ScheduledMode = () => {
     </div>
   );
 };
+
+export default ScheduledMode;

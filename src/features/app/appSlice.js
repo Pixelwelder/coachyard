@@ -6,7 +6,7 @@ import 'firebase/storage';
 import 'firebase/firestore';
 import queryString from 'query-string';
 
-import firebaseConfig from '../../__config__/firebase.json';
+import firebaseConfig from '../../__config__/firebase-prod.json';
 import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';

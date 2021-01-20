@@ -1,7 +1,7 @@
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 
-export const InitializingMode = () => {
+const InitializingMode = () => {
   return (
     <div className="item-mode processing-mode">
       <div className="mode-inner">
@@ -15,3 +15,5 @@ export const InitializingMode = () => {
     </div>
   );
 };
+
+export default InitializingMode;

@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { actions as catalogActions, actions as catalogSelectors } from '../catalog/catalogSlice';
 import { actions as uiActions } from '../ui/uiSlice';
 import Paper from '@material-ui/core/Paper';
@@ -10,6 +10,8 @@ import Alert from '@material-ui/lab/Alert';
 import OwnerControls from '../../components/OwnerControls';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -64,6 +66,8 @@ const CourseView = () => {
     }));
   };
 
+  const [tab, setTab] = useState(0);
+
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
       {course && (
@@ -71,48 +75,56 @@ const CourseView = () => {
           {
             isEditing
               ? (
-                <form onSubmit={onSubmit}>
-                  <TextField
-                    fullWidth
-                    autoFocus
-                    variant="outlined"
-                    label="Course Name" placeholder="Course Name" id="displayName"
-                    value={displayName} disabled={isLoading}
-                    onChange={({ target: { value } }) => onChange({ displayName: value })}
-                  />
-
-                  <TextField
-                    fullWidth
-                    multiline rows={4}
-                    variant="outlined"
-                    label="Course Description" placeholder="This is a short description of the course."
-                    id="description" value={description} disabled={isLoading}
-                    onChange={({ target: { value } }) => onChange({ description: value })}
-                  />
-
-                  {/* Can't edit an existing student at the moment. */}
-                  {existingStudent
-                    ? (
-                      <TextField
-                        fullWidth disabled
-                        variant="outlined" label="Student" placeholder="Student"
-                        id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}
-                      />
-                    )
-                    : (
+                <>
+                  <Tabs onChange={(event, newValue) => setTab(newValue)}>
+                    <Tab label="Details" />
+                    <Tab label="Access" />
+                  </Tabs>
+                  {tab === 0 && (
+                    <form onSubmit={onSubmit}>
                       <TextField
                         fullWidth
-                        variant="outlined" label="Student" placeholder="Student"
-                        id="student" type="email" value={student} disabled={isLoading}
-                        onChange={({ target: { value } }) => onChange({ student: value })}
+                        autoFocus
+                        variant="outlined"
+                        label="Course Name" placeholder="Course Name" id="displayName"
+                        value={displayName} disabled={isLoading}
+                        onChange={({ target: { value } }) => onChange({ displayName: value })}
                       />
-                    )
-                  }
-                  {!!error && <Alert severity="error">{error.message}</Alert>}
 
-                  <div className="spacer"/>
-                  <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete}/>
-                </form>
+                      <TextField
+                        fullWidth
+                        multiline rows={4}
+                        variant="outlined"
+                        label="Course Description" placeholder="This is a short description of the course."
+                        id="description" value={description} disabled={isLoading}
+                        onChange={({ target: { value } }) => onChange({ description: value })}
+                      />
+
+                      {/* Can't edit an existing student at the moment. */}
+                      {existingStudent
+                        ? (
+                          <TextField
+                            fullWidth disabled
+                            variant="outlined" label="Student" placeholder="Student"
+                            id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}
+                          />
+                        )
+                        : (
+                          <TextField
+                            fullWidth
+                            variant="outlined" label="Student" placeholder="Student"
+                            id="student" type="email" value={student} disabled={isLoading}
+                            onChange={({ target: { value } }) => onChange({ student: value })}
+                          />
+                        )
+                      }
+                      {!!error && <Alert severity="error">{error.message}</Alert>}
+
+                      <div className="spacer"/>
+                      <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete}/>
+                    </form>
+                  )}
+                </>
               )
 
               : (

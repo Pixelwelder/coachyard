@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import { EditView } from './EditView';
+import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
 import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
 import React from 'react';
 
-export const ViewingMode = ({ size }) => {
+const ViewingMode = ({ size }) => {
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ export const ViewingMode = ({ size }) => {
     <div className="item-mode viewing-mode">
       {
         isOpen
-          ? <EditView/>
+          ? <EditItemView/>
           : (
             <>
               <Typography className="item-title" variant="h6" component="h3">{selectedItem.displayName}</Typography>
@@ -44,4 +44,6 @@ export const ViewingMode = ({ size }) => {
       }
     </div>
   );
-}
+};
+
+export default ViewingMode;
