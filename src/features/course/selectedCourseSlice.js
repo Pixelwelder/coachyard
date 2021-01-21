@@ -53,7 +53,6 @@ const setUid = createAsyncThunk(
 
     const abandon = () => {
       history.push('/dashboard');
-      return;
     };
 
     // We check for a token when the UID is set, but we don't subscribe.
@@ -64,7 +63,7 @@ const setUid = createAsyncThunk(
       .where('courseUid', '==', uid)
       .get();
 
-    if (!tokenDocs.size) abandon();
+    if (!tokenDocs.size) return abandon();
 
     // If there's a token, grab the course and items it refers to.
     unsubscribeCourse();
@@ -75,7 +74,7 @@ const setUid = createAsyncThunk(
         dispatch(generatedActions.reset());
 
         console.log('snapshot size', snapshot.size);
-        if (!snapshot.size) abandon();
+        if (!snapshot.size) return abandon();
         console.log('received course', snapshot.docs[0].data())
 
         const course = parseUnserializables(snapshot.docs[0].data());

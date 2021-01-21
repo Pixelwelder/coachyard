@@ -40,7 +40,7 @@
     "prep-client:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
     "prep-client:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
 
-    "deploy:dev": "firebase use dev && npm run build && npm run prep-functions:dev && firebase deploy",
+    "deploy:dev": "firebase use dev && npm run prep-client:dev && npm run build && firebase deploy --only hosting",
 
     "start-client:dev": "firebase use dev && npm run prep-client:dev && npm run start",
     "start-client:prod": "firebase use prod && npm run prep-client:prod && npm run start"

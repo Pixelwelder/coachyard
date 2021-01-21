@@ -183,7 +183,7 @@ const sendItem = async (data, context) => {
         body: JSON.stringify({
           input,
           playback_policy,
-          test: true
+          // test: true
         })
       }
     );

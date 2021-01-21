@@ -96,24 +96,20 @@ const EditItemView = ({ requireUpload = false }) => {
   return (
     <div className="edit-view">
       <form className="editing-form" onSubmit={onSubmit}>
-        {true && (
-          <>
-            <TextField
-              id="displayName" name="displayName" label="name" type="text"
-              variant="outlined"
-              disabled={isDisabled()}
-              value={displayName}
-              onChange={onChange}
-            />
-            <TextField
-              id="description" name="description" label="description" type="text"
-              multiline rows={4} variant="outlined"
-              disabled={isDisabled()}
-              value={description}
-              onChange={onChange}
-            />
-          </>
-        )}
+        <TextField
+          id="displayName" name="displayName" label="name" type="text"
+          variant="outlined"
+          disabled={isDisabled()}
+          value={displayName}
+          onChange={onChange}
+        />
+        <TextField
+          id="description" name="description" label="description" type="text"
+          multiline rows={4} variant="outlined"
+          disabled={isDisabled()}
+          value={description}
+          onChange={onChange}
+        />
         {
           (isChangingFile || !item.streamingId)
             ? (
@@ -166,7 +162,7 @@ const EditItemView = ({ requireUpload = false }) => {
         onSubmit={onSubmit}
         enableSubmit={!isDisabled() && !(requireUpload && !file)}
         onCancel={onCancelEdit}
-        enableCancel={!!item.streamingId && !isDisabled()}
+        enableCancel={true}
         onDelete={onDelete}
         enableDelete={!isDisabled()}
       />

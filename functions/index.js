@@ -1,6 +1,6 @@
-const yargs = require('yargs');
 const admin = require('firebase-admin');
 const { project_id, service_account } = require('./__config__/firebase.json');
+const functions = require('firebase-functions');
 
 admin.initializeApp({
   credential: admin.credential.cert(service_account),
@@ -11,7 +11,7 @@ admin.initializeApp({
 
 // Only export the function family that was called.
 // This is not ideal; I haven't figured out how this works yet.
-const functionName = process.env.FUNCTION_NAME || process.env.K_SERVICE;
+// const functionName = process.env.FUNCTION_NAME || process.env.K_SERVICE;
 module.exports = {
   ...require('./courses'),
   ...require('./items'),
