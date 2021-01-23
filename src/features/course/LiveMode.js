@@ -16,6 +16,7 @@ const LiveMode = ({ size }) => {
   const [callFrame, setCallFrame] = useState(null);
   const [hasRecorded, setHasRecorded] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
+  const [inSession, setInSession] = useState(false);
 
   useEffect(() => {
     const _callFrame = DailyIframe.createFrame(
@@ -60,6 +61,11 @@ const LiveMode = ({ size }) => {
     return stop;
   }, []);
 
+  const onLeave = () => {
+    // dispatch(catalogActions.endItem(item))
+    callFrame.leave();
+  }
+
   useEffect(() => {
     const go = async () => {
       setHasJoined(true);
@@ -92,18 +98,18 @@ const LiveMode = ({ size }) => {
           {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>}
         </Button>
       </div>
-      {ownsCourse && (
-        <div className="owner-controls">
-          {!hasRecorded && !isRecording && <Alert className="recording-warning" severity="error">Not recording!</Alert>}
-          <Button
-            color="primary" variant="contained"
-            onClick={() => dispatch(catalogActions.endItem(item))}
-            disabled={hasRecorded && isRecording}
-          >
-            End
-          </Button>
-        </div>
-      )}
+      <div className="owner-controls">
+        {ownsCourse && !hasRecorded && !isRecording && (
+          <Alert className="recording-warning" severity="error">Not recording!</Alert>
+        )}
+        <Button
+          color="primary" variant="contained"
+          onClick={onLeave}
+          disabled={hasRecorded && isRecording}
+        >
+          Leave
+        </Button>
+      </div>
     </div>
   );
 };

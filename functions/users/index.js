@@ -7,10 +7,13 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newUserMeta } = require('../data');
 
+const isProduction = process.env.FUNCTIONS_EMULATOR === "true";
+
 const _createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
-  const path = `/tmp/${uid}.png`;
+  const pathRoot = isProduction ? './' : '/temp/'
+  const path = `${pathRoot}${uid}.png`;
   fs.writeFileSync(path, png);
 
   await admin.storage().bucket().upload(path, {
@@ -22,7 +25,14 @@ const _createIcon = async ({ uid }) => {
       }
     }
   });
-  fs.unlinkSync(path);
+
+  await admin.firestore().collection('users').doc(uid).update({ image: `${uid}.png`});
+
+  try {
+    fs.unlinkSync(path);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -50,8 +60,10 @@ const _updateMeta = async ({ uid }) => {
     const ref = admin.firestore().collection('users').doc(uid);
     const doc = await transaction.get(ref);
 
-    const newItem = _convert({ item: doc.data(), factoryFunc: newUserMeta });
-    await transaction.set(ref, newItem);
+    if (doc.exists) {
+      const newItem = _convert({ item: doc.data(), factoryFunc: newUserMeta });
+      await transaction.set(ref, newItem);
+    }
   });
 };
 

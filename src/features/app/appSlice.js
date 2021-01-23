@@ -32,7 +32,7 @@ const _initApp = createAsyncThunk(
     if (window.location.hostname === 'localhost') {
       app.auth().useEmulator('http://localhost:9099/');
       app.functions().useEmulator('localhost', 5001);
-      app.firestore().useEmulator('localhost', 8080);
+      app.firestore().useEmulator('localhost', 8081);
     }
   }
 );

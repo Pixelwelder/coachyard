@@ -7,10 +7,12 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "prep-functions:dev": "cp __config__/firebase-dev.json __config__/firebase.json",
-    "prep-functions:prod": "cp __config__/firebase-prod.json __config__/firebase.json",
-    "start-functions:dev": "firebase use dev && npm run prep-functions:dev && firebase emulators:start",
-    "start-functions:prod": "firebase use prod && npm run prep-functions:prod && firebase emulators:start"
+    "prep:dev": "cp __config__/firebase-dev.json __config__/firebase.json",
+    "prep:prod": "cp __config__/firebase-prod.json __config__/firebase.json",
+    "start:dev": "firebase use dev && npm run prep:dev && firebase emulators:start",
+    "start:prod": "firebase use prod && npm run prep:prod && firebase emulators:start",
+    "deploy:dev": "firebase use dev && npm run prep:dev && firebase deploy --only functions",
+    "deploy:prod": "firebase use prod && npm run prep:prod && firebase deploy --only functions"
   },
   "engines": {
     "node": "12"

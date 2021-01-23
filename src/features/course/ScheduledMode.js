@@ -13,6 +13,44 @@ const getDateTime = item => ({
   timeRemaining: DateTime.fromISO(item.date).toLocal().diff(DateTime.local()).toFormat('h:mm')
 });
 
+const BaseItem = () => {
+  return (
+    <div className="mode-inner">
+      {/*{*/}
+      {/*  isOpen*/}
+      {/*    ? <EditItemView/>*/}
+      {/*    : (*/}
+      {/*      <>*/}
+      {/*        <div className="centered-mode">*/}
+      {/*          <div className="item-info">*/}
+      {/*            <img className="item-info-image" src={courseCreatorImageUrl}/>*/}
+      {/*            <Typography className="participant-name" variant="h6" component="p">*/}
+      {/*              {selectedItem.displayName}*/}
+      {/*            </Typography>*/}
+      {/*            <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>*/}
+      {/*          </div>*/}
+      {/*          <Button*/}
+      {/*            color="primary" variant="contained"*/}
+      {/*            onClick={() => dispatch(catalogActions.launchItem(item))}*/}
+      {/*          >*/}
+      {/*            Go Live*/}
+      {/*          </Button>*/}
+      {/*        </div>*/}
+      {/*        <div className="owner-controls">*/}
+      {/*          <Button*/}
+      {/*            variant="contained"*/}
+      {/*            onClick={() => dispatch(uiActions2.editItem.open())}*/}
+      {/*          >*/}
+      {/*            Edit*/}
+      {/*          </Button>*/}
+      {/*        </div>*/}
+      {/*      </>*/}
+      {/*    )*/}
+      {/*}*/}
+    </div>
+  );
+};
+
 const Student = () => {
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { courseCreator, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
@@ -60,7 +98,7 @@ const Teacher = () => {
                   color="primary" variant="contained"
                   onClick={() => dispatch(catalogActions.launchItem(item))}
                 >
-                  Launch
+                  Go Live
                 </Button>
               </div>
               <div className="owner-controls">

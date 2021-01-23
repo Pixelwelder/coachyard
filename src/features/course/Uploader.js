@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-export const Uploader = ({ onChange }) => {
+export const Uploader = ({ onChange, disabled }) => {
   const fileInputRef = useRef(null);
 
   const onTargetClick = () => {
@@ -13,7 +13,7 @@ export const Uploader = ({ onChange }) => {
       {/*  onDrop={() => {}}*/}
       {/*  onTargetClick={onTargetClick}*/}
       {/*/>*/}
-      <input className="upload-input" ref={fileInputRef} type="file" onChange={onChange}/>
+      <input className="upload-input" ref={fileInputRef} type="file" onChange={onChange} disabled={disabled}/>
     </>
     // <input className="upload-input" type="file" onChange={onChange} />
     // : <DropzoneArea

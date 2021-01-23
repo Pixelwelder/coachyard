@@ -117,7 +117,7 @@ const EditItemView = ({ requireUpload = false }) => {
                 {
                   totalBytes > 0
                     ? <LinearProgress variant="determinate" value={percentUploaded}/>
-                    : <Uploader onChange={onInputUpload}/>
+                    : <Uploader onChange={onInputUpload} disabled={isDisabled()}/>
                 }
               </>
             )

@@ -37,13 +37,17 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prep-client:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
-    "prep-client:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
+    "prep:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
+    "prep:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
 
-    "deploy:dev": "firebase use dev && npm run prep-client:dev && npm run build && firebase deploy --only hosting",
+    "deploy:dev": "firebase use dev && npm run prep:dev && npm run build && firebase deploy --except functions",
+    "deploy:prod": "firebase use prod && npm run prep:prod && npm run build && firebase deploy --except functions",
 
-    "start-client:dev": "firebase use dev && npm run prep-client:dev && npm run start",
-    "start-client:prod": "firebase use prod && npm run prep-client:prod && npm run start"
+    "start:dev": "firebase use dev && npm run prep:dev && npm run start",
+    "start:prod": "firebase use prod && npm run prep:prod && npm run start",
+
+    "start:stripe": "stripe listen --forward-to localhost:5001/coach-yard/us-central1/stripe",
+    "start:ngrok": "ngrok http 5001"
   },
   "eslintConfig": {
     "extends": "react-app"

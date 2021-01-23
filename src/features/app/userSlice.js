@@ -33,10 +33,10 @@ const init = createAsyncThunk(
 
               // Update to current version.
               if (meta.version != 1) {
-                console.log('Updating user...');
-                await app.functions().httpsCallable('updateUserToCurrent')();
+                // console.log('Updating user...');
+                // await app.functions().httpsCallable('updateUserToCurrent')();
               }
-              const url = await app.storage().ref(`/avatars/${authUser.uid}.png`).getDownloadURL();
+              const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
               dispatch(generatedActions.setImage(url));
             } else {
               generatedActions.setMeta(initialState.meta);
@@ -53,6 +53,7 @@ const init = createAsyncThunk(
   }
 );
 
+let unsubscribeImage;
 const signUp = createAsyncThunk(
   'signUp',
   async ({ email, password, displayName }) => {
@@ -62,6 +63,7 @@ const signUp = createAsyncThunk(
 
     // Now create meta.
     // Have to do it here because we have displayName.
+    console.log('creating user meta');
     const timestamp = app.firestore.Timestamp.now();
     await app.firestore().collection('users').doc(result.user.uid).set({
       uid: result.user.uid,
@@ -70,6 +72,10 @@ const signUp = createAsyncThunk(
       created: timestamp,
       updated: timestamp
     });
+    console.log('created');
+
+    if (unsubscribeImage) unsubscribeImage();
+    // unsubscribeImage = app.storage().ref(`avatars/${result.user.id}.png`).
   }
 );
 
