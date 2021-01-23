@@ -7,7 +7,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 
-import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
 import Billing from '../billing';
@@ -23,7 +22,7 @@ const Account = () => {
   const dispatch = useDispatch();
 
   const onClose = () => {
-    dispatch(uiActions.setShowAccount(false));
+    dispatch(uiActions2.account.reset());
   };
 
   return (

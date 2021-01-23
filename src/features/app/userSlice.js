@@ -31,11 +31,6 @@ const init = createAsyncThunk(
               const meta = parseUnserializables(snapshot.data());
               generatedActions.setMeta(meta);
 
-              // Update to current version.
-              if (meta.version != 1) {
-                // console.log('Updating user...');
-                // await app.functions().httpsCallable('updateUserToCurrent')();
-              }
               const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
               dispatch(generatedActions.setImage(url));
             } else {
