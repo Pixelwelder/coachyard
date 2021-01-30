@@ -144,3 +144,27 @@
   color: #ff6e40;
   box-shadow: 0 0 13px 3px #ff6e40;
 }
+
+$billing-width: 400px;
+.billing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  .card-container {
+    display: flex;
+    align-self: center;
+    width: $billing-width;
+    max-width: $billing-width;
+    border: 1px solid lightgray;
+  }
+
+  .change-plan-button {
+    align-self: center;
+    margin-bottom: 16px;
+  }
+
+  .cancel-plan-button {
+    align-self: center;
+  }
+}

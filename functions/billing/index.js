@@ -196,13 +196,22 @@ const stripe_cancelSubscription = functions.https.onCall(async (data, context) =
  */
 const setTier = functions.https.onCall(async (data, context) => {
   checkAuth(context);
+  console.log('setTier', data);
   const { id } = data;
   const { auth: { uid } } = context;
 
-  // This should be custom claims, but for now we just put it on the user meta.
-  const result = await admin.firestore().collection('users').doc(uid).update({
-    tier: id
-  });
+  // The actual data is on the auth user, but we change a doc so the client is notified.
+  await admin.auth().setCustomUserClaims(uid, { tier: id });
+  await admin.firestore().collection('users').doc(uid).update({ tier: id });
+});
+
+const getTiers = functions.https.onCall((data, context) => {
+  return [
+    // { id: 0, displayName: 'Student', price: 0, period: 'forever', unitsName: 'hours', unitsAmount: 'unlimited' },
+    { id: 1, displayName: 'Coach', price: 24.95, period: 'per month', unitsName: 'hours', unitsAmount: 15 },
+    { id: 2, displayName: 'Mentor', price: 39.95, period: 'per month', unitsName: 'hours', unitsAmount: 30 },
+    { id: 3, displayName: 'Guru', price: 99.95, period: 'per month', unitsName: 'hours', unitsAmount: 100 }
+  ];
 });
 
 const stripe_webhooks = express();
@@ -248,8 +257,6 @@ stripe_webhooks.post(
           if (!snapshot.size) {
             console.error('No customer by id', customer);
           }
-
-
         }
 
         default: {
@@ -266,6 +273,7 @@ stripe_webhooks.post(
 
 module.exports = {
   setTier,
+  getTiers,
 
   stripe_onCreateUser,
   stripe_onCreatePaymentMethod,

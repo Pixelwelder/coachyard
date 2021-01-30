@@ -3,6 +3,7 @@ import { selectors as billingSelectors2, actions as billingActions2 } from './bi
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import { CardElement, useStripe } from '@stripe/react-stripe-js';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -29,10 +30,21 @@ const Tier = ({ tier, selected, subscribed, onClick }) => {
 };
 
 const Billing = () => {
-  const tiers = useSelector(billingSelectors2.selectTiers);
-  const actualSelectedTier = useSelector(billingSelectors2.selectUserTier);
-  const { selectedTierId } = useSelector(billingSelectors2.select);
+  const { isLoading, tiers, ui: { selectedTierId, actualTierId } } = useSelector(billingSelectors2.select);
   const dispatch = useDispatch();
+  const stripe = useStripe();
+
+  const onSubmit = () => {};
+
+  const showBilling = () => {
+    return false;
+  }
+
+  const isDisabled = () => {
+    return (actualTierId === selectedTierId)
+      || !stripe
+      || isLoading;
+  };
 
   return (
     <div className="billing page">
@@ -41,32 +53,36 @@ const Billing = () => {
           <Tier
             tier={tier}
             selected={selectedTierId === tier.id}
-            subscribed={actualSelectedTier === tier.id}
+            subscribed={actualTierId === tier.id}
             key={index}
             onClick={() => {
-              dispatch(billingActions2.setSelectedTierId(tier.id));
+              dispatch(billingActions2.setUI({ selectedTierId: tier.id }));
             }}
           />
         ))}
       </ul>
-      <Button
-        className="change-plan-button"
-        variant="contained"
-        color="primary"
-        onClick={() => dispatch(billingActions2.setTier({ id: selectedTierId }))}
-        disabled={actualSelectedTier === selectedTierId}
-      >
-        {`${actualSelectedTier === 0 ? 'Choose' : 'Change'} Plan`}
-      </Button>
 
-      <Button
-        size="small"
-        className="cancel-plan-button"
-        onClick={() => dispatch(billingActions2.setTier({ id: selectedTierId }))}
-        disabled={actualSelectedTier === 0}
-      >
-        Cancel Plan
-      </Button>
+      <form onSubmit={onSubmit} className="card-container">
+        {showBilling() && (<CardElement />)}
+        <Button
+          className="change-plan-button"
+          variant="contained"
+          color="primary"
+          onClick={() => dispatch(billingActions2.setTier({ id: selectedTierId }))}
+          disabled={isDisabled()}
+        >
+          {`${actualTierId === 0 ? 'Choose' : 'Change'} Plan`}
+        </Button>
+
+        <Button
+          size="small"
+          type="button"
+          className="cancel-plan-button"
+          onClick={() => dispatch(billingActions2.setTier({ id: 0 }))}
+        >
+          Cancel Plan
+        </Button>
+      </form>
     </div>
   );
 };

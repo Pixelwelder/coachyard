@@ -285,21 +285,6 @@ form {
 
 }
 
-.billing {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-
-  .change-plan-button {
-    align-self: center;
-    margin-bottom: 16px;
-  }
-
-  .cancel-plan-button {
-    align-self: center;
-  }
-}
-
 .tier-list {
   display: flex;
   flex-direction: column;
