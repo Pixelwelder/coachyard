@@ -11,15 +11,22 @@ import LiveMode from './LiveMode';
 import InitializingMode from './InitializingMode';
 import ScheduledMode from './ScheduledMode';
 import NoItem from './NoItem';
+import { actions as uiActions2 } from '../ui/uiSlice2';
 
 const ItemView = () => {
   const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
   const location = useLocation();
   const query = queryString.parse(location.search);
   const { barebones } = query;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // dispatch(uiActions2.editItem.reset());
+
+    return () => {
+      console.log('LEAVING');
+      dispatch(uiActions2.editItem.reset());
+    }
   }, [item]);
 
   return (

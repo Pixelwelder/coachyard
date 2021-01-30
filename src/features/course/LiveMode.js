@@ -61,33 +61,23 @@ const LiveMode = ({ size }) => {
     return stop;
   }, []);
 
-  const onLeave = () => {
-    // dispatch(catalogActions.endItem(item))
-    callFrame.leave();
+  const onJoin = async () => {
+    setHasJoined(true);
+    const url = `https://coachyard.daily.co/${uid}`;
+    await callFrame.join({ url });
+    setInSession(true);
   }
 
-  useEffect(() => {
-    const go = async () => {
-      setHasJoined(true);
-      const url = `https://coachyard.daily.co/${uid}`;
-      await callFrame.join({ url });
-    };
+  const onLeave = async () => {
+    await callFrame.leave();
+    setInSession(false);
+  }
 
-    if (!hasJoined && callFrame && (status === 'live')) {
-      go();
-    }
-  }, [callFrame, uid, status, hasJoined]);
+  const onEnd = () => {
+    dispatch(catalogActions.endItem(item))
+  }
 
-  useEffect(() => {
-    if (callFrame) {
-      const iframe = callFrame.iframe();
-      // iframe.width = size.width;
-      // iframe.height = size.height;
-      // iframe.left = size.position.left;
-      // iframe.top = size.position.top;
-    }
-  }, [callFrame, size]);
-
+  console.log('inSession', inSession);
   return (
     <div className="item-mode live-mode">
       <div id="live-mode-target" className={isFullscreen ? 'full-screen' : ''}>
@@ -102,13 +92,34 @@ const LiveMode = ({ size }) => {
         {ownsCourse && !hasRecorded && !isRecording && (
           <Alert className="recording-warning" severity="error">Not recording!</Alert>
         )}
-        <Button
-          color="primary" variant="contained"
-          onClick={onLeave}
-          disabled={hasRecorded && isRecording}
-        >
-          Leave
-        </Button>
+        {inSession
+          ? (
+            <Button
+              color="primary" variant="contained"
+              onClick={onLeave}
+              disabled={hasRecorded && isRecording}
+            >
+              Leave
+            </Button>
+          )
+          : (
+            <>
+              <Button
+                color="secondary" variant="contained"
+                onClick={onEnd}
+              >
+                End
+              </Button>
+              <Button
+                color="primary" variant="contained"
+                onClick={onJoin}
+              >
+                Join
+              </Button>
+            </>
+          )
+        }
+
       </div>
     </div>
   );

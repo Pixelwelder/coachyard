@@ -28,9 +28,11 @@ export const createUISlice = ({
     reducers: {
       open: (state, action) => {
         const { payload = {} } = action;
-        const newState = Object.keys(initialState).map((accum, key) => ({
+        console.log('PAYLOAD', payload);
+        const newState = Object.keys(initialState).reduce((accum, key) => ({
           ...accum, [key]: payload[key] || initialState[key]
         }), {});
+        console.log('NEW STATE', newState);
         return { ...newState, isOpen: true };
       },
       reset: reset(initialState),

@@ -5,7 +5,7 @@ const initialState = {
   displayName: '',
   email: '',
   password: '',
-  mode: SESSION_MODES.SIGN_IN
+  mode: SESSION_MODES.SIGN_UP
 };
 
 export default createUISlice({
