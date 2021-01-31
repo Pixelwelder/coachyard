@@ -55,7 +55,11 @@ const stripe_onDeleteUser = functions.auth.user()
 /**
  * The payment method doc is added on the client. This function hears it and creates the Stripe counterpart.
  */
-const basicPrice = 'price_1I2h4fISeRywORkaFpUun2Xw';
+const pricesByTier = {
+  1: 'price_1IFTGFISeRywORka8Caa1NgV',
+  2: 'price_1IFTGFISeRywORkaIHqLYNnv',
+  3: 'price_1IFTGFISeRywORkaGhbHipz0'
+};
 const stripe_onCreatePaymentMethod = functions.firestore
   .document('/stripe_customers/{userId}/payment_methods/{pushId}')
   .onCreate(async (snapshot, context) => {
@@ -64,7 +68,7 @@ const stripe_onCreatePaymentMethod = functions.firestore
       log({ message: `Billing: creating a subscription for ${userId}...`, data: snapshot.data(), context });
 
       // Grab and save the payment method.
-      const { id: paymentMethodId } = snapshot.data();
+      const { id: paymentMethodId, tier } = snapshot.data();
       const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
       await snapshot.ref.set(paymentMethod);
 
@@ -84,9 +88,10 @@ const stripe_onCreatePaymentMethod = functions.firestore
       );
 
       // Now create the subscription.
+      const price = pricesByTier[tier];
       const subscription = await stripe.subscriptions.create({
         customer: customer.customer_id,
-        items: [{ price: basicPrice }],
+        items: [{ price }],
         expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
       });
 
@@ -104,7 +109,12 @@ const stripe_onCreatePaymentMethod = functions.firestore
       //   ...user.customClaims,
       //   subscription: 1
       // });
-      await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
+      // await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
+
+      // The actual data is on the auth user, but we change a doc so the client is notified.
+      const user = await admin.auth().getUser(userId);
+      await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier: id });
+      await admin.firestore().collection('users').doc(uid).update({ tier: id });
 
       // Now create a setup intent.
       // const intent = await stripe.setupIntents.create({ customer: customer.customer_id });
@@ -121,6 +131,10 @@ const stripe_onCreatePaymentMethod = functions.firestore
       );
     }
   });
+
+const createSubscription = functions.https.onCall((data, context) => {
+
+});
 
 /**
  * The payment doc is added on the client. This function hears it and creates the payment itself.

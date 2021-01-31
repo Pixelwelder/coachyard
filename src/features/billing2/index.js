@@ -3,7 +3,7 @@ import { selectors as billingSelectors2, actions as billingActions2 } from './bi
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { CardElement, useStripe } from '@stripe/react-stripe-js';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -30,21 +30,45 @@ const Tier = ({ tier, selected, subscribed, onClick }) => {
 };
 
 const Billing = () => {
-  const { isLoading, tiers, ui: { selectedTierId, actualTierId } } = useSelector(billingSelectors2.select);
+  const {
+    isLoading,
+    tiers,
+    ui: { selectedTierId, actualTierId, showBilling }
+  } = useSelector(billingSelectors2.select);
   const dispatch = useDispatch();
   const stripe = useStripe();
+  const elements = useElements();
 
   const onSubmit = () => {};
-
-  const showBilling = () => {
-    return false;
-  }
 
   const isDisabled = () => {
     return (actualTierId === selectedTierId)
       || !stripe
       || isLoading;
   };
+
+  const shouldShowBilling = () => {
+    return showBilling;
+  };
+
+  const shouldShowGetStarted = () => {
+    return (actualTierId === 0 && selectedTierId !== 0)
+      && !showBilling;
+  };
+
+  const shouldShowCancel = () => {
+    return actualTierId !== 0;
+  };
+
+  const onGetStarted = () => {
+    dispatch(billingActions2.setUI({ showBilling: true }));
+  };
+
+  const onSetTier = () => {
+    // dispatch(billingActions2.setTier({ id: selectedTierId }));
+    const card = elements.getElement(CardElement);
+    dispatch(billingActions2.createSubscription({ stripe, card }))
+  }
 
   return (
     <div className="billing page">
@@ -62,18 +86,33 @@ const Billing = () => {
         ))}
       </ul>
 
-      <form onSubmit={onSubmit} className="card-container">
-        {showBilling() && (<CardElement />)}
+      {shouldShowGetStarted() && (
         <Button
           className="change-plan-button"
           variant="contained"
           color="primary"
-          onClick={() => dispatch(billingActions2.setTier({ id: selectedTierId }))}
-          disabled={isDisabled()}
+          onClick={onGetStarted}
         >
-          {`${actualTierId === 0 ? 'Choose' : 'Change'} Plan`}
+          Get Started
         </Button>
+      )}
 
+      {shouldShowBilling() && (
+        <form onSubmit={onSubmit} className="card-container">
+          <CardElement/>
+          <Button
+            className="change-plan-button"
+            variant="contained"
+            color="primary"
+            onClick={onSetTier}
+            disabled={isDisabled()}
+          >
+            {`${actualTierId === 0 ? 'Choose' : 'Change'} Plan`}
+          </Button>
+        </form>
+      )}
+
+      {shouldShowCancel() && (
         <Button
           size="small"
           type="button"
@@ -82,7 +121,7 @@ const Billing = () => {
         >
           Cancel Plan
         </Button>
-      </form>
+      )}
     </div>
   );
 };

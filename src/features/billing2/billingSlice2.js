@@ -1,5 +1,5 @@
 import app from 'firebase/app';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import {
   setValue,
   mergeValue,
@@ -9,6 +9,7 @@ import {
   isThisPendingAction, isThisRejectedAction, isThisFulfilledAction
 } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 const name = 'billing2';
 const initialState = {
@@ -22,6 +23,7 @@ const initialState = {
 
   // UI
   ui: {
+    showBilling: false,
     selectedTierId: 0,
     actualTierId: 0
   }
@@ -99,6 +101,62 @@ const setTier = createAsyncThunk(
   }
 );
 
+const createSubscription = createAsyncThunk(
+  'createSubscription',
+  async ({ stripe, card }, { getState }) => {
+    console.log('Billing: createSubscription', stripe, card);
+
+    // First create a payment method with the provided card.
+    const paymentMethodResult = await stripe.createPaymentMethod({
+      type: 'card',
+      card
+    });
+
+    if (paymentMethodResult.error) {
+      console.error(paymentMethodResult.error);
+      throw new Error(paymentMethodResult.error);
+    }
+
+    const { paymentMethod } = paymentMethodResult;
+    console.log('payment method created', paymentMethodResult.paymentMethod);
+
+    const { ui: { selectedTierId } } = select(getState());
+    // Save the payment method.
+    const { uid } = app.auth().currentUser;
+    const result = await app.firestore()
+      .collection('stripe_customers')
+      .doc(uid)
+      .collection('payment_methods')
+      .doc(paymentMethod.id)
+      .set({ id: paymentMethod.id, tier: selectedTierId });
+
+    console.log('Payment method saved.');
+  }
+);
+
+const cancelSubscription = createAsyncThunk(
+  'cancelSubscription',
+  async (_, { getState, dispatch }) => {
+    const active = selectSubscription(getState());
+    if (!active) {
+      console.error('No subscription to cancel.');
+      throw new Error('No subscription to cancel.');
+    }
+
+    const { id } = active;
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.STRIPE_CANCEL_SUBSCRIPTION);
+    await callable({ id });
+    // const result = await app.firestore()
+    //   .collection('stripe_customers')
+    //   .doc(app.auth().currentUser.uid)
+    //   .collection('subscriptions')
+    //   .doc(id)
+    //   .update({ pending_action: 'cancel' });
+
+    dispatch(generatedActions.resetUI());
+  }
+);
+
 const init = createAsyncThunk(
   `${name}/init`,
   async (_, { dispatch }) => {
@@ -148,10 +206,18 @@ const { actions: generatedActions, reducer } = createSlice({
   },
 });
 
-const actions = { ...generatedActions, init, setTier };
+const actions = { ...generatedActions, init, setTier, createSubscription, cancelSubscription };
 
 const select = ({ billing2 }) => billing2;
-const selectors = { select };
+/**
+ * Returns the first active subscription.
+ */
+const selectSubscription = createSelector(select, ({ subscriptions }) => {
+  if (!subscriptions.length) return null;
+  const active = subscriptions.find(({ status }) => status === 'active');
+  return active === undefined ? null : active;
+});
+const selectors = { select, selectSubscription };
 
 export { actions, selectors };
 export default reducer;
