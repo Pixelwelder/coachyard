@@ -89,11 +89,15 @@ const getTier = async (_authUser = null) => {
 
 const setTier = createAsyncThunk(
   `${name}/setTier`,
-  async (params) => {
+  async (params, { getState }) => {
+    const { paymentMethods } = select(getState());
+    if (!paymentMethods.length) throw new Error('No payment methods!');
+
     const { id: newTier } = params;
     const currentTier = await getTier();
     if (newTier === currentTier) return;
 
+    // TODO Reconsider.
     await app.functions().httpsCallable('setTier')(params);
   }
 );
@@ -103,31 +107,40 @@ const createSubscription = createAsyncThunk(
   async ({ stripe, card }, { dispatch, getState }) => {
     console.log('Billing: createSubscription', stripe, card);
 
-    // First create a payment method with the provided card.
-    const paymentMethodResult = await stripe.createPaymentMethod({
-      type: 'card',
-      card
-    });
+    const { paymentMethods, ui: { selectedTierId } } = select(getState());
 
-    if (paymentMethodResult.error) {
-      console.error(paymentMethodResult.error);
-      throw new Error(paymentMethodResult.error);
+    // First create a payment method with the provided card.
+    if (!paymentMethods.length) {
+      const paymentMethodResult = await stripe.createPaymentMethod({
+        type: 'card',
+        card
+      });
+
+      if (paymentMethodResult.error) {
+        console.error(paymentMethodResult.error);
+        throw new Error(paymentMethodResult.error);
+      }
+
+      const { paymentMethod } = paymentMethodResult;
+      console.log('payment method created', paymentMethodResult.paymentMethod);
+
+      // Save the payment method.
+      const { uid } = app.auth().currentUser;
+      const result = await app.firestore()
+        .collection('stripe_customers')
+        .doc(uid)
+        .collection('payment_methods')
+        .doc(paymentMethod.id)
+        .set({ id: paymentMethod.id }, { merge: true });
+
+      console.log('Payment method saved.');
     }
 
-    const { paymentMethod } = paymentMethodResult;
-    console.log('payment method created', paymentMethodResult.paymentMethod);
+    // Now create the order.
+    console.log('ordering...');
+    await app.functions().httpsCallable('setTier')({ id: selectedTierId });
+    console.log('order complete');
 
-    const { ui: { selectedTierId } } = select(getState());
-    // Save the payment method.
-    const { uid } = app.auth().currentUser;
-    const result = await app.firestore()
-      .collection('stripe_customers')
-      .doc(uid)
-      .collection('payment_methods')
-      .doc(paymentMethod.id)
-      .set({ id: paymentMethod.id, tier: selectedTierId }, { merge: true });
-
-    console.log('Payment method saved.');
     dispatch(generatedActions.resetUI());
   }
 );

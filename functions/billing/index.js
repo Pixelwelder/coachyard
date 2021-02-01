@@ -52,6 +52,7 @@ const stripe_onDeleteUser = functions.auth.user()
     await dbRef.doc(user.uid).delete();
   });
 
+
 /**
  * The payment method doc is added on the client. This function hears it and creates the Stripe counterpart.
  */
@@ -77,10 +78,10 @@ const stripe_onCreatePaymentMethod = functions.firestore
       const customer = customerDoc.data();
 
       // Attach the payment method to the customer.
-      const attachResult = await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.customer_id });
+      await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.customer_id });
 
       // Change default invoice settings to point to the payment method.
-      const changeResult = await stripe.customers.update(
+      await stripe.customers.update(
         customer.customer_id,
         {
           invoice_settings: { default_payment_method: paymentMethodId }
@@ -88,42 +89,28 @@ const stripe_onCreatePaymentMethod = functions.firestore
       );
 
       // Now create the subscription.
-      const price = pricesByTier[tier];
-      const subscription = await stripe.subscriptions.create({
-        customer: customer.customer_id,
-        items: [{ price }],
-        expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
-      });
-
-      await admin.firestore()
-        .collection('stripe_customers')
-        .doc(userId)
-        .collection('subscriptions')
-        .doc(subscription.id)
-        .set(subscription);
-
-      // console.log('setting token...');
-      // TODO Doesn't work with emulators.
-      // const user = await admin.auth().getUser(userId);
-      // await admin.auth().setCustomUserClaims(userId, {
-      //   ...user.customClaims,
-      //   subscription: 1
+      // const price = pricesByTier[tier];
+      // const subscription = await stripe.subscriptions.create({
+      //   customer: customer.customer_id,
+      //   items: [{ price }],
+      //   expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
       // });
-      // await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
-
-      // The actual data is on the auth user, but we change a doc so the client is notified.
-      // TODO Shouldn't this be moved to where we know it's happened?
-      const user = await admin.auth().getUser(userId);
-      await admin.auth().setCustomUserClaims(userId, { ...user.customClaims, tier });
-      await admin.firestore().collection('users').doc(userId).update({ tier });
-
-      // Now create a setup intent.
-      // const intent = await stripe.setupIntents.create({ customer: customer.customer_id });
-      // await snapshot.ref.parent.parent.set(
-      //   { setup_secret: intent.client_secret },
-      //   { merge: true }
-      // );
-      log({ message: `Billing: created a subscription for ${userId}...`, data: { id: subscription.id }, context });
+      //
+      // // Save the subscription to Firestore.
+      // await admin.firestore()
+      //   .collection('stripe_customers')
+      //   .doc(userId)
+      //   .collection('subscriptions')
+      //   .doc(subscription.id)
+      //   .set(subscription);
+      //
+      // // The actual data is on the auth user, but we change a doc so the client is notified.
+      // // TODO Consider moving this to the webhook.
+      // const user = await admin.auth().getUser(userId);
+      // await admin.auth().setCustomUserClaims(userId, { ...user.customClaims, tier });
+      // await admin.firestore().collection('users').doc(userId).update({ tier });
+      //
+      // log({ message: `Billing: created a subscription for ${userId}...`, data: { id: subscription.id }, context });
     } catch (error) {
       log({ message: error.message, data: error, context, level: 'error' });
       await snapshot.ref.set(
@@ -210,14 +197,42 @@ const stripe_cancelSubscription = functions.https.onCall(async (data, context) =
  * @param id - id of the new billing tier.
  */
 const setTier = functions.https.onCall(async (data, context) => {
-  checkAuth(context);
-  console.log('setTier', data);
-  const { id } = data;
-  const { auth: { uid } } = context;
+  try {
+    checkAuth(context);
+    console.log('setTier', data);
+    const { id: tier } = data;
+    const { auth: { uid } } = context;
 
-  // The actual data is on the auth user, but we change a doc so the client is notified.
-  await admin.auth().setCustomUserClaims(uid, { tier: id });
-  await admin.firestore().collection('users').doc(uid).update({ tier: id });
+    // This assumes we have a payment method.
+    const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
+    if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
+    const customer = customerDoc.data();
+    const price = pricesByTier[tier];
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.customer_id,
+      items: [{ price }],
+      expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
+    });
+
+    // Save the subscription to Firestore.
+    await admin.firestore()
+      .collection('stripe_customers')
+      .doc(uid)
+      .collection('subscriptions')
+      .doc(subscription.id)
+      .set(subscription);
+
+    // The actual data is on the auth user, but we change a doc so the client is notified.
+    // TODO Consider moving this to the webhook.
+    const user = await admin.auth().getUser(uid);
+    await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier });
+    await admin.firestore().collection('users').doc(uid).update({ tier });
+
+    log({ message: `Billing: created a subscription for ${uid}...`, data: { id: subscription.id }, context });
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 });
 
 const getTiers = functions.https.onCall((data, context) => {
@@ -237,7 +252,6 @@ stripe_webhooks.post(
   async (request, response) => {
     try {
       const { body } = request;
-      log({ message: 'Billing: Received Stripe webhook.', data: body });
       const {
         type,
         data: {
@@ -247,6 +261,20 @@ stripe_webhooks.post(
           }
         }
       } = body;
+      log({ message: 'Billing: Received Stripe webhook.', data: type });
+
+      // IDEMPOTENCY
+      const exists = admin.firestore().runTransaction(async (transaction) => {
+        const eventRef = admin.firestore().collection('stripe_events').doc(id);
+        const event = await transaction.get(eventRef);
+        if (event.exists) return true;
+
+        await transaction.create(eventRef, body);
+        return false;
+      });
+
+      if (exists) return response.status(200).end();
+
 
       // Handle the event.
       switch (type) {

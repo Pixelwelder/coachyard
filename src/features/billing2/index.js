@@ -58,7 +58,7 @@ const Billing = () => {
   };
 
   const shouldShowUpdate = () => {
-    return (selectedTierId !== actualTierId);
+    return (selectedTierId !== actualTierId && !shouldShowBilling());
   }
 
   const shouldShowCancel = () => {
@@ -133,6 +133,7 @@ const Billing = () => {
         </form>
       )}
 
+      {/* TODO Reconsider. */}
       {shouldShowCancel() && (
         <Button
           size="small"
