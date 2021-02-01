@@ -33,7 +33,8 @@ const Billing = () => {
   const {
     isLoading,
     tiers,
-    ui: { selectedTierId, actualTierId, showBilling }
+    tier: actualTierId,
+    ui: { selectedTierId, showBilling }
   } = useSelector(billingSelectors2.select);
   const dispatch = useDispatch();
   const stripe = useStripe();
@@ -56,6 +57,10 @@ const Billing = () => {
       && !showBilling;
   };
 
+  const shouldShowUpdate = () => {
+    return (selectedTierId !== actualTierId);
+  }
+
   const shouldShowCancel = () => {
     return actualTierId !== 0;
   };
@@ -63,6 +68,11 @@ const Billing = () => {
   const onGetStarted = () => {
     dispatch(billingActions2.setUI({ showBilling: true }));
   };
+
+  const onUpdatePlan = () => {
+    const card = elements.getElement(CardElement);
+    dispatch(billingActions2.updateSubscription({ stripe, card }));
+  }
 
   const onSetTier = () => {
     // dispatch(billingActions2.setTier({ id: selectedTierId }));
@@ -94,6 +104,17 @@ const Billing = () => {
           onClick={onGetStarted}
         >
           Get Started
+        </Button>
+      )}
+
+      {shouldShowUpdate() && (
+        <Button
+          className="change-plan-button"
+          variant="contained"
+          color="primary"
+          onClick={onUpdatePlan}
+        >
+          Change Plan
         </Button>
       )}
 

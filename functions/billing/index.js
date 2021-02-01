@@ -112,9 +112,10 @@ const stripe_onCreatePaymentMethod = functions.firestore
       // await admin.firestore().collection('users').doc(userId).update({ subscription: 1 });
 
       // The actual data is on the auth user, but we change a doc so the client is notified.
+      // TODO Shouldn't this be moved to where we know it's happened?
       const user = await admin.auth().getUser(userId);
-      await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier: id });
-      await admin.firestore().collection('users').doc(uid).update({ tier: id });
+      await admin.auth().setCustomUserClaims(userId, { ...user.customClaims, tier });
+      await admin.firestore().collection('users').doc(userId).update({ tier });
 
       // Now create a setup intent.
       // const intent = await stripe.setupIntents.create({ customer: customer.customer_id });

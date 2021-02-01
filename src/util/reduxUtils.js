@@ -1,5 +1,5 @@
 export const reset = initialState => () => initialState;
-export const resetValue = (name, initialValue) => (state, action) => state[name] = initialValue;
+export const resetValue = (name, initialValue) => (state) => { state[name] = initialValue; };
 
 export const setValue = name => (state, action) => {
   state[name] = action.payload;

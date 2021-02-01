@@ -3,10 +3,7 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import {
   setValue,
   mergeValue,
-  isPendingAction,
-  isRejectedAction,
-  isFulfilledAction,
-  isThisPendingAction, isThisRejectedAction, isThisFulfilledAction
+  isThisPendingAction, isThisRejectedAction, isThisFulfilledAction, resetValue
 } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
@@ -18,14 +15,14 @@ const initialState = {
   payments: [],
   subscriptions: [],
   tiers: [],
+  tier: 0,
 
   isLoading: false,
 
   // UI
   ui: {
     showBilling: false,
-    selectedTierId: 0,
-    actualTierId: 0
+    selectedTierId: 0
   }
 };
 
@@ -102,8 +99,8 @@ const setTier = createAsyncThunk(
 );
 
 const createSubscription = createAsyncThunk(
-  'createSubscription',
-  async ({ stripe, card }, { getState }) => {
+  `${name}/createSubscription`,
+  async ({ stripe, card }, { dispatch, getState }) => {
     console.log('Billing: createSubscription', stripe, card);
 
     // First create a payment method with the provided card.
@@ -128,14 +125,22 @@ const createSubscription = createAsyncThunk(
       .doc(uid)
       .collection('payment_methods')
       .doc(paymentMethod.id)
-      .set({ id: paymentMethod.id, tier: selectedTierId });
+      .set({ id: paymentMethod.id, tier: selectedTierId }, { merge: true });
 
     console.log('Payment method saved.');
+    dispatch(generatedActions.resetUI());
   }
 );
 
+const updateSubscription = createAsyncThunk(
+  `${name}/updateSubscription`,
+  async ({ stripe, card }) => {
+    console.log('update subscription');
+  }
+)
+
 const cancelSubscription = createAsyncThunk(
-  'cancelSubscription',
+  `${name}/cancelSubscription`,
   async (_, { getState, dispatch }) => {
     const active = selectSubscription(getState());
     if (!active) {
@@ -172,7 +177,8 @@ const init = createAsyncThunk(
             console.log('billing2: user snapshot');
             const tier = await getTier();
             console.log('billing2: tier', tier);
-            dispatch(generatedActions.setUI({ selectedTierId: tier, actualTierId: tier }));
+            dispatch(generatedActions.setUI({ selectedTierId: tier }));
+            dispatch(generatedActions.setTier(tier));
           });
 
         dispatch(_startDataListeners());
@@ -180,6 +186,8 @@ const init = createAsyncThunk(
         // TODO This should probably go elsewhere. Preferably in Firestore so we get updates.
         const { data: tiers = [] } = await app.functions().httpsCallable('getTiers')();
         dispatch(generatedActions.setTiers(tiers));
+      } else {
+        dispatch(generatedActions.resetUI());
       }
     })
   }
@@ -194,8 +202,10 @@ const { actions: generatedActions, reducer } = createSlice({
     setSubscriptions: setValue('subscriptions'),
     setPayments: setValue('payments'),
     setTiers: setValue('tiers'),
+    setTier: setValue('tier'),
 
-    setUI: mergeValue('ui')
+    setUI: mergeValue('ui'),
+    resetUI: resetValue('ui', initialState.ui)
   },
   extraReducers: (builder) => {
     builder
@@ -208,7 +218,7 @@ const { actions: generatedActions, reducer } = createSlice({
   },
 });
 
-const actions = { ...generatedActions, init, setTier, createSubscription, cancelSubscription };
+const actions = { ...generatedActions, init, setTier, createSubscription, updateSubscription, cancelSubscription };
 
 const select = ({ billing2 }) => billing2;
 /**
