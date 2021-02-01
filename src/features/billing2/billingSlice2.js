@@ -40,6 +40,7 @@ let unsubscribeSubscriptions = () => {};
 const _startDataListeners = createAsyncThunk(
   `${name}/startDataListeners`,
   async (_, { dispatch }) => {
+    console.log('billing2.startDataListeners');
     const { uid } = app.auth().currentUser;
     const stripeUserDoc = app.firestore().collection('stripe_customers').doc(uid);
 
@@ -48,7 +49,6 @@ const _startDataListeners = createAsyncThunk(
         if (snapshot.exists) {
           const customerData = snapshot.data();
           dispatch(generatedActions.setCustomerData(parseUnserializables(customerData)));
-          dispatch(_startDataListeners());
 
           unsubscribePaymentMethods = stripeUserDoc
             .collection('payment_methods')
@@ -86,7 +86,7 @@ const getTier = async (_authUser = null) => {
   const authUser = _authUser || app.auth().currentUser;
   if (!authUser) return 0;
 
-  const { claims: { tier } } = await authUser.getIdTokenResult(true);
+  const { claims: { tier = 0 } } = await authUser.getIdTokenResult(true);
   return tier;
 };
 
@@ -153,27 +153,29 @@ const cancelSubscription = createAsyncThunk(
     //   .doc(id)
     //   .update({ pending_action: 'cancel' });
 
-    dispatch(generatedActions.resetUI());
+    // dispatch(generatedActions.resetUI());
   }
 );
 
 const init = createAsyncThunk(
   `${name}/init`,
   async (_, { dispatch }) => {
-    console.log('Billing2 actions: init')
     app.auth().onAuthStateChanged(async (authUser) => {
       unsubscribeUser();
       _stopDataListeners();
 
+      console.log('billing2: auth changed', authUser);
       if (authUser) {
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
             // When the user changes, check the tier for billing purposes.
+            console.log('billing2: user snapshot');
             const tier = await getTier();
+            console.log('billing2: tier', tier);
             dispatch(generatedActions.setUI({ selectedTierId: tier, actualTierId: tier }));
           });
 
-        _startDataListeners();
+        dispatch(_startDataListeners());
 
         // TODO This should probably go elsewhere. Preferably in Firestore so we get updates.
         const { data: tiers = [] } = await app.functions().httpsCallable('getTiers')();

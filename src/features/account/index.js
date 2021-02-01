@@ -37,6 +37,7 @@ const Account = () => {
           />
         )}
         <Typography variant="h4">{authUser?.displayName}</Typography>
+        <Typography variant="h5">{authUser?.email}</Typography>
         <Billing />
       </DialogContent>
       <DialogActions>
