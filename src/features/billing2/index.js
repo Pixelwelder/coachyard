@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { DateTime } from 'luxon';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -36,6 +37,7 @@ const Billing = () => {
     tier: actualTierId,
     ui: { selectedTierId, showBilling }
   } = useSelector(billingSelectors2.select);
+  const subscription = useSelector(billingSelectors2.selectSubscription);
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
@@ -97,6 +99,14 @@ const Billing = () => {
           />
         ))}
       </ul>
+
+      {subscription && (
+        <div>
+          {subscription.cancel_at_period_end && (<p>Cancels at</p>)}
+          {!subscription.cancel_at_period_end && (<p>Renews at</p>)}
+          <p>{DateTime.fromSeconds(subscription.current_period_end).toLocal().toString()}</p>
+        </div>
+      )}
 
       {shouldShowGetStarted() && (
         <Button

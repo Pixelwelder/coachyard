@@ -14,7 +14,7 @@ export default configureStore({
     user: userReducer,
     ui: uiReducer,
     ui2: uiReducer2,
-    billing2: billingReducer2,
+    billing: billingReducer2,
     catalog: catalogReducer,
     selectedCourse: selectedCourseReducer
   },

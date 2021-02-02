@@ -8,7 +8,7 @@ import {
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
-const name = 'billing2';
+const name = 'billing';
 const initialState = {
   customerData: null,
   paymentMethods: [],
@@ -235,7 +235,7 @@ const { actions: generatedActions, reducer } = createSlice({
 
 const actions = { ...generatedActions, init, setTier, createSubscription, updateSubscription, cancelSubscription };
 
-const select = ({ billing2 }) => billing2;
+const select = ({ billing }) => billing;
 /**
  * Returns the first active subscription.
  */
