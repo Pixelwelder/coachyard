@@ -41,15 +41,41 @@ const stripe_onCreateUser = functions.auth.user()
 
 /**
  * Any time a user is deleted, we delete all record of (1) their Stripe Customer, and (2) their payment methods.
+ * TODO This is totally untested.
  */
 const stripe_onDeleteUser = functions.auth.user()
   .onDelete(async (user) => {
     log({ message: 'Billing: a user was deleted.', data: user });
-    const dbRef = admin.firestore().collection('stripe_customers');
-    const customer = (await dbRef.doc(user.uid).get()).data();
-    const snapshot = await dbRef.doc(user.uid).collection('payment_methods').get();
-    snapshot.forEach(doc => doc.ref.delete());
-    await dbRef.doc(user.uid).delete();
+    const { uid } = user;
+    const customerRef = admin.firestore().collection('stripe_customers').doc(uid);
+    const customerDoc = await customerRef.get();
+    const customer = customerDoc.data();
+    const paymentMethodsSnapshot = await customerRef.collection('payment_methods').get();
+    const subscriptionsSnapshot = await customerRef.collection('subscriptions').get();
+
+    // Delete all payment methods.
+    paymentMethodsSnapshot.forEach(doc => doc.ref.delete());
+
+    // Cancel the subscription.
+    const subscriptionsRef = customerRef.collection('subscriptions');
+    const subscriptionDocs = await subscriptionsRef.get();
+    if (subscriptionDocs.size !== 1) throw new Error(`Expected 1 subscription, got ${subscriptionDocs.size}.`);
+    // const subscriptionDoc = subscriptionDocs.docs[0];
+    // const cachedSubscription = subscriptionDoc.data();
+
+    // const subscription = await stripe.subscriptions.retrieve(cachedSubscription.id);
+
+    // Delete all subscriptions.
+    const promises = subscriptionsSnapshot.docs.map(async (doc) => {
+      const cachedSubscription = doc.data();
+      await stripe.subscriptions.del(cachedSubscription.id);
+      doc.ref.delete();
+    });
+
+    await Promise.all(promises);
+
+    // Delete customer.
+    await customerRef.delete();
   });
 
 
@@ -159,7 +185,7 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     log({ message: `Billing: updating a subscription.`, data, context });
     checkAuth(context);
 
-    const { id: tier } = data;
+    const { id: tier, params } = data;
     const { auth: { uid } } = context;
 
     const customerRef = admin.firestore().collection('stripe_customers').doc(uid);
@@ -170,19 +196,28 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     const cachedSubscription = subscriptionDoc.data();
 
     const subscription = await stripe.subscriptions.retrieve(cachedSubscription.id);
-    const currentPrice = subscription.plan.id;
+    const currentPrice = subscription.plan ? subscription.plan.id : null;
     const currentTier = tiersByPrice[currentPrice];
     if (tier === currentTier) throw new Error(`Customer is already at tier ${tier}.`);
 
+    const item = subscription.items.data[0];
     const newPrice = pricesByTier[tier];
-    const newSubscription = await stripe.subscriptions.update(
-      subscription.id,
+    console.log(item);
+    const update = await stripe.subscriptionItems.update(
+      item.id,
       {
-        items: [{ price: newPrice }]
+        price: newPrice
       }
     );
+    // const newSubscription = await stripe.subscriptions.update(
+    //   subscription.id,
+    //   {
+    //     cancel_at_period_end: false,
+    //     items: [{ price: newPrice }]
+    //   }
+    // );
 
-    await subscriptionDoc.ref.set(newSubscription);
+    // await subscriptionDoc.ref.set(newSubscription);
 
     // TODO Move this to the webhook.
     const user = await admin.auth().getUser(uid);

@@ -202,7 +202,7 @@ const init = createAsyncThunk(
         const { data: tiers = [] } = await app.functions().httpsCallable('getTiers')();
         dispatch(generatedActions.setTiers(tiers));
       } else {
-        dispatch(generatedActions.resetUI());
+        dispatch(generatedActions.resetAll());
       }
     })
   }
@@ -220,7 +220,8 @@ const { actions: generatedActions, reducer } = createSlice({
     setTier: setValue('tier'),
 
     setUI: mergeValue('ui'),
-    resetUI: resetValue('ui', initialState.ui)
+    resetUI: resetValue('ui', initialState.ui),
+    resetAll: () => initialState
   },
   extraReducers: (builder) => {
     builder

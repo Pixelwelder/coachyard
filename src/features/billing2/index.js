@@ -66,7 +66,8 @@ const Billing = () => {
   }
 
   const shouldShowCancel = () => {
-    return actualTierId !== 0;
+    return actualTierId !== 0
+      && (!subscription?.cancel_at_period_end);
   };
 
   const onGetStarted = () => {
