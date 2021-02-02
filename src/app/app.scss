@@ -259,3 +259,58 @@ $billing-width: 400px;
     margin: 0;
   }
 }
+
+.live-mode {
+  flex-direction: column;
+
+  #live-mode-target {
+    flex: 1;
+    margin-bottom: 16px;
+
+    &.out-of-session {
+      display: none;
+    }
+
+    button {
+      z-index: 2;
+      position: absolute;
+      left: 32px;
+      top: 32px;
+    }
+
+    &.full-screen {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1;
+
+      button {
+        left: 16px;
+        top: 16px;
+      }
+    }
+  }
+
+  .out-of-session-view {
+    flex: 1;
+    margin-bottom: 16px;
+  }
+}
+
+.owner-controls {
+  //flex: 0 0;
+  display: flex;
+  justify-content: flex-end;
+  height: 48px;
+
+  button:not(:last-child) {
+    margin-right: 16px;
+  }
+
+  .recording-warning {
+    flex: 1;
+    margin-right: 16px;
+  }
+}

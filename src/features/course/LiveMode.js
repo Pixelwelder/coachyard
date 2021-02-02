@@ -46,6 +46,7 @@ const LiveMode = ({ size }) => {
     const stop = () => {
       const execute = async () => {
         if (callFrame) {
+          console.log('stop daily');
           setHasJoined(false);
           callFrame.stopRecording(); // TODO Necessary?
           await callFrame.destroy();
@@ -61,22 +62,38 @@ const LiveMode = ({ size }) => {
     return stop;
   }, []);
 
+  const onJoin = () => {
+    const url = `https://coachyard.daily.co/${uid}`;
+    setInSession(true);
+    callFrame.join({ url });
+  };
+
   const onLeave = () => {
     // dispatch(catalogActions.endItem(item))
+    setInSession(false);
     callFrame.leave();
-  }
+  };
 
-  useEffect(() => {
-    const go = async () => {
-      setHasJoined(true);
-      const url = `https://coachyard.daily.co/${uid}`;
-      await callFrame.join({ url });
-    };
+  const onEnd = () => {
+    // TODO Verify.
+    dispatch(catalogActions.endItem(item));
+  };
 
-    if (!hasJoined && callFrame && (status === 'live')) {
-      go();
-    }
-  }, [callFrame, uid, status, hasJoined]);
+  const shouldShowWarning = () => {
+    return ownsCourse && !hasRecorded && !isRecording;
+  };
+
+  // useEffect(() => {
+  //   const go = async () => {
+  //     setHasJoined(true);
+  //     const url = `https://coachyard.daily.co/${uid}`;
+  //     await callFrame.join({ url });
+  //   };
+  //
+  //   if (!hasJoined && callFrame && (status === 'live')) {
+  //     go();
+  //   }
+  // }, [callFrame, uid, status, hasJoined]);
 
   useEffect(() => {
     if (callFrame) {
@@ -88,9 +105,17 @@ const LiveMode = ({ size }) => {
     }
   }, [callFrame, size]);
 
+  const getSessionClasses = () => {
+    let classes = '';
+    if (isFullscreen) classes = `full-screen ${classes}`;
+    if (!inSession) classes = `out-of-session ${classes}`;
+
+    return classes;
+  }
+
   return (
     <div className="item-mode live-mode">
-      <div id="live-mode-target" className={isFullscreen ? 'full-screen' : ''}>
+      <div id="live-mode-target" className={getSessionClasses()}>
         <Button
           className="full-screen-button" variant="contained" color="primary"
           onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))}
@@ -98,17 +123,47 @@ const LiveMode = ({ size }) => {
           {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>}
         </Button>
       </div>
+      {!inSession && (
+        <div className="out-of-session-view">
+          <p>Out of session.</p>
+        </div>
+      )}
       <div className="owner-controls">
-        {ownsCourse && !hasRecorded && !isRecording && (
-          <Alert className="recording-warning" severity="error">Not recording!</Alert>
-        )}
-        <Button
-          color="primary" variant="contained"
-          onClick={onLeave}
-          disabled={hasRecorded && isRecording}
-        >
-          Leave
-        </Button>
+        {inSession
+          ? (
+            <>
+              {shouldShowWarning() && (
+                <Alert className="recording-warning" severity="error">Not recording!</Alert>
+              )}
+              <Button
+                color="primary" variant="contained"
+                onClick={onLeave}
+                disabled={hasRecorded && isRecording}
+              >
+                Leave
+              </Button>
+            </>
+          )
+          : (
+            <>
+              <Button
+                color="secondary" variant="contained"
+                onClick={onEnd}
+                disabled={hasRecorded && isRecording}
+              >
+                End
+              </Button>
+              <div className="spacer" />
+              <Button
+                color="primary" variant="contained"
+                onClick={onJoin}
+                disabled={hasRecorded && isRecording}
+              >
+                Join
+              </Button>
+            </>
+          )
+        }
       </div>
     </div>
   );

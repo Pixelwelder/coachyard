@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { log } = require('../logging');
+const { setClaims } = require('../util/claims');
 
 const parseMuxResponse = ({ data: { playback_ids, id } }) => ({
   playbackId: playback_ids[0].id,
@@ -22,7 +23,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
     if (type === 'video.asset.ready') {
       const muxData = parseMuxResponse(body);
 
-      const updateResult = await admin.firestore().runTransaction(async (transaction) => {
+      const itemDoc = await admin.firestore().runTransaction(async (transaction) => {
         const itemRef = admin.firestore()
           .collection('items')
           .where('streamingId', '==', muxData.streamingId);
@@ -30,11 +31,20 @@ mux_webhooks.post('/webhooks', async (request, response) => {
         if (docs.size) {
           const doc = docs.docs[0];
           await transaction.update(doc.ref, { ...muxData, status: 'viewing', streamingInfo: body });
+          return doc;
         } else {
           log({ message: `Did not find a doc for streaming id ${muxData.streamingId}.`, data: body, level: 'error' });
         }
       });
+
+      const { creatorUid } = itemDoc.data();
+      const user = await admin.auth().getUser(creatorUid);
+      const { remaining } = user.customClaims;
+
+      const { data: { duration = 0 } = {} } = body;
+      await setClaims({ uid: creatorUid, claims: { remaining: remaining - duration } });
     }
+
     return response.status(200).end();
   } catch (error) {
     log({ message: error.messge, data: error, level: 'error' });
