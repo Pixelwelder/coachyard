@@ -137,6 +137,14 @@ const createPaymentMethod = functions.https.onCall(async (data, context) => {
   }
 });
 
+const setClaims = async ({ uid, claims }) => {
+  // Set user claims.
+  // TODO Move this to the webhook.
+  const user = await admin.auth().getUser(uid);
+  await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, ...claims });
+  await admin.firestore().collection('users').doc(uid).update({ tier: claims.tier }); // For notification.
+};
+
 /**
  * Sets billing tier for the user.
  * @param id - id of the new billing tier.
@@ -167,11 +175,7 @@ const createSubscription = functions.https.onCall(async (data, context) => {
       .doc(subscription.id)
       .set(subscription);
 
-    // Set user claims.
-    // TODO Move this to the webhook.
-    const user = await admin.auth().getUser(uid);
-    await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier });
-    await admin.firestore().collection('users').doc(uid).update({ tier }); // For notification.
+    await setClaims({ uid, claims: { tier } });
 
     log({ message: `Billing: created a subscription for ${uid}...`, data: { id: subscription.id }, context });
   } catch (error) {
@@ -202,7 +206,6 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
 
     const item = subscription.items.data[0];
     const newPrice = pricesByTier[tier];
-    console.log(item);
     const update = await stripe.subscriptionItems.update(
       item.id,
       {
@@ -210,6 +213,16 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
         proration_behavior: 'always_invoice'
       }
     );
+
+    // TODO Might not have to do this every single time.
+    const newSubscription = await stripe.subscriptions.update(
+      subscription.id,
+      {
+        cancel_at_period_end: false
+      }
+    );
+    console.log(newSubscription);
+    await subscriptionDoc.ref.update(newSubscription);
     // const newSubscription = await stripe.subscriptions.update(
     //   subscription.id,
     //   {
@@ -221,9 +234,7 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     // await subscriptionDoc.ref.set(newSubscription);
 
     // TODO Move this to the webhook.
-    const user = await admin.auth().getUser(uid);
-    await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier });
-    await admin.firestore().collection('users').doc(uid).update({ tier }); // For notification.
+    await setClaims({ uid, claims: { tier } });
 
     log({ message: `Billing: updated a subscription.`, data, context });
   } catch (error) {

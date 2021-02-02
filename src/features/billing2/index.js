@@ -50,6 +50,14 @@ const Billing = () => {
       || isLoading;
   };
 
+  const exists = () => {
+    return !!subscription;
+  }
+
+  const isCanceled = () => {
+    return subscription?.cancel_at_period_end
+  }
+
   const shouldShowBilling = () => {
     return showBilling;
   };
@@ -59,15 +67,15 @@ const Billing = () => {
       && !showBilling;
   };
 
+  // TODO Show this when in canceled-but-still-running mode.
   const shouldShowUpdate = () => {
-    return (actualTierId !== 0)
-      && (selectedTierId !== actualTierId)
-      && !shouldShowBilling();
+    return ((actualTierId !== 0) && (selectedTierId !== actualTierId) && !shouldShowBilling())
+      || (exists() && isCanceled());
   }
 
   const shouldShowCancel = () => {
     return actualTierId !== 0
-      && (!subscription?.cancel_at_period_end);
+      && (!isCanceled());
   };
 
   const onGetStarted = () => {
