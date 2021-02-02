@@ -62,6 +62,10 @@ const pricesByTier = {
   2: 'price_1IFTGFISeRywORkaIHqLYNnv',
   3: 'price_1IFTGFISeRywORkaGhbHipz0'
 };
+const tiersByPrice = Object.entries(pricesByTier).reduce((accum, [name, val]) => ({
+  ...accum,
+  [val]: name
+}), {});
 const createPaymentMethod = functions.https.onCall(async (data, context) => {
   try {
     log({ message: 'Billing: creating a payment method...', data, context });
@@ -113,8 +117,8 @@ const createPaymentMethod = functions.https.onCall(async (data, context) => {
  */
 const createSubscription = functions.https.onCall(async (data, context) => {
   try {
+    log({ message: `Billing: creating a subscription.`, data, context });
     checkAuth(context);
-    console.log('setTier', data);
     const { id: tier } = data;
     const { auth: { uid } } = context;
 
@@ -150,8 +154,75 @@ const createSubscription = functions.https.onCall(async (data, context) => {
   }
 });
 
-const updateSubscription = functions.https.onCall((data, context) => {
-  console.log('updateSubscription');
+const updateSubscription = functions.https.onCall(async (data, context) => {
+  try {
+    log({ message: `Billing: updating a subscription.`, data, context });
+    checkAuth(context);
+
+    const { id: tier } = data;
+    const { auth: { uid } } = context;
+
+    const customerRef = admin.firestore().collection('stripe_customers').doc(uid);
+    const subscriptionsRef = customerRef.collection('subscriptions');
+    const subscriptionDocs = await subscriptionsRef.get();
+    if (subscriptionDocs.size !== 1) throw new Error(`Expected 1 subscription, got ${subscriptionDocs.size}.`);
+    const subscriptionDoc = subscriptionDocs.docs[0];
+    const cachedSubscription = subscriptionDoc.data();
+
+    const subscription = await stripe.subscriptions.retrieve(cachedSubscription.id);
+    const currentPrice = subscription.plan.id;
+    const currentTier = tiersByPrice[currentPrice];
+    if (tier === currentTier) throw new Error(`Customer is already at tier ${tier}.`);
+
+    const newPrice = pricesByTier[tier];
+    const newSubscription = await stripe.subscriptions.update(
+      subscription.id,
+      {
+        items: [{ price: newPrice }]
+      }
+    );
+
+    await subscriptionDoc.ref.set(newSubscription);
+
+    // TODO Move this to the webhook.
+    const user = await admin.auth().getUser(uid);
+    await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, tier });
+    await admin.firestore().collection('users').doc(uid).update({ tier }); // For notification.
+
+    log({ message: `Billing: updated a subscription.`, data, context });
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
+const cancelSubscription = functions.https.onCall(async (data, context) => {
+  try {
+    console.log('updateSubscription');
+    checkAuth(context);
+
+    const { id: tier } = data;
+    const { auth: { uid } } = context;
+
+    const customerRef = admin.firestore().collection('stripe_customers').doc(uid);
+    const subscriptionsRef = customerRef.collection('subscriptions');
+    const subscriptionDocs = await subscriptionsRef.get();
+    if (subscriptionDocs.size !== 1) throw new Error(`Expected 1 subscription, got ${subscriptionDocs.size}.`);
+    const subscriptionDoc = subscriptionDocs.docs[0];
+    const subscription = subscriptionDoc.data();
+
+    const newSubscription = await stripe.subscriptions.update(
+      subscription.id,
+      {
+        cancel_at_period_end: true
+      }
+    );
+
+    await subscriptionDoc.ref.set(newSubscription);
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 });
 
 /**
@@ -167,21 +238,21 @@ const stripe_onConfirmPayment = functions.firestore
     }
   });
 
-const stripe_cancelSubscription = functions.https.onCall(async (data, context) => {
-  log({ message: 'Billing: attempting to cancel subscription.', data: data, context });
-  checkAuth(context);
-
-  try {
-    const { id } = data;
-    const subscription = await stripe.subscriptions.del(id);
-
-    log({ message: 'Billing: subscription canceled.', data: { id: subscription.id }, context });
-    return { message: 'Subscription canceled.', subscription };
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-});
+// const stripe_cancelSubscription = functions.https.onCall(async (data, context) => {
+//   log({ message: 'Billing: attempting to cancel subscription.', data: data, context });
+//   checkAuth(context);
+//
+//   try {
+//     const { id } = data;
+//     const subscription = await stripe.subscriptions.del(id);
+//
+//     log({ message: 'Billing: subscription canceled.', data: { id: subscription.id }, context });
+//     return { message: 'Subscription canceled.', subscription };
+//   } catch (error) {
+//     log({ message: error.message, data: error, context, level: 'error' });
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// });
 
 // TODO This should be related to the actual prices defined in Stripe.
 const getTiers = functions.https.onCall((data, context) => {
@@ -267,6 +338,7 @@ module.exports = {
   createPaymentMethod,
   createSubscription,
   updateSubscription,
+  cancelSubscription,
 
   stripe_onCreateUser,
   // stripe_onCreatePaymentMethod,
@@ -274,6 +346,6 @@ module.exports = {
   stripe_onConfirmPayment,
   stripe_onDeleteUser,
 
-  stripe_cancelSubscription,
+  // stripe_cancelSubscription,
   stripe: functions.https.onRequest(stripe_webhooks)
 };
