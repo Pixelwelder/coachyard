@@ -143,7 +143,22 @@ const Billing = () => {
 
       {shouldShowBilling() && (
         <form onSubmit={onSubmit} className="card-container">
-          <CardElement/>
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                },
+                invalid: {
+                  color: '#9e2146',
+                },
+              },
+            }}
+          />
           <Button
             className="change-plan-button"
             variant="contained"

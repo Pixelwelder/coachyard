@@ -161,14 +161,17 @@ $billing-width: 400px;
     width: $billing-width;
     max-width: $billing-width;
     border: 1px solid lightgray;
+    padding: 16px;
+    border-radius: 8px;
   }
 
   .change-plan-button {
     align-self: center;
-    margin-bottom: 16px;
+    margin-top: 32px;
   }
 
   .cancel-plan-button {
+    margin-top: 16px;
     align-self: center;
   }
 }

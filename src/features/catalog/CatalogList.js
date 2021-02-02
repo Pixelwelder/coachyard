@@ -1,14 +1,12 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import { actions as uiActions } from '../ui/uiSlice';
-import MODES from '../ui/Modes';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
-import { selectors as uiSelectors } from '../ui/uiSlice';
 import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { selectors as billingSelectors2 } from '../billing2/billingSlice2';
 import { useHistory } from 'react-router-dom';
 
 const CatalogList = ({
@@ -55,11 +53,21 @@ const CatalogList = ({
 const TeachingCatalogList = () => {
   const courses = useSelector(catalogSelectors.selectTeachingTokens);
   const dispatch = useDispatch();
+  const { tier } = useSelector(billingSelectors2.select);
+  const history = useHistory();
+
+  const onCreate = () => {
+    if (tier) {
+      dispatch(uiActions2.createCourse.open())
+    } else {
+      history.push('/billing');
+    }
+  };
 
   return (
     <CatalogList
       title="Teaching"
-      onCreate={() => dispatch(uiActions2.createCourse.open())}
+      onCreate={onCreate}
       onDelete={(item) => dispatch(uiActions.openDialog({
         name: 'deleteDialog',
         params: {
