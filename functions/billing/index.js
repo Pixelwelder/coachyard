@@ -206,7 +206,8 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     const update = await stripe.subscriptionItems.update(
       item.id,
       {
-        price: newPrice
+        price: newPrice,
+        proration_behavior: 'always_invoice'
       }
     );
     // const newSubscription = await stripe.subscriptions.update(
