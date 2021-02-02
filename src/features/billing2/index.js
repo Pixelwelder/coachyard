@@ -58,7 +58,9 @@ const Billing = () => {
   };
 
   const shouldShowUpdate = () => {
-    return (selectedTierId !== actualTierId && !shouldShowBilling());
+    return (actualTierId !== 0)
+      && (selectedTierId !== actualTierId)
+      && !shouldShowBilling();
   }
 
   const shouldShowCancel = () => {

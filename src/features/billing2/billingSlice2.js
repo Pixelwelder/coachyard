@@ -102,6 +102,38 @@ const setTier = createAsyncThunk(
   }
 );
 
+const _addPaymentMethod = createAsyncThunk(
+  `${name}/addPaymentMethod`,
+  async ({ stripe, card }) => {
+    const paymentMethodResult = await stripe.createPaymentMethod({
+      type: 'card',
+      card
+    });
+
+    if (paymentMethodResult.error) {
+      console.error(paymentMethodResult.error);
+      throw new Error(paymentMethodResult.error);
+    }
+
+    const { paymentMethod } = paymentMethodResult;
+    console.log('payment method created', paymentMethodResult.paymentMethod);
+
+    // Send it to the server.
+    await app.functions().httpsCallable('createPaymentMethod')({ id: paymentMethod.id });
+
+    // Save the payment method.
+    // const { uid } = app.auth().currentUser;
+    // await app.firestore()
+    //   .collection('stripe_customers')
+    //   .doc(uid)
+    //   .collection('payment_methods')
+    //   .doc(paymentMethod.id)
+    //   .set({ id: paymentMethod.id }, { merge: true });
+
+    console.log('Payment method saved.');
+  }
+);
+
 const createSubscription = createAsyncThunk(
   `${name}/createSubscription`,
   async ({ stripe, card }, { dispatch, getState }) => {
@@ -110,31 +142,7 @@ const createSubscription = createAsyncThunk(
     const { paymentMethods, ui: { selectedTierId } } = select(getState());
 
     // First create a payment method with the provided card.
-    if (!paymentMethods.length) {
-      const paymentMethodResult = await stripe.createPaymentMethod({
-        type: 'card',
-        card
-      });
-
-      if (paymentMethodResult.error) {
-        console.error(paymentMethodResult.error);
-        throw new Error(paymentMethodResult.error);
-      }
-
-      const { paymentMethod } = paymentMethodResult;
-      console.log('payment method created', paymentMethodResult.paymentMethod);
-
-      // Save the payment method.
-      const { uid } = app.auth().currentUser;
-      const result = await app.firestore()
-        .collection('stripe_customers')
-        .doc(uid)
-        .collection('payment_methods')
-        .doc(paymentMethod.id)
-        .set({ id: paymentMethod.id }, { merge: true });
-
-      console.log('Payment method saved.');
-    }
+    if (!paymentMethods.length) await dispatch(_addPaymentMethod({ stripe, card }));
 
     // Now create the order.
     console.log('ordering...');

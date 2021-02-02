@@ -57,7 +57,6 @@ const init = createAsyncThunk(
     try {
       await dispatch(setupFirebase());
       await dispatch(userActions.init());
-      await dispatch(billingActions.init());
       await dispatch(billingActions2.init());
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());

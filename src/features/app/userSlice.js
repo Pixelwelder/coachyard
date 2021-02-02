@@ -31,8 +31,12 @@ const init = createAsyncThunk(
               const meta = parseUnserializables(snapshot.data());
               generatedActions.setMeta(meta);
 
-              const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
-              dispatch(generatedActions.setImage(url));
+              try {
+                const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
+                dispatch(generatedActions.setImage(url));
+              } catch (error) {
+                console.warn(`userSlice: avatar doesn't exist yet.`);
+              }
             } else {
               generatedActions.setMeta(initialState.meta);
             }
