@@ -141,8 +141,10 @@ const setClaims = async ({ uid, claims }) => {
   // Set user claims.
   // TODO Move this to the webhook.
   const user = await admin.auth().getUser(uid);
-  await admin.auth().setCustomUserClaims(uid, { ...user.customClaims, ...claims });
-  await admin.firestore().collection('users').doc(uid).update({ tier: claims.tier }); // For notification.
+  const currentClaims = user.customClaims;
+  const mergedClaims = { ...currentClaims, ...claims };
+  await admin.auth().setCustomUserClaims(uid, mergedClaims);
+  await admin.firestore().collection('users').doc(uid).update({ claims: mergedClaims }); // For notification.
 };
 
 /**
@@ -175,7 +177,7 @@ const createSubscription = functions.https.onCall(async (data, context) => {
       .doc(subscription.id)
       .set(subscription);
 
-    await setClaims({ uid, claims: { tier } });
+    await setClaims({ uid, claims: { tier, subscribed: true } });
 
     log({ message: `Billing: created a subscription for ${uid}...`, data: { id: subscription.id }, context });
   } catch (error) {
@@ -234,7 +236,8 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     // await subscriptionDoc.ref.set(newSubscription);
 
     // TODO Move this to the webhook.
-    await setClaims({ uid, claims: { tier } });
+    const { current_period_end } = newSubscription;
+    await setClaims({ uid, claims: { tier, subscribed: true } });
 
     log({ message: `Billing: updated a subscription.`, data, context });
   } catch (error) {
@@ -266,6 +269,36 @@ const cancelSubscription = functions.https.onCall(async (data, context) => {
     );
 
     await subscriptionDoc.ref.set(newSubscription);
+
+    // Update doc so we see a change on the client.
+    setClaims({ uid, claims: { subscribed: false }})
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
+const checkSubscription = functions.https.onCall(async (data, context) => {
+  try {
+    checkAuth(context);
+    const { auth: { uid } } = context;
+    const subDocs = await admin.firestore()
+      .collection('stripe_customers').doc(uid)
+      .collection('subscriptions').limit(1)
+      .get();
+
+    if (!subDocs.size) return -1;
+
+    const id = subDocs.docs[0].id;
+    const subscription = await stripe.subscriptions.retrieve(id);
+    const {
+      current_period_end = -1,
+      cancel_at_period_end = false,
+      plan: { id: price } = {}
+    } = subscription;
+    const tier = tiersByPrice[price] || '-1';
+
+    return { tier, current_period_end, cancel_at_period_end };
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -386,6 +419,7 @@ module.exports = {
   createSubscription,
   updateSubscription,
   cancelSubscription,
+  checkSubscription,
 
   stripe_onCreateUser,
   // stripe_onCreatePaymentMethod,

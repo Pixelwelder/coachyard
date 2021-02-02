@@ -27,6 +27,7 @@ const init = createAsyncThunk(
         // Listen to user meta.
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
+            console.log('user changed');
             if (snapshot.exists) {
               const meta = parseUnserializables(snapshot.data());
               generatedActions.setMeta(meta);
@@ -37,6 +38,13 @@ const init = createAsyncThunk(
               } catch (error) {
                 console.warn(`userSlice: avatar doesn't exist yet.`);
               }
+
+              // Check the subscription separately.
+              // TODO This should be entirely authUser.getIdTokenResult()
+              const {
+                data: { tier, current_period_end, cancel_at_period_end }
+              } = await app.functions().httpsCallable('checkSubscription')();
+              console.log('subscription', tier, current_period_end, cancel_at_period_end);
             } else {
               generatedActions.setMeta(initialState.meta);
             }
