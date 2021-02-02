@@ -42,7 +42,7 @@ mux_webhooks.post('/webhooks', async (request, response) => {
       const { remaining } = user.customClaims;
 
       const { data: { duration = 0 } = {} } = body;
-      await setClaims({ uid: creatorUid, claims: { remaining: remaining - duration } });
+      await setClaims({ uid: creatorUid, claims: { remaining: remaining - (duration / 60) } });
     }
 
     return response.status(200).end();
