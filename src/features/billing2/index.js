@@ -110,7 +110,7 @@ const Billing = () => {
       </ul>
 
       {subscription && (
-        <div>
+        <div className="subscription-info">
           {subscription.cancel_at_period_end && (<p>Cancels at</p>)}
           {!subscription.cancel_at_period_end && (<p>Renews at</p>)}
           <p>{DateTime.fromSeconds(subscription.current_period_end).toLocal().toString()}</p>
