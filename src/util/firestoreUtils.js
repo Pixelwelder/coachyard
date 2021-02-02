@@ -10,7 +10,8 @@ const parseTimestamp = (timestamp) => {
 };
 
 /**
- * Parses anything that's not serializable.
+ * Parses anything that's not serializable. Yes, it's kinda gross.
+ *
  * @param obj
  * @returns the same object with serializable members
  */
@@ -18,6 +19,7 @@ const parseUnserializables = (obj) => {
   const newObj = { ...obj };
   if (newObj.created) newObj.created = parseTimestamp(newObj.created);
   if (newObj.updated) newObj.updated = parseTimestamp(newObj.updated);
+  if (newObj.started) newObj.started = parseTimestamp(newObj.started);
 
   return newObj;
 };
