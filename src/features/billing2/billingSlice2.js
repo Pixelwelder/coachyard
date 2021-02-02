@@ -146,7 +146,7 @@ const createSubscription = createAsyncThunk(
 
     // Now create the order.
     console.log('ordering...');
-    await app.functions().httpsCallable('setTier')({ id: selectedTierId });
+    await app.functions().httpsCallable('createSubscription')({ id: selectedTierId });
     console.log('order complete');
 
     dispatch(generatedActions.resetUI());
@@ -155,8 +155,11 @@ const createSubscription = createAsyncThunk(
 
 const updateSubscription = createAsyncThunk(
   `${name}/updateSubscription`,
-  async ({ stripe, card }) => {
+  async (_, { getState }) => {
     console.log('update subscription');
+    const { ui: { selectedTierId } } = select(getState());
+    await app.functions().httpsCallable('updateSubscription')({ id: selectedTierId });
+    console.log('subscription updated');
   }
 )
 
