@@ -141,7 +141,8 @@ const Billing = () => {
           size="small"
           type="button"
           className="cancel-plan-button"
-          onClick={() => dispatch(billingActions2.setTier({ id: 0 }))}
+          // onClick={() => dispatch(billingActions2.setTier({ id: 0 }))}
+          onClick={() => dispatch(billingActions2.cancelSubscription())}
         >
           Cancel Plan
         </Button>

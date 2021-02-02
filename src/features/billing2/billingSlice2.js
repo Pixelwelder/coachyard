@@ -173,16 +173,7 @@ const cancelSubscription = createAsyncThunk(
     }
 
     const { id } = active;
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.STRIPE_CANCEL_SUBSCRIPTION);
-    await callable({ id });
-    // const result = await app.firestore()
-    //   .collection('stripe_customers')
-    //   .doc(app.auth().currentUser.uid)
-    //   .collection('subscriptions')
-    //   .doc(id)
-    //   .update({ pending_action: 'cancel' });
-
-    // dispatch(generatedActions.resetUI());
+    await app.functions().httpsCallable('cancelSubscription')({ id });
   }
 );
 
