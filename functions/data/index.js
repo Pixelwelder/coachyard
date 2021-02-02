@@ -78,6 +78,7 @@ const newCourseItem = (overrides) => ({
   date: '',
   room: false,
   status: 'viewing', // scheduled, initializing, live, uploading, processing, viewing
+  started: false,
 
   // This is for associated media.
   originalFilename: '',

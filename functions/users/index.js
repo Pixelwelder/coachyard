@@ -6,6 +6,7 @@ const { v4: uuid } = require('uuid');
 const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newUserMeta } = require('../data');
+const { setClaims } = require('../util/claims');
 
 const isProduction = process.env.FUNCTIONS_EMULATOR === "true";
 
@@ -88,7 +89,10 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   const { uid, email } = user;
 
   // Create icon.
- await _createIcon({ uid });
+  await _createIcon({ uid });
+
+  // Create claims.
+  await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
 
   await admin.firestore().runTransaction(async (transaction) => {
     // Update all tokens that mention this user.

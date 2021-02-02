@@ -41,18 +41,17 @@ const init = createAsyncThunk(
 
               // Check the subscription separately.
               // TODO This should be entirely authUser.getIdTokenResult()
-              const {
-                data: { tier, current_period_end, cancel_at_period_end }
-              } = await app.functions().httpsCallable('checkSubscription')();
-              console.log('subscription', tier, current_period_end, cancel_at_period_end);
+              // const { data } = await app.functions().httpsCallable('checkSubscription')();
+              // console.log('subscription', data);
+
+              // Grab claims.
+              const { claims } = await authUser.getIdTokenResult(true);
+              console.log('claims', claims);
+              dispatch(generatedActions.setClaims(claims));
             } else {
               generatedActions.setMeta(initialState.meta);
             }
           });
-
-        // Grab claims.
-        const { claims } = await authUser.getIdTokenResult(true);
-        dispatch(generatedActions.setClaims(claims));
       } else {
         dispatch(generatedActions.reset());
       }

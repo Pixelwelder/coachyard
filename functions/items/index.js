@@ -6,6 +6,7 @@ const { checkAuth } = require('../util/auth');
 const { getMuxHeaders, getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourseItem } = require('../data');
+const { setClaims } = require('../util/claims');
 
 /**
  * Filters user input for item creation.
@@ -289,6 +290,7 @@ const handleItemUpdate = functions.firestore
         } else {
           update.room = newRoom;
           update.status = 'live';
+          update.started = admin.firestore.Timestamp.now();
           log({ message: 'Successfully launched room.', data: newRoom, context });
         }
       }
@@ -299,7 +301,7 @@ const handleItemUpdate = functions.firestore
 
       // If we move from 'live' to 'uploading', delete a room.
     } else if (oldValue.status === 'live' && newValue.status === 'uploading') {
-      const update = {};
+      const update = { started: false };
 
       // Does it exist?
       const existingRoom = await _checkRoom({ name: docId });
@@ -325,6 +327,17 @@ const handleItemUpdate = functions.firestore
 
       const ref = admin.firestore().collection('items').doc(docId);
       await ref.update(update);
+
+      // Stop counting and subtract time from what user has left.
+      const then = oldValue.started.toDate();
+      const now = admin.firestore.Timestamp.now().toDate();
+      const used = now - then;
+
+      const { creatorUid } = oldValue;
+      const user = await admin.auth().getUser(creatorUid);
+      const { remaining = 0 } = user.customClaims;
+      setClaims({ uid: creatorUid, remaining: remaining - used });
+
       log({ message: 'Updated item based on room result.', data: update, context });
     }
   });
@@ -344,11 +357,34 @@ const handleFileDelete = functions.storage
     console.log('deleted', object.name);
   });
 
+const beginRecording = functions.https.onCall((data, context) => {
+  try {
+    const { auth: { uid } } = context;
+    const { uid: itemUid } = data;
+
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
+const endRecording = functions.https.onCall((data, context) => {
+  try {
+
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
 module.exports = {
   createItem: functions.https.onCall(createItem),
   updateItem: functions.https.onCall(updateItem),
   deleteItem: functions.https.onCall(deleteItem),
   sendItem: functions.https.onCall(sendItem),
+
+  beginRecording,
+  endRecording,
 
   handleItemUpdate,
 

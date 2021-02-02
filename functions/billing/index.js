@@ -7,6 +7,7 @@ const { log } = require ('../logging');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { secret_key } = require('../__config__/stripe.json');
+const { setClaims } = require('../util/claims');
 
 const stripe = new Stripe(
   secret_key,
@@ -137,16 +138,6 @@ const createPaymentMethod = functions.https.onCall(async (data, context) => {
   }
 });
 
-const setClaims = async ({ uid, claims }) => {
-  // Set user claims.
-  // TODO Move this to the webhook.
-  const user = await admin.auth().getUser(uid);
-  const currentClaims = user.customClaims;
-  const mergedClaims = { ...currentClaims, ...claims };
-  await admin.auth().setCustomUserClaims(uid, mergedClaims);
-  await admin.firestore().collection('users').doc(uid).update({ claims: mergedClaims }); // For notification.
-};
-
 /**
  * Sets billing tier for the user.
  * @param id - id of the new billing tier.
@@ -177,7 +168,8 @@ const createSubscription = functions.https.onCall(async (data, context) => {
       .doc(subscription.id)
       .set(subscription);
 
-    await setClaims({ uid, claims: { tier, subscribed: true } });
+    const tierDef = tiers[tier - 1];
+    await setClaims({ uid, claims: { tier, subscribed: true, remaining: tierDef.unitsAmount * 60 } });
 
     log({ message: `Billing: created a subscription for ${uid}...`, data: { id: subscription.id }, context });
   } catch (error) {
@@ -236,8 +228,9 @@ const updateSubscription = functions.https.onCall(async (data, context) => {
     // await subscriptionDoc.ref.set(newSubscription);
 
     // TODO Move this to the webhook.
-    const { current_period_end } = newSubscription;
-    await setClaims({ uid, claims: { tier, subscribed: true } });
+    // TODO How do we handle rolling hours between changed subscriptions?
+    const tierDef = tiers[tier - 1];
+    await setClaims({ uid, claims: { tier, subscribed: true, remaining: tierDef.unitsAmount * 60 } });
 
     log({ message: `Billing: updated a subscription.`, data, context });
   } catch (error) {
@@ -334,14 +327,16 @@ const stripe_onConfirmPayment = functions.firestore
 //   }
 // });
 
+const tiers = [
+  // { id: 0, displayName: 'Student', price: 0, period: 'forever', unitsName: 'hours', unitsAmount: 'unlimited' },
+  { id: 1, displayName: 'Coach', price: 24.95, period: 'per month', unitsName: 'hours', unitsAmount: 15 },
+  { id: 2, displayName: 'Mentor', price: 39.95, period: 'per month', unitsName: 'hours', unitsAmount: 30 },
+  { id: 3, displayName: 'Guru', price: 99.95, period: 'per month', unitsName: 'hours', unitsAmount: 100 }
+];
+
 // TODO This should be related to the actual prices defined in Stripe.
 const getTiers = functions.https.onCall((data, context) => {
-  return [
-    // { id: 0, displayName: 'Student', price: 0, period: 'forever', unitsName: 'hours', unitsAmount: 'unlimited' },
-    { id: 1, displayName: 'Coach', price: 24.95, period: 'per month', unitsName: 'hours', unitsAmount: 15 },
-    { id: 2, displayName: 'Mentor', price: 39.95, period: 'per month', unitsName: 'hours', unitsAmount: 30 },
-    { id: 3, displayName: 'Guru', price: 99.95, period: 'per month', unitsName: 'hours', unitsAmount: 100 }
-  ];
+  return tiers;
 });
 
 const stripe_webhooks = express();
