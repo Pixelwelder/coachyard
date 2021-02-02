@@ -6,6 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
+import { useHistory, Link } from 'react-router-dom';
 
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
@@ -25,6 +26,11 @@ const Account = () => {
     dispatch(uiActions2.account.reset());
   };
 
+  const onDetails = () => {
+    onClose();
+
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth>
       <DialogTitle id="account-dialog">Account</DialogTitle>
@@ -39,6 +45,7 @@ const Account = () => {
         <Typography variant="h4">{authUser?.displayName}</Typography>
         <Typography variant="h5">{authUser?.email}</Typography>
         <Billing />
+        <Link className="billing-link" to="/billing" onClick={onClose}>Details</Link>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

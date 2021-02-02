@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { DateTime } from 'luxon';
+import { Link } from 'react-router-dom';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -95,6 +96,7 @@ const Billing = () => {
 
   return (
     <div className="billing page">
+      <Link to="/dashboard">{'< Dashboard'}</Link>
       <ul className="tier-list">
         {tiers.map((tier, index) => (
           <Tier
@@ -149,7 +151,7 @@ const Billing = () => {
             onClick={onSetTier}
             disabled={isDisabled()}
           >
-            {`${actualTierId === 0 ? 'Choose' : 'Change'} Plan`}
+            Get Started
           </Button>
         </form>
       )}

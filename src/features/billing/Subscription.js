@@ -1,42 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 import Button from '@material-ui/core/Button';
-import { selectors as billingSelectors, actions as billingActions } from './billingSlice';
+import { selectors as billingSelectors2, actions as billingActions2 } from '../billing2/billingSlice2';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import Typography from '@material-ui/core/Typography';
+import app from 'firebase';
 
-const Subscription = ({ onCancel }) => {
-  const subscription = useSelector(billingSelectors.selectSubscription);
-  const { ui } = useSelector(billingSelectors.select);
-  const dispatch = useDispatch();
+const Subscription = () => {
+  const sub = useSelector(billingSelectors2.selectSubscription);
+  const getDate = () => DateTime.fromSeconds(sub.current_period_end).toLocal().toFormat('LLL d, yyyy');
+  const [remaining, setRemaining] = useState(0);
+  const tier = useSelector(billingSelectors2.selectTier);
 
-  if (!subscription) return null;
-
-  const {
-    cancel_at_period_end,
-    plan,
-    current_period_end,
-    billing_cycle_anchor,
-    status
-  } = subscription;
+  // TODO Use redux.
+  useEffect(() => {
+    const execute = async () => {
+      const authUser = app.auth().currentUser;
+      const { claims: { remaining } = 0 } = await authUser.getIdTokenResult(true);
+      setRemaining(remaining);
+    };
+    execute();
+  }, []);
 
   return (
     <div>
-      <p>Plan</p>
-      <p>Plan will renew {DateTime.fromSeconds(current_period_end).toLocaleString()}</p>
-      {!ui.showConfirmCancel && (
-        <Button onClick={() => dispatch(billingActions.setUI({ showConfirmCancel: true }))}>
-          Cancel Plan
-        </Button>
+      {!sub && (
+        <Typography>No subscription</Typography>
       )}
-      {ui.showConfirmCancel && (
+      {sub && (
         <>
-          <p>Are you sure?</p>
-          <Button onClick={() => dispatch(billingActions.cancelSubscription())}>
-            Yes, cancel my subscription
-          </Button>
-          <Button onClick={() => dispatch(billingActions.setUI({ showConfirmCancel: false }))}>
-            Never mind
-          </Button>
+          <Typography>{tier.displayName} Plan</Typography>
+          <Typography>{(remaining / 60).toFixed(1)} hours remaining</Typography>
+          {sub.cancel_at_period_end && (<Typography>Ends: {getDate()}</Typography>)}
+          {!sub.cancel_at_period_end && (<Typography>Renews: {getDate()}</Typography>)}
         </>
       )}
     </div>

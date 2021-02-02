@@ -66,6 +66,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  .billing-link {
+    align-self: flex-start;
+  }
 }
 
 .billing {
@@ -313,4 +317,8 @@ $billing-width: 400px;
     flex: 1;
     margin-right: 16px;
   }
+}
+
+.subscription {
+  display: flex;
 }

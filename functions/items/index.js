@@ -6,7 +6,6 @@ const { checkAuth } = require('../util/auth');
 const { getMuxHeaders, getDailyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourseItem } = require('../data');
-const { setClaims } = require('../util/claims');
 
 /**
  * Filters user input for item creation.
@@ -336,7 +335,6 @@ const handleItemUpdate = functions.firestore
       const { creatorUid } = oldValue;
       const user = await admin.auth().getUser(creatorUid);
       const { remaining = 0 } = user.customClaims;
-      setClaims({ uid: creatorUid, remaining: remaining - used });
 
       log({ message: 'Updated item based on room result.', data: update, context });
     }

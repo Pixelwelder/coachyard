@@ -245,7 +245,8 @@ const selectSubscription = createSelector(select, ({ subscriptions }) => {
   const active = subscriptions.find(({ status }) => status === 'active');
   return active === undefined ? null : active;
 });
-const selectors = { select, selectSubscription };
+const selectTier = createSelector(select, ({ tiers, tier }) => tiers[tier - 1]);
+const selectors = { select, selectSubscription, selectTier };
 
 export { actions, selectors };
 export default reducer;

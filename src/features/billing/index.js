@@ -13,16 +13,6 @@ const Billing = () => {
   const { ui } = useSelector(billingSelectors.select);
   const subscription = useSelector(billingSelectors.selectSubscription);
 
-  const onSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!stripe || !elements) return;
-
-    const card = elements.getElement(CardElement);
-    await dispatch(billingActions.createSubscription({ stripe, card }));
-    console.log('onSubmit complete');
-  }
-
   const onCancel = () => {
     console.log('Canceling plan...');
   };
@@ -34,12 +24,6 @@ const Billing = () => {
         subscription={subscription}
         onCancel={onCancel}
       />
-      {!subscription && (
-        <form onSubmit={onSubmit}>
-          <CardElement />
-          <button type="submit" onSubmit={onSubmit} disabled={!stripe}>Pay</button>
-        </form>
-      )}
     </div>
   )
 };
