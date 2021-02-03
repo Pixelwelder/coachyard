@@ -5,7 +5,7 @@ import { selectors as billingSelectors2, actions as billingActions2 } from '../b
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
-import app from 'firebase';
+import app from 'firebase/app';
 
 const Subscription = () => {
   const sub = useSelector(billingSelectors2.selectSubscription);
@@ -17,7 +17,7 @@ const Subscription = () => {
   useEffect(() => {
     const execute = async () => {
       const authUser = app.auth().currentUser;
-      const { claims: { remaining } = 0 } = await authUser.getIdTokenResult(true);
+      const { claims: { remaining = 0 } } = await authUser.getIdTokenResult(true);
       setRemaining(remaining);
     };
     execute();

@@ -325,3 +325,18 @@ $billing-width: 400px;
 .subscription {
   display: flex;
 }
+
+.uploader-container {
+  display: flex;
+}
+
+.account-warning {
+  color: #f50057;
+  margin: 0;
+  padding: 0 4px 0 0;
+}
+
+.account-info {
+  margin: 0;
+  color: #999999;
+}

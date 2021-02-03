@@ -7,7 +7,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea  from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
-import app from 'firebase';
+import app from 'firebase/app';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const { displayName = '', user } = item;
