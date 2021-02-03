@@ -7,10 +7,15 @@ import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import Alert from '@material-ui/lab/Alert';
 import { actions as catalogActions } from '../catalog/catalogSlice';
+import { Typography } from '@material-ui/core';
+import StorageImage from '../../components/StorageImage';
+import ParticipantList from '../../components/ParticipantList';
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { selectedItem: item, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
+  const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
+  const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const { uid, status } = item;
   const dispatch = useDispatch();
   const [callFrame, setCallFrame] = useState(null);
@@ -113,6 +118,8 @@ const LiveMode = ({ size }) => {
     return classes;
   }
 
+  const tokens = ownsCourse ? studentTokens : adminTokens;
+
   return (
     <div className="item-mode live-mode">
       <div id="live-mode-target" className={getSessionClasses()}>
@@ -124,8 +131,13 @@ const LiveMode = ({ size }) => {
         </Button>
       </div>
       {!inSession && (
-        <div className="out-of-session-view">
-          <p>Out of session.</p>
+        <div className="out-of-session-container mode-inner">
+          <div className="item-info">
+            <ParticipantList tokens={tokens} />
+            <Typography className="out-of-session-title" variant="h6" component="p">
+              This session is currently live.
+            </Typography>
+          </div>
         </div>
       )}
       <div className="owner-controls">

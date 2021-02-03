@@ -12,7 +12,7 @@ const createCourse = async (data, context) => {
     log({ message: 'Attempting to create course...', data, context });
     checkAuth(context);
 
-    const { auth: { token: { uid, email } } } = context;
+    const { auth: { token: { uid, email, name: teacherName } } } = context;
     const { displayName, students: _students, description = '', date, image = '' } = data;
 
     // This is an array of emails.
@@ -29,6 +29,12 @@ const createCourse = async (data, context) => {
       const studentResults = await Promise.all(studentPromises).catch(error => {
         log({ message: error.message, data: error, context, level: 'error' });
       });
+      const studentsById = studentResults.reduce((accum, result) => {
+        if (!result.size) return accum;
+
+        const data = result.docs[0].data();
+        return { ...accum, [data.uid]: data };
+      }, {});
       const studentUids = studentResults.map(result => {
         return result.size ? result.docs[0].data().uid : null
       });
@@ -72,6 +78,7 @@ const createCourse = async (data, context) => {
         created: timestamp,
         updated: timestamp,
         user: uid,
+        userDisplayName: teacherName,
         courseUid: courseRef.id,
         access: 'admin',
         displayName,
@@ -89,11 +96,13 @@ const createCourse = async (data, context) => {
 
         const studentTokenRef = admin.firestore().collection('tokens').doc();
         const studentUid = studentUids[index];
+        const student = studentsById[studentUid];
         const studentToken = newCourseToken({
           uid: studentTokenRef.id,
           created: timestamp,
           updated: timestamp,
           user: studentUid || studentEmail,
+          userDisplayName: student ? student.displayName : studentEmail,
           courseUid: courseRef.id,
           access: 'student',
           displayName,

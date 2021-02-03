@@ -9,6 +9,8 @@ const initialState = {
   isRecording: false,
   isFullscreen: false,
 
+  token: null,
+  tokens: [],
   course: null,
   courseCreator: null,
   courseCreatorImageUrl: '',
@@ -34,6 +36,7 @@ let unsubscribeToken = () => {};
 let unsubscribeItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeStudent = () => {};
+let unsubscribeStudentTokens = () => {};
 /**
  * Sets the selected course.
  * This loads the course and its items.
@@ -93,6 +96,17 @@ const setUid = createAsyncThunk(
             const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
             dispatch(generatedActions.setCourseCreatorImageUrl(url));
           });
+
+        // Get all tokens.
+        unsubscribeStudentTokens();
+        unsubscribeStudentTokens = app.firestore().collection('tokens')
+          .where('courseUid', '==', course.uid)
+          .onSnapshot((snapshot) => {
+            if (snapshot.size) {
+              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              dispatch(generatedActions.setTokens(tokens));
+            }
+          })
       });
 
     // Get the items.
@@ -174,6 +188,7 @@ const { actions: generatedActions, reducer } = createSlice({
   initialState,
   reducers: {
     // _setUid: setValue('uid'),
+    setTokens: setValue('tokens'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
     setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
@@ -210,7 +225,15 @@ const selectOwnsCourse = createSelector(
     return !!(course && currentUser && (currentUser.uid === course.creatorUid));
   }
 );
-const selectors = { select, selectSelectedItem, selectOwnsCourse };
+const selectAdminTokens = createSelector(
+  select,
+  ({ tokens }) => tokens.filter(({ access }) => access === 'admin')
+);
+const selectStudentTokens = createSelector(
+  select,
+  ({ tokens }) => tokens.filter(({ access }) => access === 'student')
+);
+const selectors = { select, selectSelectedItem, selectOwnsCourse, selectAdminTokens, selectStudentTokens };
 
 export { actions, selectors };
 export default reducer;

@@ -97,6 +97,7 @@ const newCourseItem = (overrides) => ({
 const newCourseToken = (overrides) => ({
   ...newBaseItem(),
   user: '', // Could be email (if pending) or uid.
+  userDisplayName: '',
   courseUid: '',
   access: 'student', // 'student' | 'editor' | 'admin'
 

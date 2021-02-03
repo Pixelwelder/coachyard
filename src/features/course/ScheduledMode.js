@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import React from 'react';
+import ParticipantList from '../../components/ParticipantList';
 
 const getDateTime = item => ({
   formattedDate: DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT),
@@ -73,12 +74,16 @@ const Student = () => {
 
 const Teacher = () => {
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
+  const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const { selectedItem, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const { formattedDate, timeRemaining } = getDateTime(item);
 
+  const tokens = ownsCourse ? studentTokens : adminTokens;
   return (
     <div className="mode-inner">
       {
@@ -88,7 +93,7 @@ const Teacher = () => {
             <>
               <div className="centered-mode">
                 <div className="item-info">
-                  <img className="item-info-image" src={courseCreatorImageUrl}/>
+                  <ParticipantList tokens={tokens} />
                   <Typography className="participant-name" variant="h6" component="p">
                     {selectedItem.displayName}
                   </Typography>

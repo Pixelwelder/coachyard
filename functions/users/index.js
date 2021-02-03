@@ -94,24 +94,24 @@ const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
   // Create claims.
   await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
 
-  await admin.firestore().runTransaction(async (transaction) => {
-    // Update all tokens that mention this user.
-    const tokensRef = admin.firestore()
-      .collection('tokens')
-      .where('user', '==', email)
-      .select();
-
-    // Update tokens that should belong to this user.
-    const result = await transaction.get(tokensRef);
-    log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
-    const promises = result.docs.map((doc) => {
-      return transaction.update(doc.ref, { user: uid });
-    })
-
-    await Promise.all(promises).catch(error => {
-      log({ message: error.message, data: error, context, level: 'error' });
-    });
-  })
+  // await admin.firestore().runTransaction(async (transaction) => {
+  //   // Update all tokens that mention this user.
+  //   const tokensRef = admin.firestore()
+  //     .collection('tokens')
+  //     .where('user', '==', email)
+  //     .select();
+  //
+  //   // Update tokens that should belong to this user.
+  //   const result = await transaction.get(tokensRef);
+  //   log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
+  //   const promises = result.docs.map((doc) => {
+  //     return transaction.update(doc.ref, { user: uid });
+  //   })
+  //
+  //   await Promise.all(promises).catch(error => {
+  //     log({ message: error.message, data: error, context, level: 'error' });
+  //   });
+  // })
 });
 
 /**
@@ -134,9 +134,43 @@ const getUser = async (data, context) => {
   }
 };
 
+const onCreateUserMeta = functions.firestore
+  .document('/users/{docId}')
+  .onCreate(async (change, context) => {
+    const user = change.data();
+    const { uid, email, displayName } = user;
+
+    await admin.firestore().runTransaction(async (transaction) => {
+      // Update all tokens that mention this user.
+      const tokensRef = admin.firestore()
+        .collection('tokens')
+        .where('user', '==', email)
+        .select();
+
+      // Update tokens that should belong to this user.
+      const result = await transaction.get(tokensRef);
+      log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
+      const promises = result.docs.map((doc) => {
+        return transaction.update(doc.ref, { user: uid, userDisplayName: displayName });
+      })
+
+      await Promise.all(promises).catch(error => {
+        log({ message: error.message, data: error, context, level: 'error' });
+      });
+    })
+  });
+
+const onUpdateUserMeta = functions.firestore
+  .document('/users/{docId}')
+  .onUpdate((change, context) => {
+
+  });
+
 module.exports = {
   // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),
   updateUserToCurrent: functions.https.onCall(updateUserToCurrent),
-  onCreateUser
+  onCreateUser,
+  onCreateUserMeta,
+  // onUpdateUserMeta
 };
