@@ -1,39 +1,28 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const jdenticon = require('jdenticon');
-const fs = require('fs');
 const { v4: uuid } = require('uuid');
 const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newUserMeta } = require('../data');
 const { setClaims } = require('../util/claims');
 
-const isProduction = process.env.FUNCTIONS_EMULATOR === "true";
-
 const _createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
-  const pathRoot = isProduction ? './' : '/temp/'
-  const path = `${pathRoot}${uid}.png`;
-  fs.writeFileSync(path, png);
+  const buffer = Buffer.from(png);
 
-  await admin.storage().bucket().upload(path, {
-    destination: `avatars/${uid}.png`,
+  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, {
     metadata: {
       fileType: 'image/png',
       metadata: {
+        // Allows us to see the image in Firebase Admin UI
         firebaseStorageDownloadTokens: uuid()
       }
     }
   });
 
   await admin.firestore().collection('users').doc(uid).update({ image: `${uid}.png`});
-
-  try {
-    fs.unlinkSync(path);
-  } catch (error) {
-    console.error(error);
-  }
 };
 
 /**
