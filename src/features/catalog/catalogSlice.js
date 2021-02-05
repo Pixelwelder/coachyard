@@ -5,6 +5,7 @@ import { parseUnserializables } from '../../util/firestoreUtils';
 import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import MODES from '../ui/Modes';
 import { reset, setValue } from '../../util/reduxUtils';
+import { EventTypes } from '../../constants/analytics';
 
 /**
  * Provides the list of courses this user has access to.
@@ -61,33 +62,38 @@ const init = createAsyncThunk(
 const createNewCourse = createAsyncThunk(
   'createCourse',
   async (params, { dispatch, getState }) => {
+    app.analytics().logEvent(EventTypes.CREATE_COURSE_ATTEMPTED);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
     const result = await callable(params);
+    app.analytics().logEvent(EventTypes.CREATE_COURSE);
   }
 );
 
 const updateCourse = createAsyncThunk(
   'updateCourse',
   async (params, { dispatch }) => {
+    app.analytics().logEvent(EventTypes.UPDATE_COURSE_ATTEMPTED);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
     const result = await callable(params);
+    app.analytics().logEvent(EventTypes.UPDATE_COURSE);
   }
 );
 
 const deleteCourse = createAsyncThunk(
   'deleteCourse',
   async ({ uid }, { dispatch, getState }) => {
-    console.log('deleting', uid);
-
     dispatch(uiActions.resetDialog('deleteDialog'));
     const { deleteDialog } = uiSelectors.select(getState());
     dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
 
     try {
+      app.analytics().logEvent(EventTypes.DELETE_COURSE_ATTEMPTED);
       const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_COURSE);
       await callable({ uid });
+      app.analytics().logEvent(EventTypes.DELETE_COURSE);
       dispatch(uiActions.resetUI('deleteDialog'));
     } catch (error) {
+      // TODO Analytics
       dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEW }}));
     }
   }
@@ -98,7 +104,6 @@ const _addItemToCourse = createAsyncThunk(
   async ({ item, courseUid }, { getState }) => {
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_ITEM);
     const { data } = await callable({ courseUid, item });
-    console.log('item added', data);
     return data.item;
   }
 );
@@ -106,8 +111,7 @@ const _addItemToCourse = createAsyncThunk(
 const _uploadItem = createAsyncThunk(
   '_uploadItem',
   async ({ uid, file }, { dispatch, getState }) => new Promise((resolve, reject) => {
-    console.log('_uploadItem', uid, file);
-
+    app.analytics().logEvent(EventTypes.UPLOAD_ITEM_ATTEMPTED);
     // Upload the file to Firebase Storage.
     const storageRef = app.storage().ref(`raw`);
     const fileRef = storageRef.child(uid);
@@ -122,12 +126,14 @@ const _uploadItem = createAsyncThunk(
       (error) => {
         console.error(error.message);
         dispatch({ type: 'upload/error', error });
+        // TODO Analytics
         return reject(error);
       },
       async () => {
         // Now get a url for streaming service.
         console.log('upload complete', file);
         dispatch({ type: 'upload/complete' });
+        app.analytics().logEvent(EventTypes.UPLOAD_ITEM);
         return resolve(fileRef.getDownloadURL());
       }
     );
@@ -137,12 +143,14 @@ const _uploadItem = createAsyncThunk(
 const _sendToStreamingService = createAsyncThunk(
   '_sendToStreamingService',
   async ({ uid, downloadUrl }) => {
-    console.log('Sending to streaming service:', downloadUrl);
+    console.log('Sending to streaming server:', downloadUrl);
+    app.analytics().logEvent(EventTypes.SEND_TO_STREAMING_SERVER_ATTEMPTED);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.SEND_ITEM);
     const streamResult = await callable({
       uid,
       params: { input: downloadUrl, playback_policy: ['public'] }
     });
+    app.analytics().logEvent(EventTypes.SEND_TO_STREAMING_SERVER);
     console.log('sent', streamResult);
   }
 );
@@ -158,6 +166,7 @@ const createItem = createAsyncThunk(
   'createItem',
   async ({ courseUid, item, file }, { dispatch, getState }) => {
     try {
+      app.analytics().logEvent(EventTypes.CREATE_ITEM_ATTEMPTED);
       // Create the data object.
       const { payload } = await dispatch(_addItemToCourse({ courseUid, item }));
       const { uid } = payload;
@@ -174,8 +183,10 @@ const createItem = createAsyncThunk(
         await dispatch(_sendToStreamingService({ uid, downloadUrl }));
         console.log('createItem: complete');
       }
+      app.analytics().logEvent(EventTypes.CREATE_ITEM);
       // Reset UI.
     } catch (error) {
+      // TODO Analytics
       console.error(error);
       throw error;
     }
@@ -186,6 +197,7 @@ const updateItem = createAsyncThunk(
   'updateItem',
   async ({ uid, update, file }, { dispatch }) => {
     // Update data object.
+    app.analytics().logEvent(EventTypes.UPDATE_ITEM_ATTEMPTED);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
     const updateResult = await callable({ uid, update });
 
@@ -197,6 +209,8 @@ const updateItem = createAsyncThunk(
       await dispatch(_sendToStreamingService({ uid, downloadUrl }));
       console.log('updateItem: complete');
     }
+
+    app.analytics().logEvent(EventTypes.UPDATE_ITEM);
   }
 );
 
@@ -204,6 +218,7 @@ const deleteItem = createAsyncThunk(
   'deleteItem',
   async ({ uid }, { dispatch, getState }) => {
     // dispatch(uiActions.resetDialog('deleteDialog'));
+    app.analytics().logEvent(EventTypes.DELETE_ITEM_ATTEMPTED);
     const { deleteDialog } = uiSelectors.select(getState());
     // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
 
@@ -212,6 +227,7 @@ const deleteItem = createAsyncThunk(
       const result = await callable({ uid });
       // dispatch(uiActions.resetDialog('deleteDialog'));
       console.log(result);
+    app.analytics().logEvent(EventTypes.DELETE_ITEM);
     // } catch (error) {
       // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
     // }
@@ -222,10 +238,11 @@ const launchItem = createAsyncThunk(
   'launchItem',
   async ({ uid }) => {
     console.log('launch item', uid);
+    app.analytics().logEvent(EventTypes.LAUNCH_ITEM_ATTEMPTED);
     const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
     if (itemData.status !== 'scheduled') throw new Error(`Can't launch ${uid}: status is ${itemData.status}.`);
-
     await app.firestore().collection('items').doc(uid).update({ status: 'initializing' });
+    app.analytics().logEvent(EventTypes.LAUNCH_ITEM);
   }
 );
 
@@ -236,10 +253,12 @@ const endItem = createAsyncThunk(
   'endItem',
   async ({ uid }) => {
     console.log('end item', uid);
+    app.analytics().logEvent(EventTypes.END_ITEM_ATTEMPTED);
     const itemData = (await app.firestore().collection('items').doc(uid).get()).data();
     if (itemData.status !== 'live') throw new Error(`Can't end ${uid}: status is ${itemData.status}.`);
 
     await app.firestore().collection('items').doc(uid).update({ status: 'uploading' });
+    app.analytics().logEvent(EventTypes.END_ITEM);
   }
 );
 

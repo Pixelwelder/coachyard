@@ -7,6 +7,7 @@ import {
 } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
+import { EventTypes } from '../../constants/analytics';
 
 const name = 'billing';
 const initialState = {
@@ -105,6 +106,7 @@ const setTier = createAsyncThunk(
 const _addPaymentMethod = createAsyncThunk(
   `_addPaymentMethod`,
   async ({ stripe, card }) => {
+    app.analytics().logEvent(EventTypes.ADD_PAYMENT_METHOD_ATTEMPTED);
     const paymentMethodResult = await stripe.createPaymentMethod({
       type: 'card',
       card
@@ -120,6 +122,7 @@ const _addPaymentMethod = createAsyncThunk(
 
     // Send it to the server.
     await app.functions().httpsCallable('createPaymentMethod')({ id: paymentMethod.id });
+    app.analytics().logEvent(EventTypes.ADD_PAYMENT_METHOD);
 
     // Save the payment method.
     // const { uid } = app.auth().currentUser;
@@ -146,7 +149,9 @@ const createSubscription = createAsyncThunk(
 
     // Now create the order.
     console.log('ordering...');
+    app.analytics().logEvent(EventTypes.CREATE_SUBSCRIPTION_ATTEMPTED, { tier: selectedTierId });
     await app.functions().httpsCallable('createSubscription')({ id: selectedTierId });
+    app.analytics().logEvent(EventTypes.CREATE_SUBSCRIPTION, { tier: selectedTierId });
     console.log('order complete');
 
     dispatch(generatedActions.resetUI());
@@ -158,7 +163,9 @@ const updateSubscription = createAsyncThunk(
   async (_, { getState }) => {
     console.log('update subscription');
     const { ui: { selectedTierId } } = select(getState());
+    app.analytics().logEvent(EventTypes.UPDATE_SUBSCRIPTION_ATTEMPTED, { tier: selectedTierId });
     await app.functions().httpsCallable('updateSubscription')({ id: selectedTierId });
+    app.analytics().logEvent(EventTypes.UPDATE_SUBSCRIPTION, { tier: selectedTierId });
     console.log('subscription updated');
   }
 )
@@ -173,7 +180,9 @@ const cancelSubscription = createAsyncThunk(
     }
 
     const { id } = active;
+    app.analytics().logEvent(EventTypes.UPDATE_SUBSCRIPTION_ATTEMPTED);
     await app.functions().httpsCallable('cancelSubscription')({ id });
+    app.analytics().logEvent(EventTypes.UPDATE_SUBSCRIPTION);
   }
 );
 

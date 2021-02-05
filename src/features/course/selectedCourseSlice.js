@@ -1,6 +1,7 @@
 import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { EventTypes } from '../../constants/analytics';
 
 const initialState = {
   isLoading: false,
@@ -45,6 +46,7 @@ let unsubscribeStudentTokens = () => {};
 const setUid = createAsyncThunk(
   'setUid',
   async ({ uid, history }, { dispatch, getState }) => {
+    app.analytics().logEvent(EventTypes.SELECT_COURSE, { uid });
     const slice = selectors.select(getState());
     const { course } = slice;
     if (course && (course.uid === uid)) {
@@ -133,6 +135,7 @@ const setSelectedItemUid = createAsyncThunk(
       return;
     }
 
+    app.analytics().logEvent(EventTypes.SELECT_ITEM, { uid });
     unsubscribeItem();
 
     if (uid) {

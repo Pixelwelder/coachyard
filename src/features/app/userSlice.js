@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { reset, setError, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import app from 'firebase/app';
+import { EventTypes } from '../../constants/analytics';
 
 const initialState = {
   isSignedIn: false,
@@ -64,8 +65,10 @@ const signUp = createAsyncThunk(
   'signUp',
   async ({ email, password, displayName }) => {
     // Create the user first.
+    app.analytics().logEvent(EventTypes.SIGN_UP_ATTEMPTED);
     const result = await app.auth().createUserWithEmailAndPassword(email, password);
     await result.user.updateProfile({ displayName });
+    app.analytics().logEvent(EventTypes.SIGN_UP_SUCCEEDED);
 
     // Now create meta.
     // Have to do it here because we have displayName.
@@ -88,6 +91,7 @@ const signUp = createAsyncThunk(
 const signIn = createAsyncThunk(
   'signIn',
   async ({ email, password }) => {
+    app.analytics().logEvent(EventTypes.SIGN_IN_ATTEMPTED);
     await app.auth().signInWithEmailAndPassword(email, password);
   }
 );
@@ -95,6 +99,7 @@ const signIn = createAsyncThunk(
 const signOut = createAsyncThunk(
   'signOut',
   async () => {
+    app.analytics().logEvent(EventTypes.SIGN_OUT);
     await app.auth().signOut();
   }
 );

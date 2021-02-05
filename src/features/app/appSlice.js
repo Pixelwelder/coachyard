@@ -4,6 +4,7 @@ import 'firebase/auth';
 import 'firebase/functions';
 import 'firebase/storage';
 import 'firebase/firestore';
+import 'firebase/analytics';
 import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';
@@ -13,6 +14,7 @@ import { actions as selectedCourseActions } from '../course/selectedCourseSlice'
 import { actions as userActions } from './userSlice';
 import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { resetValue, setValue } from '../../util/reduxUtils';
+import { EventTypes } from '../../constants/analytics';
 
 const initialState = {
   isInitialised: false,
@@ -34,6 +36,10 @@ const _initApp = createAsyncThunk(
       app.functions().useEmulator('localhost', 5001);
       app.firestore().useEmulator('localhost', 8081);
     }
+
+    app.analytics();
+    app.analytics().setAnalyticsCollectionEnabled(true);
+    app.analytics().logEvent(EventTypes.STARTUP);
   }
 );
 
@@ -46,6 +52,12 @@ const setupFirebase = createAsyncThunk(
       async (authUser) => {
         dispatch({ type: 'auth/stateChanged', payload: authUser });
         dispatch(generatedActions.setSignInAttempted(true));
+        if (authUser) {
+          app.analytics().setUserId(authUser.uid);
+          app.analytics().logEvent(EventTypes.SIGN_IN);
+        } else {
+          // app.analytics().logEvent(EventTypes.SIGN_OUT);
+        }
       }
     );
   }
