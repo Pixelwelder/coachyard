@@ -18,6 +18,7 @@ import Barebones from '../features/barebones';
 import Button from '@material-ui/core/Button';
 import app from 'firebase/app';
 import Billing from '../features/billing2';
+import Iframe from 'react-iframe';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -74,6 +75,20 @@ const App = () => {
       <CreateItemDialog />
       <DeleteCourseDialog />
       <DeleteItemDialog />
+
+      <Iframe
+        url="http://localhost:8000/index.php/appointments"
+        width="800px"
+        height="700px"
+        display="block"
+        position="absolute"
+        style={{ width: '900px', height: '50px', zIndex: 10 }}
+      />
+
+      {/*<iframe*/}
+      {/*  style={{ position: 'absolute', height: '100%', border: 'none' }}*/}
+      {/*  url="http://localhost:8000/index.php/appointments"*/}
+      {/*/>*/}
 
       {/*<Nav />*/}
 
