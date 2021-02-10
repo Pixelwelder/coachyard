@@ -1,21 +1,32 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { addProvider, deleteProvider } = require('./providers');
+const { addCustomer, deleteCustomer } = require('./customers');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
     const { uid, email } = user;
-    const easyResult = await addProvider({ uid, email });
-    await admin.firestore().collection('easy_users').doc(uid).set(easyResult);
+    const providerResult = await addProvider({ uid, email });
+    await admin.firestore().collection('easy_providers').doc(uid).set(providerResult);
+
+    const customerResult = await addCustomer({ uid, email });
+    console.log('customer', customerResult);
+    await admin.firestore().collection('easy_customers').doc(uid).set(customerResult);
   })
 
+// TODO We can easily end up with orphaned providers and customers here.
 const scheduling_onDeleteUser = functions.auth.user()
   .onDelete(async (user, context) => {
     const { uid } = user;
-    const easyDoc = await admin.firestore().collection('easy_users').doc(uid).get();
-    const { id } = easyDoc.data();
-    await deleteProvider(id);
-    await easyDoc.ref.delete();
+    const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
+    const { id: providerId } = providerDoc.data();
+    await deleteProvider(providerId);
+    await providerDoc.ref.delete();
+
+    const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
+    const { id: customerId } = customerDoc.data();
+    await deleteCustomer(customerId);
+    await customerDoc.ref.delete();
   });
 
 // const scheduling_onUpdateUser = functions.firestore
