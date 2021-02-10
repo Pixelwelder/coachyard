@@ -51,4 +51,31 @@ const deleteCustomer = async (id) => {
   return json;
 };
 
-module.exports = { addCustomer, deleteCustomer };
+const getCustomers = async () => {
+  console.log('getCustomers');
+  const customers = await fetch(
+    `${baseUrl}/customers`,
+    {
+      headers: getEasyHeaders()
+    }
+  );
+  const json = await customers.json();
+  console.log(`getCustomers: ${json.length} found`);
+  return json;
+};
+
+const clearCustomers = async () => {
+  console.log('clearCustomers');
+  const customers = await getCustomers();
+  const promises = customers.map(customer => fetch(
+    `${baseUrl}/customers/${customer.id}`,
+    {
+      headers: getEasyHeaders(),
+      method: METHODS.DELETE
+    }
+  ));
+  await Promise.all(promises);
+  console.log(`clearCustomers: cleared ${customers.length}`);
+};
+
+module.exports = { addCustomer, deleteCustomer, getCustomers, clearCustomers };

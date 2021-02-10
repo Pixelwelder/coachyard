@@ -3,8 +3,10 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { v4: uuid } = require('uuid');
 const { baseUrl } = require('./config.json');
-const { addCategories, removeCategories, getCategories } = require('./categories');
-const { addServices, removeServices, getServices } = require('./services');
+const { addCategories, clearCategories, getCategories } = require('./categories');
+const { addServices, clearServices, getServices } = require('./services');
+const { getProviders, clearProviders } = require('./providers');
+const { getCustomers, clearCustomers } = require('./customers');
 
 const createProvider = () => ({
   "id": 143,
@@ -87,8 +89,10 @@ const initialize = async () => {
 
 const clear = async () => {
   console.log('----- CLEAR -----');
-  await removeCategories();
-  await removeServices()
+  await clearProviders();
+  await clearCustomers();
+  await clearServices();
+  await clearCategories();
 };
 
 // const getSettings = async () => {
@@ -133,8 +137,8 @@ const go = async () => {
 }
 
 const go2 = async () => {
-  const result = await getCategories();
-  console.log(result);
+  const result = await clearProviders();
 };
 
+console.log('go');
 go();

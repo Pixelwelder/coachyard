@@ -62,6 +62,7 @@ const createProvider = (overrides) => ({
 });
 
 const getProviders = async () => {
+  console.log('getProviders');
   const result = await fetch(
     `${baseUrl}/providers`,
     {
@@ -70,7 +71,7 @@ const getProviders = async () => {
   );
 
   const json = await result.json();
-  console.log(json);
+  console.log(`getProviders: ${json.length} found`);
   return json;
 };
 
@@ -90,7 +91,19 @@ const deleteProvider = async (id) => {
   return json;
 };
 
-const deleteProviders = async () => {};
+const clearProviders = async () => {
+  console.log('clearProviders');
+  const providers = await getProviders();
+  const promises = providers.map((provider) => fetch(
+    `${baseUrl}/providers/${provider.id}`,
+    {
+      headers: getEasyHeaders(),
+      method: METHODS.DELETE
+    }
+  ));
+  await Promise.all(promises);
+  console.log(`clearProviders: cleared ${providers.length}`);
+};
 
 const addProvider = async ({ uid, email }) => {
   console.log('addProvider:', uid, email);
@@ -124,4 +137,4 @@ const addProvider = async ({ uid, email }) => {
   return json;
 };
 
-module.exports = { addProvider, deleteProvider };
+module.exports = { addProvider, deleteProvider, clearProviders, getProviders };

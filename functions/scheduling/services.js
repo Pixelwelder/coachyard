@@ -32,8 +32,8 @@ const getServices = async () => {
   return json;
 };
 
-const removeServices = async () => {
-  console.log('removeServices');
+const clearServices = async () => {
+  console.log('clearServices');
   const services = await getServices();
   const promises = await services.map(service => fetch(
     `${baseUrl}/services/${service.id}`,
@@ -42,7 +42,7 @@ const removeServices = async () => {
       method: METHODS.DELETE
     }
   ));
-  console.log(`removeServices: removed ${services.length}`);
+  console.log(`clearServices: removed ${services.length}`);
 };
 
 const addServices = async () => {
@@ -74,4 +74,4 @@ const addServices = async () => {
   console.log(`addServices: added ${services.length}`)
 };
 
-module.exports = { addServices, getServices, removeServices };
+module.exports = { addServices, getServices, clearServices };

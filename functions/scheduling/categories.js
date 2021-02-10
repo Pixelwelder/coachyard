@@ -25,7 +25,7 @@ const getCategories = async () => {
   return json;
 }
 
-const removeCategories = async () => {
+const clearCategories = async () => {
   console.log(`removing categories`);
   const categories = await getCategories();
   const promises = categories.map(category => fetch(
@@ -65,4 +65,4 @@ const addCategories = async () => {
   return categories;
 };
 
-module.exports = { getCategories, removeCategories, addCategories };
+module.exports = { getCategories, clearCategories, addCategories };
