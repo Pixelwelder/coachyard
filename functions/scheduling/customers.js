@@ -43,11 +43,12 @@ const deleteCustomer = async (id) => {
     `${baseUrl}/customers/${id}`,
     {
       headers: getEasyHeaders(),
-      method: METHODS.POST
+      method: METHODS.DELETE
     }
   );
+  const json = await result.json();
   console.log('deleteCustomer: complete');
-  return result;
+  return json;
 };
 
 module.exports = { addCustomer, deleteCustomer };

@@ -84,9 +84,10 @@ const deleteProvider = async (id) => {
       headers: getEasyHeaders(),
       method: METHODS.DELETE
     }
-  )
-  console.log(result);
+  );
   console.log('deleteProvider: complete');
+  const json = await result.json();
+  return json;
 };
 
 const deleteProviders = async () => {};

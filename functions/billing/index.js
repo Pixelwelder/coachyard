@@ -60,7 +60,7 @@ const stripe_onDeleteUser = functions.auth.user()
     // Cancel the subscription.
     const subscriptionsRef = customerRef.collection('subscriptions');
     const subscriptionDocs = await subscriptionsRef.get();
-    if (subscriptionDocs.size !== 1) throw new Error(`Expected 1 subscription, got ${subscriptionDocs.size}.`);
+    // if (subscriptionDocs.size !== 1) throw new Error(`Expected 1 subscription, got ${subscriptionDocs.size}.`);
     // const subscriptionDoc = subscriptionDocs.docs[0];
     // const cachedSubscription = subscriptionDoc.data();
 
