@@ -38,7 +38,8 @@ const createSettings = (overrides) => ({
   workingPlan: days.reduce((accum, day) => ({
     ...accum,
     [day]: createDay()
-  }), {})
+  }), {}),
+  ...overrides
 });
 
 const createProvider = (overrides) => ({
@@ -74,7 +75,20 @@ const getProviders = async () => {
 };
 
 const getProvider = async () => {};
-const deleteProvider = async () => {};
+
+const deleteProvider = async (id) => {
+  console.log('deleteProvider:', id);
+  const result = await fetch(
+    `${baseUrl}/providers/${id}`,
+    {
+      headers: getEasyHeaders(),
+      method: METHODS.DELETE
+    }
+  )
+  console.log(result);
+  console.log('deleteProvider: complete');
+};
+
 const deleteProviders = async () => {};
 
 const addProvider = async ({ uid, email }) => {
@@ -109,4 +123,4 @@ const addProvider = async ({ uid, email }) => {
   return json;
 };
 
-module.exports = { addProvider };
+module.exports = { addProvider, deleteProvider };
