@@ -5,81 +5,9 @@ const { v4: uuid } = require('uuid');
 const { baseUrl } = require('./config.json');
 const { addCategories, clearCategories, getCategories } = require('./categories');
 const { addServices, clearServices, getServices } = require('./services');
-const { getProviders, clearProviders } = require('./providers');
-const { getCustomers, clearCustomers } = require('./customers');
+const { clearProviders, listProviders, addProvider } = require('./providers');
+const { clearCustomers } = require('./customers');
 
-const createProvider = () => ({
-  "id": 143,
-  "firstName": "Chloe",
-  "lastName": "Doe",
-  "email": "zjordan@mailinator.com",
-  "mobile": "012345679-0",
-  "phone": "0123456789-1",
-  "address": "Some Str. 123",
-  "city": "Some City",
-  "state": "Some State",
-  "zip": "12345",
-  "notes": "Test provider notes.",
-  "services": [
-    2, 3, 4
-  ],
-  "settings":{
-    "username": "zjordan",
-    password: 'password',
-    "notifications":true,
-    "googleSync":true,
-    "googleCalendar": "calendar-id",
-    "googleToken": "23897dfasdf7a98gas98d9",
-    "syncFutureDays":10,
-    "syncPastDays":10,
-    "calendarView": "default",
-    "workingPlan":{
-      monday:{
-        "start": "09:00",
-        "end": "18:00",
-        "breaks":[
-          {
-            "start": "14:30",
-            "end": "15:00"
-          }
-        ]
-      },
-      tuesday:{
-        "start": "09:00",
-        "end": "18:00",
-        "breaks":[
-          {
-            "start": "14:30",
-            "end": "15:00"
-          }
-        ]
-      },
-      wednesday:null,
-      thursday:{
-        "start": "09:00",
-        "end": "18:00",
-        "breaks":[
-          {
-            "start": "14:30",
-            "end": "15:00"
-          }
-        ]
-      },
-      friday:{
-        "start": "09:00",
-        "end": "18:00",
-        "breaks":[
-          {
-            "start": "14:30",
-            "end": "15:00"
-          }
-        ]
-      },
-      saturday:null,
-      sunday:null
-    }
-  }
-});
 
 const initialize = async () => {
   console.log('----- INITITALIZE -----');
@@ -95,19 +23,6 @@ const clear = async () => {
   await clearCategories();
 };
 
-const getSettings = async () => {
-  const result = await fetch(
-    'http://localhost:8000/index.php/api/v1/settings',
-    {
-      method: METHODS.GET,
-      headers: getEasyHeaders()
-    }
-  );
-
-  const json = await result.json();
-  return json;
-};
-
 const __INIT__ = async () => {
   await clear()
   await initialize();
@@ -115,10 +30,9 @@ const __INIT__ = async () => {
 }
 
 const go2 = async () => {
-  console.log(getEasyHeaders())
-  const result = await getSettings();
-  console.log('result', result);
+  // const providers = await listProviders();
+  const provider = await addProvider({ uid: '55', email: 'test@mailinator.co', password: 'password' });
+  console.log(provider);
 };
 
-console.log('go');
 go2();

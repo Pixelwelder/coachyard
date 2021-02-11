@@ -3,6 +3,7 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { baseUrl } = require('./config.json');
 const { getServices } = require('./services');
+const { createGet, createList, createAdd } = require('./base');
 
 const createDuration = (overrides) => ({
   start: "00:00",
@@ -61,21 +62,8 @@ const createProvider = (overrides) => ({
   ...overrides
 });
 
-const getProviders = async () => {
-  console.log('getProviders');
-  const result = await fetch(
-    `${baseUrl}/providers`,
-    {
-      headers: getEasyHeaders()
-    }
-  );
-
-  const json = await result.json();
-  console.log(`getProviders: ${json.length} found`);
-  return json;
-};
-
-const getProvider = async () => {};
+const getProvider = createGet({ url: `${baseUrl}/providers` });
+const listProviders = createList({ url: `${baseUrl}/providers`});
 
 const deleteProvider = async (id) => {
   console.log('deleteProvider:', id);
@@ -93,7 +81,7 @@ const deleteProvider = async (id) => {
 
 const clearProviders = async () => {
   console.log('clearProviders');
-  const providers = await getProviders();
+  const providers = await listProviders();
   const promises = providers.map((provider) => fetch(
     `${baseUrl}/providers/${provider.id}`,
     {
@@ -105,8 +93,8 @@ const clearProviders = async () => {
   console.log(`clearProviders: cleared ${providers.length}`);
 };
 
+const _addProvider = createAdd({ url: `${baseUrl}/providers` });
 const addProvider = async ({ uid, email, password }) => {
-  console.log('addProvider:', uid, email);
   const _services = await getServices();
   const services = _services.map(service => service.id);
   const settings = createSettings({
@@ -121,20 +109,19 @@ const addProvider = async ({ uid, email, password }) => {
     services,
     settings
   });
-  console.log('sending provider', provider);
-
-  const result = await fetch(
-    `${baseUrl}/providers`,
-    {
-      method: METHODS.POST,
-      headers: getEasyHeaders(),
-      body: JSON.stringify(provider)
-    }
-  );
-
-  const json = await result.json();
-  console.log('addProvider: complete');
-  return json;
+  const result = await _addProvider({ data: provider });
+  return result;
 };
 
-module.exports = { addProvider, deleteProvider, clearProviders, getProviders };
+const updateProvider = async (uid, update) => {
+  const existingProvider = getProvider(uid);
+  const result = await fetch(
+    `${baseUrl}/providers/${uid}`,
+    {
+      method: METHODS.PUT,
+      headers: getEasyHeaders(),
+    }
+  )
+};
+
+module.exports = { addProvider, deleteProvider, clearProviders, getProvider, listProviders, updateProvider };

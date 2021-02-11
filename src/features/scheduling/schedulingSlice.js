@@ -21,7 +21,7 @@ const init = createAsyncThunk(
               const { settings: { username, password } } = data;
               console.log('--', username, password);
               setTimeout(() => {
-                console.log('POSTING');
+                console.log('POSTING', username, password);
                 document.getElementById('scheduling').contentWindow.postMessage(
                   { type: 'login', username, password },
                   'http://localhost:8000'
