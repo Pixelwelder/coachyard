@@ -34,4 +34,24 @@ const createAdd = ({ url }) => async ({ data }) => {
   return json;
 };
 
-module.exports = { createGet, createList, createAdd };
+const createUpdate = ({ url }) => async () => {
+
+};
+
+const createDelete = ({ url }) => async ({ id }) => {
+  console.log(`DELETE ${url}: ${id}`);
+  const result = await fetch(
+    `${url}/${id}`,
+    {
+      headers: getEasyHeaders(),
+      method: METHODS.DELETE
+    }
+  );
+  const json = await result.json();
+  console.log(`DELETE ${url}: complete`);
+  return json;
+};
+
+const createClear = () => {};
+
+module.exports = { createGet, createList, createAdd, createDelete };

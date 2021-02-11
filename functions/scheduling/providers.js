@@ -3,7 +3,7 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { baseUrl } = require('./config.json');
 const { getServices } = require('./services');
-const { createGet, createList, createAdd } = require('./base');
+const { createGet, createList, createAdd, createDelete } = require('./base');
 
 const createDuration = (overrides) => ({
   start: "00:00",
@@ -64,20 +64,7 @@ const createProvider = (overrides) => ({
 
 const getProvider = createGet({ url: `${baseUrl}/providers` });
 const listProviders = createList({ url: `${baseUrl}/providers`});
-
-const deleteProvider = async (id) => {
-  console.log('deleteProvider:', id);
-  const result = await fetch(
-    `${baseUrl}/providers/${id}`,
-    {
-      headers: getEasyHeaders(),
-      method: METHODS.DELETE
-    }
-  );
-  console.log('deleteProvider: complete');
-  const json = await result.json();
-  return json;
-};
+const deleteProvider = createDelete({ url: `${baseUrl}/providers` });
 
 const clearProviders = async () => {
   console.log('clearProviders');

@@ -24,7 +24,7 @@ const scheduling_onDeleteUser = functions.auth.user()
     const { uid } = user;
     const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
     const { id: providerId } = providerDoc.data();
-    await deleteProvider(providerId);
+    await deleteProvider({ id: providerId });
     await providerDoc.ref.delete();
 
     const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
