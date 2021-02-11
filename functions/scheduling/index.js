@@ -1,13 +1,17 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const generatePassword = require('password-generator');
 const { addProvider, deleteProvider } = require('./providers');
 const { addCustomer, deleteCustomer } = require('./customers');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
     const { uid, email } = user;
-    const providerResult = await addProvider({ uid, email });
-    await admin.firestore().collection('easy_providers').doc(uid).set(providerResult);
+    const password = generatePassword(20, true);
+    const providerResult = await addProvider({ uid, email, password });
+    // For the love of FSM change this as soon as possible.
+    const cachedProvider = { ...providerResult, settings: { ...providerResult.settings, password }}
+    await admin.firestore().collection('easy_providers').doc(uid).set(cachedProvider);
 
     const customerResult = await addCustomer({ uid, email });
     console.log('customer', customerResult);

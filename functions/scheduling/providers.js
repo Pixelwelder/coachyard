@@ -105,13 +105,13 @@ const clearProviders = async () => {
   console.log(`clearProviders: cleared ${providers.length}`);
 };
 
-const addProvider = async ({ uid, email }) => {
+const addProvider = async ({ uid, email, password }) => {
   console.log('addProvider:', uid, email);
   const _services = await getServices();
   const services = _services.map(service => service.id);
   const settings = createSettings({
     username: uid,
-    password: 'password', // TODO
+    password
   });
   const provider = createProvider({
     // id: uid,

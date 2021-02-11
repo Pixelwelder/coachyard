@@ -47,6 +47,16 @@ service cloud.firestore {
       // }
     }
 
+    match /easy_customers/{uid} {
+      allow read: if isCreator2();
+      allow write: if false;
+    }
+
+    match /easy_providers/{uid} {
+      allow read: if isCreator2();
+      allow write: if false;
+    }
+
     match /stripe_customers/{uid} {
       allow read, write: if request.auth.uid == uid;
 
@@ -65,6 +75,10 @@ service cloud.firestore {
     // function isSignedIn() {
     //   return request.auth != null;
     // }
+
+    function isCreator2() {
+      return request.auth != null;// && request.auth.uid == uid;
+    }
 
     function isCreator() {
       return resource.data.creatorUid == request.auth.uid;

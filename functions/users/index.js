@@ -73,35 +73,42 @@ const updateUserToCurrent = async (data, context) => {
 /**
  * Performs some maintenance when users are created.
  */
-const onCreateUser = functions.auth.user().onCreate(async (user, context) => {
-  log({ message: 'User was created.', data: user, context });
-  const { uid, email } = user;
+const users_onCreateUser = functions.auth.user()
+  .onCreate(async (user, context) => {
+    log({ message: 'User was created.', data: user, context });
+    const { uid, email } = user;
 
-  // Create icon.
-  await _createIcon({ uid });
+    // Create icon.
+    await _createIcon({ uid });
 
-  // Create claims.
-  await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
+    // Create claims.
+    await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
 
-  // await admin.firestore().runTransaction(async (transaction) => {
-  //   // Update all tokens that mention this user.
-  //   const tokensRef = admin.firestore()
-  //     .collection('tokens')
-  //     .where('user', '==', email)
-  //     .select();
-  //
-  //   // Update tokens that should belong to this user.
-  //   const result = await transaction.get(tokensRef);
-  //   log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
-  //   const promises = result.docs.map((doc) => {
-  //     return transaction.update(doc.ref, { user: uid });
-  //   })
-  //
-  //   await Promise.all(promises).catch(error => {
-  //     log({ message: error.message, data: error, context, level: 'error' });
-  //   });
-  // })
-});
+    // await admin.firestore().runTransaction(async (transaction) => {
+    //   // Update all tokens that mention this user.
+    //   const tokensRef = admin.firestore()
+    //     .collection('tokens')
+    //     .where('user', '==', email)
+    //     .select();
+    //
+    //   // Update tokens that should belong to this user.
+    //   const result = await transaction.get(tokensRef);
+    //   log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
+    //   const promises = result.docs.map((doc) => {
+    //     return transaction.update(doc.ref, { user: uid });
+    //   })
+    //
+    //   await Promise.all(promises).catch(error => {
+    //     log({ message: error.message, data: error, context, level: 'error' });
+    //   });
+    // })
+  });
+
+const users_onDeleteUser = functions.auth.user()
+  .onDelete(async (user, context) => {
+    const { uid } = user;
+    await admin.firestore().collection('users').doc(uid).delete();
+  });
 
 /**
  * Returns the metadata for the currently logged-in user.
@@ -123,7 +130,7 @@ const getUser = async (data, context) => {
   }
 };
 
-const onCreateUserMeta = functions.firestore
+const users_onCreateUserMeta = functions.firestore
   .document('/users/{docId}')
   .onCreate(async (change, context) => {
     const user = change.data();
@@ -159,7 +166,8 @@ module.exports = {
   // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),
   updateUserToCurrent: functions.https.onCall(updateUserToCurrent),
-  onCreateUser,
-  onCreateUserMeta,
+  users_onCreateUser,
+  users_onDeleteUser,
+  users_onCreateUserMeta,
   // onUpdateUserMeta
 };

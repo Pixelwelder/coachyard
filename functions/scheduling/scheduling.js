@@ -95,50 +95,30 @@ const clear = async () => {
   await clearCategories();
 };
 
-// const getSettings = async () => {
-//   const result = await fetch(
-//     'http://localhost:8000/index.php/api/v1/settings',
-//     {
-//       method: METHODS.GET,
-//       headers: getEasyHeaders()
-//     }
-//   );
-//
-//   const json = await result.json();
-//   return json;
-// };
-
-const post = async () => {
-  console.log('go');
-  // When we create a new provider, we give them all services.
-  // const services = await getServices();
+const getSettings = async () => {
   const result = await fetch(
-    'http://localhost:8000/index.php/api/v1/providers',
+    'http://localhost:8000/index.php/api/v1/settings',
     {
-      method: METHODS.POST,
-      headers: getEasyHeaders(),
-      body: JSON.stringify(createProvider())
+      method: METHODS.GET,
+      headers: getEasyHeaders()
     }
   );
-  try {
-    console.log(result);
-    console.log('---');
-    const json = await result.json();
-    console.log(json);
-  } catch (error) {
-    console.log(error);
-  }
+
+  const json = await result.json();
+  return json;
 };
 
-const go = async () => {
+const __INIT__ = async () => {
   await clear()
   await initialize();
   console.log('done');
 }
 
 const go2 = async () => {
-  const result = await clearProviders();
+  console.log(getEasyHeaders())
+  const result = await getSettings();
+  console.log('result', result);
 };
 
 console.log('go');
-go();
+go2();

@@ -7,6 +7,7 @@ import uiReducer2 from '../features/ui/uiSlice2';
 import billingReducer2 from '../features/billing2/billingSlice2';
 import catalogReducer from '../features/catalog/catalogSlice';
 import selectedCourseReducer from '../features/course/selectedCourseSlice';
+import schedulingReducer from '../features/scheduling/schedulingSlice';
 
 export default configureStore({
   reducer: {
@@ -16,7 +17,8 @@ export default configureStore({
     ui2: uiReducer2,
     billing: billingReducer2,
     catalog: catalogReducer,
-    selectedCourse: selectedCourseReducer
+    selectedCourse: selectedCourseReducer,
+    scheduling: schedulingReducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {
