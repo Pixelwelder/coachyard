@@ -10,7 +10,7 @@ const scheduling_onCreateUser = functions.auth.user()
     const password = generatePassword(20, true);
     const providerResult = await addProvider({ uid, email, password });
     // For the love of FSM change this as soon as possible.
-    const cachedProvider = { ...providerResult, settings: { ...providerResult.settings, password }}
+    const cachedProvider = { ...providerResult, settings: { ...providerResult.settings, password } }
     await admin.firestore().collection('easy_providers').doc(uid).set(cachedProvider);
 
     const customerResult = await addCustomer({ uid, email });
@@ -23,14 +23,18 @@ const scheduling_onDeleteUser = functions.auth.user()
   .onDelete(async (user, context) => {
     const { uid } = user;
     const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
-    const { id: providerId } = providerDoc.data();
-    await deleteProvider({ id: providerId });
-    await providerDoc.ref.delete();
+    if (providerDoc.exists) {
+      const { id: providerId } = providerDoc.data();
+      await deleteProvider({ id: providerId });
+      await providerDoc.ref.delete();
+    }
 
     const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
-    const { id: customerId } = customerDoc.data();
-    await deleteCustomer(customerId);
-    await customerDoc.ref.delete();
+    if (customerDoc.exists) {
+      const { id: customerId } = customerDoc.data();
+      await deleteCustomer(customerId);
+      await customerDoc.ref.delete();
+    }
   });
 
 // const scheduling_onUpdateUser = functions.firestore

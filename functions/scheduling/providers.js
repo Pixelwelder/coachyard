@@ -3,7 +3,7 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { baseUrl } = require('./config.json');
 const { getServices } = require('./services');
-const { createGet, createList, createAdd, createDelete } = require('./base');
+const { createGet, createList, createAdd, createDelete, createClear } = require('./base');
 
 const createDuration = (overrides) => ({
   start: "00:00",
@@ -65,20 +65,7 @@ const createProvider = (overrides) => ({
 const getProvider = createGet({ url: `${baseUrl}/providers` });
 const listProviders = createList({ url: `${baseUrl}/providers`});
 const deleteProvider = createDelete({ url: `${baseUrl}/providers` });
-
-const clearProviders = async () => {
-  console.log('clearProviders');
-  const providers = await listProviders();
-  const promises = providers.map((provider) => fetch(
-    `${baseUrl}/providers/${provider.id}`,
-    {
-      headers: getEasyHeaders(),
-      method: METHODS.DELETE
-    }
-  ));
-  await Promise.all(promises);
-  console.log(`clearProviders: cleared ${providers.length}`);
-};
+const clearProviders = createClear({ url: `${baseUrl}/providers`, listFunc: listProviders });
 
 const _addProvider = createAdd({ url: `${baseUrl}/providers` });
 const addProvider = async ({ uid, email, password }) => {

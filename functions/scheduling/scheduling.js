@@ -35,4 +35,4 @@ const go2 = async () => {
   console.log(provider);
 };
 
-go2();
+__INIT__();

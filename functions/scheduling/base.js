@@ -12,7 +12,7 @@ const createGet = ({ url }) => async ({ id } = {}) => {
     }
   );
   const json = await result.json();
-  console.log(`GET ${url}: ${id === 'undefined' ? 'complete' : json.length + ' found'}`);
+  console.log(`GET ${url}: ${id === 'undefined' ? 'complete' : 'found ' + json.length }`);
   return json;
 };
 
@@ -52,6 +52,19 @@ const createDelete = ({ url }) => async ({ id }) => {
   return json;
 };
 
-const createClear = () => {};
+const createClear = ({ url, listFunc }) => async () => {
+  console.log('clearProviders');
+  const items = await listFunc();
+  const promises = items.map((item) => fetch(
+    `${url}/${item.id}`,
+    {
+      headers: getEasyHeaders(),
+      method: METHODS.DELETE
+    }
+  ));
+  await Promise.all(promises);
+  console.log(`clearProviders: cleared ${items.length}`);
+  return {};
+};
 
-module.exports = { createGet, createList, createAdd, createDelete };
+module.exports = { createGet, createList, createAdd, createDelete, createClear };
