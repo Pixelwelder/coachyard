@@ -20,21 +20,31 @@ const init = createAsyncThunk(
               const data = snapshot.data();
               const { settings: { username, password } } = data;
               console.log('--', username, password);
-              const result = await fetch(
-                'http://localhost:8000/index.php/user/ajax_check_login',
-                {
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                    // 'Content-Type': 'application/json; charset=utf-8'
-                  },
-                  method: 'post',
-                  // mode: 'no-cors',
-                  body: `username=${username}&password=${password}`
-                }
-              );
-
-              const json = await result.json();
-              console.log(json);
+              setTimeout(() => {
+                console.log('POSTING');
+                document.getElementById('scheduling').contentWindow.postMessage(
+                  { type: 'login', username, password },
+                  'http://localhost:8000'
+                );
+              }, 5000);
+              // const result = await fetch(
+              //   'http://localhost:8000/index.php/user/ajax_check_login',
+              //   {
+              //     headers: {
+              //       'Content-Type': 'application/x-www-form-urlencoded'
+              //     },
+              //     method: 'POST',
+              //     body: `username=${username}&password=${password}`
+              //   }
+              // );
+              // document.getElementById("scheduling").src = 'http://localhost:8000/index.php/backend/index';
+              // const json = await result.json();
+              // if (json === 'SUCCESS') {
+              //   // document.getElementById("scheduling").src = 'http://localhost:8000/index.php/backend/index';
+              //   // window.location.href = 'http://localhost:8000/index.php/backend/index';
+              // } else {
+              //   console.log(json);
+              // }
             }
           });
       }
