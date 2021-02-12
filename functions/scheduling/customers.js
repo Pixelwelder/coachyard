@@ -3,6 +3,7 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { baseUrl } = require('./config.json');
 const { getServices } = require('./services');
+const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
 
 const createCustomer = (overrides) => ({
   id: 97,
@@ -17,65 +18,28 @@ const createCustomer = (overrides) => ({
   ...overrides
 });
 
+const _addCustomer = createAdd({ url: `${baseUrl}/customers` });
 const addCustomer = async ({ uid, email }) => {
-  console.log('addCustomer');
   const customer = createCustomer({
     firstName: email,
     lastName: uid,
     email
   });
-  const result = await fetch(
-    `${baseUrl}/customers`,
-    {
-      headers: getEasyHeaders(),
-      method: METHODS.POST,
-      body: JSON.stringify(customer)
-    }
-  );
-  console.log('addCustomer: complete');
-  const json = await result.json();
-  return json;
+  const result = await _addCustomer({ data: customer });
+  return result;
 };
 
-const deleteCustomer = async (id) => {
-  console.log('deleteCustomer');
-  const result = await fetch(
-    `${baseUrl}/customers/${id}`,
-    {
-      headers: getEasyHeaders(),
-      method: METHODS.DELETE
-    }
-  );
-  const json = await result.json();
-  console.log('deleteCustomer: complete');
-  return json;
+const _updateCustomer = createUpdate({ url: `${baseUrl}/customers` })
+const updateCustomer = async ({ id, data }) => {
+  const existingCustomer = getCustomer({ id });
+  const newCustomer = { ...existingCustomer, ...data };
+  const result = await _updateCustomer({ id, data: newCustomer });
+  return result;
 };
 
-const getCustomers = async () => {
-  console.log('getCustomers');
-  const customers = await fetch(
-    `${baseUrl}/customers`,
-    {
-      headers: getEasyHeaders()
-    }
-  );
-  const json = await customers.json();
-  console.log(`getCustomers: ${json.length} found`);
-  return json;
-};
+const getCustomer = createGet({ url: `${baseUrl}/customers` });
+const listCustomers = createList({ url: `${baseUrl}/customers` });
+const deleteCustomer = createDelete({ url: `${baseUrl}/customers` });
+const clearCustomers = createClear({ url: `${baseUrl}/customers`, listFunc: listCustomers });
 
-const clearCustomers = async () => {
-  console.log('clearCustomers');
-  const customers = await getCustomers();
-  const promises = customers.map(customer => fetch(
-    `${baseUrl}/customers/${customer.id}`,
-    {
-      headers: getEasyHeaders(),
-      method: METHODS.DELETE
-    }
-  ));
-  await Promise.all(promises);
-  console.log(`clearCustomers: cleared ${customers.length}`);
-};
-
-module.exports = { addCustomer, deleteCustomer, getCustomers, clearCustomers };
+module.exports = { addCustomer, updateCustomer, deleteCustomer, getCustomer, listCustomers, clearCustomers };

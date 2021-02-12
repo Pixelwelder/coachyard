@@ -20,7 +20,6 @@ const createList = createGet;
 
 const createAdd = ({ url }) => async ({ data }) => {
   console.log(`ADD ${url}`);
-  console.log(data);
   const result = await fetch(
     url,
     {
@@ -34,8 +33,19 @@ const createAdd = ({ url }) => async ({ data }) => {
   return json;
 };
 
-const createUpdate = ({ url }) => async () => {
-
+const createUpdate = ({ url }) => async ({ id, data }) => {
+  console.log(`UPDATE ${url}: ${id}`);
+  const result = await fetch(
+    `${url}/${id}`,
+    {
+      method: METHODS.PUT,
+      headers: getEasyHeaders(),
+      body: JSON.stringify(data)
+    }
+  );
+  const json = await result.json();
+  console.log(`UPDATE ${url}: ${id}: complete`);
+  return json;
 };
 
 const createDelete = ({ url }) => async ({ id }) => {
@@ -64,7 +74,7 @@ const createClear = ({ url, listFunc }) => async () => {
   ));
   await Promise.all(promises);
   console.log(`clearProviders: cleared ${items.length}`);
-  return {};
+  return [];
 };
 
-module.exports = { createGet, createList, createAdd, createDelete, createClear };
+module.exports = { createGet, createList, createAdd, createDelete, createClear, createUpdate };

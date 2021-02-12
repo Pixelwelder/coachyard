@@ -1,8 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const generatePassword = require('password-generator');
-const { addProvider, deleteProvider } = require('./providers');
-const { addCustomer, deleteCustomer } = require('./customers');
+const { addProvider, deleteProvider, updateProvider } = require('./providers');
+const { addCustomer, deleteCustomer, updateCustomer } = require('./customers');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
@@ -37,6 +37,26 @@ const scheduling_onDeleteUser = functions.auth.user()
     }
   });
 
+const scheduling_onUpdateUser = functions.firestore
+  .document('/users/{docId}')
+  .onUpdate(async (change, context) => {
+    const { params: { docId: uid } } = context;
+    const { displayName } = change.after.data();
+
+    const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
+    if (providerDoc.exists) {
+      const { id, settings } = providerDoc.data()
+      const result = await updateProvider({ id, data: { firstName: displayName, lastName: '', settings } });
+      console.log(result);
+    }
+
+    const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
+    if (customerDoc.exists) {
+      const { id } = customerDoc.data();
+      await updateCustomer({ id, data: { firstName: displayName, lastName: '' } });
+    }
+  });
+
 // const scheduling_onUpdateUser = functions.firestore
 //   .document('/users/{docId}')
 //   .onUpdate(async (change, context) => {
@@ -58,6 +78,7 @@ const scheduling_onDeleteUser = functions.auth.user()
 
 module.exports = {
   scheduling_onCreateUser,
+  scheduling_onUpdateUser,
   scheduling_onDeleteUser,
   // scheduling_onUpdateUser
 };

@@ -156,12 +156,6 @@ const users_onCreateUserMeta = functions.firestore
     })
   });
 
-const onUpdateUserMeta = functions.firestore
-  .document('/users/{docId}')
-  .onUpdate((change, context) => {
-
-  });
-
 module.exports = {
   // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),

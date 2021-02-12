@@ -3,7 +3,7 @@ const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { baseUrl } = require('./config.json');
 const { getServices } = require('./services');
-const { createGet, createList, createAdd, createDelete, createClear } = require('./base');
+const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
 
 const createDuration = (overrides) => ({
   start: "00:00",
@@ -62,11 +62,6 @@ const createProvider = (overrides) => ({
   ...overrides
 });
 
-const getProvider = createGet({ url: `${baseUrl}/providers` });
-const listProviders = createList({ url: `${baseUrl}/providers`});
-const deleteProvider = createDelete({ url: `${baseUrl}/providers` });
-const clearProviders = createClear({ url: `${baseUrl}/providers`, listFunc: listProviders });
-
 const _addProvider = createAdd({ url: `${baseUrl}/providers` });
 const addProvider = async ({ uid, email, password }) => {
   const _services = await getServices();
@@ -87,15 +82,17 @@ const addProvider = async ({ uid, email, password }) => {
   return result;
 };
 
-const updateProvider = async (uid, update) => {
-  const existingProvider = getProvider(uid);
-  const result = await fetch(
-    `${baseUrl}/providers/${uid}`,
-    {
-      method: METHODS.PUT,
-      headers: getEasyHeaders(),
-    }
-  )
+const _updateProvider = createUpdate({ url: `${baseUrl}/providers` });
+const updateProvider = async ({ id, data }) => {
+  const existingProvider = await getProvider(id);
+  const newProvider = { ...existingProvider, ...data }; // TODO Does not handle nesting.
+  const result = await _updateProvider({ id, data });
+  return result;
 };
 
-module.exports = { addProvider, deleteProvider, clearProviders, getProvider, listProviders, updateProvider };
+const getProvider = createGet({ url: `${baseUrl}/providers` });
+const listProviders = createList({ url: `${baseUrl}/providers`});
+const deleteProvider = createDelete({ url: `${baseUrl}/providers` });
+const clearProviders = createClear({ url: `${baseUrl}/providers`, listFunc: listProviders });
+
+module.exports = { addProvider, updateProvider, deleteProvider, getProvider, listProviders, clearProviders };
