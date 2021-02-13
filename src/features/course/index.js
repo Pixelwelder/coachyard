@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import {
+  actions as selectedCourseActions,
+  selectors as selectedCourseSelectors,
+  SIDEBAR_MODES
+} from './selectedCourseSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
 import './course.scss';
@@ -13,10 +17,13 @@ import Typography from '@material-ui/core/Typography';
 import CourseSummary from './CourseSummary';
 import ItemView from './ItemView';
 import CourseView from './CourseView';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { CourseChat } from '../chat';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
-  const { course, courseCreator, selectedItem, isRecording } = useSelector(selectedCourseSelectors.select);
+  const { course, courseCreator, selectedItem, isRecording, sidebarMode } = useSelector(selectedCourseSelectors.select);
   const { isSignedIn } = useSelector(userSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
@@ -80,7 +87,15 @@ const Course = () => {
             <div className="toc-header">
               <CourseSummary />
             </div>
-            <ItemList />
+            <Tabs
+              value={sidebarMode}
+              onChange={(event, newValue) => dispatch(selectedCourseActions.setSidebarMode(newValue))}
+            >
+              <Tab label="Content" />
+              <Tab label="Chat" />
+            </Tabs>
+            {sidebarMode === SIDEBAR_MODES.TOC && <ItemList />}
+            {sidebarMode === SIDEBAR_MODES.CHAT && <CourseChat />}
             <div className="toc-footer">
               {ownsCourse && (
                 <Button

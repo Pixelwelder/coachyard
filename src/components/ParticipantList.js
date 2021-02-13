@@ -8,7 +8,7 @@ const ParticipantList = ({ tokens }) => {
       {
         tokens.map((token, index) => (
           <li className="token-item" key={index}>
-            <StorageImage url={`/avatars/${token.user}.png`} />
+            <StorageImage url={`/avatars/${token.user}.png`} className="item-info-image" />
             <Typography>{token.userDisplayName}</Typography>
           </li>
         ))

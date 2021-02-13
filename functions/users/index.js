@@ -17,7 +17,8 @@ const _createIcon = async ({ uid }) => {
       fileType: 'image/png',
       metadata: {
         // Allows us to see the image in Firebase Admin UI
-        firebaseStorageDownloadTokens: uuid()
+        firebaseStorageDownloadTokens: uuid(),
+        cacheControl: 'public,max-age=4000'
       }
     }
   });

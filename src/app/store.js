@@ -8,6 +8,7 @@ import billingReducer2 from '../features/billing2/billingSlice2';
 import catalogReducer from '../features/catalog/catalogSlice';
 import selectedCourseReducer from '../features/course/selectedCourseSlice';
 import schedulingReducer from '../features/scheduling/schedulingSlice';
+import chatReducer from '../features/chat/chatSlice';
 
 export default configureStore({
   reducer: {
@@ -18,7 +19,8 @@ export default configureStore({
     billing: billingReducer2,
     catalog: catalogReducer,
     selectedCourse: selectedCourseReducer,
-    scheduling: schedulingReducer
+    scheduling: schedulingReducer,
+    chat: chatReducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {

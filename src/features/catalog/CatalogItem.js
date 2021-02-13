@@ -16,8 +16,11 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
 
   useEffect(() => {
     const go = async () => {
-      const url = await app.storage().ref(`/avatars/${user}.png`).getDownloadURL();
-      setImageUrl(url);
+      try {
+        // TODO Load item image.
+        const url = await app.storage().ref(`/avatars/${user}.png`).getDownloadURL();
+        setImageUrl(url);
+      } catch (error) {}
     }
 
     if (item) go();

@@ -3,6 +3,12 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 
+export const SIDEBAR_MODES = {
+  TOC: 0,
+  CHAT: 1
+};
+
+const name = 'selectedCourse';
 const initialState = {
   isLoading: false,
   error: null,
@@ -22,15 +28,13 @@ const initialState = {
   selectedItemUid: null,
 
   adminImageUrl: '',
-  studentImageUrls: []
+  studentImageUrls: [],
+
+  chat: [],
+  chatMessage: '',
+
+  sidebarMode: SIDEBAR_MODES.CHAT
 };
-
-const _loadItems = createAsyncThunk(
-  'selectedCourse/loadItems',
-  async ({ uid }) => {
-
-  }
-);
 
 let unsubscribeCourse = () => {};
 let unsubscribeToken = () => {};
@@ -38,13 +42,14 @@ let unsubscribeItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeStudent = () => {};
 let unsubscribeStudentTokens = () => {};
+let unsubscribeChat = () => {};
 /**
  * Sets the selected course.
  * This loads the course and its items.
  * @param id - the id of the course to load.
  */
 const setUid = createAsyncThunk(
-  'setUid',
+  `${name}/setUid`,
   async ({ uid, history }, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.SELECT_COURSE, { uid });
     const slice = selectors.select(getState());
@@ -80,9 +85,8 @@ const setUid = createAsyncThunk(
 
         console.log('snapshot size', snapshot.size);
         if (!snapshot.size) return abandon();
-        console.log('received course', snapshot.docs[0].data())
-
-        const course = parseUnserializables(snapshot.docs[0].data());
+        const courseDoc = snapshot.docs[0];
+        const course = parseUnserializables(courseDoc.data());
         dispatch(generatedActions.setCourse(course));
 
         // Get the creator.
@@ -108,7 +112,23 @@ const setUid = createAsyncThunk(
               const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setTokens(tokens));
             }
-          })
+          });
+
+        // Get chat, then subscribe for more.
+        // const chatRef = courseDoc.ref.collection('chat');
+        // const existingChat = await chatRef.get();
+        // const chatMessages = existingChat.docs.map(doc => parseUnserializables(doc.data()));
+        // dispatch(generatedActions.setChat(chatMessages));
+
+        unsubscribeChat();
+        unsubscribeChat = courseDoc.ref.collection('chat')
+          .orderBy('created')
+          // .limit(1)
+          .onSnapshot((snapshot) => {
+            console.log('CHAT', snapshot.size);
+            const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            dispatch(generatedActions.setChat(messages));
+          });
       });
 
     // Get the items.
@@ -127,7 +147,7 @@ const setUid = createAsyncThunk(
 
 let unsubscribeItem = () => {};
 const setSelectedItemUid = createAsyncThunk(
-  'setSelectedItemUid',
+  `${name}/setSelectedItemUid`,
   async ({ uid, history }, { dispatch, getState }) => {
     const { selectedItem } = selectors.select(getState());
     if (selectedItem && selectedItem.uid === uid) {
@@ -159,8 +179,31 @@ const setSelectedItemUid = createAsyncThunk(
   }
 );
 
+const submitChatMessage = createAsyncThunk(
+  `${name}/submitChatMessage`,
+  async (_, { getState, dispatch }) => {
+    try {
+      const { uid } = app.auth().currentUser;
+      const state = getState();
+      const { chatMessage, course } = select(state);
+      dispatch(generatedActions.setChatMessage(''));
+      await app.firestore().collection('courses')
+        .doc(course.uid)
+        .collection('chat')
+        .doc()
+        .set({
+          sender: uid,
+          text: chatMessage,
+          created: app.firestore.Timestamp.now()
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
+
 const init = createAsyncThunk(
-  'initSelectedCourse',
+  `${name}/initSelectedCourse`,
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
       dispatch(generatedActions.reset());
@@ -202,6 +245,12 @@ const { actions: generatedActions, reducer } = createSlice({
     _setSelectedItem: setValue('selectedItem'),
     setIsRecording: setValue('isRecording'),
     setIsFullscreen: setValue('isFullscreen'),
+    setSidebarMode: setValue('sidebarMode'),
+    setChat: setValue('chat'),
+    addChatMessage: (state, action) => {
+      state.chat = [ ...state.chat, action.payload ]
+    },
+    setChatMessage: setValue('chatMessage'),
 
     setAdminImageUrl: setValue('adminImageUrl'),
     setStudentImageUrls: setValue('studentImageUrls'),
@@ -214,7 +263,7 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, init, setUid, setSelectedItemUid };
+const actions = { ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(

@@ -42,5 +42,5 @@ const go2 = async () => {
   // const result = await listCustomers();
 };
 
-// go2();
-__INIT__();
+go2();
+// __INIT__();

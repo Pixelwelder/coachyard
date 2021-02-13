@@ -27,6 +27,9 @@ const LiveMode = ({ size }) => {
     const _callFrame = DailyIframe.createFrame(
       document.getElementById('live-mode-target'),
       {
+        // showLeaveButton: true,
+        showFullscreenButton: true,
+        userName: 'Testing',
         iframeStyle: {
           // position: 'absolute',
           border: '1px solid black',
@@ -123,12 +126,12 @@ const LiveMode = ({ size }) => {
   return (
     <div className="item-mode live-mode">
       <div id="live-mode-target" className={getSessionClasses()}>
-        <Button
-          className="full-screen-button" variant="contained" color="primary"
-          onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))}
-        >
-          {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>}
-        </Button>
+        {/*<Button*/}
+        {/*  className="full-screen-button" variant="contained" color="primary"*/}
+        {/*  onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))}*/}
+        {/*>*/}
+        {/*  {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>}*/}
+        {/*</Button>*/}
       </div>
       {!inSession && (
         <div className="out-of-session-container mode-inner">

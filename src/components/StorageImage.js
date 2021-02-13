@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import app from 'firebase/app';
 
-const StorageImage = ({ url }) => {
+const StorageImage = ({ url, className = '' }) => {
   const [downloadUrl, setDownloadUrl] = useState('');
 
   useEffect(() => {
     const go = async () => {
-      const _downloadUrl = await app.storage().ref(url).getDownloadURL();
-      setDownloadUrl(_downloadUrl);
+      try {
+        const _downloadUrl = await app.storage().ref(url).getDownloadURL();
+        setDownloadUrl(_downloadUrl);
+      } catch (error) {}
     };
     go();
   }, [url]);
 
   return (
-    <img className="item-info-image" src={downloadUrl}/>
+    <img className={className} src={downloadUrl}/>
   );
 };
 

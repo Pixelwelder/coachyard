@@ -1,0 +1,90 @@
+@import '../../app/variables';
+
+.chat {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+
+  @media (min-width: $breakpoint-mobile) {
+    height: 100px;
+  }
+}
+
+.main {
+  padding: 10px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 0.25rem;
+  }
+}
+
+.chat-form {
+  flex: 1;
+
+  display: flex;
+  flex-direction: row;
+  padding: 8px;
+
+  .chat-input {
+    flex: 1;
+    margin: 0 8px 0 0;
+  }
+}
+
+.chat-message {
+  display: flex;
+  align-items: center;
+
+  p {
+    margin: 0 0 8px 0;
+    max-width: 500px;
+    line-height: 24px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    position: relative;
+    color: white;
+    text-align: center;
+  }
+
+  &.sent {
+    flex-direction: row-reverse;
+
+    p {
+      color: white;
+      background: #0b93f6;
+      align-self: flex-end;
+    }
+  }
+
+  &.received {
+    p {
+      background: #e5e5ea;
+      color: black;
+    }
+  }
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 2px 5px;
+}
+
+//.sign-in {
+//  color: #282c34;
+//  background: white;
+//  max-width: 400px;
+//  margin: 0 auto;
+//}
+
+
+
+
+
+
+

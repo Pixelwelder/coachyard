@@ -20,13 +20,13 @@ const init = createAsyncThunk(
               const data = snapshot.data();
               const { settings: { username, password } } = data;
               console.log('--', username, password);
-              setTimeout(() => {
-                console.log('POSTING', username, password);
-                document.getElementById('scheduling').contentWindow.postMessage(
-                  { type: 'login', username, password },
-                  'http://localhost:8000'
-                );
-              }, 5000);
+              // setTimeout(() => {
+              //   console.log('POSTING', username, password);
+              //   document.getElementById('scheduling').contentWindow.postMessage(
+              //     { type: 'login', username, password },
+              //     'http://localhost:8000'
+              //   );
+              // }, 5000);
               // const result = await fetch(
               //   'http://localhost:8000/index.php/user/ajax_check_login',
               //   {
