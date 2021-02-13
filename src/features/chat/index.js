@@ -38,7 +38,7 @@ const Chat = ({ messages }) => {
   };
 
   return (
-    <div className="chat">
+    <>
       <ul className="main">
         {messages.map((message, index) => (
           <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
@@ -55,7 +55,7 @@ const Chat = ({ messages }) => {
         />
         <Button variant="contained" color="primary" type="submit" onClick={onSubmit}>Submit</Button>
       </form>
-    </div>
+    </>
   );
 };
 
