@@ -5,6 +5,7 @@
   overflow-y: scroll;
   padding: 8px;
   margin: 0;
+  height: 500px;
 
   @media (min-width: $breakpoint-mobile) {
     height: 100px;
@@ -36,12 +37,11 @@
   p {
     max-width: 500px;
     line-height: 24px;
-    padding: 8px 16px;
+    padding: 8px 24px;
     margin: 0;
     border-radius: 25px;
     position: relative;
     color: white;
-    text-align: center;
   }
 
   &.sent {
