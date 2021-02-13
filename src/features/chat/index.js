@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import app from 'firebase/app';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
@@ -24,18 +24,20 @@ const ChatMessage = ({ message, imageUrls }) => {
 const Chat = ({ messages }) => {
   const { chatMessage, imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
+  const dummy = useRef();
 
   const onChange = (value) => {
     dispatch(selectedCourseActions.setChatMessage(value));
   };
 
   const onSubmit = async (event) => {
-    console.log('onSubmit');
     event.preventDefault();
-    console.log(selectedCourseActions.submitChatMessage);
     await dispatch(selectedCourseActions.submitChatMessage());
-    console.log('submitted');
   };
+
+  useEffect(() => {
+    dummy.current.scrollIntoView({ behavior: 'smooth' });
+  }, [dummy, messages])
 
   return (
     <>
@@ -43,6 +45,7 @@ const Chat = ({ messages }) => {
         {messages.map((message, index) => (
           <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
         ))}
+        <span ref={dummy}></span>
       </ul>
       <form className="chat-form" onSubmit={onSubmit}>
         <TextField

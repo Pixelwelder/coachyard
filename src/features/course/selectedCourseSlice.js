@@ -2,6 +2,7 @@ import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
+import { useSelector } from 'react-redux';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
@@ -32,10 +33,11 @@ const initialState = {
 
   chat: [],
   chatMessage: '',
+  numOutstandingChats: 0,
 
   imageUrls: {},
 
-  sidebarMode: SIDEBAR_MODES.CHAT
+  sidebarMode: SIDEBAR_MODES.TOC
 };
 
 let unsubscribeCourse = () => {};
@@ -141,8 +143,13 @@ const setUid = createAsyncThunk(
           .orderBy('created')
           // .limit(1)
           .onSnapshot((snapshot) => {
-            console.log('CHAT', snapshot.size);
             const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+
+            const { numOutstandingChats, sidebarMode, chat } = select(getState());
+            if (sidebarMode === SIDEBAR_MODES.TOC) {
+              const diff = messages.length - chat.length;
+              dispatch(generatedActions.setNumOutstandingChats(numOutstandingChats + diff));
+            }
             dispatch(generatedActions.setChat(messages));
           });
       });
@@ -156,11 +163,7 @@ const setUid = createAsyncThunk(
       .onSnapshot((snapshot) => {
         console.log('received', snapshot.size, 'items');
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
-        const fakeItems = [];
-        for (let i = 0; i < 15; i++) {
-          fakeItems.push(items[0]);
-        }
-        dispatch(generatedActions.setItems(fakeItems));
+        dispatch(generatedActions.setItems(items));
       });
   }
 );
@@ -265,12 +268,16 @@ const { actions: generatedActions, reducer } = createSlice({
     _setSelectedItem: setValue('selectedItem'),
     setIsRecording: setValue('isRecording'),
     setIsFullscreen: setValue('isFullscreen'),
-    setSidebarMode: setValue('sidebarMode'),
+    setSidebarMode: (state, action) => {
+      state.sidebarMode = action.payload;
+      state.numOutstandingChats = 0;
+    },
     setChat: setValue('chat'),
     addChatMessage: (state, action) => {
       state.chat = [ ...state.chat, action.payload ]
     },
     setChatMessage: setValue('chatMessage'),
+    setNumOutstandingChats: setValue('numOutstandingChats'),
     addImageUrls: (state, action) => {
       state.imageUrls = { ...state.imageUrls, ...action.payload };
     },

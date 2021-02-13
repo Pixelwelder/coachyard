@@ -23,7 +23,9 @@ import { CourseChat } from '../chat';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
-  const { course, courseCreator, selectedItem, isRecording, sidebarMode } = useSelector(selectedCourseSelectors.select);
+  const {
+    course, courseCreator, selectedItem, isRecording, sidebarMode, numOutstandingChats
+  } = useSelector(selectedCourseSelectors.select);
   const { isSignedIn } = useSelector(userSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
@@ -88,25 +90,30 @@ const Course = () => {
               <CourseSummary />
             </div>
             <Tabs
+              variant="fullWidth"
               value={sidebarMode}
               onChange={(event, newValue) => dispatch(selectedCourseActions.setSidebarMode(newValue))}
             >
               <Tab label="Content" />
-              <Tab label="Chat" />
+              <Tab label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')} />
             </Tabs>
-            {sidebarMode === SIDEBAR_MODES.TOC && <ItemList />}
             {sidebarMode === SIDEBAR_MODES.CHAT && <CourseChat />}
-            <div className="toc-footer">
-              {ownsCourse && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => dispatch(uiActions2.createItem.open())}
-                >
-                  Create New
-                </Button>
-              )}
-            </div>
+            {sidebarMode === SIDEBAR_MODES.TOC && (
+              <>
+                <ItemList />
+                <div className="toc-footer">
+                  {ownsCourse && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => dispatch(uiActions2.createItem.open())}
+                    >
+                      Create New
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
           </Paper>
         </Grid>
       </Grid>
