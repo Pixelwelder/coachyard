@@ -8,13 +8,11 @@ import 'firebase/analytics';
 import queryString from 'query-string';
 
 import firebaseConfig from '../../__config__/firebase.json';
-import { actions as billingActions } from '../billing/billingSlice';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { actions as userActions } from './userSlice';
 import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { actions as schedulingActions } from '../scheduling/schedulingSlice';
-import { actions as chatActions } from '../chat/chatSlice';
 import { resetValue, setValue } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 

@@ -7,21 +7,22 @@ import StorageImage from '../../components/StorageImage';
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import './chat.scss';
 
-const ChatMessage = ({ message }) => {
+const ChatMessage = ({ message, imageUrls }) => {
   const authUser = app.auth().currentUser;
-  const { text, sender, photoURL } = message;
+  const { text, sender } = message;
+  const imageUrl = imageUrls[sender];
   const messageClass = sender === authUser.uid ? 'sent' : 'received';
 
   return (
-    <div className={`chat-message ${messageClass}`}>
-      <StorageImage url={`/avatars/${sender}.png`} className="chat-avatar" />
+    <li className={`chat-message ${messageClass}`}>
+      <img src={imageUrl} className="chat-avatar" />
       <p>{text}</p>
-    </div>
+    </li>
   )
 };
 
 const Chat = ({ messages }) => {
-  const { chatMessage } = useSelector(selectedCourseSelectors.select);
+  const { chatMessage, imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const onChange = (value) => {
@@ -38,11 +39,11 @@ const Chat = ({ messages }) => {
 
   return (
     <div className="chat">
-      <div className="main">
+      <ul className="main">
         {messages.map((message, index) => (
-          <ChatMessage key={index} message={message}/>
+          <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
         ))}
-      </div>
+      </ul>
       <form className="chat-form" onSubmit={onSubmit}>
         <TextField
           size="small"

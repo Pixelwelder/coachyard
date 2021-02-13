@@ -33,6 +33,8 @@ const initialState = {
   chat: [],
   chatMessage: '',
 
+  imageUrls: {},
+
   sidebarMode: SIDEBAR_MODES.CHAT
 };
 
@@ -107,10 +109,24 @@ const setUid = createAsyncThunk(
         unsubscribeStudentTokens();
         unsubscribeStudentTokens = app.firestore().collection('tokens')
           .where('courseUid', '==', course.uid)
-          .onSnapshot((snapshot) => {
+          .onSnapshot(async (snapshot) => {
             if (snapshot.size) {
               const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setTokens(tokens));
+
+              // Now images
+              const uids = tokens.map(({ user }) => user);
+              const promises = uids.map(async (uid) => {
+                const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
+                return { uid, url };
+              });
+              const result = await Promise.all(promises);
+              const urls = result.reduce((accum, { uid, url }) => ({
+                ...accum,
+                [uid]: url
+              }), {});
+              dispatch(generatedActions.addImageUrls(urls));
+              console.log('PROMISES', result);
             }
           });
 
@@ -140,7 +156,11 @@ const setUid = createAsyncThunk(
       .onSnapshot((snapshot) => {
         console.log('received', snapshot.size, 'items');
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
-        dispatch(generatedActions.setItems(items));
+        const fakeItems = [];
+        for (let i = 0; i < 15; i++) {
+          fakeItems.push(items[0]);
+        }
+        dispatch(generatedActions.setItems(fakeItems));
       });
   }
 );
@@ -251,6 +271,9 @@ const { actions: generatedActions, reducer } = createSlice({
       state.chat = [ ...state.chat, action.payload ]
     },
     setChatMessage: setValue('chatMessage'),
+    addImageUrls: (state, action) => {
+      state.imageUrls = { ...state.imageUrls, ...action.payload };
+    },
 
     setAdminImageUrl: setValue('adminImageUrl'),
     setStudentImageUrls: setValue('studentImageUrls'),
