@@ -31,12 +31,13 @@
 .chat-message {
   display: flex;
   align-items: center;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 
   p {
     max-width: 500px;
     line-height: 24px;
     padding: 8px 16px;
+    margin: 0;
     border-radius: 25px;
     position: relative;
     color: white;
@@ -51,6 +52,10 @@
       background: #0b93f6;
       align-self: flex-end;
     }
+
+    .chat-avatar {
+      margin-left: 5px;
+    }
   }
 
   &.received {
@@ -58,15 +63,21 @@
       background: #e5e5ea;
       color: black;
     }
+
+    .chat-avatar {
+      margin-right: 5px;
+    }
+  }
+
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0;
   }
 }
 
-.chat-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin: 2px 5px;
-}
+
 
 //.sign-in {
 //  color: #282c34;
