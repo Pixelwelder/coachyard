@@ -128,7 +128,6 @@ const setUid = createAsyncThunk(
                 [uid]: url
               }), {});
               dispatch(generatedActions.addImageUrls(urls));
-              console.log('PROMISES', result);
             }
           });
 
