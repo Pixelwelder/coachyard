@@ -185,6 +185,9 @@ const createItem = createAsyncThunk(
       }
       app.analytics().logEvent(EventTypes.CREATE_ITEM);
       // Reset UI.
+
+      // return
+      return { uid };
     } catch (error) {
       // TODO Analytics
       console.error(error);

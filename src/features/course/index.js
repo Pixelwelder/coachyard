@@ -20,6 +20,8 @@ import CourseView from './CourseView';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
+import { actions as catalogActions } from '../catalog/catalogSlice';
+import { getDefaultDateTime } from '../../util/itemUtils';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
@@ -41,6 +43,17 @@ const Course = () => {
       go();
     }
   }, [uid, itemUid, isSignedIn]);
+
+  const onCreate = async () => {
+    // dispatch(uiActions2.createItem.open())
+    const { payload } = await dispatch(catalogActions.createItem({
+      courseUid: course.uid,
+      item: { displayName: 'New Item', description: '', date: getDefaultDateTime(), file: '' }
+    }));
+    console.log('result', payload);
+    history.push(`/course/${course.uid}/${payload.uid}`);
+    dispatch(uiActions2.editItem.open());
+  }
 
   return (
     <div className="app-content">
@@ -106,7 +119,7 @@ const Course = () => {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => dispatch(uiActions2.createItem.open())}
+                      onClick={onCreate}
                     >
                       Create New
                     </Button>
