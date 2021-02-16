@@ -3,6 +3,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 import { useSelector } from 'react-redux';
+import { resetValue } from '../../util/reduxUtils';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
@@ -37,7 +38,9 @@ const initialState = {
 
   imageUrls: {},
 
-  sidebarMode: SIDEBAR_MODES.TOC
+  sidebarMode: SIDEBAR_MODES.TOC,
+
+  emailResult: null
 };
 
 let unsubscribeCourse = () => {};
@@ -224,6 +227,27 @@ const submitChatMessage = createAsyncThunk(
   }
 );
 
+const searchForEmail = createAsyncThunk(
+  `${name}/searchForEmail`,
+  async ({ email }, { dispatch }) => {
+    // Make sure we should do it first.
+
+    dispatch(generatedActions.setEmailResult(initialState.emailResult));
+    const result = await app.firestore()
+      .collection('users')
+      .where('email', '==', email)
+      .get();
+
+    console.log(result.size, 'found');
+    if (result.size) {
+      const user = result.docs[0].data();
+      dispatch(generatedActions.setEmailResult(parseUnserializables(user)));
+    } else {
+      dispatch(generatedActions.setEmailResult(email));
+    }
+  }
+);
+
 const init = createAsyncThunk(
   `${name}/initSelectedCourse`,
   async (_, { dispatch }) => {
@@ -283,7 +307,10 @@ const { actions: generatedActions, reducer } = createSlice({
 
     setAdminImageUrl: setValue('adminImageUrl'),
     setStudentImageUrls: setValue('studentImageUrls'),
-    reset: (state, action) => initialState
+    reset: (state, action) => initialState,
+
+    setEmailResult: setValue('emailResult'),
+    resetEmailResult: resetValue('emailResult', initialState.emailResult)
   },
   extraReducers: {
     [setUid.pending]: onPending,
@@ -292,7 +319,7 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage };
+const actions = { ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage, searchForEmail };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(

@@ -12,6 +12,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import StudentManager from './StudentManager';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -66,7 +67,7 @@ const CourseView = () => {
     }));
   };
 
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(1);
 
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
@@ -76,7 +77,11 @@ const CourseView = () => {
             isEditing
               ? (
                 <>
-                  <Tabs onChange={(event, newValue) => setTab(newValue)}>
+                  <Tabs
+                    className="edit-course-tabs"
+                    onChange={(event, newValue) => setTab(newValue)}
+                    value={tab}
+                  >
                     <Tab label="Details" />
                     <Tab label="Access" />
                   </Tabs>
@@ -123,6 +128,10 @@ const CourseView = () => {
                       <div className="spacer"/>
                       <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete}/>
                     </form>
+                  )}
+
+                  {tab === 1 && (
+                    <StudentManager />
                   )}
                 </>
               )
