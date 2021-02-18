@@ -184,6 +184,7 @@ const addUser = async (data, context) => {
   try {
     checkAuth(context);
     const { courseUid, studentEmail } = data;
+    console.log(data);
 
     await admin.firestore().runTransaction(async (transaction) => {
       // Grab the course.
@@ -200,10 +201,11 @@ const addUser = async (data, context) => {
       const studentDocs = await transaction.get(studentRef);
       let student;
       let studentUid;
-      if (studentDocs.length) {
+      if (studentDocs.size) {
         student = studentDocs.docs[0].data();
         studentUid = studentDocs.docs[0].id;
       }
+      console.log('student', studentUid, student);
 
       // Check to make sure token doesn't already exist.
       const existingTokenRef = admin.firestore().collection('tokens')

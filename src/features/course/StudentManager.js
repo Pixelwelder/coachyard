@@ -131,7 +131,7 @@ const StudentManager = () => {
 
     return (
       <div className="student-manager-page student-delete">
-        <p>{`Delete ${tokenToRemove?.user}?`}</p>
+        <p>{`Delete ${tokenToRemove?.userDisplayName}?`}</p>
         <Button className="student-cancel" onClick={onCancel}>Back</Button>
         <Button className="student-confirm" onClick={onRemove}>Confirm</Button>
       </div>

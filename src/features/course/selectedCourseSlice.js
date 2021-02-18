@@ -30,13 +30,11 @@ const initialState = {
   courseCreator: null,
   courseCreatorImageUrl: '',
   student: null,
-  studentImageUrl: '',
   items: [],
   selectedItem: null,
   selectedItemUid: null,
 
   adminImageUrl: '',
-  studentImageUrls: [],
 
   chat: [],
   chatMessage: '',
@@ -128,7 +126,9 @@ const setUid = createAsyncThunk(
               dispatch(generatedActions.setTokens(tokens));
 
               // Now images
-              const uids = tokens.map(({ user }) => user);
+              // TODO This should be universal.
+              const { imageUrls } = select(getState());
+              const uids = tokens.map(({ user }) => user).filter(uid => !imageUrls[uid]);
               const promises = uids.map(async (uid) => {
                 const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
                 return { uid, url };
@@ -327,7 +327,6 @@ const { actions: generatedActions, reducer } = createSlice({
     setCourseCreator: setValue('courseCreator'),
     setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
     setStudent: setValue('student'),
-    setStudentImageUrl: setValue('studentImageUrl'),
     setItems: setValue('items'),
     _setSelectedItemUid: setValue('selectedItemUid'),
     _setSelectedItem: setValue('selectedItem'),
@@ -348,7 +347,6 @@ const { actions: generatedActions, reducer } = createSlice({
     },
 
     setAdminImageUrl: setValue('adminImageUrl'),
-    setStudentImageUrls: setValue('studentImageUrls'),
     reset: (state, action) => initialState,
 
     setStudentManagerMode: setValue('studentManagerMode'),
