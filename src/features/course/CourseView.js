@@ -86,7 +86,7 @@ const CourseView = () => {
                     <Tab label="Access" />
                   </Tabs>
                   {tab === 0 && (
-                    <form onSubmit={onSubmit}>
+                    <form className="edit-course-form" onSubmit={onSubmit}>
                       <TextField
                         fullWidth
                         autoFocus

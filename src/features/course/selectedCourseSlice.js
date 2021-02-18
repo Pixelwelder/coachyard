@@ -10,6 +10,12 @@ export const SIDEBAR_MODES = {
   CHAT: 1
 };
 
+export const STUDENT_MANAGER_MODE = {
+  LIST: 0,
+  ADD: 1,
+  DELETE: 2
+};
+
 const name = 'selectedCourse';
 const initialState = {
   isLoading: false,
@@ -40,7 +46,9 @@ const initialState = {
 
   sidebarMode: SIDEBAR_MODES.TOC,
 
-  emailResult: null
+  studentManagerMode: STUDENT_MANAGER_MODE.LIST,
+  emailResult: null,
+  tokenToRemove: null
 };
 
 let unsubscribeCourse = () => {};
@@ -248,6 +256,40 @@ const searchForEmail = createAsyncThunk(
   }
 );
 
+const addUser = createAsyncThunk(
+  `${name}/addUser`,
+  async (_, { getState, dispatch }) => {
+    const { emailResult, course } = select(getState());
+    console.log('addUser', emailResult, course);
+    if (!emailResult) throw new Error('No email.');
+    if (!course) throw new Error('No course.');
+
+    const studentEmail = typeof emailResult === 'object' ? emailResult.email : emailResult;
+    const { uid: courseUid } = course;
+
+    console.log('addUser', studentEmail, courseUid);
+    const result = await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
+    console.log('addUser result', result);
+    dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
+  }
+);
+
+const removeUser = createAsyncThunk(
+  `${name}/removeUser`,
+  async (_, { getState, dispatch }) => {
+    const { tokenToRemove } = select(getState());
+    console.log('removeUser', tokenToRemove);
+    if (!tokenToRemove) throw new Error('No token.');
+
+    const { uid: tokenUid } = tokenToRemove;
+
+    console.log('removeUser', tokenUid);
+    const result = await app.functions().httpsCallable('removeUser')({ tokenUid });
+    console.log('removeUser', result);
+    dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
+  }
+);
+
 const init = createAsyncThunk(
   `${name}/initSelectedCourse`,
   async (_, { dispatch }) => {
@@ -309,8 +351,11 @@ const { actions: generatedActions, reducer } = createSlice({
     setStudentImageUrls: setValue('studentImageUrls'),
     reset: (state, action) => initialState,
 
+    setStudentManagerMode: setValue('studentManagerMode'),
     setEmailResult: setValue('emailResult'),
-    resetEmailResult: resetValue('emailResult', initialState.emailResult)
+    resetEmailResult: resetValue('emailResult', initialState.emailResult),
+    setTokenToRemove: setValue('tokenToRemove'),
+    resetTokenToRemove: resetValue('tokenToRemove', initialState.studentToRemove)
   },
   extraReducers: {
     [setUid.pending]: onPending,
@@ -319,7 +364,10 @@ const { actions: generatedActions, reducer } = createSlice({
   }
 });
 
-const actions = { ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage, searchForEmail };
+const actions = {
+  ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage, searchForEmail,
+  addUser, removeUser
+};
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectSelectedItem = createSelector(

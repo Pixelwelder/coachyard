@@ -3,41 +3,48 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
+import {
+  selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
+} from './selectedCourseSlice';
 
-const StudentView = ({ token, onDelete }) => {
+const StudentView = ({ token }) => {
+  const dispatch = useDispatch();
+
+  const onDelete = () => {
+    dispatch(selectedCourseActions.setTokenToRemove(token));
+    dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.DELETE));
+  }
+
   return (
     <div className="student-view">
       <p className="student-name">{token.userDisplayName}</p>
-      <Button onClick={() => onDelete(token)}>
+      <Button onClick={onDelete}>
         <DeleteIcon />
       </Button>
     </div>
   );
 };
 
-const PAGES = {
-  LIST: 0,
-  ADD: 1,
-  DELETE: 2
-};
-
 const StudentManager = () => {
-  // TODO Currently we assume private.
-  const [page, setPage] = useState(PAGES.LIST);
+  const { studentManagerMode } = useSelector(selectedCourseSelectors.select);
+  const dispatch = useDispatch();
 
   const onNavigate = (page) => {
-    setPage(page);
+    dispatch(selectedCourseActions.setStudentManagerMode(page));
   }
 
-  const List = ({ onAdd, onDelete }) => {
+  const List = () => {
     const tokens = useSelector(selectedCourseSelectors.selectStudentTokens);
+
+    const onAdd = () => {
+      dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.ADD));
+    }
 
     return (
       <div className="student-manager-page student-list">
         <ul>
           {tokens.map((token, index) => (
-            <StudentView key={index} token={token} onDelete={onDelete} />
+            <StudentView key={index} token={token} />
           ))}
         </ul>
         <Button
@@ -56,7 +63,7 @@ const StudentManager = () => {
 
     return (
       <>
-        {typeof result === 'string' && (<p>{result}</p>)}
+        {typeof result === 'string' && (<p>Not found: {result}</p>)}
         {typeof result === 'object' && (<p>{result.displayName}</p>)}
       </>
     );
@@ -76,13 +83,18 @@ const StudentManager = () => {
       dispatch(selectedCourseActions.resetEmailResult());
     }
 
+    const onAdd = () => {
+      dispatch(selectedCourseActions.addUser())
+    }
+
     return (
       <div className="student-manager-page student-add">
         {emailResult && (
-          <>
+          <div className="student-result-form">
             <EmailResult result={emailResult} />
             <Button onClick={onChange}>Change</Button>
-          </>
+            <Button onClick={onAdd}>Add Person</Button>
+          </div>
         )}
 
         {!emailResult && (
@@ -94,42 +106,48 @@ const StudentManager = () => {
               label="Email Address"
               placeholder="student@email.com"
             />
-            <Button type="submit" onClick={onSearch} variant="contained">Search</Button>
+            <Button type="submit" onClick={onSearch} variant="contained" disabled={!email}>Search</Button>
           </form>
         )}
         <div className="student-controls">
-          <Button className="student-cancel" variant="outlined" onClick={() => onNavigate(PAGES.LIST)}>Back</Button>
-          <Button className="student-confirm" variant="contained" color="primary" onClick={() => {}}>Confirm</Button>
+          <Button className="student-cancel" variant="outlined" onClick={() => onNavigate(STUDENT_MANAGER_MODE.LIST)}>Back</Button>
+          {/*<Button className="student-confirm" variant="contained" color="primary" onClick={() => {}}>Confirm</Button>*/}
         </div>
       </div>
     )
   };
 
-  const Delete = ({ onNavigate }) => {
+  const Delete = ({ onNavigate, user }) => {
+    const { tokenToRemove } = useSelector(selectedCourseSelectors.select);
+
+    const onRemove = () => {
+      dispatch(selectedCourseActions.removeUser(user));
+    }
+
+    const onCancel = () => {
+      dispatch(selectedCourseActions.resetTokenToRemove());
+      onNavigate(STUDENT_MANAGER_MODE.LIST);
+    }
+
     return (
       <div className="student-manager-page student-delete">
-        <Button className="student-cancel" onClick={() => onNavigate(PAGES.LIST)}>Back</Button>
+        <p>{`Delete ${tokenToRemove?.user}?`}</p>
+        <Button className="student-cancel" onClick={onCancel}>Back</Button>
+        <Button className="student-confirm" onClick={onRemove}>Confirm</Button>
       </div>
     )
   };
 
   return (
     <div className="student-manager">
-      {page === 0 && (
-        <List
-          onAdd={() => {
-            onNavigate(PAGES.ADD);
-          }}
-          onDelete={() => {
-            onNavigate(PAGES.DELETE);
-          }}
-        />
+      {studentManagerMode === 0 && (
+        <List />
       )}
 
-      {page === 1 && (
+      {studentManagerMode === 1 && (
         <Add onNavigate={onNavigate} />
       )}
-      {page === 2 && (
+      {studentManagerMode === 2 && (
         <Delete onNavigate={onNavigate} />
       )}
     </div>

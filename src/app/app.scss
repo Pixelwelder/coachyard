@@ -399,6 +399,7 @@ $billing-width: 400px;
 }
 
 .student-search-form {
+  flex: 1;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -407,6 +408,10 @@ $billing-width: 400px;
   .MuiTextField-root {
     flex: 1;
   }
+}
+
+.student-result-form {
+  flex: 1;
 }
 
 .student-controls {

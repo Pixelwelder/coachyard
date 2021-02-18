@@ -180,6 +180,81 @@ const updateCourse = async (data, context) => {
   }
 };
 
+const addUser = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { courseUid, studentEmail } = data;
+
+    await admin.firestore().runTransaction(async (transaction) => {
+      // Grab the course.
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+      const { displayName, description, image } = courseDoc.data();
+
+      // Grab the student.
+      const studentRef = admin.firestore()
+        .collection('users')
+        .where('email', '==', studentEmail)
+        .limit(1);
+      const studentDocs = await transaction.get(studentRef);
+      let student;
+      let studentUid;
+      if (studentDocs.length) {
+        student = studentDocs.docs[0].data();
+        studentUid = studentDocs.docs[0].id;
+      }
+
+      // Check to make sure token doesn't already exist.
+      const existingTokenRef = admin.firestore().collection('tokens')
+        .where('courseUid', '==', courseUid)
+        .where('user', '==', studentUid || studentEmail)
+        .limit(1);
+      const existingTokenDoc = await transaction.get(existingTokenRef);
+      if (existingTokenDoc.exists) throw new Error(`User ${studentUid || studentEmail} already has access to ${courseUid}.`);
+
+      const tokenRef = admin.firestore().collection('tokens').doc();
+      const timestamp = admin.firestore.Timestamp.now()
+      const studentToken = newCourseToken({
+        uid: tokenRef.id,
+        created: timestamp,
+        updated: timestamp,
+        user: studentUid || studentEmail,
+        userDisplayName: student ? student.displayName : studentEmail,
+        courseUid,
+        access: 'student',
+        displayName,
+        description,
+        image
+      });
+
+      await transaction.set(tokenRef, studentToken);
+    });
+
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+const removeUser = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { tokenUid } = data;
+    const result = await admin.firestore().runTransaction(async (transaction) => {
+
+      const tokenRef = admin.firestore().collection('tokens').doc(tokenUid);
+      const tokenDoc = await transaction.get(tokenRef);
+      if (!tokenDoc.exists) throw new Error(`Token ${tokenUid} does not exist.`);
+
+      await transaction.delete(tokenRef);
+    });
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+}
+
 /**
  * Allows one user to give a course they created to another user.
  * TODO - Must be rewritten
@@ -448,6 +523,8 @@ module.exports = {
   updateCourse: functions.https.onCall(updateCourse),
   // getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
+  addUser: functions.https.onCall(addUser),
+  removeUser: functions.https.onCall(removeUser),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
