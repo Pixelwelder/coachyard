@@ -11,6 +11,7 @@ import {
 } from './selectedCourseSlice';
 import app from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
+import Alert from '@material-ui/lab/Alert';
 
 const tokenIsClaimed = token => token.user !== token.userDisplayName;
 const isMember = (user) => (user !== null) && (typeof user === 'object');
@@ -119,6 +120,7 @@ const List = () => {
 const Add = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
+  const { error } = useSelector(selectedCourseSelectors.select);
 
   const onSearch = (event) => {
     event.preventDefault();
@@ -145,6 +147,7 @@ const Add = () => {
         </form>
       </div>
 
+      {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
         <Button
           variant="outlined"
@@ -257,7 +260,7 @@ const EditInvite = () => {
 }
 
 const StudentManager = () => {
-  const { studentManagerMode } = useSelector(selectedCourseSelectors.select);
+  const { studentManagerMode, error } = useSelector(selectedCourseSelectors.select);
 
   return (
     <div className="student-manager">

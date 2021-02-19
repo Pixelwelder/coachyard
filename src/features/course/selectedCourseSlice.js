@@ -3,7 +3,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 import { useSelector } from 'react-redux';
-import { resetValue } from '../../util/reduxUtils';
+import { isFulfilledAction, isPendingAction, isRejectedAction, isThisAction, resetValue } from '../../util/reduxUtils';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
@@ -250,16 +250,26 @@ const submitChatMessage = createAsyncThunk(
 
 const searchForEmail = createAsyncThunk(
   `${name}/searchForEmail`,
-  async ({ email }, { dispatch }) => {
-    dispatch(generatedActions.setEmailResult(initialState.emailResult));
+  async ({ email }, { dispatch, getState }) => {
     const result = await app.firestore()
       .collection('users')
       .where('email', '==', email)
       .get();
 
-    console.log(result.size, 'found');
+    console.log('user', email, result.size);
     if (result.size) {
       const user = result.docs[0].data();
+      // Check for dupe.
+      const { course } = select(getState());
+      const tokenDocs = await app.firestore()
+        .collection('tokens')
+        .where('user', '==', user.uid)
+        .where('courseUid', '==', course.uid)
+        .get();
+      console.log('TOKENS', tokenDocs.size);
+      if (tokenDocs.size) throw new Error(`${user.displayName} already has access to this course.`);
+
+      console.log('found user', user);
       dispatch(generatedActions.setEmailResult(parseUnserializables(user)));
     } else {
       dispatch(generatedActions.setEmailResult(email));
@@ -369,11 +379,20 @@ const { actions: generatedActions, reducer } = createSlice({
     setCurrentToken: setValue('tokenToRemove'),
     resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove)
   },
-  extraReducers: {
-    [setUid.pending]: onPending,
-    [setUid.rejected]: onRejected,
-    [setUid.fulfilled]: onFulfilled
-  }
+  extraReducers: (builder) => {
+      return builder
+        .addMatcher(isThisAction(name), (state, action) => {
+          if (isPendingAction(action)) {
+            state.isLoading = true;
+            state.error = initialState.error;
+          } else if (isRejectedAction(action)) {
+            state.isLoading = false;
+            state.error = action.error;
+          } else if (isFulfilledAction(action)) {
+            state.isLoading = false;
+          }
+        })
+    }
 });
 
 const actions = {

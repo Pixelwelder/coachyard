@@ -213,7 +213,7 @@ const addUser = async (data, context) => {
         .where('user', '==', studentUid || studentEmail)
         .limit(1);
       const existingTokenDoc = await transaction.get(existingTokenRef);
-      if (existingTokenDoc.exists) throw new Error(`User ${studentUid || studentEmail} already has access to ${courseUid}.`);
+      if (existingTokenDoc.size) throw new Error(`User ${studentUid || studentEmail} already has access to ${courseUid}.`);
 
       const tokenRef = admin.firestore().collection('tokens').doc();
       const timestamp = admin.firestore.Timestamp.now()

@@ -354,14 +354,14 @@ $billing-width: 400px;
 // ------------------------------------ COURSE ------------------------------------ //
 .edit-course-tabs {
   margin-bottom: 16px;
+  border-bottom: 1px solid lightgray;
 }
 
 // ------------------------------------ STUDENT MANAGER ------------------------------------ //
 .student-manager {
   flex: 1;
   display: flex;
-  border-top: 1px solid lightgray;
-  padding: 16px 0 0 0;
+  flex-direction: column;
 }
 
 .student-manager-page {
