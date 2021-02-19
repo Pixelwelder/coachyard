@@ -16,11 +16,27 @@ const tokenIsClaimed = token => token.user !== token.userDisplayName;
 const isMember = (user) => (user !== null) && (typeof user === 'object');
 const getName = (user, propName) => isMember(user) ? user[propName] : user;
 
-const _StudentImage = ({ student, propName = 'user', cName = "student-view-thumb" }) => {
+const _StudentImage = ({ uid, cName = "student-view-thumb" }) => {
   const { imageUrls } = useSelector(selectedCourseSelectors.select);
-  const imageUrl = imageUrls[student[propName]];
+  const [imageUrl, setImageUrl] = useState('');
 
-  console.log(student, propName);
+  useEffect(() => {
+    const go = async () => {
+      try {
+        const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
+        setImageUrl(url);
+      } catch (error) {
+        // Ignore.
+      }
+    }
+
+    if (imageUrls[uid]) {
+      setImageUrl(imageUrls[uid]);
+    } else {
+      go();
+    }
+  }, [uid, imageUrls]);
+
   return (
     <>
       {imageUrl
@@ -49,7 +65,7 @@ const StudentView = ({ token }) => {
 
   return (
     <div className="student-view">
-      <_StudentImage student={token} />
+      <_StudentImage uid={token.user} />
       <p className="student-name">{token.userDisplayName}</p>
       {/*{tokenIsClaimed(token) && (*/}
       {/*  <MemberIcon />*/}
@@ -163,7 +179,7 @@ const Delete = () => {
     <div className="student-manager-page student-delete">
       <Typography variant="h6">Remove Student</Typography>
       <div className="student-manager-content">
-        <_UserView user={tokenToRemove} propName="userDisplayName" />
+        <_UserView token={tokenToRemove} propName="userDisplayName" />
         <p>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</p>
       </div>
       <div className="student-manager-controls">
@@ -174,16 +190,19 @@ const Delete = () => {
   )
 };
 
-const _UserView = ({ user, propName = 'displayName' }) => {
+const _UserView = ({ user, token }) => {
+  const uid = user?.uid || token?.user;
+  const name = user?.displayName || token?.userDisplayName;
+  console.log('_UserView', uid, name);
   return (
     <div className="_user-view">
-      <_StudentImage student={user} propName="user" cName="student-manager-image" />
+      <_StudentImage uid={uid} cName="student-manager-image" />
       <Typography className="student-manager-user-name" variant="h5">
-        {getName(user)}
+        {name}
       </Typography>
-      {!isMember(user) && (
-        <Typography>This person is not a current Coachyard user.</Typography>
-      )}
+      {/*{!isMember(user) && (*/}
+      {/*  <Typography>This person is not a current Coachyard user.</Typography>*/}
+      {/*)}*/}
     </div>
   );
 }

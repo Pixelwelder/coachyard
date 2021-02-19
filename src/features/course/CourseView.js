@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import React, { useEffect, useState } from 'react';
 import { actions as catalogActions, actions as catalogSelectors } from '../catalog/catalogSlice';
@@ -18,7 +18,7 @@ import StudentManager from './StudentManager';
  * This component is similar to ItemView but displays Courses instead of Items.
  */
 const CourseView = () => {
-  const { course, student: existingStudent, courseCreator } = useSelector(selectedCourseSelectors.select);
+  const { course, editMode } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
@@ -67,8 +67,6 @@ const CourseView = () => {
     }));
   };
 
-  const [tab, setTab] = useState(1);
-
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
       {course && (
@@ -79,13 +77,13 @@ const CourseView = () => {
                 <>
                   <Tabs
                     className="edit-course-tabs"
-                    onChange={(event, newValue) => setTab(newValue)}
-                    value={tab}
+                    onChange={(event, newValue) => dispatch(selectedCourseActions.setEditMode(newValue))}
+                    value={editMode}
                   >
                     <Tab label="Details" />
                     <Tab label="Access" />
                   </Tabs>
-                  {tab === 0 && (
+                  {editMode === 0 && (
                     <form className="edit-course-form" onSubmit={onSubmit}>
                       <TextField
                         fullWidth
@@ -98,31 +96,31 @@ const CourseView = () => {
 
                       <TextField
                         fullWidth
-                        multiline rows={4}
+                        multiline rows={10}
                         variant="outlined"
                         label="Course Description" placeholder="This is a short description of the course."
                         id="description" value={description} disabled={isLoading}
                         onChange={({ target: { value } }) => onChange({ description: value })}
                       />
 
-                      {/* Can't edit an existing student at the moment. */}
-                      {existingStudent
-                        ? (
-                          <TextField
-                            fullWidth disabled
-                            variant="outlined" label="Student" placeholder="Student"
-                            id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}
-                          />
-                        )
-                        : (
-                          <TextField
-                            fullWidth
-                            variant="outlined" label="Student" placeholder="Student"
-                            id="student" type="email" value={student} disabled={isLoading}
-                            onChange={({ target: { value } }) => onChange({ student: value })}
-                          />
-                        )
-                      }
+                      {/*/!* Can't edit an existing student at the moment. *!/*/}
+                      {/*{existingStudent*/}
+                      {/*  ? (*/}
+                      {/*    <TextField*/}
+                      {/*      fullWidth disabled*/}
+                      {/*      variant="outlined" label="Student" placeholder="Student"*/}
+                      {/*      id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}*/}
+                      {/*    />*/}
+                      {/*  )*/}
+                      {/*  : (*/}
+                      {/*    <TextField*/}
+                      {/*      fullWidth*/}
+                      {/*      variant="outlined" label="Student" placeholder="Student"*/}
+                      {/*      id="student" type="email" value={student} disabled={isLoading}*/}
+                      {/*      onChange={({ target: { value } }) => onChange({ student: value })}*/}
+                      {/*    />*/}
+                      {/*  )*/}
+                      {/*}*/}
                       {!!error && <Alert severity="error">{error.message}</Alert>}
 
                       <div className="spacer"/>
@@ -130,7 +128,7 @@ const CourseView = () => {
                     </form>
                   )}
 
-                  {tab === 1 && (
+                  {editMode === 1 && (
                     <StudentManager />
                   )}
                 </>
@@ -139,15 +137,6 @@ const CourseView = () => {
               : (
                 <div className="course-details">
                   <Typography variant="h6" component="h3">{course?.displayName || ''}</Typography>
-                  <Typography className="course-student">
-                    {
-                      !ownsCourse
-                        ? `Instructor: ${courseCreator?.displayName || ''}`
-                        : existingStudent
-                        ? `Student: ${existingStudent.displayName} (${existingStudent.email})`
-                        : `Student: ${course?.student || ''}`
-                    }
-                  </Typography>
                   <Typography className="course-description">{course.description}</Typography>
 
                   <div className="spacer"/>

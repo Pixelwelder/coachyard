@@ -18,6 +18,11 @@ export const STUDENT_MANAGER_MODE = {
   EDIT_INVITE: 4
 };
 
+export const EDIT_MODE = {
+  DETAILS: 0,
+  ACCESS: 1
+};
+
 const name = 'selectedCourse';
 const initialState = {
   isLoading: false,
@@ -45,6 +50,7 @@ const initialState = {
   imageUrls: {},
 
   sidebarMode: SIDEBAR_MODES.TOC,
+  editMode: EDIT_MODE.DETAILS,
 
   studentManagerMode: STUDENT_MANAGER_MODE.LIST,
   emailResult: null,
@@ -356,6 +362,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setAdminImageUrl: setValue('adminImageUrl'),
     reset: (state, action) => initialState,
 
+    setEditMode: setValue('editMode'),
     setStudentManagerMode: setValue('studentManagerMode'),
     setEmailResult: setValue('emailResult'),
     resetEmailResult: resetValue('emailResult', initialState.emailResult),
