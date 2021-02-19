@@ -3,20 +3,38 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
-import NonUserIcon from '@material-ui/icons/Help';
+import NonMemberIcon from '@material-ui/icons/Help';
+import MemberIcon from '@material-ui/icons/Done';
+
 import {
   selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
 } from './selectedCourseSlice';
 import app from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
 
-const tokenIsUnclaimed = token => token.user === token.userDisplayName;
+const tokenIsClaimed = token => token.user !== token.userDisplayName;
+
+const _StudentImage = ({ student, propName = 'user', cName = "student-view-thumb" }) => {
+  const { imageUrls } = useSelector(selectedCourseSelectors.select);
+  const imageUrl = imageUrls[student[propName]];
+
+  console.log(student, propName);
+  return (
+    <>
+      {imageUrl
+        ? <img className={cName} src={imageUrl} />
+        : (
+          <div className={`${cName} no-student`}>
+            <NonMemberIcon />
+          </div>
+        )
+      }
+    </>
+  );
+}
 
 const StudentView = ({ token }) => {
-  const { imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
-
-  const imageUrl = imageUrls[token.user];
 
   const onDelete = () => {
     dispatch(selectedCourseActions.setCurrentToken(token));
@@ -29,20 +47,17 @@ const StudentView = ({ token }) => {
 
   return (
     <div className="student-view">
-      {imageUrl
-        ? <img className="student-view-thumb" src={imageUrl} />
-        : (
-          <div className="student-view-thumb no-student">
-            <NonUserIcon />
-          </div>
-        )
-      }
+      <_StudentImage student={token} />
       <p className="student-name">{token.userDisplayName}</p>
-      {tokenIsUnclaimed(token) && (
-        <Button onClick={onEdit}>
-          Invite...
-        </Button>
-      )}
+      {/*{tokenIsClaimed(token) && (*/}
+      {/*  <MemberIcon />*/}
+      {/*)}*/}
+      {/*{tokenIsUnclaimed(token) && (*/}
+      {/*  <Button onClick={onEdit}>*/}
+      {/*    Invite...*/}
+      {/*  </Button>*/}
+      {/*)}*/}
+      <div className="spacer" />
       <Button onClick={onDelete}>
         <DeleteIcon />
       </Button>
@@ -71,7 +86,8 @@ const List = () => {
       <div className="student-manager-controls">
         <div className="spacer" />
         <Button
-          variant="outlined"
+          variant="contained"
+          color="primary"
           className="student-list-add"
           onClick={onAdd}
         >
@@ -126,9 +142,11 @@ const Add = () => {
   )
 };
 
-const Delete = ({ user }) => {
-  const { tokenToRemove } = useSelector(selectedCourseSelectors.select);
+const Delete = () => {
+  const { tokenToRemove, imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
+
+  const imageUrl = imageUrls[tokenToRemove.user];
 
   const onRemove = () => {
     dispatch(selectedCourseActions.removeUser());
@@ -147,8 +165,8 @@ const Delete = ({ user }) => {
         <p>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</p>
       </div>
       <div className="student-manager-controls">
-        <Button onClick={onCancel}>Back</Button>
-        <Button onClick={onRemove}>Confirm</Button>
+        <Button onClick={onCancel} variant="outlined">Back</Button>
+        <Button onClick={onRemove} variant="contained" color="secondary">Confirm</Button>
       </div>
     </div>
   )
@@ -158,31 +176,9 @@ const _UserView = ({ user, propName = 'displayName' }) => {
   const isUser = () => (user !== null) && (typeof user === 'object');
   const getName = () => isUser() ? user[propName] : user;
 
-  const [imageUrl, setImageUrl] = useState('');
-
-  useEffect(() => {
-    const getImageUrl = async () => {
-      const { image } = user;
-      const url = await app.storage().ref(`/avatars/${image}`).getDownloadURL();
-      setImageUrl(url);
-    }
-
-    if (isUser()) getImageUrl();
-
-  }, [user]);
-
   return (
     <div className="_user-view">
-      {imageUrl
-        ? (
-          <img className="student-manager-image" src={imageUrl} />
-        )
-        : (
-          <div className="student-manager-image student-manager-image-placeholder">
-            <NonUserIcon />
-          </div>
-        )
-      }
+      <_StudentImage student={user} propName="user" cName="student-manager-image" />
       <Typography className="student-manager-user-name" variant="h5">
         {getName()}
       </Typography>

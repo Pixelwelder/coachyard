@@ -408,10 +408,6 @@ $billing-width: 400px;
   margin-bottom: 8px;
   border-radius: 8px;
 
-  .student-name {
-    flex: 1;
-  }
-
   .student-view-thumb {
     width: 25px;
     height: 25px;
@@ -465,14 +461,15 @@ $billing-width: 400px;
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 1px solid lightgray;
+  border: 1px solid #eeeeee;
   margin-bottom: 16px;
-}
 
-.student-manager-image-placeholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  &.no-student {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 ._user-view {
