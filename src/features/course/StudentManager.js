@@ -54,6 +54,7 @@ const _StudentImage = ({ uid, cName = "student-view-thumb" }) => {
 
 const StudentView = ({ token }) => {
   const dispatch = useDispatch();
+  const { isLoading } = useSelector(selectedCourseSelectors.select)
 
   const onDelete = () => {
     dispatch(selectedCourseActions.setCurrentToken(token));
@@ -77,7 +78,7 @@ const StudentView = ({ token }) => {
       {/*  </Button>*/}
       {/*)}*/}
       <div className="spacer" />
-      <Button onClick={onDelete}>
+      <Button onClick={onDelete} disabled={isLoading}>
         <DeleteIcon />
       </Button>
     </div>
@@ -86,6 +87,7 @@ const StudentView = ({ token }) => {
 
 const List = () => {
   const tokens = useSelector(selectedCourseSelectors.selectStudentTokens);
+  const { isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const onAdd = () => {
@@ -109,6 +111,7 @@ const List = () => {
           color="primary"
           className="student-list-add"
           onClick={onAdd}
+          disabled={isLoading}
         >
           Add
         </Button>
@@ -120,7 +123,7 @@ const List = () => {
 const Add = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
-  const { error } = useSelector(selectedCourseSelectors.select);
+  const { error, isLoading } = useSelector(selectedCourseSelectors.select);
 
   const onSearch = (event) => {
     event.preventDefault();
@@ -140,8 +143,9 @@ const Add = () => {
             placeholder="student@email.com"
             variant="outlined"
             autoFocus
+            disabled={isLoading}
           />
-          <Button type="submit" onClick={onSearch} variant="contained" color="primary" disabled={!email}>
+          <Button type="submit" onClick={onSearch} variant="contained" color="primary" disabled={!email || isLoading}>
             Search
           </Button>
         </form>
@@ -164,7 +168,7 @@ const Add = () => {
 };
 
 const Delete = () => {
-  const { tokenToRemove, imageUrls, error } = useSelector(selectedCourseSelectors.select);
+  const { tokenToRemove, imageUrls, error, isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const imageUrl = imageUrls[tokenToRemove.user];
@@ -188,7 +192,9 @@ const Delete = () => {
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
         <Button onClick={onCancel} variant="outlined">Back</Button>
-        <Button onClick={onRemove} variant="contained" color="secondary">Confirm</Button>
+        <Button onClick={onRemove} variant="contained" color="secondary" disabled={isLoading}>
+          Confirm
+        </Button>
       </div>
     </div>
   )
@@ -212,7 +218,7 @@ const _UserView = ({ user, token }) => {
 }
 
 const ViewUser = () => {
-  const { emailResult, error } = useSelector(selectedCourseSelectors.select);
+  const { emailResult, error, isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const onCancel = () => {
@@ -232,7 +238,7 @@ const ViewUser = () => {
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
         <Button onClick={onCancel} variant="outlined">Back</Button>
-        <Button onClick={onSubmit} variant="contained" color="primary">
+        <Button onClick={onSubmit} variant="contained" color="primary" disabled={isLoading}>
           {isMember(emailResult) ? 'Add' : 'Invite'}
         </Button>
       </div>
