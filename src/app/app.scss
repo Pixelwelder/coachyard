@@ -380,7 +380,7 @@ $billing-width: 400px;
   }
 }
 
-.student-add {
+.student-add, .student-delete {
   .student-manager-content {
     justify-content: center;
     align-items: center;
@@ -410,6 +410,20 @@ $billing-width: 400px;
 
   .student-name {
     flex: 1;
+  }
+
+  .student-view-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-right: 8px;
+
+    &.no-student {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
   }
 }
 

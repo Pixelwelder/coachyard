@@ -13,7 +13,10 @@ import Typography from '@material-ui/core/Typography';
 const tokenIsUnclaimed = token => token.user === token.userDisplayName;
 
 const StudentView = ({ token }) => {
+  const { imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
+
+  const imageUrl = imageUrls[token.user];
 
   const onDelete = () => {
     dispatch(selectedCourseActions.setCurrentToken(token));
@@ -26,6 +29,14 @@ const StudentView = ({ token }) => {
 
   return (
     <div className="student-view">
+      {imageUrl
+        ? <img className="student-view-thumb" src={imageUrl} />
+        : (
+          <div className="student-view-thumb no-student">
+            <NonUserIcon />
+          </div>
+        )
+      }
       <p className="student-name">{token.userDisplayName}</p>
       {tokenIsUnclaimed(token) && (
         <Button onClick={onEdit}>
@@ -120,7 +131,7 @@ const Delete = ({ user }) => {
   const dispatch = useDispatch();
 
   const onRemove = () => {
-    dispatch(selectedCourseActions.removeUser(user));
+    dispatch(selectedCourseActions.removeUser());
   }
 
   const onCancel = () => {
@@ -132,7 +143,8 @@ const Delete = ({ user }) => {
     <div className="student-manager-page student-delete">
       <Typography variant="h6">Remove Student</Typography>
       <div className="student-manager-content">
-        <p>{`Delete ${tokenToRemove?.userDisplayName}?`}</p>
+        <_UserView user={tokenToRemove} propName="userDisplayName" />
+        <p>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</p>
       </div>
       <div className="student-manager-controls">
         <Button onClick={onCancel}>Back</Button>
@@ -142,9 +154,9 @@ const Delete = ({ user }) => {
   )
 };
 
-const _UserView = ({ user }) => {
+const _UserView = ({ user, propName = 'displayName' }) => {
   const isUser = () => (user !== null) && (typeof user === 'object');
-  const getName = () => isUser() ? user.displayName : user;
+  const getName = () => isUser() ? user[propName] : user;
 
   const [imageUrl, setImageUrl] = useState('');
 

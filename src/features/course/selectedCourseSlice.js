@@ -132,8 +132,13 @@ const setUid = createAsyncThunk(
               const { imageUrls } = select(getState());
               const uids = tokens.map(({ user }) => user).filter(uid => !imageUrls[uid]);
               const promises = uids.map(async (uid) => {
-                const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
-                return { uid, url };
+                try {
+                  const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
+                  console.log('uid', uid, url);
+                  return { uid, url };
+                } catch (error) {
+                  return { uid, url: '' };
+                }
               });
               const result = await Promise.all(promises);
               const urls = result.reduce((accum, { uid, url }) => ({
