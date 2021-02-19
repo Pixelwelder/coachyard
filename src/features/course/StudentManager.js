@@ -13,6 +13,8 @@ import app from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
 
 const tokenIsClaimed = token => token.user !== token.userDisplayName;
+const isMember = (user) => (user !== null) && (typeof user === 'object');
+const getName = (user, propName) => isMember(user) ? user[propName] : user;
 
 const _StudentImage = ({ student, propName = 'user', cName = "student-view-thumb" }) => {
   const { imageUrls } = useSelector(selectedCourseSelectors.select);
@@ -173,16 +175,13 @@ const Delete = () => {
 };
 
 const _UserView = ({ user, propName = 'displayName' }) => {
-  const isUser = () => (user !== null) && (typeof user === 'object');
-  const getName = () => isUser() ? user[propName] : user;
-
   return (
     <div className="_user-view">
       <_StudentImage student={user} propName="user" cName="student-manager-image" />
       <Typography className="student-manager-user-name" variant="h5">
-        {getName()}
+        {getName(user)}
       </Typography>
-      {!isUser() && (
+      {!isMember(user) && (
         <Typography>This person is not a current Coachyard user.</Typography>
       )}
     </div>
@@ -209,7 +208,9 @@ const ViewUser = () => {
       </div>
       <div className="student-manager-controls">
         <Button onClick={onCancel} variant="outlined">Back</Button>
-        <Button onClick={onSubmit} variant="contained" color="primary">Add</Button>
+        <Button onClick={onSubmit} variant="contained" color="primary">
+          {isMember(emailResult) ? 'Add' : 'Invite'}
+        </Button>
       </div>
     </div>
   );
