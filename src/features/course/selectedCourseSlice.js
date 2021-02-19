@@ -13,7 +13,9 @@ export const SIDEBAR_MODES = {
 export const STUDENT_MANAGER_MODE = {
   LIST: 0,
   ADD: 1,
-  DELETE: 2
+  DELETE: 2,
+  VIEW_USER: 3,
+  EDIT_INVITE: 4
 };
 
 const name = 'selectedCourse';
@@ -253,6 +255,7 @@ const searchForEmail = createAsyncThunk(
     } else {
       dispatch(generatedActions.setEmailResult(email));
     }
+    dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.VIEW_USER))
   }
 );
 
@@ -270,6 +273,7 @@ const addUser = createAsyncThunk(
     console.log('addUser', studentEmail, courseUid);
     const result = await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
     console.log('addUser result', result);
+    dispatch(generatedActions.resetEmailResult());
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   }
 );

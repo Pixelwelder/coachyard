@@ -368,10 +368,6 @@ $billing-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-
-  .student-cancel {
-    align-self: flex-end;
-  }
 }
 
 .student-list {
@@ -392,10 +388,15 @@ $billing-width: 400px;
   border: 1px solid green;
   display: flex;
   padding: 0 16px;
+  align-items: center;
 
   .student-name {
     flex: 1;
   }
+}
+
+.student-manager-content {
+  flex: 1;
 }
 
 .student-search-form {
@@ -414,7 +415,7 @@ $billing-width: 400px;
   flex: 1;
 }
 
-.student-controls {
+.student-manager-controls {
   display: flex;
   justify-content: space-between;
 }
