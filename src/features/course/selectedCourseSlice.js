@@ -48,7 +48,7 @@ const initialState = {
 
   studentManagerMode: STUDENT_MANAGER_MODE.LIST,
   emailResult: null,
-  tokenToRemove: null
+  currentToken: null
 };
 
 let unsubscribeCourse = () => {};
@@ -240,8 +240,6 @@ const submitChatMessage = createAsyncThunk(
 const searchForEmail = createAsyncThunk(
   `${name}/searchForEmail`,
   async ({ email }, { dispatch }) => {
-    // Make sure we should do it first.
-
     dispatch(generatedActions.setEmailResult(initialState.emailResult));
     const result = await app.firestore()
       .collection('users')
@@ -356,8 +354,8 @@ const { actions: generatedActions, reducer } = createSlice({
     setStudentManagerMode: setValue('studentManagerMode'),
     setEmailResult: setValue('emailResult'),
     resetEmailResult: resetValue('emailResult', initialState.emailResult),
-    setTokenToRemove: setValue('tokenToRemove'),
-    resetTokenToRemove: resetValue('tokenToRemove', initialState.studentToRemove)
+    setCurrentToken: setValue('tokenToRemove'),
+    resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove)
   },
   extraReducers: {
     [setUid.pending]: onPending,

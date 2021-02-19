@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
-import MemberIcon from '@material-ui/icons/CheckCircle';
+import NonUserIcon from '@material-ui/icons/Help';
 import {
   selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
 } from './selectedCourseSlice';
+import app from 'firebase/app';
+import Typography from '@material-ui/core/Typography';
 
 const tokenIsUnclaimed = token => token.user === token.userDisplayName;
 
@@ -14,7 +16,7 @@ const StudentView = ({ token }) => {
   const dispatch = useDispatch();
 
   const onDelete = () => {
-    dispatch(selectedCourseActions.setTokenToRemove(token));
+    dispatch(selectedCourseActions.setCurrentToken(token));
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.DELETE));
   }
 
@@ -47,6 +49,7 @@ const List = () => {
 
   return (
     <div className="student-manager-page student-list">
+      <Typography variant="h6">Who has access to this course?</Typography>
       <div className="student-manager-content">
         <ul>
           {tokens.map((token, index) => (
@@ -68,17 +71,6 @@ const List = () => {
   );
 };
 
-const EmailResult = ({ result }) => {
-  if (!result) return null;
-
-  return (
-    <>
-      {typeof result === 'string' && (<p>Not found: {result}</p>)}
-      {typeof result === 'object' && (<p>{result.displayName}</p>)}
-    </>
-  );
-};
-
 const Add = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
@@ -90,6 +82,7 @@ const Add = () => {
 
   return (
     <div className="student-manager-page student-add">
+      <Typography variant="h6">Add Student</Typography>
       <div className="student-manager-content">
         <form className="student-search-form">
           <TextField
@@ -98,9 +91,12 @@ const Add = () => {
             onSubmit={onSearch}
             label="Email Address"
             placeholder="student@email.com"
+            variant="outlined"
             autoFocus
           />
-          <Button type="submit" onClick={onSearch} variant="contained" disabled={!email}>Search</Button>
+          <Button type="submit" onClick={onSearch} variant="contained" color="primary" disabled={!email}>
+            Search
+          </Button>
         </form>
       </div>
 
@@ -111,7 +107,7 @@ const Add = () => {
             dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
           }}
         >
-          Back
+          Cancel
         </Button>
         {/*<Button className="student-confirm" variant="contained" color="primary" onClick={() => {}}>Confirm</Button>*/}
       </div>
@@ -128,12 +124,13 @@ const Delete = ({ user }) => {
   }
 
   const onCancel = () => {
-    dispatch(selectedCourseActions.resetTokenToRemove());
+    dispatch(selectedCourseActions.resetCurrentToken());
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   }
 
   return (
     <div className="student-manager-page student-delete">
+      <Typography variant="h6">Remove Student</Typography>
       <div className="student-manager-content">
         <p>{`Delete ${tokenToRemove?.userDisplayName}?`}</p>
       </div>
@@ -145,15 +142,50 @@ const Delete = ({ user }) => {
   )
 };
 
+const _UserView = ({ user }) => {
+  const isUser = () => (user !== null) && (typeof user === 'object');
+  const getName = () => isUser() ? user.displayName : user;
+
+  const [imageUrl, setImageUrl] = useState('');
+
+  useEffect(() => {
+    const getImageUrl = async () => {
+      const { image } = user;
+      const url = await app.storage().ref(`/avatars/${image}`).getDownloadURL();
+      setImageUrl(url);
+    }
+
+    if (isUser()) getImageUrl();
+
+  }, [user]);
+
+  return (
+    <div className="_user-view">
+      {imageUrl
+        ? (
+          <img className="student-manager-image" src={imageUrl} />
+        )
+        : (
+          <div className="student-manager-image student-manager-image-placeholder">
+            <NonUserIcon />
+          </div>
+        )
+      }
+      <Typography className="student-manager-user-name" variant="h5">
+        {getName()}
+      </Typography>
+      {!isUser() && (
+        <Typography>This person is not a current Coachyard user.</Typography>
+      )}
+    </div>
+  );
+}
+
 const ViewUser = () => {
   const { emailResult } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const onCancel = () => {
-
-  }
-
-  const onChange = () => {
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.ADD));
   }
 
@@ -162,16 +194,14 @@ const ViewUser = () => {
   }
 
   return (
-    <div className="student-manager-page student-add">
+    <div className="student-manager-page view-user">
+      <Typography variant="h6">Add Student</Typography>
       <div className="student-manager-content">
-        <div className="student-result-form">
-          <EmailResult result={emailResult} />
-        </div>
-        <Button onClick={onChange}>Change</Button>
+        <_UserView user={emailResult} />
       </div>
       <div className="student-manager-controls">
-        <Button onClick={onCancel}>Back</Button>
-        <Button onClick={onSubmit}>Confirm</Button>
+        <Button onClick={onCancel} variant="outlined">Back</Button>
+        <Button onClick={onSubmit} variant="contained" color="primary">Add</Button>
       </div>
     </div>
   );
@@ -183,7 +213,7 @@ const EditInvite = () => {
   return (
     <div className="student-manager-page student-edit-invite">
       <div className="student-manager-content">
-        <p>Content</p>
+        {/*<_UserView />*/}
       </div>
       <div className="student-manager-controls">
         <Button
@@ -200,7 +230,6 @@ const EditInvite = () => {
 
 const StudentManager = () => {
   const { studentManagerMode } = useSelector(selectedCourseSelectors.select);
-  const dispatch = useDispatch();
 
   return (
     <div className="student-manager">
