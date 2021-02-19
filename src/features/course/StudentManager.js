@@ -164,7 +164,7 @@ const Add = () => {
 };
 
 const Delete = () => {
-  const { tokenToRemove, imageUrls } = useSelector(selectedCourseSelectors.select);
+  const { tokenToRemove, imageUrls, error } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const imageUrl = imageUrls[tokenToRemove.user];
@@ -185,6 +185,7 @@ const Delete = () => {
         <_UserView token={tokenToRemove} propName="userDisplayName" />
         <p>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</p>
       </div>
+      {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
         <Button onClick={onCancel} variant="outlined">Back</Button>
         <Button onClick={onRemove} variant="contained" color="secondary">Confirm</Button>
@@ -195,7 +196,7 @@ const Delete = () => {
 
 const _UserView = ({ user, token }) => {
   const uid = user?.uid || token?.user;
-  const name = user?.displayName || token?.userDisplayName;
+  const name = typeof user === 'string' ? user : (user?.displayName || token?.userDisplayName);
   console.log('_UserView', uid, name);
   return (
     <div className="_user-view">
@@ -211,7 +212,7 @@ const _UserView = ({ user, token }) => {
 }
 
 const ViewUser = () => {
-  const { emailResult } = useSelector(selectedCourseSelectors.select);
+  const { emailResult, error } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const onCancel = () => {
@@ -228,6 +229,7 @@ const ViewUser = () => {
       <div className="student-manager-content">
         <_UserView user={emailResult} />
       </div>
+      {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
         <Button onClick={onCancel} variant="outlined">Back</Button>
         <Button onClick={onSubmit} variant="contained" color="primary">

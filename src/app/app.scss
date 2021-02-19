@@ -362,6 +362,10 @@ $billing-width: 400px;
   flex: 1;
   display: flex;
   flex-direction: column;
+
+  .MuiAlert-standardError {
+    margin-bottom: 16px;
+  }
 }
 
 .student-manager-page {
@@ -382,7 +386,8 @@ $billing-width: 400px;
 
 .student-add, .student-delete {
   .student-manager-content {
-    justify-content: center;
+    padding-top: 96px;
+    justify-content: flex-start;
     align-items: center;
   }
 }

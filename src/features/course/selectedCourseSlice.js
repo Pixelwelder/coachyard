@@ -251,6 +251,7 @@ const submitChatMessage = createAsyncThunk(
 const searchForEmail = createAsyncThunk(
   `${name}/searchForEmail`,
   async ({ email }, { dispatch, getState }) => {
+    dispatch(generatedActions.setEmailResult(initialState.emailResult));
     const result = await app.firestore()
       .collection('users')
       .where('email', '==', email)
@@ -266,7 +267,6 @@ const searchForEmail = createAsyncThunk(
         .where('user', '==', user.uid)
         .where('courseUid', '==', course.uid)
         .get();
-      console.log('TOKENS', tokenDocs.size);
       if (tokenDocs.size) throw new Error(`${user.displayName} already has access to this course.`);
 
       console.log('found user', user);
@@ -372,8 +372,15 @@ const { actions: generatedActions, reducer } = createSlice({
     setAdminImageUrl: setValue('adminImageUrl'),
     reset: (state, action) => initialState,
 
-    setEditMode: setValue('editMode'),
-    setStudentManagerMode: setValue('studentManagerMode'),
+    setEditMode: (state, action) => {
+      state.editMode = action.payload;
+      state.studentManagerMode = initialState.studentManagerMode;
+      state.error = initialState.error;
+    },
+    setStudentManagerMode: (state, action) => {
+      state.studentManagerMode = action.payload;
+      state.error = initialState.error;
+    },
     setEmailResult: setValue('emailResult'),
     resetEmailResult: resetValue('emailResult', initialState.emailResult),
     setCurrentToken: setValue('tokenToRemove'),
