@@ -73,9 +73,8 @@ const setUid = createAsyncThunk(
   `${name}/setUid`,
   async ({ uid, history }, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.SELECT_COURSE, { uid });
-    const slice = selectors.select(getState());
-    const { course } = slice;
-    if (course && (course.uid === uid)) {
+    const { course } = selectors.select(getState());
+    if (course?.uid === uid) {
       return;
     }
 
