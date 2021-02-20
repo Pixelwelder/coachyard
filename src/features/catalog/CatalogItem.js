@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
-  const { displayName = '', user } = item;
+  const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
   console.log('CatalogItem', item);
 
@@ -41,9 +41,8 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           image={'/images/generic-teacher-cropped.png'}
         />
         <CardContent>
-          <Typography>
-            {displayName}
-          </Typography>
+          <Typography>{displayName}</Typography>
+          {/*<Typography>{(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</Typography>*/}
         </CardContent>
       </CardActionArea>
       {/*<CardActions>*/}

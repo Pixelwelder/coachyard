@@ -67,7 +67,7 @@ const AccessManager = () => {
           <TextField
             variant="outlined" label="Price" placeholder="49.95"
             id="students" name="students"
-            value={price / 1000}
+            value={price / 100}
             disabled={isLoading}
             inputProps={{
               type: 'number',
@@ -75,7 +75,7 @@ const AccessManager = () => {
             }}
             onChange={({ target: { value } }) => onChange({
               // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
-              price: value * 1000
+              price: value * 100
             })}
           />
         </div>

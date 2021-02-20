@@ -294,7 +294,6 @@ const addUser = createAsyncThunk(
   `${name}/addUser`,
   async (_, { getState, dispatch }) => {
     const { emailResult, course } = select(getState());
-    console.log('addUser', emailResult, course);
     if (!emailResult) throw new Error('No email.');
     if (!course) throw new Error('No course.');
 
@@ -306,6 +305,14 @@ const addUser = createAsyncThunk(
     console.log('addUser result', result);
     dispatch(generatedActions.resetEmailResult());
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
+  }
+);
+
+const purchaseCourse = createAsyncThunk(
+  `${name}/purchase`,
+  async (_, { getState }) => {
+    const { course: { uid: courseUid } } = select(getState());
+    const result = await app.functions().httpsCallable('purchaseCourse')({ courseUid });
   }
 );
 
@@ -405,7 +412,8 @@ const actions = {
   ...generatedActions, init, update,
   setUid, setSelectedItemUid,
   submitChatMessage, searchForEmail,
-  addUser, removeUser
+  addUser, removeUser,
+  purchaseCourse
 };
 
 const select = ({ selectedCourse }) => selectedCourse;

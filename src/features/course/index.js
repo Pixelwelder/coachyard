@@ -58,7 +58,7 @@ const Course = () => {
   };
 
   const onUnlock = () => {
-
+    dispatch(selectedCourseActions.purchaseCourse())
   };
 
   return (
@@ -130,13 +130,13 @@ const Course = () => {
                       Create New
                     </Button>
                   )}
-                  {!hasAccess && (
+                  {!hasAccess && course?.price && (
                     <Button
                       variant="contained"
                       color="primary"
                       onClick={onUnlock}
                     >
-                      Unlock for $9.99
+                      Unlock for {(course.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     </Button>
                   )}
                 </div>

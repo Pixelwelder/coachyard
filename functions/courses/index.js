@@ -255,7 +255,55 @@ const removeUser = async (data, context) => {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
   }
-}
+};
+
+const purchaseCourse = async (data, context) => {
+  try {
+    checkAuth(context);
+    const { courseUid } = data;
+    const {
+      auth: {
+        uid,
+        token: { name: userDisplayName }
+      }
+    } = context;
+    console.log('student', userDisplayName, courseUid);
+
+    const result = await admin.firestore().runTransaction(async (transaction) => {
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+      const { displayName, description, image } = courseDoc.data();
+
+      // const studentRef = admin.firestore().collection('users').doc(uid);
+      // const studentDoc = await transaction.get(studentRef);
+      // if (!studentDoc.exists) throw new Error(`Student ${uid} does not exist.`);
+      // const { displayName: userDisplayName } = studentDoc.data();
+
+      const tokenRef = admin.firestore().collection('tokens').doc();
+      const timestamp = admin.firestore.Timestamp.now()
+      const studentToken = newCourseToken({
+        uid: tokenRef.id,
+        created: timestamp,
+        updated: timestamp,
+        user: uid,
+        userDisplayName,
+        courseUid,
+        access: 'student',
+        displayName,
+        description,
+        image
+      });
+
+      console.log('setting');
+      await transaction.set(tokenRef, studentToken);
+    });
+
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
 
 /**
  * Allows one user to give a course they created to another user.
@@ -527,6 +575,7 @@ module.exports = {
   deleteCourse: functions.https.onCall(deleteCourse),
   addUser: functions.https.onCall(addUser),
   removeUser: functions.https.onCall(removeUser),
+  purchaseCourse: functions.https.onCall(purchaseCourse),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
