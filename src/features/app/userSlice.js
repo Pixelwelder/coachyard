@@ -3,6 +3,7 @@ import { reset, setError, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import app from 'firebase/app';
 import { EventTypes } from '../../constants/analytics';
+import { toKebab } from '../../util/string';
 
 const initialState = {
   isSignedIn: false,
@@ -72,12 +73,22 @@ const signUp = createAsyncThunk(
 
     // Now create meta.
     // Have to do it here because we have displayName.
+    // We'll need a unique slug for their URL.
+    let slug = toKebab(displayName);
+    console.log('checking for slug', slug);
+    const existing = await app.firestore().collection('users')
+      .where('slug', '==', slug).get();
+    // TODO Need a real solution here.
+    if (existing.size) slug = `${slug}-${Math.round(Math.random() * 1000)}`;
+    console.log('final slug', slug);
+
     console.log('creating user meta');
     const timestamp = app.firestore.Timestamp.now();
     await app.firestore().collection('users').doc(result.user.uid).set({
       uid: result.user.uid,
       email,
       displayName,
+      slug,
       created: timestamp,
       updated: timestamp
     });

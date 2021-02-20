@@ -53,12 +53,12 @@ service cloud.firestore {
     }
 
     match /easy_customers/{uid} {
-      allow read: if isCreator2();
+      allow read: if request.auth != null && request.auth.uid == uid; // isCreator2();
       allow write: if false;
     }
 
     match /easy_providers/{uid} {
-      allow read: if isCreator2();
+      allow read: if request.auth != null && request.auth.uid == uid; // isCreator2();
       allow write: if false;
     }
 

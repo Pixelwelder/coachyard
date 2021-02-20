@@ -3,7 +3,14 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 import { useSelector } from 'react-redux';
-import { isFulfilledAction, isPendingAction, isRejectedAction, isThisAction, resetValue } from '../../util/reduxUtils';
+import {
+  isFulfilledAction,
+  isPendingAction,
+  isRejectedAction,
+  isThisAction,
+  loaderReducers,
+  resetValue
+} from '../../util/reduxUtils';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
@@ -386,20 +393,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setCurrentToken: setValue('tokenToRemove'),
     resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove)
   },
-  extraReducers: (builder) => {
-      return builder
-        .addMatcher(isThisAction(name), (state, action) => {
-          if (isPendingAction(action)) {
-            state.isLoading = true;
-            state.error = initialState.error;
-          } else if (isRejectedAction(action)) {
-            state.isLoading = false;
-            state.error = action.error;
-          } else if (isFulfilledAction(action)) {
-            state.isLoading = false;
-          }
-        })
-    }
+  extraReducers: loaderReducers(name, initialState)
 });
 
 const actions = {

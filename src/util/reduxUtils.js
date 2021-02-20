@@ -26,3 +26,18 @@ export const isAuthAction = action => action.type === 'auth/stateChanged';
 export const isThisPendingAction = name => action => isThisAction(name)(action) && isPendingAction(action);
 export const isThisRejectedAction = name => action => isThisAction(name)(action) && isRejectedAction(action);
 export const isThisFulfilledAction = name => action => isThisAction(name)(action) && isFulfilledAction(action);
+
+export const loaderReducers = (name, initialState) => (builder) => {
+  return builder
+    .addMatcher(isThisAction(name), (state, action) => {
+      if (isPendingAction(action)) {
+        state.isLoading = true;
+        state.error = initialState.error;
+      } else if (isRejectedAction(action)) {
+        state.isLoading = false;
+        state.error = action.error;
+      } else if (isFulfilledAction(action)) {
+        state.isLoading = false;
+      }
+    });
+};

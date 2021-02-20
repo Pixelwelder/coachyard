@@ -19,6 +19,7 @@ import Button from '@material-ui/core/Button';
 import app from 'firebase/app';
 import Billing from '../features/billing2';
 import Iframe from 'react-iframe';
+import Coach from '../features/coach';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -57,6 +58,7 @@ const App = () => {
           <Route path="/course/:uid/:itemUid?" component={Course} />
           <Route path="/barebones" component={Barebones} />
           <Route path="/billing" component={Billing} />
+          <Route path="/:slug" component={Coach} />
           <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>
