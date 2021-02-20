@@ -13,6 +13,7 @@ import Button from '@material-ui/core/Button';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import StudentManager from './StudentManager';
+import AccessManager from './AccessManager';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -129,7 +130,7 @@ const CourseView = () => {
                   )}
 
                   {editMode === 1 && (
-                    <StudentManager />
+                    <AccessManager />
                   )}
                 </>
               )

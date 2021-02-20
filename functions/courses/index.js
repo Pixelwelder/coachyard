@@ -13,10 +13,10 @@ const createCourse = async (data, context) => {
     checkAuth(context);
 
     const { auth: { token: { uid, email, name: teacherName } } } = context;
-    const { displayName, students: _students, description = '', date, image = '' } = data;
+    const { displayName, type, students: _students, description = '', date, image = '' } = data;
 
     // This is an array of emails.
-    const students = _students.split(',').map(s => s.trim().toLowerCase());
+    const students = _students ? _students.split(',').map(s => s.trim().toLowerCase()) : [];
 
     const { course, item } = admin.firestore().runTransaction(async (transaction) => {
 
@@ -47,6 +47,7 @@ const createCourse = async (data, context) => {
         creatorUid: uid,
         displayName,
         description,
+        type,
         created: timestamp,
         updated: timestamp
       });
@@ -132,6 +133,7 @@ const createCourse = async (data, context) => {
 const filterCourseItem = ({
   displayName,
   description,
+  type,
   student,
 }) => {
   const courseItem = { displayName, description };
@@ -149,7 +151,7 @@ const updateCourse = async (data, context) => {
     const { auth: { uid } } = context;
     const { uid: courseUid, update } = data;
 
-    const filteredCourseItem = filterCourseItem(update);
+    const filteredCourseItem = update;//filterCourseItem(update);
 
     // Do we need to find a user?
     const { student } = filteredCourseItem;

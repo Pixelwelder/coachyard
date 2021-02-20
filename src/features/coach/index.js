@@ -7,7 +7,7 @@ const Coach = () => {
   const history = useHistory();
   const { slug } = useParams();
   const dispatch = useDispatch();
-  const { isLoading, error, coach } = useSelector(coachSelectors.select);
+  const { isLoading, error, coach, courses } = useSelector(coachSelectors.select);
 
   useEffect(() => {
     dispatch(coachActions.load({ slug, history }));
@@ -19,6 +19,9 @@ const Coach = () => {
       {isLoading && <p>Loading...</p>}
       {coach && <p>{coach.displayName}</p>}
       {error && (<p>Error: { error.message }</p>)}
+      {courses.map((course, index) => {
+        return <p key={index}>{course.displayName}</p>
+      })}
     </div>
   );
 };

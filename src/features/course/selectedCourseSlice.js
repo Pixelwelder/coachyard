@@ -11,6 +11,7 @@ import {
   loaderReducers,
   resetValue
 } from '../../util/reduxUtils';
+import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
@@ -232,6 +233,17 @@ const setSelectedItemUid = createAsyncThunk(
   }
 );
 
+const update = createAsyncThunk(
+  `${name}/update`,
+  async (update, { dispatch, getState }) => {
+    const { course: { uid } } = select(getState());
+    app.analytics().logEvent(EventTypes.UPDATE_COURSE_ATTEMPTED);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
+    const result = await callable({ uid, update });
+    app.analytics().logEvent(EventTypes.UPDATE_COURSE);
+  }
+);
+
 const submitChatMessage = createAsyncThunk(
   `${name}/submitChatMessage`,
   async (_, { getState, dispatch }) => {
@@ -397,7 +409,9 @@ const { actions: generatedActions, reducer } = createSlice({
 });
 
 const actions = {
-  ...generatedActions, init, setUid, setSelectedItemUid, submitChatMessage, searchForEmail,
+  ...generatedActions, init, update,
+  setUid, setSelectedItemUid,
+  submitChatMessage, searchForEmail,
   addUser, removeUser
 };
 

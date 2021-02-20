@@ -63,6 +63,8 @@ const newCourse = (overrides) => ({
   displayName: '',
   description: '',
   image: '',
+  type: 'invite', // public, invite, template
+  price: 1000, // in cents
   ...overrides
 });
 

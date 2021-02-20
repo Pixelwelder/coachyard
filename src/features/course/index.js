@@ -71,9 +71,9 @@ const Course = () => {
               Courses
           </Link> > {course?.displayName || ''}
         </Typography>
-        <Typography variant="body1">
-          {courseCreator?.displayName || ''}
-        </Typography>
+        {/*<Typography variant="body1">*/}
+        {/*  {courseCreator?.displayName || ''}*/}
+        {/*</Typography>*/}
       </div>
       <Grid
         container

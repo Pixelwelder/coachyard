@@ -357,6 +357,17 @@ $billing-width: 400px;
   border-bottom: 1px solid lightgray;
 }
 
+// ------------------------------------ ACCESS MANAGER ------------------------------------ //
+.access-manager {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  .access-type {
+    flex-direction: row;
+  }
+}
+
 // ------------------------------------ STUDENT MANAGER ------------------------------------ //
 .student-manager {
   flex: 1;
@@ -486,3 +497,5 @@ $billing-width: 400px;
   flex-direction: column;
   align-items: center;
 }
+
+// ------------------------------------ New Course ------------------------------------ //

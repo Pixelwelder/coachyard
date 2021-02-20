@@ -5,7 +5,8 @@ const initialState = {
   displayName: '',
   students: '',
   description: '',
-  date: ''
+  date: '',
+  type: 'invite'
 };
 
 export default createUISlice({
