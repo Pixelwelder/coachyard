@@ -87,25 +87,27 @@ const setUid = createAsyncThunk(
 
     // We check for a token when the UID is set, but we don't subscribe.
     // TODO Ensure we only have one.
-    const tokenDocs = await app.firestore()
-      .collection('tokens')
-      .where('user', '==', app.auth().currentUser.uid)
-      .where('courseUid', '==', uid)
-      .get();
-
-    if (!tokenDocs.size) return abandon();
+    // const tokenDocs = await app.firestore()
+    //   .collection('tokens')
+    //   .where('user', '==', app.auth().currentUser.uid)
+    //   .where('courseUid', '==', uid)
+    //   .get();
+    //
+    // if (!tokenDocs.size) return abandon();
 
     // If there's a token, grab the course and items it refers to.
     unsubscribeCourse();
     unsubscribeCourse = app.firestore()
       .collection('courses')
-      .where('uid', '==', uid)
+      .doc(uid)
       .onSnapshot(async (snapshot) => {
         dispatch(generatedActions.reset());
-
-        console.log('snapshot size', snapshot.size);
-        if (!snapshot.size) return abandon();
-        const courseDoc = snapshot.docs[0];
+        if (!snapshot.exists) {
+          // If there's no course, just return.
+          history.push('/dashboard');
+          return;
+        }
+        const courseDoc = snapshot;
         const course = parseUnserializables(courseDoc.data());
         dispatch(generatedActions.setCourse(course));
 

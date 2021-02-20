@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { actions as catalogActions, actions as catalogSelectors } from '../catalog/catalogSlice';
 import { actions as uiActions } from '../ui/uiSlice';
 import Paper from '@material-ui/core/Paper';
@@ -12,21 +12,18 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import StudentManager from './StudentManager';
 import AccessManager from './AccessManager';
-import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
  */
 const CourseView = () => {
   const { course, editMode } = useSelector(selectedCourseSelectors.select);
-  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
 
-  const { displayName, student, description, isEditing } = editCourse;
+  const { displayName, description, isEditing } = editCourse;
   const isLoading = false;
   const error = null;
 
@@ -34,7 +31,7 @@ const CourseView = () => {
     return () => {
       dispatch(uiActions2.editCourse.reset());
     }
-  }, [])
+  }, [dispatch]);
 
   const onEdit = () => {
     dispatch(uiActions2.editCourse.setValues({
@@ -72,7 +69,6 @@ const CourseView = () => {
 
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
-      <p>{hasAccess ? 'yes' : 'no'}</p>
       {course && (
         <>
           {

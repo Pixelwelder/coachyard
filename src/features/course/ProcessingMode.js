@@ -15,7 +15,7 @@ const ProcessingMode = ({ status }) => {
     <div className="item-mode processing-mode">
       {(ownsCourse && status === 'uploading')
         ? (
-          <EditItemView requireUpload/>
+          <EditItemView requireUpload />
         )
         : (
           <div className="mode-inner">

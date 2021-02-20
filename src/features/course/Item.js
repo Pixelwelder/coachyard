@@ -1,6 +1,9 @@
 import React from 'react';
 import { DateTime, Duration } from 'luxon';
 import Typography from '@material-ui/core/Typography';
+import LockIcon from '@material-ui/icons/Lock';
+import { useSelector } from 'react-redux';
+import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 
 const getDurationString = (seconds) => {
   // const d = Duration.fromMillis(seconds * 1000);
@@ -19,10 +22,10 @@ const getDurationString = (seconds) => {
 }
 
 const Item = ({ item, isSelected, onSelect }) => {
-
   const formattedTime = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
   const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local()).toFormat('h:mm');
   const duration = getDurationString(item?.streamingInfo?.data?.duration || 0);
+  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
 
   return (
     <li className={`item item${isSelected ? ' selected-item' : ''} item-${item.status}`}>
@@ -31,7 +34,10 @@ const Item = ({ item, isSelected, onSelect }) => {
         className="item-title"
       >
         <Typography className="item-name">
-          {item.displayName}
+          <>
+            {item.displayName}
+            {!hasAccess && <LockIcon className="item-name-icon" color="disabled" />}
+          </>
         </Typography>
         {item.status === 'scheduled' && (
           <Typography>{formattedTime} (in {timeRemaining})</Typography>

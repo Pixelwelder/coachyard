@@ -68,6 +68,14 @@
 
   .item-name {
     font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .item-name-icon {
+    margin-left: 4px;
+    font-size: 16px;
   }
 }
 
