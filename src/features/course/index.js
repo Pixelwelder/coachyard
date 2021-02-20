@@ -108,7 +108,10 @@ const Course = () => {
               onChange={(event, newValue) => dispatch(selectedCourseActions.setSidebarMode(newValue))}
             >
               <Tab label="Content" />
-              <Tab label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')} />
+              <Tab
+                label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')}
+
+              />
             </Tabs>
             {sidebarMode === SIDEBAR_MODES.CHAT && <CourseChat />}
             {sidebarMode === SIDEBAR_MODES.TOC && (

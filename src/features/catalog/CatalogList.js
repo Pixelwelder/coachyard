@@ -3,6 +3,7 @@ import Button from '@material-ui/core/Button';
 import { actions as uiActions } from '../ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
+import { selectors as coachSelectors } from '../coach/coachSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
@@ -33,7 +34,7 @@ const CatalogList = ({
                   item={item}
                   key={index}
                   onSelect={() => {
-                    history.push(`/course/${item.courseUid}`);
+                    history.push(`/course/${item.courseUid || item.uid}`);
                   }}
                   onDelete={onDelete}
                 />
@@ -93,4 +94,16 @@ const LearningCatalogList = () => {
   );
 };
 
-export { TeachingCatalogList, LearningCatalogList };
+const PublicCatalogList = () => {
+  const { courses, coach } = useSelector(coachSelectors.select);
+
+  return (
+    <CatalogList
+      title="Public Courses"
+      items={courses}
+      emptyMessage={`${coach?.displayName || 'This coach'} has no public courses.`}
+    />
+  );
+}
+
+export { TeachingCatalogList, LearningCatalogList, PublicCatalogList };

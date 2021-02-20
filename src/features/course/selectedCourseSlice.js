@@ -2,15 +2,7 @@ import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
-import { useSelector } from 'react-redux';
-import {
-  isFulfilledAction,
-  isPendingAction,
-  isRejectedAction,
-  isThisAction,
-  loaderReducers,
-  resetValue
-} from '../../util/reduxUtils';
+import { loaderReducers, resetValue } from '../../util/reduxUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 export const SIDEBAR_MODES = {
@@ -91,7 +83,7 @@ const setUid = createAsyncThunk(
     dispatch(generatedActions._setSelectedItem(null));
 
     const abandon = () => {
-      history.push('/dashboard');
+      // history.push('/dashboard');
     };
 
     // We check for a token when the UID is set, but we don't subscribe.
@@ -427,6 +419,10 @@ const selectOwnsCourse = createSelector(
     return !!(course && currentUser && (currentUser.uid === course.creatorUid));
   }
 );
+const selectHasAccess = createSelector(
+  select,
+  () => {}
+);
 const selectAdminTokens = createSelector(
   select,
   ({ tokens }) => tokens.filter(({ access }) => access === 'admin')
@@ -435,7 +431,9 @@ const selectStudentTokens = createSelector(
   select,
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
-const selectors = { select, selectSelectedItem, selectOwnsCourse, selectAdminTokens, selectStudentTokens };
+const selectors = {
+  select, selectSelectedItem, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens
+};
 
 export { actions, selectors };
 export default reducer;

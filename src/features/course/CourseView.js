@@ -14,12 +14,14 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import StudentManager from './StudentManager';
 import AccessManager from './AccessManager';
+import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
  */
 const CourseView = () => {
   const { course, editMode } = useSelector(selectedCourseSelectors.select);
+  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
@@ -70,6 +72,7 @@ const CourseView = () => {
 
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
+      <p>{hasAccess ? 'yes' : 'no'}</p>
       {course && (
         <>
           {

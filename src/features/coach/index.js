@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { PublicCatalogList } from '../catalog/CatalogList';
+import Alert from '@material-ui/lab/Alert';
 
 const Coach = () => {
   const history = useHistory();
@@ -11,17 +13,17 @@ const Coach = () => {
 
   useEffect(() => {
     dispatch(coachActions.load({ slug, history }));
-  }, [slug, history]);
+  }, [slug, history, dispatch]);
 
   return (
-    <div>
+    <div className="coach-page">
       <h1>Coach: {slug}</h1>
       {isLoading && <p>Loading...</p>}
-      {coach && <p>{coach.displayName}</p>}
-      {error && (<p>Error: { error.message }</p>)}
-      {courses.map((course, index) => {
-        return <p key={index}>{course.displayName}</p>
-      })}
+      {!!error && <Alert severity="error">{error.message}</Alert>}
+      <PublicCatalogList />
+      {/*{courses.map((course, index) => {*/}
+      {/*  return <p key={index}>{course.displayName}</p>*/}
+      {/*})}*/}
     </div>
   );
 };

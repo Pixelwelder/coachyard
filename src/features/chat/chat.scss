@@ -1,6 +1,6 @@
 @import '../../app/variables';
 
-.main {
+.chat-main {
   flex: 1 1 auto;
   overflow-y: scroll;
   padding: 8px;
@@ -13,6 +13,16 @@
 
   &::-webkit-scrollbar {
     width: 0.25rem;
+  }
+
+  &.chat-main-locked {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #666666;
+    padding: 32px;
   }
 }
 

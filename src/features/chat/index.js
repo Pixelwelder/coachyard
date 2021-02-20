@@ -6,6 +6,8 @@ import TextField from '@material-ui/core/TextField';
 import StorageImage from '../../components/StorageImage';
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import './chat.scss';
+import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
+import Typography from '@material-ui/core/Typography';
 
 const ChatMessage = ({ message, imageUrls }) => {
   const authUser = app.auth().currentUser;
@@ -24,6 +26,7 @@ const ChatMessage = ({ message, imageUrls }) => {
 const Chat = ({ messages }) => {
   const { chatMessage, imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
+  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const dummy = useRef();
 
   const onChange = (value) => {
@@ -36,17 +39,28 @@ const Chat = ({ messages }) => {
   };
 
   useEffect(() => {
-    dummy.current.scrollIntoView({ behavior: 'smooth' });
+    if (dummy.current) {
+      dummy.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [dummy, messages])
 
   return (
     <>
-      <ul className="main">
-        {messages.map((message, index) => (
-          <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
-        ))}
-        <span ref={dummy}></span>
-      </ul>
+      {hasAccess
+        ? (
+          <ul className="chat-main">
+            {messages.map((message, index) => (
+              <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
+            ))}
+            <span ref={dummy}></span>
+          </ul>
+        )
+        : (
+          <div className="chat-main chat-main-locked">
+            <Typography>Please purchase this course to unlock chat.</Typography>
+          </div>
+        )
+      }
       <form className="chat-form" onSubmit={onSubmit}>
         <TextField
           size="small"
@@ -55,8 +69,11 @@ const Chat = ({ messages }) => {
           placeholder="Send message"
           value={chatMessage}
           onChange={({ target: { value } }) => onChange(value)}
+          disabled={!hasAccess}
         />
-        <Button variant="contained" color="primary" type="submit" onClick={onSubmit}>Submit</Button>
+        <Button variant="contained" color="primary" type="submit" onClick={onSubmit} disabled={!hasAccess}>
+          Submit
+        </Button>
       </form>
     </>
   );

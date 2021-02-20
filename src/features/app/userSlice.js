@@ -80,7 +80,6 @@ const signUp = createAsyncThunk(
       .where('slug', '==', slug).get();
     // TODO Need a real solution here.
     if (existing.size) slug = `${slug}-${Math.round(Math.random() * 1000)}`;
-    console.log('final slug', slug);
 
     console.log('creating user meta');
     const timestamp = app.firestore.Timestamp.now();
