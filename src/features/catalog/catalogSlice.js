@@ -23,7 +23,8 @@ const initialState = {
     error: null
   },
 
-  tokens: []
+  tokens: [],
+  tokensByUser: {}
 };
 
 let userListener = () => {};
@@ -49,10 +50,16 @@ const init = createAsyncThunk(
           .orderBy('created')
           .onSnapshot((snapshot) => {
             let tokens = [];
+            let tokensByUser = {};
             if (snapshot.size) {
               tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              tokensByUser = tokens.reduce((accum, token) => ({
+                ...accum,
+                [token.user]: token
+              }), {});
             }
             dispatch(generatedActions.setTokens(tokens));
+            dispatch(generatedActions.setTokensByUser(tokensByUser));
           });
       }
     });
@@ -298,6 +305,7 @@ const { actions: generatedActions, reducer } = createSlice({
     resetLearning: resetValue('learning'),
 
     setTokens: setValue('tokens'),
+    setTokensByUser: setValue('tokensByUser'),
     reset: reset(initialState)
   },
   extraReducers: {

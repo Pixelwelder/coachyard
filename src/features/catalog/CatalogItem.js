@@ -8,8 +8,11 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea  from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
+import { selectors as catalogSelectors } from './catalogSlice';
+import { useSelector } from 'react-redux';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
+  const { tokensByUser } = useSelector(catalogSelectors.select);
   const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
   console.log('CatalogItem', item);
@@ -42,7 +45,14 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
         />
         <CardContent>
           <Typography>{displayName}</Typography>
-          {/*<Typography>{(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</Typography>*/}
+          {tokensByUser[app.auth().currentUser?.uid]
+            ? (<Typography variant="body2">Owned</Typography>)
+            : (
+              <Typography variant="body2">
+                {(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+              </Typography>
+            )
+          }
         </CardContent>
       </CardActionArea>
       {/*<CardActions>*/}

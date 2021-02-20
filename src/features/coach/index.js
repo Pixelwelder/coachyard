@@ -4,6 +4,7 @@ import { actions as coachActions, selectors as coachSelectors } from './coachSli
 import { useDispatch, useSelector } from 'react-redux';
 import { PublicCatalogList } from '../catalog/CatalogList';
 import Alert from '@material-ui/lab/Alert';
+import Typography from '@material-ui/core/Typography';
 
 const Coach = () => {
   const history = useHistory();
@@ -18,7 +19,9 @@ const Coach = () => {
   if (!coach) return null;
   return (
     <div className="coach-page">
-      <h1>{coach.displayName}</h1>
+      <Typography variant="h1">{coach.displayName}</Typography>
+      {/*TODO*/}
+      <Typography style={{ marginBottom: 32 }}>{coach?.description || ''}</Typography>
       {isLoading && <p>Loading...</p>}
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <PublicCatalogList />

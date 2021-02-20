@@ -87,6 +87,7 @@ const signUp = createAsyncThunk(
       uid: result.user.uid,
       email,
       displayName,
+      description: `${displayName} is a coach with a passion for all things coaching.`,
       slug,
       created: timestamp,
       updated: timestamp
