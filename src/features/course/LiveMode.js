@@ -3,12 +3,9 @@ import { actions as selectedCourseActions, selectors as selectedCourseSelectors 
 import React, { useEffect, useState } from 'react';
 import DailyIframe from '@daily-co/daily-js';
 import Button from '@material-ui/core/Button';
-import FullscreenIcon from '@material-ui/icons/Fullscreen';
-import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import Alert from '@material-ui/lab/Alert';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import { Typography } from '@material-ui/core';
-import StorageImage from '../../components/StorageImage';
+import Typography from '@material-ui/core/Typography';
 import ParticipantList from '../../components/ParticipantList';
 
 const LiveMode = ({ size }) => {

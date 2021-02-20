@@ -11,7 +11,7 @@ import { useHistory, Link } from 'react-router-dom';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
 import Billing from '../billing';
-import { Typography } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 
 const Account = () => {
   const { account: selectors } = uiSelectors2;

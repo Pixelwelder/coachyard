@@ -15,9 +15,10 @@ const Coach = () => {
     dispatch(coachActions.load({ slug, history }));
   }, [slug, history, dispatch]);
 
+  if (!coach) return null;
   return (
     <div className="coach-page">
-      <h1>Coach: {slug}</h1>
+      <h1>{coach.displayName}</h1>
       {isLoading && <p>Loading...</p>}
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <PublicCatalogList />

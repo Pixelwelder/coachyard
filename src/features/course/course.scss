@@ -40,7 +40,8 @@
   background: #dddddd;
   padding: 10px 20px;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  //justify-content: flex-end;
 }
 
 .item-list {

@@ -12,7 +12,7 @@ import InitializingMode from './InitializingMode';
 import ScheduledMode from './ScheduledMode';
 import NoItem from './NoItem';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
-import { Typography } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 
 const Locked = () => {
   return (

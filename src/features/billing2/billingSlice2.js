@@ -235,15 +235,12 @@ const { actions: generatedActions, reducer } = createSlice({
   extraReducers: (builder) => {
     builder
       .addMatcher(isThisPendingAction(name), (state, action) => {
-        console.log('PENDING', action);
         state.isLoading = true;
       })
       .addMatcher(isThisRejectedAction(name), (state, action) => {
-        console.log('REJECTED', action);
         state.isLoading = false;
       })
       .addMatcher(isThisFulfilledAction(name), (state, action) => {
-        console.log('FULFILLED', action);
         state.isLoading = false;
       })
   },

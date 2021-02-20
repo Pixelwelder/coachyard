@@ -22,13 +22,15 @@ import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { getDefaultDateTime } from '../../util/itemUtils';
+import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
   const {
-    course, courseCreator, selectedItem, isRecording, sidebarMode, numOutstandingChats
+    course, selectedItem, isRecording, sidebarMode, numOutstandingChats
   } = useSelector(selectedCourseSelectors.select);
   const { isSignedIn } = useSelector(userSelectors.select);
+  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -53,7 +55,11 @@ const Course = () => {
     console.log('result', payload);
     history.push(`/course/${course.uid}/${payload.uid}`);
     dispatch(uiActions2.editItem.open());
-  }
+  };
+
+  const onUnlock = () => {
+
+  };
 
   return (
     <div className="app-content">
@@ -68,7 +74,7 @@ const Course = () => {
               }
             }}
           >
-              Courses
+              Dashboard
           </Link> > {course?.displayName || ''}
         </Typography>
         {/*<Typography variant="body1">*/}
@@ -122,6 +128,15 @@ const Course = () => {
                       onClick={onCreate}
                     >
                       Create New
+                    </Button>
+                  )}
+                  {!hasAccess && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onUnlock}
+                    >
+                      Unlock for $9.99
                     </Button>
                   )}
                 </div>

@@ -32,10 +32,15 @@
   display: flex;
   flex-direction: row;
   padding: 8px;
+  //background: lightgray;
 
   .chat-input {
     flex: 1;
     margin: 0 8px 0 0;
+
+    input {
+      //background: white;
+    }
   }
 }
 

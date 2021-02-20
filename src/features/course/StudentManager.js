@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import NonMemberIcon from '@material-ui/icons/Help';
 import MemberIcon from '@material-ui/icons/Done';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
 import {
   selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
@@ -68,7 +69,7 @@ const StudentView = ({ token }) => {
   return (
     <div className="student-view">
       <_StudentImage uid={token.user} />
-      <p className="student-name">{token.userDisplayName}</p>
+      <Typography className="student-name">{token.userDisplayName}</Typography>
       {/*{tokenIsClaimed(token) && (*/}
       {/*  <MemberIcon />*/}
       {/*)}*/}
@@ -96,7 +97,7 @@ const List = () => {
 
   return (
     <div className="student-manager-page student-list">
-      <Typography variant="h6">Who has access to this course?</Typography>
+      <Typography className="student-manager-title">Who has access to this course?</Typography>
       <div className="student-manager-content">
         <ul>
           {tokens.map((token, index) => (
@@ -107,13 +108,13 @@ const List = () => {
       <div className="student-manager-controls">
         <div className="spacer" />
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
+          color="default"
           className="student-list-add"
           onClick={onAdd}
           disabled={isLoading}
         >
-          Add
+          <PersonAddIcon />
         </Button>
       </div>
     </div>
@@ -132,7 +133,7 @@ const Add = () => {
 
   return (
     <div className="student-manager-page student-add">
-      <Typography variant="h6">Add Student</Typography>
+      <Typography className="student-manager-title">Add Student</Typography>
       <div className="student-manager-content">
         <form className="student-search-form">
           <TextField
@@ -184,10 +185,10 @@ const Delete = () => {
 
   return (
     <div className="student-manager-page student-delete">
-      <Typography variant="h6">Remove Student</Typography>
+      <Typography className="student-manager-title">Remove Student</Typography>
       <div className="student-manager-content">
         <_UserView token={tokenToRemove} propName="userDisplayName" />
-        <p>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</p>
+        <Typography>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</Typography>
       </div>
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">
@@ -207,7 +208,7 @@ const _UserView = ({ user, token }) => {
   return (
     <div className="_user-view">
       <_StudentImage uid={uid} cName="student-manager-image" />
-      <Typography className="student-manager-user-name" variant="h5">
+      <Typography variant="h6" className="student-manager-title">
         {name}
       </Typography>
       {/*{!isMember(user) && (*/}
@@ -231,7 +232,7 @@ const ViewUser = () => {
 
   return (
     <div className="student-manager-page view-user">
-      <Typography variant="h6">Add Student</Typography>
+      <Typography className="student-manager-title">Add Student</Typography>
       <div className="student-manager-content">
         <_UserView user={emailResult} />
       </div>

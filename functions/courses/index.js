@@ -130,16 +130,13 @@ const createCourse = async (data, context) => {
 /**
  * Filter out the junk.
  */
-const filterCourseItem = ({
-  displayName,
-  description,
-  type,
-  student,
-}) => {
-  const courseItem = { displayName, description };
-
-  // Don't change the student if there's nothing there. Could me there's a real student.
-  if (student) courseItem.student = student;
+const filterCourseItem = (params) => {
+  const paramNames = ['displayName', 'description', 'type', 'price'];
+  const courseItem = paramNames.reduce((accum, paramName) => {
+    return params.hasOwnProperty(paramName) && params[paramName] !== null && params[paramName] !== undefined
+      ? { ...accum, [paramName]: params[paramName ]}
+      : accum;
+  }, {});
 
   return courseItem;
 };
@@ -151,7 +148,8 @@ const updateCourse = async (data, context) => {
     const { auth: { uid } } = context;
     const { uid: courseUid, update } = data;
 
-    const filteredCourseItem = update;//filterCourseItem(update);
+    const filteredCourseItem = filterCourseItem(update);
+    console.log('fiteredCourseItem', update, filteredCourseItem);
 
     // Do we need to find a user?
     const { student } = filteredCourseItem;

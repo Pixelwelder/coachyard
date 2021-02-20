@@ -13,12 +13,13 @@ import Button from '@material-ui/core/Button';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccessManager from './AccessManager';
+import { Link } from 'react-router-dom';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
  */
 const CourseView = () => {
-  const { course, editMode } = useSelector(selectedCourseSelectors.select);
+  const { course, courseCreator, editMode } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const dispatch = useDispatch();
@@ -83,6 +84,7 @@ const CourseView = () => {
                     <Tab label="Details" />
                     <Tab label="Access" />
                   </Tabs>
+
                   {editMode === 0 && (
                     <form className="edit-course-form" onSubmit={onSubmit}>
                       <TextField
@@ -103,40 +105,25 @@ const CourseView = () => {
                         onChange={({ target: { value } }) => onChange({ description: value })}
                       />
 
-                      {/*/!* Can't edit an existing student at the moment. *!/*/}
-                      {/*{existingStudent*/}
-                      {/*  ? (*/}
-                      {/*    <TextField*/}
-                      {/*      fullWidth disabled*/}
-                      {/*      variant="outlined" label="Student" placeholder="Student"*/}
-                      {/*      id="student" type="email" value={`${existingStudent.displayName} (${existingStudent.email})`}*/}
-                      {/*    />*/}
-                      {/*  )*/}
-                      {/*  : (*/}
-                      {/*    <TextField*/}
-                      {/*      fullWidth*/}
-                      {/*      variant="outlined" label="Student" placeholder="Student"*/}
-                      {/*      id="student" type="email" value={student} disabled={isLoading}*/}
-                      {/*      onChange={({ target: { value } }) => onChange({ student: value })}*/}
-                      {/*    />*/}
-                      {/*  )*/}
-                      {/*}*/}
-                      {!!error && <Alert severity="error">{error.message}</Alert>}
-
                       <div className="spacer"/>
-                      <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete}/>
                     </form>
                   )}
 
                   {editMode === 1 && (
                     <AccessManager />
                   )}
+
+                  {!!error && <Alert severity="error">{error.message}</Alert>}
+                  <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete}/>
                 </>
               )
 
               : (
                 <div className="course-details">
-                  <Typography variant="h6" component="h3">{course?.displayName || ''}</Typography>
+                  <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
+                  <Link to={`/${courseCreator?.slug || 'dashboard'}`}>
+                    <Typography variant="h6" component="h4">{courseCreator?.displayName || ''}</Typography>
+                  </Link>
                   <Typography className="course-description">{course.description}</Typography>
 
                   <div className="spacer"/>

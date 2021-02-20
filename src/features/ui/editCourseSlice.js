@@ -4,8 +4,9 @@ const initialState = {
   isEditing: false,
 
   displayName: '',
-  student: '',
-  description: ''
+  description: '',
+  price: 0,
+  type: 'invite'
 };
 
 export default createUISlice({ name: 'editCourse', initialState });

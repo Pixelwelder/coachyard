@@ -3,6 +3,7 @@ import Typography from '@material-ui/core/Typography';
 import User from './user';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles({
   container: {
@@ -28,7 +29,9 @@ const Header = () => {
   return (
     <Box borderBottom={1} borderColor="lightgray" className={styles.container}>
       <Box className={styles.titleContainer}>
-        <Typography variant="h3" className={styles.title}>Coachyard</Typography>
+        <Link to='/dashboard'>
+          <Typography variant="h3" className={styles.title}>Coachyard</Typography>
+        </Link>
       </Box>
 
       <Box className={styles.userContainer}>
