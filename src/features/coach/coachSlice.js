@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { loaderReducers, setValue } from '../../util/reduxUtils';
 import app from 'firebase/app';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { EventTypes } from '../../constants/analytics';
+import { actions as uiActions2 } from '../ui/uiSlice2';
 
 const name = 'coach';
 const initialState = {
@@ -22,6 +24,7 @@ const load = createAsyncThunk(
     unsubscribeCoach = app.firestore().collection('users')
       .where('slug', '==', slug).limit(1)
       .onSnapshot((snapshot) => {
+        console.log('coach.onSnapshot', slug, snapshot.size);
         if (snapshot.size) {
           // Coach found
           const coach = snapshot.docs[0].data();
@@ -39,8 +42,22 @@ const load = createAsyncThunk(
           history.push('/dashboard');
         }
       })
+  }
+);
 
+const update = createAsyncThunk(
+  `${name}/update`,
+  async ({ description }, { dispatch }) => {
+    app.analytics().logEvent(EventTypes.UPDATE_USER);
 
+    await app.firestore()
+      .collection('users')
+      .doc(app.auth().currentUser.uid)
+      .update({
+        description
+      });
+
+    dispatch(uiActions2.editCoach.reset());
   }
 );
 
@@ -54,7 +71,7 @@ const { actions: generatedActions, reducer } = createSlice({
   extraReducers: loaderReducers(name, initialState)
 });
 
-const actions = { ...generatedActions, load };
+const actions = { ...generatedActions, load, update };
 
 const select = ({ coach }) => coach;
 const selectors = { select };

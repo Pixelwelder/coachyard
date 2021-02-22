@@ -15,7 +15,6 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const { tokensByUser } = useSelector(catalogSelectors.select);
   const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
-  console.log('CatalogItem', item);
 
   useEffect(() => {
     const go = async () => {

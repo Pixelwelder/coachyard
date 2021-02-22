@@ -5,6 +5,7 @@ const EventTypes = Object.freeze({
   SIGN_IN_ATTEMPTED: 'signInAttempted',
   SIGN_IN: 'signIn',
   SIGN_OUT: 'signOut',
+  UPDATE_USER: 'updateUser',
 
   ADD_PAYMENT_METHOD_ATTEMPTED: 'addPaymentMethodAttempted',
   ADD_PAYMENT_METHOD: 'addPaymentMethod',

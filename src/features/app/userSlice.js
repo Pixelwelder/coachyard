@@ -5,6 +5,7 @@ import app from 'firebase/app';
 import { EventTypes } from '../../constants/analytics';
 import { toKebab } from '../../util/string';
 
+const name = 'user';
 const initialState = {
   isSignedIn: false,
   error: null,
@@ -15,7 +16,7 @@ const initialState = {
 
 let unsubscribeUser = null;
 const init = createAsyncThunk(
-  'user/init',
+  `${name}/init`,
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged(async (authUser) => {
       if (unsubscribeUser) {
@@ -63,7 +64,7 @@ const init = createAsyncThunk(
 
 let unsubscribeImage;
 const signUp = createAsyncThunk(
-  'signUp',
+  `${name}/signUp`,
   async ({ email, password, displayName }) => {
     // Create the user first.
     app.analytics().logEvent(EventTypes.SIGN_UP_ATTEMPTED);
@@ -100,7 +101,7 @@ const signUp = createAsyncThunk(
 );
 
 const signIn = createAsyncThunk(
-  'signIn',
+  `${name}/signIn`,
   async ({ email, password }) => {
     app.analytics().logEvent(EventTypes.SIGN_IN_ATTEMPTED);
     await app.auth().signInWithEmailAndPassword(email, password);
@@ -108,7 +109,7 @@ const signIn = createAsyncThunk(
 );
 
 const signOut = createAsyncThunk(
-  'signOut',
+  `${name}/signOut`,
   async () => {
     app.analytics().logEvent(EventTypes.SIGN_OUT);
     await app.auth().signOut();
