@@ -257,47 +257,154 @@ const removeUser = async (data, context) => {
   }
 };
 
+const _unlockCourse = async (data, context) => {
+  const { courseUid } = data;
+  const {
+    auth: {
+      uid,
+      token: { name: userDisplayName }
+    }
+  } = context;
+
+  const result = await admin.firestore().runTransaction(async (transaction) => {
+    const courseRef = admin.firestore().collection('courses').doc(courseUid);
+    const courseDoc = await transaction.get(courseRef);
+    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+    const { displayName, description, image } = courseDoc.data();
+
+    // const studentRef = admin.firestore().collection('users').doc(uid);
+    // const studentDoc = await transaction.get(studentRef);
+    // if (!studentDoc.exists) throw new Error(`Student ${uid} does not exist.`);
+    // const { displayName: userDisplayName } = studentDoc.data();
+
+    const tokenRef = admin.firestore().collection('tokens').doc();
+    const timestamp = admin.firestore.Timestamp.now()
+    const studentToken = newCourseToken({
+      uid: tokenRef.id,
+      created: timestamp,
+      updated: timestamp,
+      user: uid,
+      userDisplayName,
+      courseUid,
+      access: 'student',
+      displayName,
+      description,
+      image
+    });
+
+    await transaction.set(tokenRef, studentToken);
+  });
+};
+
+const _cloneCourse = async (data, context) => {
+  const { courseUid, studentUid } = data;
+  const result = await admin.firestore().runTransaction(async (transaction) => {
+    const originalRef = admin.firestore().collection('courses').doc(courseUid);
+    const originalDoc = await transaction.get(originalRef);
+    if (!originalDoc.exists) throw new Error(`No course by uid ${courseUid} exists.`);
+
+    const studentRef = admin.firestore().collection('users').doc(studentUid);
+    const studentDoc = await transaction.get(studentRef);
+    if (!studentDoc.exists) throw new Error(`No student by uid ${studentUid} exists.`);
+
+    // Make sure the student doesn't already own a descendent of this course.
+    const owned = admin.firestore().collection('tokens')
+      .where('parent', '==', courseUid).limit(1);
+    if (owned.size) throw new Error(`${studentUid} already owns a descendant of ${courseUid}.`)
+
+    const student = studentDoc.data();
+    const original = originalDoc.data();
+
+    // Create the new course.
+    // TODO Update descendant courses when parent course is updated.
+    const courseRef = admin.firestore().collection('courses').doc();
+    const timestamp = admin.firestore.Timestamp.now();
+    const newCourse = {
+      ...original,
+      uid: courseRef.id,
+      parent: courseUid,
+      created: timestamp,
+      updated: timestamp,
+
+      // TODO TEMP
+      displayName: `${original.displayName} Copy`
+    };
+
+    // Clone template items.
+    const itemsRef = admin.firestore().collection('items')
+      .where('courseUid', '==', courseUid);
+    const itemDocs = await transaction.get(itemsRef);
+    if (itemDocs.size > 495) throw new Error('Not implemented: too many items to clone.');
+
+    const promises = itemDocs.docs.map((itemDoc) => {
+      const item = itemDoc.data();
+      const newItem = {
+        ...item,
+        courseUid: newCourse.uid,
+        parent: item.uid,
+        created: timestamp,
+        updated: timestamp,
+
+        // TODO TEMP
+        displayName: `${item.displayName} Copy`
+      };
+      const ref = admin.firestore().collection('items').doc();
+      return transaction.set(ref, newItem);
+    });
+
+    // Create student token for the new course.
+    // TODO Update descendant tokens when parent course is updated.
+    const studentTokenRef = admin.firestore().collection('tokens').doc();
+    const studentToken = newCourseToken({
+      uid: studentTokenRef.id,
+      created: timestamp,
+      updated: timestamp,
+      user: studentUid,
+      userDisplayName: student.displayName,
+      courseUid: courseRef.id,
+      access: 'student',
+      displayName: newCourse.displayName,
+      description: newCourse.description,
+      image: newCourse.image,
+      parent: courseUid
+    });
+
+    // Create teacher token for the new course.
+    const teacherTokenRef = admin.firestore().collection('tokens').doc();
+    const teacherToken = newCourseToken({
+      uid: teacherTokenRef.id,
+      created: timestamp,
+      updated: timestamp,
+      user: studentUid,
+      userDisplayName: student.displayName,
+      courseUid: courseRef.id,
+      access: 'admin',
+      displayName: newCourse.displayName,
+      description: newCourse.description,
+      image: newCourse.image,
+      parent: courseUid
+    });
+
+    // Save all
+    await transaction.set(courseRef, newCourse);
+    await Promise.all(promises);
+    await transaction.set(studentTokenRef, studentToken);
+    await transaction.set(teacherTokenRef, teacherToken);
+  });
+};
+
 const purchaseCourse = async (data, context) => {
   try {
     checkAuth(context);
     const { courseUid } = data;
-    const {
-      auth: {
-        uid,
-        token: { name: userDisplayName }
-      }
-    } = context;
-    console.log('student', userDisplayName, courseUid);
+    const course = await admin.firestore().collection('courses').doc(courseUid).get();
+    if (!course.exists) throw new Error(`Course ${courseUid} does not exist.`);
 
-    const result = await admin.firestore().runTransaction(async (transaction) => {
-      const courseRef = admin.firestore().collection('courses').doc(courseUid);
-      const courseDoc = await transaction.get(courseRef);
-      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-      const { displayName, description, image } = courseDoc.data();
-
-      // const studentRef = admin.firestore().collection('users').doc(uid);
-      // const studentDoc = await transaction.get(studentRef);
-      // if (!studentDoc.exists) throw new Error(`Student ${uid} does not exist.`);
-      // const { displayName: userDisplayName } = studentDoc.data();
-
-      const tokenRef = admin.firestore().collection('tokens').doc();
-      const timestamp = admin.firestore.Timestamp.now()
-      const studentToken = newCourseToken({
-        uid: tokenRef.id,
-        created: timestamp,
-        updated: timestamp,
-        user: uid,
-        userDisplayName,
-        courseUid,
-        access: 'student',
-        displayName,
-        description,
-        image
-      });
-
-      console.log('setting');
-      await transaction.set(tokenRef, studentToken);
-    });
+    if (course.type === 'template') {
+      await _cloneCourse(data, context);
+    } else {
+      await _unlockCourse(data, context);
+    }
 
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });

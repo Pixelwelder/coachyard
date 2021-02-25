@@ -95,7 +95,8 @@ const LearningCatalogList = () => {
 };
 
 const PublicCatalogList = () => {
-  const { courses, coach } = useSelector(coachSelectors.select);
+  const { coach } = useSelector(coachSelectors.select);
+  const courses = useSelector(coachSelectors.selectPublicCourses);
 
   return (
     <CatalogList
@@ -104,6 +105,19 @@ const PublicCatalogList = () => {
       emptyMessage={`${coach?.displayName || 'This coach'} has no public courses.`}
     />
   );
-}
+};
 
-export { TeachingCatalogList, LearningCatalogList, PublicCatalogList };
+const TemplateCatalogList = () => {
+  const { coach } = useSelector(coachSelectors.select);
+  const courses = useSelector(coachSelectors.selectTemplateCourses);
+
+  return (
+    <CatalogList
+      title="Template Courses"
+      items={courses}
+      emptyMessage={`${coach?.displayName || 'This coach'} has no template courses.`}
+    />
+  );
+};
+
+export { TeachingCatalogList, LearningCatalogList, PublicCatalogList, TemplateCatalogList };

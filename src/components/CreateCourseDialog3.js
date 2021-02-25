@@ -71,6 +71,7 @@ const NewCourseDialog = () => {
             <RadioGroup row aria-label="type" name="type" value={type} onChange={onChange}>
               <FormControlLabel value="public" control={<Radio />} label="Public" />
               <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />
+              <FormControlLabel value="template" control={<Radio />} label="Template" />
             </RadioGroup>
           </FormControl>
           {type === 'invite' && (

@@ -65,6 +65,7 @@ const newCourse = (overrides) => ({
   image: '',
   type: 'invite', // public, invite, template
   price: 1000, // in cents
+  parent: '',
   ...overrides
 });
 
@@ -75,8 +76,10 @@ const newCourseItem = (overrides) => ({
   displayName: '',
   description: '',
   image: '',
+  type: 'basic', // 'basic', 'template'
+  parent: '',
 
-  // This is for invites.
+  // This is for invites. TODO - Review.
   date: '',
   room: false,
   status: 'viewing', // scheduled, initializing, live, uploading, processing, viewing
@@ -107,6 +110,7 @@ const newCourseToken = (overrides) => ({
   displayName: '',
   description: '',
   image: '',
+  parent: '',
 
   ...overrides
 });

@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { loaderReducers, setValue } from '../../util/reduxUtils';
 import app from 'firebase/app';
 import { parseUnserializables } from '../../util/firestoreUtils';
@@ -33,7 +33,7 @@ const load = createAsyncThunk(
           // Load courses.
           unsubscribeCourses = app.firestore().collection('courses')
             .where('creatorUid', '==', coach.uid)
-            .where('type', '==', 'public')
+            .where('type', 'in', ['public', 'template'])
             .onSnapshot((snapshot) => {
               const courses = snapshot.docs.map((doc => parseUnserializables(doc.data())));
               dispatch(generatedActions.setCourses(courses));
@@ -73,8 +73,11 @@ const { actions: generatedActions, reducer } = createSlice({
 
 const actions = { ...generatedActions, load, update };
 
+const createTypeFilter = type => ({ courses }) => courses.filter(course => course.type === type);
 const select = ({ coach }) => coach;
-const selectors = { select };
+const selectPublicCourses = createSelector(select, createTypeFilter('public'));
+const selectTemplateCourses = createSelector(select, createTypeFilter('template'));
+const selectors = { select, selectPublicCourses, selectTemplateCourses };
 
 export { actions, selectors };
 export default reducer;

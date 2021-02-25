@@ -85,20 +85,20 @@ const App = () => {
       <DeleteCourseDialog />
       <DeleteItemDialog />
 
-      <Iframe
-        id="scheduling"
-        url="http://localhost:8000/index.php/user/login"
-        width="800px"
-        height="900px"
-        display="block"
-        position="absolute"
-        style={{ width: '900px', height: '50px', zIndex: 10 }}
-      />
+      {/*<Iframe*/}
+      {/*  id="scheduling"*/}
+      {/*  url="http://localhost:8000/index.php/user/login"*/}
+      {/*  width="800px"*/}
+      {/*  height="900px"*/}
+      {/*  display="block"*/}
+      {/*  position="absolute"*/}
+      {/*  style={{ width: '900px', height: '50px', zIndex: 10 }}*/}
+      {/*/>*/}
 
-      <iframe
-        style={{ position: 'absolute', height: '100%', border: 'none' }}
-        url="http://localhost:8000/index.php/appointments"
-      />
+      {/*<iframe*/}
+      {/*  style={{ position: 'absolute', height: '100%', border: 'none' }}*/}
+      {/*  url="http://localhost:8000/index.php/appointments"*/}
+      {/*/>*/}
 
       {/*<Nav />*/}
 

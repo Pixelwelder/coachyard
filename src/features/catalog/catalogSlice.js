@@ -10,6 +10,7 @@ import { EventTypes } from '../../constants/analytics';
 /**
  * Provides the list of courses this user has access to.
  */
+const name = 'catalog'; // TODO
 const initialState = {
   teaching: {
     courses: [],
@@ -103,6 +104,13 @@ const deleteCourse = createAsyncThunk(
       // TODO Analytics
       dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEW }}));
     }
+  }
+);
+
+const purchaseCourse = createAsyncThunk(
+  `${name}/purchase`,
+  async ({ courseUid }) => {
+    const result = await app.functions().httpsCallable('purchaseCourse')({ courseUid });
   }
 );
 
@@ -330,7 +338,7 @@ const { actions: generatedActions, reducer } = createSlice({
 const actions = {
   ...generatedActions,
   init,
-  createNewCourse, updateCourse, deleteCourse,
+  createNewCourse, updateCourse, deleteCourse, purchaseCourse,
   createItem, updateItem, deleteItem, launchItem, endItem
 };
 

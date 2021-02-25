@@ -44,6 +44,7 @@ const AccessManager = () => {
         >
           <FormControlLabel value="public" control={<Radio />} label="Public" />
           <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />
+          <FormControlLabel value="template" control={<Radio />} label="Template" />
         </RadioGroup>
         {/*{type !== course.type && (*/}
         {/*  <Button size="small" color="secondary" variant="contained" onClick={onSave} disabled={isLoading}>*/}
