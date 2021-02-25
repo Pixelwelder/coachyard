@@ -370,26 +370,26 @@ const _cloneCourse = async (data, context) => {
     });
 
     // Create teacher token for the new course.
-    const teacherTokenRef = admin.firestore().collection('tokens').doc();
-    const teacherToken = newCourseToken({
-      uid: teacherTokenRef.id,
-      created: timestamp,
-      updated: timestamp,
-      user: studentUid,
-      userDisplayName: student.displayName,
-      courseUid: courseRef.id,
-      access: 'admin',
-      displayName: newCourse.displayName,
-      description: newCourse.description,
-      image: newCourse.image,
-      parent: courseUid
-    });
+    // const teacherTokenRef = admin.firestore().collection('tokens').doc();
+    // const teacherToken = newCourseToken({
+    //   uid: teacherTokenRef.id,
+    //   created: timestamp,
+    //   updated: timestamp,
+    //   user: studentUid,
+    //   userDisplayName: student.displayName,
+    //   courseUid: courseRef.id,
+    //   access: 'admin',
+    //   displayName: newCourse.displayName,
+    //   description: newCourse.description,
+    //   image: newCourse.image,
+    //   parent: courseUid
+    // });
 
     // Save all
     await transaction.set(courseRef, newCourse);
     await Promise.all(promises);
     await transaction.set(studentTokenRef, studentToken);
-    await transaction.set(teacherTokenRef, teacherToken);
+    // await transaction.set(teacherTokenRef, teacherToken);
 
     return { newCourse }
   });
