@@ -38,7 +38,6 @@ let unsubscribeSubscriptions = () => {};
 const _startDataListeners = createAsyncThunk(
   `${name}/startDataListeners`,
   async (_, { dispatch }) => {
-    console.log('billing2.startDataListeners');
     const { uid } = app.auth().currentUser;
     const stripeUserDoc = app.firestore().collection('stripe_customers').doc(uid);
 
@@ -113,7 +112,6 @@ const _addPaymentMethod = createAsyncThunk(
     });
 
     if (paymentMethodResult.error) {
-      console.error(paymentMethodResult.error);
       throw new Error(paymentMethodResult.error);
     }
 
@@ -193,14 +191,11 @@ const init = createAsyncThunk(
       unsubscribeUser();
       _stopDataListeners();
 
-      console.log('billing2: auth changed', authUser);
       if (authUser) {
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
             // When the user changes, check the tier for billing purposes.
-            console.log('billing2: user snapshot');
             const tier = await getTier();
-            console.log('billing2: tier', tier);
             dispatch(generatedActions.setUI({ selectedTierId: tier }));
             dispatch(generatedActions.setTier(tier));
           });

@@ -73,7 +73,6 @@ const init = createAsyncThunk(
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
       await dispatch(schedulingActions.init());
-      await dispatch(schedulingActions.init());
 
       // await dispatch(adminActions.init({ firebase: app }));
 

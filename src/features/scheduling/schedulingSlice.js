@@ -1,25 +1,106 @@
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 import app from 'firebase/app';
+import { setValue } from '../../util/reduxUtils';
 
 const name = 'scheduling';
-const initialState = {};
+const initialState = {
+  isInitialized: false,
+  isReadyForLogin: false,
+  isLoggedIn: false,
+  credentials: null,
+  isLoading: false
+};
 
 let unsubscribeProviders = () => {};
 const init = createAsyncThunk(
   `${name}/init`,
-  async () => {
+  async (_, { dispatch, getState }) => {
+    const { isInitialized } = select(getState());
+    if (isInitialized) return;
+
+    dispatch(generatedActions.setIsLoading(true));
+
+    // Logs into the scheduler.
+    const doLogin = () => {
+      console.log('doLogin...');
+      const { credentials, isReadyForLogin } = select(getState());
+      if (!isReadyForLogin) {
+        console.log('Form is not ready for login');
+        return;
+      }
+
+      if (!credentials) {
+        console.log('No credentials.');
+        return;
+      }
+
+      const { username, password } = credentials;
+      console.log('doLogin', username, password);
+      document.getElementById('scheduling').contentWindow.postMessage(
+        { type: 'login', username, password },
+        'http://localhost:8000' // TODO
+      );
+    };
+
+    // Listens for messages from scheduler login page.
+    const onMessage = (event) => {
+      if (event.data.type) {
+        const { type, value } = event.data;
+        console.log('?', type, value);
+        switch (type) {
+          case 'scheduler-login-ready': {
+            const { isLoggedIn } = select(getState());
+            if (!isLoggedIn) {
+              dispatch(generatedActions.setIsReadyForLogin(value));
+              if (value) {
+                doLogin();
+              }
+            }
+          }
+
+          case 'schedule-login-is-loading': {
+            dispatch(generatedActions.setIsLoading(value));
+          }
+
+          case 'scheduler-login-logged-in': {
+            // dispatch(generatedActions.setIsLoggedIn(value));
+          }
+
+          default: {
+            //
+          }
+        }
+      }
+    };
+    window.addEventListener('message', onMessage);
+
     app.auth().onAuthStateChanged((authUser) => {
       unsubscribeProviders();
       if (authUser) {
+        console.log('scheduling: login');
         unsubscribeProviders = app.firestore()
           .collection('easy_providers')
           .doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
             if (snapshot.exists) {
-              // TODO TODO TODO for the love of everything TODO
-              const data = snapshot.data();
-              const { settings: { username, password } } = data;
-              console.log('--', username, password);
+              // We have credentials.
+              // Is the scheduler ready?
+              const { isReadyForLogin, isLoggedIn } = select(getState());
+              if (!isLoggedIn) {
+                const data = snapshot.data();
+                console.log('+', data);
+                const { settings: { username, password } } = data;
+                dispatch(generatedActions.setCredentials({ username: authUser.uid, password }));
+
+                if (isReadyForLogin) {
+                  doLogin();
+                } else {
+                  console.log('scheduler: not ready for login');
+                }
+              } else {
+                console.log('scheduler: already logged in');
+              }
+
               // setTimeout(() => {
               //   console.log('POSTING', username, password);
               //   document.getElementById('scheduling').contentWindow.postMessage(
@@ -49,12 +130,20 @@ const init = createAsyncThunk(
           });
       }
     });
+    dispatch(generatedActions.setIsInitialized(true));
   }
 );
 
 const { reducer, actions: generatedActions } = createSlice({
   name,
-  initialState
+  initialState,
+  reducers: {
+    setIsInitialized: setValue('isInitialized'),
+    setIsReadyForLogin: setValue('isReadyForLogin'),
+    setIsLoggedIn: setValue('isLoggedIn'),
+    setIsLoading: setValue('isLoading'),
+    setCredentials: setValue('credentials')
+  }
 });
 
 const actions = { ...generatedActions, init };

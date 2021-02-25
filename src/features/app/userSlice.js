@@ -30,7 +30,6 @@ const init = createAsyncThunk(
         // Listen to user meta.
         unsubscribeUser = app.firestore().collection('users').doc(authUser.uid)
           .onSnapshot(async (snapshot) => {
-            console.log('user changed');
             if (snapshot.exists) {
               const meta = parseUnserializables(snapshot.data());
               generatedActions.setMeta(meta);
