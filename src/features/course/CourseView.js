@@ -121,7 +121,7 @@ const CourseView = () => {
               : (
                 <div className="course-details">
                   <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
-                  <Link to={`/${courseCreator?.slug || 'dashboard'}`}>
+                  <Link to={`/coach/${courseCreator?.slug || 'dashboard'}`}>
                     <Typography variant="h6" component="h4">{courseCreator?.displayName || ''}</Typography>
                   </Link>
                   <Typography className="course-description">{course.description}</Typography>

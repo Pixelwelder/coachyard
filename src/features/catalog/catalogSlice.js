@@ -25,7 +25,7 @@ const initialState = {
   },
 
   tokens: [],
-  tokensByUser: {}
+  tokensByCourseUid: {}
 };
 
 let userListener = () => {};
@@ -51,16 +51,16 @@ const init = createAsyncThunk(
           .orderBy('created')
           .onSnapshot((snapshot) => {
             let tokens = [];
-            let tokensByUser = {};
+            let tokensByCourseUid = {};
             if (snapshot.size) {
               tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              tokensByUser = tokens.reduce((accum, token) => ({
+              tokensByCourseUid = tokens.reduce((accum, token) => ({
                 ...accum,
-                [token.user]: token
+                [token.courseUid]: token
               }), {});
             }
             dispatch(generatedActions.setTokens(tokens));
-            dispatch(generatedActions.setTokensByUser(tokensByUser));
+            dispatch(generatedActions.setTokensByCourseUid(tokensByCourseUid));
           });
       }
     });
@@ -110,7 +110,10 @@ const deleteCourse = createAsyncThunk(
 const purchaseCourse = createAsyncThunk(
   `${name}/purchase`,
   async ({ courseUid }) => {
-    const result = await app.functions().httpsCallable('purchaseCourse')({ courseUid });
+    const result = await app.functions().httpsCallable('purchaseCourse')({
+      courseUid,
+      studentUid: app.auth().currentUser.uid
+    });
   }
 );
 
@@ -313,7 +316,7 @@ const { actions: generatedActions, reducer } = createSlice({
     resetLearning: resetValue('learning'),
 
     setTokens: setValue('tokens'),
-    setTokensByUser: setValue('tokensByUser'),
+    setTokensByCourseUid: setValue('tokensByCourseUid'),
     reset: reset(initialState)
   },
   extraReducers: {

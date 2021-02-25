@@ -12,7 +12,7 @@ import { selectors as catalogSelectors } from './catalogSlice';
 import { useSelector } from 'react-redux';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
-  const { tokensByUser } = useSelector(catalogSelectors.select);
+  const { tokensByCourseUid } = useSelector(catalogSelectors.select);
   const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
 
@@ -28,6 +28,8 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
     if (item) go();
   }, [item]);
 
+  console.log(item);
+  console.log(tokensByCourseUid);
   return (
     <Card
       className={`catalog-item${onSelect ? '' : ' placeholder'}`}
@@ -44,7 +46,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
         />
         <CardContent>
           <Typography>{displayName}</Typography>
-          {tokensByUser[app.auth().currentUser?.uid]
+          {tokensByCourseUid[item.courseUid || item.uid]
             ? (<Typography variant="body2">Owned</Typography>)
             : (
               <Typography variant="body2">

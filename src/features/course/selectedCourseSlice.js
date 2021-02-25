@@ -308,11 +308,17 @@ const addUser = createAsyncThunk(
   }
 );
 
+// TODO Duplicate
 const purchaseCourse = createAsyncThunk(
   `${name}/purchase`,
   async (_, { getState }) => {
     const { course: { uid: courseUid } } = select(getState());
-    const result = await app.functions().httpsCallable('purchaseCourse')({ courseUid });
+    const { data: newCourse } = await app.functions().httpsCallable('purchaseCourse')({
+      courseUid,
+      studentUid: app.auth().currentUser.uid
+    });
+    console.log('new course', newCourse);
+    return newCourse;
   }
 );
 

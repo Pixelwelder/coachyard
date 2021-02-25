@@ -57,8 +57,10 @@ const Course = () => {
     dispatch(uiActions2.editItem.open());
   };
 
-  const onUnlock = () => {
-    dispatch(selectedCourseActions.purchaseCourse())
+  const onUnlock = async () => {
+    const result = await dispatch(selectedCourseActions.purchaseCourse());
+    console.log('result', result.payload);
+    history.push(`/${result.payload.uid}`);
   };
 
   return (

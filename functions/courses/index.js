@@ -298,7 +298,7 @@ const _unlockCourse = async (data, context) => {
 
 const _cloneCourse = async (data, context) => {
   const { courseUid, studentUid } = data;
-  const result = await admin.firestore().runTransaction(async (transaction) => {
+  const { newCourse } = await admin.firestore().runTransaction(async (transaction) => {
     const originalRef = admin.firestore().collection('courses').doc(courseUid);
     const originalDoc = await transaction.get(originalRef);
     if (!originalDoc.exists) throw new Error(`No course by uid ${courseUid} exists.`);
@@ -390,26 +390,32 @@ const _cloneCourse = async (data, context) => {
     await Promise.all(promises);
     await transaction.set(studentTokenRef, studentToken);
     await transaction.set(teacherTokenRef, teacherToken);
+
+    return { newCourse }
   });
+
+  return newCourse;
 };
 
 const purchaseCourse = async (data, context) => {
-  try {
+  // try {
     checkAuth(context);
     const { courseUid } = data;
-    const course = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!course.exists) throw new Error(`Course ${courseUid} does not exist.`);
+    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
+    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
 
+    const course = courseDoc.data();
+    console.log('course', course);
     if (course.type === 'template') {
-      await _cloneCourse(data, context);
+      return _cloneCourse(data, context);
     } else {
-      await _unlockCourse(data, context);
+      return _unlockCourse(data, context);
     }
 
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
+  // } catch (error) {
+  //   log({ message: error.message, data: error, context, level: 'error' });
+  //   throw new functions.https.HttpsError('internal', error.message, error);
+  // }
 };
 
 /**
