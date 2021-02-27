@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import { actions as schedulingActions, selectors as schedulingSelectors } from '../scheduling/schedulingSlice';
+import { actions as scheduleActions, selectors as scheduleSelectors } from '../schedule/scheduleSlice';
 import { DateTime } from 'luxon';
 import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
@@ -58,13 +58,13 @@ const Student = () => {
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { courseCreator, courseCreatorProvider, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
-  const { services } = useSelector(schedulingSelectors.select);
+  const { services } = useSelector(scheduleSelectors.select);
 
   const { formattedDate, timeRemaining } = getDateTime(item);
   const providerId = courseCreatorProvider?.id;
 
   const onSchedule = async () => {
-    dispatch(schedulingActions.getServices());
+    dispatch(scheduleActions.getServices());
   };
 
   return (
@@ -83,7 +83,7 @@ const Student = () => {
 
       {providerId && false && (
         <Iframe
-          id="scheduling"
+          id="schedule"
           // url={`http://localhost:8000?provider=${providerId}`}
           url={`http://localhost:8000/index.php/user/login`}
           width="800px"

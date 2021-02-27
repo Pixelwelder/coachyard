@@ -87,7 +87,7 @@ const App = () => {
       <DeleteItemDialog />
 
       {/*<Iframe*/}
-      {/*  id="scheduling"*/}
+      {/*  id="schedule"*/}
       {/*  url="http://localhost:8000/index.php/user/login"*/}
       {/*  width="800px"*/}
       {/*  height="900px"*/}

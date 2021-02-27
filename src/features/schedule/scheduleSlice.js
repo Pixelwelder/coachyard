@@ -2,14 +2,23 @@ import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import { setValue } from '../../util/reduxUtils';
 
-const name = 'scheduling';
+export const TABS = {
+  CALENDAR: 0,
+  WORKING_PLAN: 1,
+  BREAKS: 2,
+  EXCEPTIONS: 3
+};
+
+const name = 'schedule';
 const initialState = {
   isInitialized: false,
   isReadyForLogin: false,
   isLoggedIn: false,
   credentials: null,
   isLoading: false,
-  services: []
+  services: [],
+
+  tab: TABS.CALENDAR
 };
 
 let unsubscribeProviders = () => {};
@@ -37,7 +46,7 @@ const init = createAsyncThunk(
 
       const { username, password } = credentials;
       console.log('doLogin', username, password);
-      document.getElementById('scheduling').contentWindow.postMessage(
+      document.getElementById('schedule').contentWindow.postMessage(
         { type: 'login', username, password },
         'http://localhost:8000' // TODO
       );
@@ -78,7 +87,6 @@ const init = createAsyncThunk(
     app.auth().onAuthStateChanged((authUser) => {
       unsubscribeProviders();
       if (authUser) {
-        console.log('scheduling: login');
         unsubscribeProviders = app.firestore()
           .collection('easy_providers')
           .doc(authUser.uid)
@@ -104,7 +112,7 @@ const init = createAsyncThunk(
 
               // setTimeout(() => {
               //   console.log('POSTING', username, password);
-              //   document.getElementById('scheduling').contentWindow.postMessage(
+              //   document.getElementById('schedule').contentWindow.postMessage(
               //     { type: 'login', username, password },
               //     'http://localhost:8000'
               //   );
@@ -119,10 +127,10 @@ const init = createAsyncThunk(
               //     body: `username=${username}&password=${password}`
               //   }
               // );
-              // document.getElementById("scheduling").src = 'http://localhost:8000/index.php/backend/index';
+              // document.getElementById("schedule").src = 'http://localhost:8000/index.php/backend/index';
               // const json = await result.json();
               // if (json === 'SUCCESS') {
-              //   // document.getElementById("scheduling").src = 'http://localhost:8000/index.php/backend/index';
+              //   // document.getElementById("schedule").src = 'http://localhost:8000/index.php/backend/index';
               //   // window.location.href = 'http://localhost:8000/index.php/backend/index';
               // } else {
               //   console.log(json);
@@ -160,13 +168,14 @@ const { reducer, actions: generatedActions } = createSlice({
     setIsLoggedIn: setValue('isLoggedIn'),
     setIsLoading: setValue('isLoading'),
     setCredentials: setValue('credentials'),
-    setServices: setValue('services')
+    setServices: setValue('services'),
+    setTab: setValue('tab')
   }
 });
 
 const actions = { ...generatedActions, init, getServices };
 
-const select = ({ scheduling }) => scheduling;
+const select = ({ schedule }) => schedule;
 const selectors = { select };
 
 export { actions, selectors };

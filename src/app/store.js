@@ -7,7 +7,7 @@ import uiReducer2 from '../features/ui/uiSlice2';
 import billingReducer2 from '../features/billing2/billingSlice2';
 import catalogReducer from '../features/catalog/catalogSlice';
 import selectedCourseReducer from '../features/course/selectedCourseSlice';
-import schedulingReducer from '../features/scheduling/schedulingSlice';
+import scheduleReducer from '../features/schedule/scheduleSlice';
 import coachReducer from '../features/coach/coachSlice';
 import dashboardReducer from '../features/dashboard/dashboardSlice';
 
@@ -20,7 +20,7 @@ export default configureStore({
     billing: billingReducer2,
     catalog: catalogReducer,
     selectedCourse: selectedCourseReducer,
-    scheduling: schedulingReducer,
+    schedule: scheduleReducer,
     coach: coachReducer,
     dashboard: dashboardReducer
   },
