@@ -8,7 +8,8 @@ const initialState = {
   isReadyForLogin: false,
   isLoggedIn: false,
   credentials: null,
-  isLoading: false
+  isLoading: false,
+  services: []
 };
 
 let unsubscribeProviders = () => {};
@@ -134,6 +135,22 @@ const init = createAsyncThunk(
   }
 );
 
+const getServices = createAsyncThunk(
+  `${name}/getServices`,
+  async (_, { dispatch }) => {
+    console.log('getServices');
+    try {
+      console.log('trying');
+      const result = await app.functions().httpsCallable('getServices')();
+      dispatch(generatedActions.setServices(result))
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+    console.log('done');
+  }
+);
+
 const { reducer, actions: generatedActions } = createSlice({
   name,
   initialState,
@@ -142,11 +159,12 @@ const { reducer, actions: generatedActions } = createSlice({
     setIsReadyForLogin: setValue('isReadyForLogin'),
     setIsLoggedIn: setValue('isLoggedIn'),
     setIsLoading: setValue('isLoading'),
-    setCredentials: setValue('credentials')
+    setCredentials: setValue('credentials'),
+    setServices: setValue('services')
   }
 });
 
-const actions = { ...generatedActions, init };
+const actions = { ...generatedActions, init, getServices };
 
 const select = ({ scheduling }) => scheduling;
 const selectors = { select };

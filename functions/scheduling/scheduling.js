@@ -8,7 +8,6 @@ const { addServices, clearServices, getServices } = require('./services');
 const { clearProviders, listProviders, addProvider, updateProvider } = require('./providers');
 const { addCustomer, updateCustomer, deleteCustomer, getCustomer, listCustomers, clearCustomers } = require('./customers');
 
-
 const initialize = async () => {
   console.log('----- INITITALIZE -----');
   await addCategories();
@@ -42,5 +41,5 @@ const go2 = async () => {
   // const result = await listCustomers();
 };
 
-go2();
-// __INIT__();
+// go2();
+__INIT__();

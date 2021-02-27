@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
+import { actions as schedulingActions, selectors as schedulingSelectors } from '../scheduling/schedulingSlice';
 import { DateTime } from 'luxon';
 import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
@@ -8,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import React from 'react';
 import ParticipantList from '../../components/ParticipantList';
+import Iframe from 'react-iframe';
 
 const getDateTime = item => ({
   formattedDate: DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT),
@@ -54,9 +56,16 @@ const BaseItem = () => {
 
 const Student = () => {
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
-  const { courseCreator, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
+  const { courseCreator, courseCreatorProvider, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
+  const dispatch = useDispatch();
+  const { services } = useSelector(schedulingSelectors.select);
 
   const { formattedDate, timeRemaining } = getDateTime(item);
+  const providerId = courseCreatorProvider?.id;
+
+  const onSchedule = async () => {
+    dispatch(schedulingActions.getServices());
+  };
 
   return (
     <div className="mode-inner">
@@ -67,7 +76,23 @@ const Student = () => {
           {courseCreator?.displayName}
         </Typography>
         <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
+        <Button variant="contained" color="primary" onClick={onSchedule}>
+          Schedule
+        </Button>
       </div>
+
+      {providerId && false && (
+        <Iframe
+          id="scheduling"
+          // url={`http://localhost:8000?provider=${providerId}`}
+          url={`http://localhost:8000/index.php/user/login`}
+          width="800px"
+          height="900px"
+          display="block"
+          position="absolute"
+          style={{ width: '900px', height: '50px', zIndex: 10 }}
+        />
+      )}
     </div>
   );
 };

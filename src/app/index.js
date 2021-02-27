@@ -20,6 +20,7 @@ import app from 'firebase/app';
 import Billing from '../features/billing2';
 import Iframe from 'react-iframe';
 import Coach from '../features/coach';
+import Dashboard from '../features/dashboard';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -53,7 +54,7 @@ const App = () => {
       {/* Content. */}
       <div className="content-container">
         <Switch>
-          <Route path="/dashboard" component={Catalog} />
+          <Route path="/dashboard" component={Dashboard} />
           {/*<Route path="/course/:uid" component={Course} />*/}
           <Route path="/course/:uid/:itemUid?" component={Course} />
           <Route path="/barebones" component={Barebones} />

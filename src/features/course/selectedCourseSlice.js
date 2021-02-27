@@ -35,6 +35,7 @@ const initialState = {
   tokens: [],
   course: null,
   courseCreator: null,
+  courseCreatorProvider: null,
   courseCreatorImageUrl: '',
   student: null,
   items: [],
@@ -61,6 +62,7 @@ let unsubscribeCourse = () => {};
 let unsubscribeToken = () => {};
 let unsubscribeItems = () => {};
 let unsubscribeCreator = () => {};
+let unsubscribeCreatorSchedule = () => {};
 let unsubscribeStudent = () => {};
 let unsubscribeStudentTokens = () => {};
 let unsubscribeChat = () => {};
@@ -117,12 +119,23 @@ const setUid = createAsyncThunk(
           .collection('users')
           .doc(course.creatorUid)
           .onSnapshot(async (snapshot) => {
-            console.log('got creator', snapshot.data());
             const creator = parseUnserializables(snapshot.data());
             dispatch(generatedActions.setCourseCreator(creator));
 
             const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
             dispatch(generatedActions.setCourseCreatorImageUrl(url));
+          });
+
+        unsubscribeCreatorSchedule();
+        unsubscribeCreatorSchedule = app.firestore()
+          .collection('easy_providers')
+          .doc(course.creatorUid)
+          .onSnapshot(async (snapshot) => {
+            console.log('provider', snapshot.data());
+            if (snapshot.exists) {
+              const creatorProvider = parseUnserializables(snapshot.data());
+              dispatch(generatedActions.setCourseCreatorProvider(creatorProvider));
+            }
           });
 
         // Get all tokens.
@@ -373,6 +386,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setTokens: setValue('tokens'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
+    setCourseCreatorProvider: setValue('courseCreatorProvider'),
     setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
     setStudent: setValue('student'),
     setItems: setValue('items'),

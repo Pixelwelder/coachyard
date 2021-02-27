@@ -7,6 +7,11 @@ import MODES from '../ui/Modes';
 import { reset, setValue } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 
+export const TABS = {
+  TEACHING: 0,
+  LEARNING: 1
+};
+
 /**
  * Provides the list of courses this user has access to.
  */
@@ -25,7 +30,9 @@ const initialState = {
   },
 
   tokens: [],
-  tokensByCourseUid: {}
+  tokensByCourseUid: {},
+
+  tab: TABS.TEACHING
 };
 
 let userListener = () => {};
@@ -317,7 +324,9 @@ const { actions: generatedActions, reducer } = createSlice({
 
     setTokens: setValue('tokens'),
     setTokensByCourseUid: setValue('tokensByCourseUid'),
-    reset: reset(initialState)
+    reset: reset(initialState),
+
+    setTab: setValue('tab')
   },
   extraReducers: {
     [createNewCourse.pending]: onPending('teaching'),

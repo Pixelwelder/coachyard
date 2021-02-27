@@ -302,18 +302,21 @@ const _cloneCourse = async (data, context) => {
     const originalRef = admin.firestore().collection('courses').doc(courseUid);
     const originalDoc = await transaction.get(originalRef);
     if (!originalDoc.exists) throw new Error(`No course by uid ${courseUid} exists.`);
+    const original = originalDoc.data();
 
     const studentRef = admin.firestore().collection('users').doc(studentUid);
     const studentDoc = await transaction.get(studentRef);
     if (!studentDoc.exists) throw new Error(`No student by uid ${studentUid} exists.`);
+    const student = studentDoc.data();
 
     // Make sure the student doesn't already own a descendent of this course.
     const owned = admin.firestore().collection('tokens')
       .where('parent', '==', courseUid).limit(1);
     if (owned.size) throw new Error(`${studentUid} already owns a descendant of ${courseUid}.`)
 
-    const student = studentDoc.data();
-    const original = originalDoc.data();
+    const teacherRef = admin.firestore().collection('users').doc(original.creatorUid);
+    const teacherDoc = await transaction.get(teacherRef);
+    const teacher = teacherDoc.data();
 
     // Create the new course.
     // TODO Update descendant courses when parent course is updated.
@@ -370,20 +373,20 @@ const _cloneCourse = async (data, context) => {
     });
 
     // Create teacher token for the new course.
-    // const teacherTokenRef = admin.firestore().collection('tokens').doc();
-    // const teacherToken = newCourseToken({
-    //   uid: teacherTokenRef.id,
-    //   created: timestamp,
-    //   updated: timestamp,
-    //   user: studentUid,
-    //   userDisplayName: student.displayName,
-    //   courseUid: courseRef.id,
-    //   access: 'admin',
-    //   displayName: newCourse.displayName,
-    //   description: newCourse.description,
-    //   image: newCourse.image,
-    //   parent: courseUid
-    // });
+    const teacherTokenRef = admin.firestore().collection('tokens').doc();
+    const teacherToken = newCourseToken({
+      uid: teacherTokenRef.id,
+      created: timestamp,
+      updated: timestamp,
+      user: teacher.uid,
+      userDisplayName: teacher.displayName,
+      courseUid: courseRef.id,
+      access: 'admin',
+      displayName: newCourse.displayName,
+      description: newCourse.description,
+      image: newCourse.image,
+      parent: courseUid
+    });
 
     // Save all
     await transaction.set(courseRef, newCourse);

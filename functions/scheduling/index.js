@@ -3,6 +3,7 @@ const admin = require('firebase-admin');
 const generatePassword = require('password-generator');
 const { addProvider, deleteProvider, updateProvider } = require('./providers');
 const { addCustomer, deleteCustomer, updateCustomer } = require('./customers');
+const { getServices: _getServices } = require('./services');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
@@ -57,6 +58,11 @@ const scheduling_onUpdateUser = functions.firestore
     }
   });
 
+const getServices = functions.https.onCall(async (data, context) => {
+  const services = await _getServices();
+  return services;
+});
+
 // const scheduling_onUpdateUser = functions.firestore
 //   .document('/users/{docId}')
 //   .onUpdate(async (change, context) => {
@@ -80,5 +86,6 @@ module.exports = {
   scheduling_onCreateUser,
   scheduling_onUpdateUser,
   scheduling_onDeleteUser,
+  getServices
   // scheduling_onUpdateUser
 };
