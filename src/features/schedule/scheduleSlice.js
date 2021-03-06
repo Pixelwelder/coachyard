@@ -61,10 +61,15 @@ const init = createAsyncThunk(
     // Logs out of the scheduler.
     const doLogout = () => {
       const schedule = document.getElementById('schedule');
-      schedule.contentWindow.postMessage({ type: 'logout' });
+      if (schedule) {
+        document.getElementById('schedule').src = "http://localhost:8000/index.php/user/logout"
+      } else {
+        console.log('No schedule iframe');
+      }
     }
 
     // Listens for messages from scheduler login page.
+    // TODO Log in after logging out
     const onMessage = (event) => {
       if (event.data.type) {
         const { type, value } = event.data;

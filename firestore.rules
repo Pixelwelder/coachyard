@@ -63,17 +63,25 @@ service cloud.firestore {
     }
 
     match /stripe_customers/{uid} {
-      allow read, write: if request.auth.uid == uid;
+      allow read, write: if isUser();
 
       match /payment_methods/{id} {
-        allow read, write: if request.auth.uid == uid;
+        allow read, write: if isUser();
       }
       match /payments/{id} {
-        allow read, write: if request.auth.uid == uid;
+        allow read, write: if isUser();
       }
       match /subscriptions/{id} {
-        allow read: if request.auth.uid == uid;
+        allow read: if isUser();
         allow write: if false;
+      }
+
+      function isLoggedIn() {
+        return request.auth != null;
+      }
+
+      function isUser() {
+        return request.auth != null && request.auth.uid == uid;
       }
     }
 
