@@ -16,6 +16,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { TimePicker } from '@material-ui/pickers';
 import DateTime from 'luxon/src/datetime';
 import { listTimes, to12Hour } from '../../util/times';
+import { selectors as userSelectors } from '../app/userSlice';
 
 const Header = () => {
   return (
@@ -180,14 +181,15 @@ const WorkingPlan = () => {
   const dispatch = useDispatch();
   const { provider, isLoading, error } = useSelector(scheduleSelectors.select);
   const workingPlan = useSelector(scheduleSelectors.selectWorkingPlan);
+  const { isSignedIn } = useSelector(userSelectors.select)
 
   const onLoad = () => {
     dispatch(scheduleActions.getProvider());
   }
 
   useEffect(() => {
-    onLoad();
-  }, []);
+    if (isSignedIn) onLoad();
+  }, [isSignedIn]);
 
   return (
     <div className="working-plan">
