@@ -6,6 +6,7 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { newUserMeta } = require('../data');
 const { setClaims } = require('../util/claims');
+const { toKebab } = require('../util/string');
 
 const _createIcon = async ({ uid }) => {
   // Create icon.
@@ -77,7 +78,32 @@ const updateUserToCurrent = async (data, context) => {
 const users_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
     log({ message: 'User was created.', data: user, context });
-    const { uid, email } = user;
+    const { uid, email, displayName } = user;
+
+    // Create user meta.
+    await admin.firestore().runTransaction(async (transaction) => {
+      let slug = toKebab(displayName);
+      const existingRef = admin.firestore()
+        .collection('users')
+        .where('slug', '==', slug);
+      const existingDocs = await transaction.get(existingRef);
+      if (existingDocs.size) slug = `${slug}-${existingDocs.size}`;
+
+      const timestamp = admin.firestore.Timestamp.now();
+      const metaRef = admin.firestore().collection('users').doc(uid);
+      await transaction.set(
+        metaRef,
+        {
+          uid,
+          email,
+          displayName,
+          description: `${displayName} is a coach with a passion for all things coaching.`,
+          slug,
+          created: timestamp,
+          updated: timestamp
+        }
+      );
+    });
 
     // Create icon.
     await _createIcon({ uid });

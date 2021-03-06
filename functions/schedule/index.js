@@ -9,6 +9,7 @@ const { log } = require('../logging');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
+    console.log('created user', user);
     const { uid, email } = user;
     const password = generatePassword(20, true);
     const providerResult = await addProvider({ uid, email, password });

@@ -3,7 +3,6 @@ import { reset, setError, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import app from 'firebase/app';
 import { EventTypes } from '../../constants/analytics';
-import { toKebab } from '../../util/string';
 
 const name = 'user';
 const initialState = {
@@ -61,40 +60,40 @@ const init = createAsyncThunk(
   }
 );
 
-let unsubscribeImage;
+// let unsubscribeImage;
 const signUp = createAsyncThunk(
   `${name}/signUp`,
   async ({ email, password, displayName }) => {
     // Create the user first.
-    app.analytics().logEvent(EventTypes.SIGN_UP_ATTEMPTED);
-    const result = await app.auth().createUserWithEmailAndPassword(email, password);
-    await result.user.updateProfile({ displayName });
-    app.analytics().logEvent(EventTypes.SIGN_UP_SUCCEEDED);
-
-    // Now create meta.
-    // Have to do it here because we have displayName.
-    // We'll need a unique slug for their URL.
-    let slug = toKebab(displayName);
-    console.log('checking for slug', slug);
-    const existing = await app.firestore().collection('users')
-      .where('slug', '==', slug).get();
-    // TODO Need a real solution here.
-    if (existing.size) slug = `${slug}-${Math.round(Math.random() * 1000)}`;
-
-    console.log('creating user meta');
-    const timestamp = app.firestore.Timestamp.now();
-    await app.firestore().collection('users').doc(result.user.uid).set({
-      uid: result.user.uid,
-      email,
-      displayName,
-      description: `${displayName} is a coach with a passion for all things coaching.`,
-      slug,
-      created: timestamp,
-      updated: timestamp
-    });
-    console.log('created');
-
-    if (unsubscribeImage) unsubscribeImage();
+    // app.analytics().logEvent(EventTypes.SIGN_UP_ATTEMPTED);
+    // const result = await app.auth().createUserWithEmailAndPassword(email, password);
+    // await result.user.updateProfile({ displayName });
+    // app.analytics().logEvent(EventTypes.SIGN_UP_SUCCEEDED);
+    //
+    // // Now create meta.
+    // // Have to do it here because we have displayName.
+    // // We'll need a unique slug for their URL.
+    // let slug = toKebab(displayName);
+    // console.log('checking for slug', slug);
+    // const existing = await app.firestore().collection('users')
+    //   .where('slug', '==', slug).get();
+    // // TODO Need a real solution here.
+    // if (existing.size) slug = `${slug}-${Math.round(Math.random() * 1000)}`;
+    //
+    // console.log('creating user meta');
+    // const timestamp = app.firestore.Timestamp.now();
+    // await app.firestore().collection('users').doc(result.user.uid).set({
+    //   uid: result.user.uid,
+    //   email,
+    //   displayName,
+    //   description: `${displayName} is a coach with a passion for all things coaching.`,
+    //   slug,
+    //   created: timestamp,
+    //   updated: timestamp
+    // });
+    // console.log('created');
+    //
+    // if (unsubscribeImage) unsubscribeImage();
     // unsubscribeImage = app.storage().ref(`avatars/${result.user.id}.png`).
   }
 );
@@ -102,8 +101,8 @@ const signUp = createAsyncThunk(
 const signIn = createAsyncThunk(
   `${name}/signIn`,
   async ({ email, password }) => {
-    app.analytics().logEvent(EventTypes.SIGN_IN_ATTEMPTED);
-    await app.auth().signInWithEmailAndPassword(email, password);
+    // app.analytics().logEvent(EventTypes.SIGN_IN_ATTEMPTED);
+    // await app.auth().signInWithEmailAndPassword(email, password);
   }
 );
 

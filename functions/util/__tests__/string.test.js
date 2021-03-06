@@ -5,5 +5,7 @@ describe('toKebab', () => {
     expect(toKebab('a string')).toBe('a-string');
     expect(toKebab('An Uppercase String')).toBe('an-uppercase-string');
     expect(toKebab()).toBe('');
+    expect(toKebab('oneWord')).toBe('oneword');
+    expect(toKebab('snake_case')).toBe('snake-case');
   });
 });

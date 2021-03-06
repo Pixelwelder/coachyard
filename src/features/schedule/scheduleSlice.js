@@ -58,6 +58,12 @@ const init = createAsyncThunk(
       }
     };
 
+    // Logs out of the scheduler.
+    const doLogout = () => {
+      const schedule = document.getElementById('schedule');
+      schedule.contentWindow.postMessage({ type: 'logout' });
+    }
+
     // Listens for messages from scheduler login page.
     const onMessage = (event) => {
       if (event.data.type) {
@@ -113,34 +119,11 @@ const init = createAsyncThunk(
               } else {
                 console.log('scheduler: already logged in');
               }
-
-              // setTimeout(() => {
-              //   console.log('POSTING', username, password);
-              //   document.getElementById('schedule').contentWindow.postMessage(
-              //     { type: 'login', username, password },
-              //     'http://localhost:8000'
-              //   );
-              // }, 5000);
-              // const result = await fetch(
-              //   'http://localhost:8000/index.php/user/ajax_check_login',
-              //   {
-              //     headers: {
-              //       'Content-Type': 'application/x-www-form-urlencoded'
-              //     },
-              //     method: 'POST',
-              //     body: `username=${username}&password=${password}`
-              //   }
-              // );
-              // document.getElementById("schedule").src = 'http://localhost:8000/index.php/backend/index';
-              // const json = await result.json();
-              // if (json === 'SUCCESS') {
-              //   // document.getElementById("schedule").src = 'http://localhost:8000/index.php/backend/index';
-              //   // window.location.href = 'http://localhost:8000/index.php/backend/index';
-              // } else {
-              //   console.log(json);
-              // }
             }
           });
+      } else {
+        console.log('LOGGED OUT');
+        doLogout();
       }
     });
     dispatch(generatedActions.setIsInitialized(true));

@@ -34,9 +34,6 @@ const App = () => {
       // console.log('??', event.data);
     }
     window.addEventListener('message', handler, false);
-    app.auth().onAuthStateChanged((authUser) => {
-      console.log('+++++ CHANGED +++++', authUser);
-    })
   }, [])
 
   const { isInitialized } = useSelector(appSelectors.select);
