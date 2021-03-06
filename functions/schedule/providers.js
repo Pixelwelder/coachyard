@@ -6,20 +6,20 @@ const { getServices } = require('./services');
 const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
 
 const createDuration = (overrides) => ({
-  start: "00:00",
-  end: "23:59",
+  start: "08:00",
+  end: "18:00",
   ...overrides
 });
 
 const createDay = (overrides) => ({
   ...createDuration({
-    // start: "06:00",
-    // end: "22:00"
+    start: "08:00",
+    end: "18:00"
   }),
   breaks: [
     createDuration({
       start: "12:00",
-      end: "1:00"
+      end: "13:00"
     })
   ]
 });
@@ -54,6 +54,7 @@ const createProvider = (overrides) => ({
   city: "Some City",
   state: "Some State",
   zip: "12345",
+  timezone: 'UTC',
   notes: "Test provider notes.",
   services: [
     2, 3, 4

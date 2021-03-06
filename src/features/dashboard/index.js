@@ -15,7 +15,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <Typography variant="h2" component="h2">Dashboard</Typography>
-      <Tabs variant="fullWidth"
+      <Tabs
+        variant="fullWidth"
         value={tab}
         onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
       >

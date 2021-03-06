@@ -6,7 +6,6 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
-import Typography from '@material-ui/core/Typography';
 import { DateTimePicker } from '@material-ui/pickers';
 import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -17,7 +16,6 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormLabel from '@material-ui/core/FormLabel';
 
 const NewCourseDialog = () => {
@@ -45,7 +43,9 @@ const NewCourseDialog = () => {
   const onSubmit = async () => {
     // TODO This should be in the action.
     await dispatch(catalogActions.createNewCourse({
-      displayName, students, description, date, type
+      displayName, students, description, type,
+      // Don't create a first item on a template.
+      date: type === 'template' ? null : date
     }));
   };
 
@@ -59,39 +59,49 @@ const NewCourseDialog = () => {
           Create a brand-spankin'-new Live Course.
         </DialogContentText>
         <form onSubmit={onSubmit} className="create-course-form">
-          <TextField
-            fullWidth
-            autoFocus
-            variant="outlined" label="Course Name" placeholder={'Ex. "First Steps"'}
-            id="displayName" name="displayName" value={displayName} disabled={isLoading}
-            onChange={onChange}
-          />
+          <FormControl>
+            <FormLabel control="course-name" label="What is this course called?" />
+            <TextField
+              id="course-name"
+              fullWidth
+              autoFocus
+              variant="outlined" label="Course Name" placeholder={'Ex. "First Steps"'}
+              id="displayName" name="displayName" value={displayName} disabled={isLoading}
+              onChange={onChange}
+            />
+          </FormControl>
           <FormControl component="fieldset">
             <FormLabel component="legend">This course is:</FormLabel>
             <RadioGroup row aria-label="type" name="type" value={type} onChange={onChange}>
-              <FormControlLabel value="public" control={<Radio />} label="Public" />
               <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />
+              <FormControlLabel value="public" control={<Radio />} label="Public" />
               <FormControlLabel value="template" control={<Radio />} label="Template" />
             </RadioGroup>
           </FormControl>
-          {type === 'invite' && (
-            <TextField
-              fullWidth
-              variant="outlined" label="Student Emails" placeholder="student1@gmail.com, student2@gmail.com, ..."
-              id="students" name="students" type="email" value={students} disabled={isLoading}
-              onChange={onChange}
-            />
+          {(type === 'invite' || type === 'public') && (
+            <FormControl>
+              <FormLabel>When is your first live session?</FormLabel>
+              {
+                date && (
+                  <DateTimePicker
+                    value={date}
+                    onChange={onChangeDate}
+                    disabled={isLoading}
+                  />
+                )
+              }
+            </FormControl>
           )}
-          <Typography>When is your first live session?</Typography>
-          {
-            date && (
-              <DateTimePicker
-                value={date}
-                onChange={onChangeDate}
-                disabled={isLoading}
+          {type === 'invite' && (
+            <FormControl>
+              <TextField
+                fullWidth
+                variant="outlined" label="Who's Invited?" placeholder="student1@gmail.com, student2@gmail.com, ..."
+                id="students" name="students" type="email" value={students} disabled={isLoading}
+                onChange={onChange}
               />
-            )
-          }
+            </FormControl>
+          )}
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>

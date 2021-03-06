@@ -1,6 +1,6 @@
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 import app from 'firebase/app';
-import { setValue } from '../../util/reduxUtils';
+import { loaderReducers, setValue } from '../../util/reduxUtils';
 
 export const TABS = {
   CALENDAR: 0,
@@ -17,8 +17,9 @@ const initialState = {
   credentials: null,
   isLoading: false,
   services: [],
+  provider: null,
 
-  tab: TABS.CALENDAR
+  tab: TABS.WORKING_PLAN,
 };
 
 let unsubscribeProviders = () => {};
@@ -46,17 +47,21 @@ const init = createAsyncThunk(
 
       const { username, password } = credentials;
       console.log('doLogin', username, password);
-      document.getElementById('schedule').contentWindow.postMessage(
-        { type: 'login', username, password },
-        'http://localhost:8000' // TODO
-      );
+      const schedule = document.getElementById('schedule');
+      if (schedule) {
+        schedule.contentWindow.postMessage(
+          { type: 'login', username, password },
+          'http://localhost:8000' // TODO
+        );
+      } else {
+        console.log('No schedule iframe');
+      }
     };
 
     // Listens for messages from scheduler login page.
     const onMessage = (event) => {
       if (event.data.type) {
         const { type, value } = event.data;
-        console.log('?', type, value);
         switch (type) {
           case 'scheduler-login-ready': {
             const { isLoggedIn } = select(getState());
@@ -97,7 +102,6 @@ const init = createAsyncThunk(
               const { isReadyForLogin, isLoggedIn } = select(getState());
               if (!isLoggedIn) {
                 const data = snapshot.data();
-                console.log('+', data);
                 const { settings: { username, password } } = data;
                 dispatch(generatedActions.setCredentials({ username: authUser.uid, password }));
 
@@ -146,16 +150,17 @@ const init = createAsyncThunk(
 const getServices = createAsyncThunk(
   `${name}/getServices`,
   async (_, { dispatch }) => {
-    console.log('getServices');
-    try {
-      console.log('trying');
-      const result = await app.functions().httpsCallable('getServices')();
-      dispatch(generatedActions.setServices(result))
-      console.log(result);
-    } catch (error) {
-      console.error(error);
-    }
-    console.log('done');
+    const result = await app.functions().httpsCallable('getServices')();
+    dispatch(generatedActions.setServices(result))
+  }
+);
+
+const getProvider = createAsyncThunk(
+  `${name}/getWorkingPlan`,
+  async (_, { dispatch }) => {
+    const { data } = await app.functions().httpsCallable('getProvider')();
+    console.log('result', data);
+    dispatch(generatedActions.setProvider(data));
   }
 );
 
@@ -169,14 +174,26 @@ const { reducer, actions: generatedActions } = createSlice({
     setIsLoading: setValue('isLoading'),
     setCredentials: setValue('credentials'),
     setServices: setValue('services'),
+    setProvider: setValue('provider'),
     setTab: setValue('tab')
-  }
+  },
+  extraReducers: loaderReducers(name, initialState)
 });
 
-const actions = { ...generatedActions, init, getServices };
+const actions = { ...generatedActions, init, getServices, getProvider };
 
 const select = ({ schedule }) => schedule;
-const selectors = { select };
+const selectWorkingPlan = createSelector(
+  select,
+  ({ provider }) => {
+    const workingPlanObj = provider?.settings?.workingPlan;
+    if (!workingPlanObj) return [];
+
+    return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      .map(dayName => ({ ...workingPlanObj[dayName], name: dayName }));
+  }
+);
+const selectors = { select, selectWorkingPlan };
 
 export { actions, selectors };
 export default reducer;

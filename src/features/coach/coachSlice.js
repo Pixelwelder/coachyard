@@ -10,7 +10,8 @@ const initialState = {
   isLoading: false,
   error: null,
   coach: null,
-  courses: []
+  courses: [],
+  provider: {}
 };
 
 let unsubscribeCoach = () => {}
@@ -61,12 +62,20 @@ const update = createAsyncThunk(
   }
 );
 
+const getProvider = createAsyncThunk(
+  `${name}/getProvider`,
+  async (_, { dispatch }) => {
+
+  }
+);
+
 const { actions: generatedActions, reducer } = createSlice({
   name,
   initialState,
   reducers: {
     setCoach: setValue('coach'),
-    setCourses: setValue('courses')
+    setCourses: setValue('courses'),
+    setProvider: setValue('provider')
   },
   extraReducers: loaderReducers(name, initialState)
 });

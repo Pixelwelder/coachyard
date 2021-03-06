@@ -215,6 +215,12 @@ form {
   flex: 1;
   display: flex;
   flex-direction: column;
+
+  .scheduler-control, .date-control {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .change-video-btn {

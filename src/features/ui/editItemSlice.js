@@ -9,6 +9,7 @@ const initialState = {
   courseUid: '',
   displayName: '',
   description: '',
+  scheduler: 'student', // 'teacher' or 'student'
   date: '',
   file: ''
 };

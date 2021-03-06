@@ -23,6 +23,8 @@ import { CourseChat } from '../chat';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { getDefaultDateTime } from '../../util/itemUtils';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
 
 const Course = () => {
   const { uid, itemUid } = useParams();
@@ -46,15 +48,25 @@ const Course = () => {
     }
   }, [uid, itemUid, isSignedIn]);
 
-  const onCreate = async () => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const onOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const onClose = () => {
+    setAnchorEl(null);
+  };
+
+  const onCreate = async (type) => {
     // dispatch(uiActions2.createItem.open())
     const { payload } = await dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName: 'New Item', description: '', date: getDefaultDateTime(), file: '' }
+      item: { displayName: 'New Item', description: '', date: null, file: '' }
     }));
     console.log('result', payload);
     history.push(`/course/${course.uid}/${payload.uid}`);
     dispatch(uiActions2.editItem.open());
+    onClose();
   };
 
   const onUnlock = async () => {
@@ -124,13 +136,25 @@ const Course = () => {
                 <ItemList />
                 <div className="toc-footer">
                   {ownsCourse && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={onCreate}
-                    >
-                      Create New
-                    </Button>
+                    <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={onOpen}
+                      >
+                        Create New
+                      </Button>
+                      <Menu
+                        id="create-new-menu"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={!!anchorEl}
+                        onClose={onClose}
+                      >
+                        <MenuItem onClick={() => onCreate('live')}>Live Session</MenuItem>
+                        <MenuItem onClick={() => onCreate('pre-recorded')}>Pre-Recorded Video</MenuItem>
+                      </Menu>
+                    </>
                   )}
                   {!hasAccess && course?.price && (
                     <Button

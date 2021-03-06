@@ -10,7 +10,7 @@ export const TABS = {
 
 const name = 'dashboard';
 const initialState = {
-  tab: TABS.COURSES
+  tab: TABS.SCHEDULE
 };
 
 const { reducer, actions: generatedActions } = createSlice({

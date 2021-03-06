@@ -36,7 +36,7 @@ const go2 = async () => {
   // const result = await clearCustomers();
   // const result = await updateProvider({ id: 53, data: { city: 'Here Goes Nothing' } });
   const result = await listProviders();
-  console.log(result);
+  console.log(result.pop().settings.workingPlan.monday);
   // const provider = await addProvider({ uid: '55', email: 'test@mailinator.co', password: 'password' });
   // const result = await listCustomers();
 };

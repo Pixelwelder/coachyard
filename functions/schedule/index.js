@@ -1,9 +1,11 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const generatePassword = require('password-generator');
-const { addProvider, deleteProvider, updateProvider } = require('./providers');
+const { addProvider, deleteProvider, updateProvider, getProvider: _getProvider } = require('./providers');
 const { addCustomer, deleteCustomer, updateCustomer } = require('./customers');
 const { getServices: _getServices } = require('./services');
+const { checkAuth } = require('../util/auth');
+const { log } = require('../logging');
 
 const scheduling_onCreateUser = functions.auth.user()
   .onCreate(async (user, context) => {
@@ -59,9 +61,33 @@ const scheduling_onUpdateUser = functions.firestore
   });
 
 const getServices = functions.https.onCall(async (data, context) => {
-  const services = await _getServices();
-  return services;
+  try {
+    checkAuth(context);
+    const services = await _getServices();
+    return services;
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 });
+
+const getProvider = functions.https.onCall(async (data, context) => {
+  try {
+    checkAuth(context);
+
+    const { auth: { uid } } = context;
+    const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
+    if (!providerDoc.exists) throw new Error(`No provider for user ${uid}.`);
+
+    const { id } = providerDoc.data();
+    const provider = await _getProvider({ id });
+    return provider;
+
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+})
 
 // const scheduling_onUpdateUser = functions.firestore
 //   .document('/users/{docId}')
@@ -86,6 +112,7 @@ module.exports = {
   scheduling_onCreateUser,
   scheduling_onUpdateUser,
   scheduling_onDeleteUser,
-  getServices
+  getServices,
+  getProvider
   // scheduling_onUpdateUser
 };

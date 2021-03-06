@@ -1,22 +1,30 @@
 import React from 'react';
-import Iframe from 'react-iframe';
-import { selectors as scheduleSelectors, actions as scheduleActions } from './scheduleSlice';
+import { selectors as scheduleSelectors, actions as scheduleActions, TABS } from './scheduleSlice';
 import './schedule.scss';
-
+import Calendar from './Calendar';
+import { useDispatch, useSelector } from 'react-redux';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import WorkingPlan from './WorkingPlan';
 
 const Schedule = () => {
+  const dispatch = useDispatch();
+  const { tab } = useSelector(scheduleSelectors.select);
+
   return (
     <div className="schedule">
-      <Iframe
-        id="schedule"
-        // url={`http://localhost:8000?provider=${providerId}`}
-        url={`http://localhost:8000/index.php/user/login`}
-        width="800px"
-        height="500px"
-        display="block"
-        position="absolute"
-        style={{ width: '900px', height: '50px', zIndex: 10 }}
-      />
+      <Tabs
+        value={tab}
+        onChange={(event, newValue) => dispatch(scheduleActions.setTab(newValue))}
+      >
+        <Tab label="Calendar" />
+        <Tab label="Availability" />
+        {/*<Tab label="Breaks" />*/}
+        {/*<Tab label="Exceptions" />*/}
+      </Tabs>
+
+      {tab === TABS.CALENDAR && <Calendar />}
+      {tab === TABS.WORKING_PLAN && <WorkingPlan />}
     </div>
   );
 };

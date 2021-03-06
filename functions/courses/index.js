@@ -57,20 +57,22 @@ const createCourse = async (data, context) => {
 
       // Now create the first item in the course.
       // TODO Move this into a handler if possible... though date is tricky.
-      const itemRef = admin.firestore().collection('items').doc();
-      const item = newCourseItem({
-        uid: itemRef.id,
-        creatorUid: uid,
-        courseUid: courseRef.id,
-        created: timestamp,
-        updated: timestamp,
+      if (date) {
+        const itemRef = admin.firestore().collection('items').doc();
+        const item = newCourseItem({
+          uid: itemRef.id,
+          creatorUid: uid,
+          courseUid: courseRef.id,
+          created: timestamp,
+          updated: timestamp,
 
-        displayName: 'First Meeting',
-        date,
-        status: date ? 'scheduled' : 'viewing'
-      });
+          displayName: 'First Meeting',
+          date,
+          status: date ? 'scheduled' : 'viewing'
+        });
 
-      await transaction.set(itemRef, item);
+        await transaction.set(itemRef, item);
+      }
 
       // Now create access tokens.
       const teacherTokenRef = admin.firestore().collection('tokens').doc();
@@ -119,8 +121,8 @@ const createCourse = async (data, context) => {
       });
     });
 
-    log({ message: `Course created.`, data: item, context });
-    return { message: `Course '${displayName}' created.`, course, item };
+    log({ message: `Course created.`, data: course, context });
+    return { message: `Course '${displayName}' created.`, course };
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);

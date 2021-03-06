@@ -45,18 +45,24 @@ const clearServices = async () => {
   console.log(`clearServices: removed ${services.length}`);
 };
 
+const CATEGORY_IDS = {
+  LIVE_SESSION: 0
+};
+
 const addServices = async () => {
   console.log('addServices');
   // All services go in this category.
   const categories = await getCategories();
   const category = categories.find(category => category.name === 'Generic Timeslots');
-  const services = [15, 30, 45, 60, 75, 90, 105, 120].map((duration, index) => createService({
+  // const services = [15, 30, 45, 60, 75, 90, 105, 120].map((duration, index) => createService({
+  // We create one service, because we can specify the length later.
+  const services = [CATEGORY_IDS.LIVE_SESSION].map((duration, index) => createService({
     id: index,
-    name: `${duration}-Minute Slot`,
+    name: `Live Session`,
     duration,
     price: 0,
     currency: 'USD',
-    description: `A ${duration}-minute time slot`,
+    description: `A 1-on-1 live session`,
     availabilityType: 'fixed',
     attendantsNumber: 1,
     categoryId: category.id

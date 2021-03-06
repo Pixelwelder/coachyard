@@ -9,3 +9,69 @@
   display: flex;
   flex-direction: column;
 }
+
+.working-plan-list {
+  list-style: none;
+  padding: 0;
+}
+
+.working-plan-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.working-plan-day-closed {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.working-plan-header {
+  flex: 1;
+  display: flex;
+}
+
+.working-plan-day-item {
+  flex: 1 1 150px;
+  border: 1px solid green;
+  margin: 0;
+}
+
+.working-day-header-item {
+  @extend .working-plan-day-item;
+}
+
+.working-day-name {
+  @extend .working-plan-day-item;
+}
+
+.working-day-start {
+  @extend .working-plan-day-item;
+}
+
+.working-day-end {
+  @extend .working-plan-day-item;
+}
+
+.working-day-breaks {
+  @extend .working-plan-day-item;
+}
+
+.working-day-actions {
+  @extend .working-plan-day-item;
+}
+
+.day-open-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid red;
+}
+
+.day-period {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}

@@ -21,6 +21,7 @@ import Billing from '../features/billing2';
 import Iframe from 'react-iframe';
 import Coach from '../features/coach';
 import Dashboard from '../features/dashboard';
+import FirebaseSignIn from '../components/FirebaseSignIn';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,9 @@ const App = () => {
       // console.log('??', event.data);
     }
     window.addEventListener('message', handler, false);
+    app.auth().onAuthStateChanged((authUser) => {
+      console.log('+++++ CHANGED +++++', authUser);
+    })
   }, [])
 
   const { isInitialized } = useSelector(appSelectors.select);
@@ -74,8 +78,8 @@ const App = () => {
 
       {/* User account. */}
       {/* TODO FirebaseSignIn always signs out. */}
-      {/*<FirebaseSignIn />*/}
-      <CreateAccountDialog />
+      <FirebaseSignIn />
+      {/*<CreateAccountDialog />*/}
       <Account />
 
       {/* DIALOGS */}

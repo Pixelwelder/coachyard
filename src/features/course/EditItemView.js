@@ -11,6 +11,11 @@ import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
 import { DateTimePicker } from '@material-ui/pickers';
 import OwnerControls from '../../components/OwnerControls';
+import FormLabel from '@material-ui/core/FormLabel';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
+import FormControl from '@material-ui/core/FormControl';
 
 const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
@@ -21,7 +26,7 @@ const EditItemView = ({ requireUpload = false }) => {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
 
-  const { displayName, description, date, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
+  const { displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
   const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
   useEffect(() => {
@@ -78,7 +83,10 @@ const EditItemView = ({ requireUpload = false }) => {
   const onSubmit = async (event) => {
     event.preventDefault();
 
-    const update = { displayName, description, file, date };
+    const update = {
+      displayName, description, file, scheduler,
+      date: scheduler === 'teacher' ? date : null,
+    };
     dispatch(catalogActions.updateItem({ uid: item.uid, update, file }));
   };
 
@@ -97,6 +105,7 @@ const EditItemView = ({ requireUpload = false }) => {
     <div className="edit-view">
       <form className="editing-form" onSubmit={onSubmit}>
         <TextField
+          autoFocus
           id="displayName" name="displayName" label="name" type="text"
           variant="outlined"
           disabled={isDisabled()}
@@ -149,11 +158,22 @@ const EditItemView = ({ requireUpload = false }) => {
           </Button>
         )}
 
-        {item.status === 'scheduled' && !requireUpload && (
-          <DateTimePicker
-            value={date}
-            onChange={onChangeDate}
-          />
+        <FormControl component="fieldset" variant="outlined" className="scheduler-control">
+          <FormLabel>Scheduled by:</FormLabel>
+          <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
+            <FormControlLabel value="teacher" control={<Radio />} label="Me" />
+            <FormControlLabel value="student" control={<Radio />} label="My Student" />
+          </RadioGroup>
+        </FormControl>
+
+        {scheduler === 'teacher' && (
+          <FormControl className="date-control">
+            <FormLabel>Date:</FormLabel>
+            <DateTimePicker
+              value={date}
+              onChange={onChangeDate}
+            />
+          </FormControl>
         )}
       </form>
 
