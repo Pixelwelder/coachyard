@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import app from 'firebase/app';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,6 +15,7 @@ const Auth = () => {
   const { isSignedIn, image } = useSelector(userSelectors.select);
   const dispatch = useDispatch();
   const authUser = app.auth().currentUser;
+  const history = useHistory();
 
   // Menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -29,6 +31,11 @@ const Auth = () => {
   const onLogOut = () => {
     onClose();
     dispatch(userActions.signOut());
+  }
+
+  const onShowDashboard = () => {
+    onClose();
+    history.push('/dashboard');
   }
 
   const onShowAccount = () => {
@@ -69,6 +76,7 @@ const Auth = () => {
               open={!!anchorEl}
               onClose={onClose}
             >
+              <MenuItem onClick={onShowDashboard}>Dashboard</MenuItem>
               <MenuItem onClick={onShowAccount}>Account</MenuItem>
               <MenuItem onClick={onLogOut}>Logout</MenuItem>
             </Menu>

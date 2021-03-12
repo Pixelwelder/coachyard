@@ -7,6 +7,7 @@ import { actions as dashboardActions, selectors as dashboardSelectors, TABS } fr
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Schedule from '../schedule';
+import Students from './students';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -21,13 +22,14 @@ const Dashboard = () => {
         onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
       >
         <Tab label="Courses" />
-        <Tab label="Students" disabled />
+        <Tab label="Students" />
         <Tab label="Chats" disabled />
         <Tab label="Schedule" />
       </Tabs>
       <div className="dashboard-content">
         {tab === TABS.COURSES && <Catalog />}
         {tab === TABS.SCHEDULE && <Schedule />}
+        {tab === TABS.STUDENTS && <Students />}
       </div>
     </div>
   )

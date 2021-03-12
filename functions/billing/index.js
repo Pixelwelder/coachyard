@@ -1,44 +1,49 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { Stripe } = require('stripe');
 const { newStripeCustomer, newStripePayment } = require('../data');
 const { checkAuth } = require('../util/auth');
 const { log } = require ('../logging');
 const express = require('express');
 const bodyParser = require('body-parser');
-const { secret_key } = require('../__config__/stripe.json');
 const { setClaims } = require('../util/claims');
-
-const stripe = new Stripe(
-  secret_key,
-  { apiVersion: '2020-08-27' }
-);
+const stripe = require('./stripe')
 
 /**
  * When a new user is created, create a matching Stripe Customer.
  */
-const stripe_onCreateUser = functions.auth.user()
-  .onCreate(async (user) => {
-    log({ message: 'Billing: a user was created.', data: user });
-    const timestamp = admin.firestore.Timestamp.now();
-    const stripeCustomer = await stripe.customers.create({
-      name: user.displayName,
-      email: user.email,
-      metadata: { uid: user.uid }
-    });
-    // TODO Do we actually want to do this?
-    const stripeIntent = await stripe.setupIntents.create({ customer: stripeCustomer.id });
-
-    // Create our own object in our own database.
-    const fbCustomer = newStripeCustomer({
-      uid: user.uid,
-      created: timestamp,
-      updated: timestamp,
-      customer_id: stripeCustomer.id,
-      setup_secret: stripeIntent.client_secret
-    });
-    await admin.firestore().collection('stripe_customers').doc(user.uid).set(fbCustomer);
-  });
+// const stripe_onCreateUser = functions.auth.user()
+//   .onCreate(async (_user) => {
+//     const user = await admin.auth().getUser(_user.uid);
+//     log({ message: 'Billing: a user was created.', data: user });
+//     // const timestamp = admin.firestore.Timestamp.now();
+//     // const stripeCustomer = await stripe.customers.create({
+//     //   name: user.displayName,
+//     //   email: user.email,
+//     //   metadata: { uid: user.uid }
+//     // });
+//     // // TODO Do we actually want to do this?
+//     // const stripeIntent = await stripe.setupIntents.create({ customer: stripeCustomer.id });
+//
+//     await admin.firestore().runTransaction(async (transaction) => {
+//       try {
+//         // Create our own object in our own database.
+//         const fbCustomer = newStripeCustomer({
+//           uid: user.uid,
+//           created: timestamp,
+//           updated: timestamp,
+//           customer_id: stripeCustomer.id,
+//           setup_secret: stripeIntent.client_secret
+//         });
+//
+//         const ref = admin.firestore().collection('stripe_customers').doc(user.uid);
+//         await transaction.set(ref, fbCustomer);
+//       } catch (error) {
+//         console.log('----------');
+//         console.error(error);
+//         console.log('----------');
+//       }
+//     })
+//   });
 
 /**
  * Any time a user is deleted, we delete all record of (1) their Stripe Customer, and (2) their payment methods.
@@ -416,7 +421,7 @@ module.exports = {
   cancelSubscription,
   checkSubscription,
 
-  stripe_onCreateUser,
+  // stripe_onCreateUser,
   // stripe_onCreatePaymentMethod,
   // stripe_onCreatePayment,
   stripe_onConfirmPayment,

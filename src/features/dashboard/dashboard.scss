@@ -10,3 +10,25 @@
   flex-direction: column;
   margin-top: 16px;
 }
+
+dashboard-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.student-list {
+
+}
+
+.student-item {
+  display: flex;
+}
+
+.student-name {
+  margin-right: 8px !important;
+}
+
+.course-link {
+
+}

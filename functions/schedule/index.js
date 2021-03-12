@@ -7,20 +7,29 @@ const { getServices: _getServices } = require('./services');
 const { checkAuth } = require('../util/auth');
 const { log } = require('../logging');
 
-const scheduling_onCreateUser = functions.auth.user()
-  .onCreate(async (user, context) => {
-    console.log('created user', user);
-    const { uid, email } = user;
-    const password = generatePassword(20, true);
-    const providerResult = await addProvider({ uid, email, password });
-    // For the love of FSM change this as soon as possible.
-    const cachedProvider = { ...providerResult, settings: { ...providerResult.settings, password } }
-    await admin.firestore().collection('easy_providers').doc(uid).set(cachedProvider);
-
-    const customerResult = await addCustomer({ uid, email });
-    console.log('customer', customerResult);
-    await admin.firestore().collection('easy_customers').doc(uid).set(customerResult);
-  })
+// const scheduling_onCreateUser = functions.auth.user()
+//   .onCreate(async (user, context) => {
+//     const { uid, email } = user;
+//     const password = generatePassword(20, true);
+//     const providerResult = await addProvider({ uid, email, password });
+//     const customerResult = await addCustomer({ uid, email });
+//     // For the love of FSM change this as soon as possible.
+//     try {
+//       await admin.firestore().runTransaction(async (transaction) => {
+//         console.log('scheduling transaction', uid);
+//         const cachedProvider = { ...providerResult, settings: { ...providerResult.settings, password } }
+//         const providerRef = admin.firestore().collection('easy_providers').doc(uid);
+//         await transaction.set(providerRef, cachedProvider);
+//
+//         const customerRef = admin.firestore().collection('easy_customers').doc(uid);
+//         await transaction.set(customerRef, customerResult);
+//       })
+//     } catch (error) {
+//       console.log('-=====-')
+//       console.log(error);
+//       console.log('-=====-')
+//     }
+//   })
 
 // TODO We can easily end up with orphaned providers and customers here.
 const scheduling_onDeleteUser = functions.auth.user()
@@ -110,7 +119,7 @@ const getProvider = functions.https.onCall(async (data, context) => {
 //   });
 
 module.exports = {
-  scheduling_onCreateUser,
+  // scheduling_onCreateUser,
   scheduling_onUpdateUser,
   scheduling_onDeleteUser,
   getServices,

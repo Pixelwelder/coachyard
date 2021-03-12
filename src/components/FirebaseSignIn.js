@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import app from 'firebase/app';
 // import { StyledFirebaseAuth } from 'react-firebaseui';
@@ -34,17 +34,17 @@ const FirebaseSignIn = () => {
 
   const { signInAttempted } = useSelector(appSelectors.select);
   const { isSignedIn } = useSelector(userSelectors.select);
-  const ui = useRef(null)
+  const ui = useRef(null);
 
-  useEffect(() => {
-    if (!isSignedIn) {
-      if (!ui.current) {
-        ui.current = new firebaseui.auth.AuthUI(app.auth());
-      }
-
-      ui.current.start('#firebase-auth', uiConfig);
+  // Called when we have a node.
+  const handleNode = useCallback((node) => {
+    if (!ui.current) {
+      ui.current = new firebaseui.auth.AuthUI(app.auth());
     }
-  }, [isSignedIn])
+    if (node) {
+      ui.current.start(`#${node.id}`, uiConfig);
+    }
+  }, [isSignedIn]);
 
   return (
     <Dialog
@@ -56,7 +56,7 @@ const FirebaseSignIn = () => {
         {mode === SESSION_MODES.SIGN_IN ? 'Welcome Back!' : 'Welcome!'}
       </DialogTitle>
       <DialogContent>
-        <div id="firebase-auth" />
+        <div id="firebase-auth" ref={handleNode} />
         {/*<DialogContentText>*/}
         {/*  Hello!*/}
         {/*</DialogContentText>*/}

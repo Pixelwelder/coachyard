@@ -13,6 +13,7 @@ import { actions as selectedCourseActions } from '../course/selectedCourseSlice'
 import { actions as userActions } from './userSlice';
 import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { actions as scheduleActions } from '../schedule/scheduleSlice';
+import { actions as dashboardActions } from '../dashboard/dashboardSlice';
 import { resetValue, setValue } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 
@@ -73,6 +74,7 @@ const init = createAsyncThunk(
       await dispatch(catalogActions.init());
       await dispatch(selectedCourseActions.init());
       await dispatch(scheduleActions.init());
+      await dispatch(dashboardActions.init());
 
       // await dispatch(adminActions.init({ firebase: app }));
 

@@ -267,6 +267,8 @@ const submitChatMessage = createAsyncThunk(
           text: chatMessage,
           created: app.firestore.Timestamp.now()
         });
+
+      // await app.firestore().collection('courses').doc(course.uid).update({ numChats: })
     } catch (error) {
       console.error(error);
     }

@@ -11,6 +11,7 @@ const initialState = {
   error: null,
   coach: null,
   courses: [],
+  students: [],
   provider: {}
 };
 
@@ -42,7 +43,7 @@ const load = createAsyncThunk(
         } else {
           history.push('/dashboard');
         }
-      })
+      });
   }
 );
 

@@ -19,5 +19,6 @@ module.exports = {
   ...require('./billing'),
   ...require('./mux'),
   ...require('./daily'),
-  ...require('./schedule')
+  ...require('./schedule'),
+  ...require('./chat')
 };

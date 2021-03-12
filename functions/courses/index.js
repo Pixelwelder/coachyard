@@ -86,7 +86,8 @@ const createCourse = async (data, context) => {
         access: 'admin',
         displayName,
         description,
-        image
+        image,
+        creatorUid: uid
       });
 
       await transaction.create(teacherTokenRef, teacherToken)
@@ -110,7 +111,8 @@ const createCourse = async (data, context) => {
           access: 'student',
           displayName,
           description,
-          image
+          image,
+          creatorUid: uid
         });
 
         return transaction.set(studentTokenRef, studentToken);
@@ -193,7 +195,7 @@ const addUser = async (data, context) => {
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
       const courseDoc = await transaction.get(courseRef);
       if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-      const { displayName, description, image } = courseDoc.data();
+      const { displayName, description, image, creatorUid } = courseDoc.data();
 
       // Grab the student.
       const studentRef = admin.firestore()
@@ -229,7 +231,8 @@ const addUser = async (data, context) => {
         access: 'student',
         displayName,
         description,
-        image
+        image,
+        creatorUid
       });
 
       await transaction.set(tokenRef, studentToken);
@@ -268,11 +271,11 @@ const _unlockCourse = async (data, context) => {
     }
   } = context;
 
-  const result = await admin.firestore().runTransaction(async (transaction) => {
+  await admin.firestore().runTransaction(async (transaction) => {
     const courseRef = admin.firestore().collection('courses').doc(courseUid);
     const courseDoc = await transaction.get(courseRef);
     if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-    const { displayName, description, image } = courseDoc.data();
+    const { displayName, description, image, creatorUid } = courseDoc.data();
 
     // const studentRef = admin.firestore().collection('users').doc(uid);
     // const studentDoc = await transaction.get(studentRef);
@@ -291,7 +294,8 @@ const _unlockCourse = async (data, context) => {
       access: 'student',
       displayName,
       description,
-      image
+      image,
+      creatorUid
     });
 
     await transaction.set(tokenRef, studentToken);
@@ -371,7 +375,8 @@ const _cloneCourse = async (data, context) => {
       displayName: newCourse.displayName,
       description: newCourse.description,
       image: newCourse.image,
-      parent: courseUid
+      parent: courseUid,
+      creatorUid: original.creatorUid
     });
 
     // Create teacher token for the new course.
@@ -387,7 +392,8 @@ const _cloneCourse = async (data, context) => {
       displayName: newCourse.displayName,
       description: newCourse.description,
       image: newCourse.image,
-      parent: courseUid
+      parent: courseUid,
+      creator: original.creatorUid
     });
 
     // Save all

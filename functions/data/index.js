@@ -66,6 +66,8 @@ const newCourse = (overrides) => ({
   type: 'invite', // public, invite, template
   price: 1000, // in cents
   parent: '',
+  numChats: 0,
+  numChatsUnseen: 0,
   ...overrides
 });
 
@@ -112,6 +114,7 @@ const newCourseToken = (overrides) => ({
   description: '',
   image: '',
   parent: '',
+  creatorUid: '',
 
   ...overrides
 });
