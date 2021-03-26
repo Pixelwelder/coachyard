@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit'
 import { setValue } from '../../util/reduxUtils';
 import app from 'firebase';
 import { parseUnserializables } from '../../util/firestoreUtils';
+import { SIDEBAR_MODES } from '../course/selectedCourseSlice';
 
 export const TABS = {
   COURSES: 0,
@@ -12,11 +13,17 @@ export const TABS = {
 
 const name = 'dashboard';
 const initialState = {
-  tab: TABS.STUDENTS,
-  tokens: []
+  tab: TABS.CHATS,
+  tokens: [],
+  courses: [], // Created by this user
+
+  selectedChatUid: null,
+  selectedChat: []
 };
 
+// TODO Lazy load.
 let unsubscribeTokens = () => {};
+let unsubscribeCourses = () => {};
 const init = createAsyncThunk(
   `${name}/init`,
   async (_, { dispatch }) => {
@@ -31,17 +38,49 @@ const init = createAsyncThunk(
               dispatch(generatedActions.setTokens(tokens));
             }
           });
+
+        unsubscribeCourses();
+        unsubscribeCourses = app.firestore().collection('courses')
+          .where('creatorUid', '==', authUser.uid)
+          .onSnapshot((snapshot) => {
+            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            dispatch(generatedActions.setCourses(courses));
+          })
       }
     })
   }
 );
+
+let unsubscribeChat = () => {};
+const setSelectedChat = createAsyncThunk(
+  `${name}/setSelectedCourse`,
+  ({ uid }, { dispatch, getState }) => {
+    const { selectedChatUid } = select(getState());
+    if (selectedChatUid === uid) return;
+
+    dispatch(generatedActions.setSelectedChatUid(uid));
+    dispatch(generatedActions._setSelectedChat(initialState.selectedChat));
+    unsubscribeChat();
+    unsubscribeChat = app.firestore().collection('courses')
+      .doc(uid)
+      .collection('chat')
+      .orderBy('created')
+      .onSnapshot((snapshot) => {
+        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        dispatch(generatedActions._setSelectedChat(messages));
+      });
+  }
+)
 
 const { reducer, actions: generatedActions } = createSlice({
   name,
   initialState,
   reducers: {
     setTab: setValue('tab'),
-    setTokens: setValue('tokens')
+    setTokens: setValue('tokens'),
+    setCourses: setValue('courses'),
+    setSelectedChatUid: setValue('selectedChatUid'),
+    _setSelectedChat: setValue('selectedChat')
   }
 });
 
@@ -60,7 +99,7 @@ const selectStudentTokens = createSelector(selectTokens, tokens => {
 });
 const selectors = { select, selectStudentTokens };
 
-const actions = { ...generatedActions, init };
+const actions = { ...generatedActions, init, setSelectedChat };
 
 export { selectors, actions };
 export default reducer;

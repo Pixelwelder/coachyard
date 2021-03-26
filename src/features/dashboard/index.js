@@ -8,6 +8,7 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Schedule from '../schedule';
 import Students from './students';
+import Chats from './chats';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -23,13 +24,14 @@ const Dashboard = () => {
       >
         <Tab label="Courses" />
         <Tab label="Students" />
-        <Tab label="Chats" disabled />
+        <Tab label="Chats" />
         <Tab label="Schedule" />
       </Tabs>
       <div className="dashboard-content">
         {tab === TABS.COURSES && <Catalog />}
         {tab === TABS.SCHEDULE && <Schedule />}
         {tab === TABS.STUDENTS && <Students />}
+        {tab === TABS.CHATS && <Chats />}
       </div>
     </div>
   )

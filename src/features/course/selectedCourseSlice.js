@@ -103,7 +103,7 @@ const setUid = createAsyncThunk(
       .collection('courses')
       .doc(uid)
       .onSnapshot(async (snapshot) => {
-        dispatch(generatedActions.reset());
+        // dispatch(generatedActions.reset());
         if (!snapshot.exists) {
           // If there's no course, just return.
           history.push('/dashboard');
@@ -148,7 +148,7 @@ const setUid = createAsyncThunk(
               dispatch(generatedActions.setTokens(tokens));
 
               // Now images
-              // TODO This should be universal.
+              // TODO This should be universal. REMOVE. cacheSlice exists now.
               const { imageUrls } = select(getState());
               const uids = tokens.map(({ user }) => user).filter(uid => !imageUrls[uid]);
               const promises = uids.map(async (uid) => {
@@ -252,19 +252,19 @@ const update = createAsyncThunk(
 
 const submitChatMessage = createAsyncThunk(
   `${name}/submitChatMessage`,
-  async (_, { getState, dispatch }) => {
+  async ({ courseUid, message }, { getState, dispatch }) => {
     try {
       const { uid } = app.auth().currentUser;
-      const state = getState();
-      const { chatMessage, course } = select(state);
+      // const state = getState();
+      // const { course } = select(state);
       dispatch(generatedActions.setChatMessage(''));
       await app.firestore().collection('courses')
-        .doc(course.uid)
+        .doc(courseUid)
         .collection('chat')
         .doc()
         .set({
           sender: uid,
-          text: chatMessage,
+          text: message,
           created: app.firestore.Timestamp.now()
         });
 
@@ -462,8 +462,9 @@ const selectStudentTokens = createSelector(
   select,
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
+const selectChat = createSelector(select, ({ chat }) => chat);
 const selectors = {
-  select, selectSelectedItem, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens
+  select, selectSelectedItem, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat
 };
 
 export { actions, selectors };

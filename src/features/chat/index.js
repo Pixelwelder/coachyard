@@ -9,6 +9,11 @@ import './chat.scss';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import Typography from '@material-ui/core/Typography';
 
+const EMPTY_MESSAGES = {
+  LOCKED: 'Please purchase this course to unlock chat with this coach.',
+  NO_COURSE: 'No course selected.'
+}
+
 const ChatMessage = ({ message, imageUrls }) => {
   const authUser = app.auth().currentUser;
   const { text, sender } = message;
@@ -23,19 +28,22 @@ const ChatMessage = ({ message, imageUrls }) => {
   )
 };
 
-const Chat = ({ messages }) => {
-  const { chatMessage, imageUrls } = useSelector(selectedCourseSelectors.select);
+const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED }) => {
+  console.log('chat', messages);
+  const { imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
-  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const dummy = useRef();
+  const [message, setMessage] = useState('');
 
   const onChange = (value) => {
-    dispatch(selectedCourseActions.setChatMessage(value));
+    // dispatch(selectedCourseActions.setChatMessage(value));
+    setMessage(value);
   };
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    await dispatch(selectedCourseActions.submitChatMessage());
+    await dispatch(selectedCourseActions.submitChatMessage({ courseUid, message }));
+    setMessage('');
   };
 
   useEffect(() => {
@@ -46,7 +54,7 @@ const Chat = ({ messages }) => {
 
   return (
     <>
-      {hasAccess
+      {hasAccess && !!courseUid
         ? (
           <ul className="chat-main">
             {messages.map((message, index) => (
@@ -57,7 +65,7 @@ const Chat = ({ messages }) => {
         )
         : (
           <div className="chat-main chat-main-locked">
-            <Typography>Please purchase this course to unlock chat.</Typography>
+            <Typography>{emptyMessage}</Typography>
           </div>
         )
       }
@@ -67,11 +75,17 @@ const Chat = ({ messages }) => {
           className="chat-input"
           variant="outlined"
           placeholder="Send message"
-          value={chatMessage}
+          value={message}
           onChange={({ target: { value } }) => onChange(value)}
-          disabled={!hasAccess}
+          disabled={!hasAccess || !courseUid}
         />
-        <Button variant="contained" color="primary" type="submit" onClick={onSubmit} disabled={!hasAccess}>
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          onClick={onSubmit}
+          disabled={!hasAccess || !courseUid}
+        >
           Submit
         </Button>
       </form>
@@ -79,9 +93,15 @@ const Chat = ({ messages }) => {
   );
 };
 
-const CourseChat = () => {
-  const { chat } = useSelector(selectedCourseSelectors.select);
-  return <Chat messages={chat} />
+const BaseChat = ({ chat, courseUid }) => {
+  return <Chat messages={chat} courseUid={courseUid} hasAccess={true} emptyMessage={EMPTY_MESSAGES.NO_COURSE} />
 }
 
-export { CourseChat };
+const CourseChat = () => {
+  const chat = useSelector(selectedCourseSelectors.selectChat);
+  const hasAccess = useSelector(selectHasAccessToCurrentCourse);
+  const { course: { uid } } = useSelector(selectedCourseSelectors.select);
+  return <Chat messages={chat} courseUid={uid} hasAccess={hasAccess} />
+}
+
+export { CourseChat, BaseChat };

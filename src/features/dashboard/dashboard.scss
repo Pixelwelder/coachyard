@@ -47,3 +47,36 @@ $student-image-size: 100px;
 .course-link {
 
 }
+
+.chats {
+  flex: 1;
+  display: flex;
+  //border: 1px solid red;
+}
+
+.chats-list {
+  //border: 1px solid green;
+  margin-right: 32px;
+  list-style: none;
+  padding: 0;
+}
+
+.chat-title {
+  //border: 1px solid blue;
+  padding: 16px 16px;
+  border-radius: 8px;
+  width: 300px;
+  background: #eeeeee;
+  cursor: pointer;
+  margin-bottom: 8px;
+
+  &.selected {
+    background: lightgrey;
+  }
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid lightgray;
+}
