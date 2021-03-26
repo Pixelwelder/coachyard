@@ -158,23 +158,36 @@ const createSubscription = functions.https.onCall(async (data, context) => {
     const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
     if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
     const customer = customerDoc.data();
+    console.log('got customer');
     const price = pricesByTier[tier];
     const subscription = await stripe.subscriptions.create({
       customer: customer.customer_id,
       items: [{ price }],
       expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
     });
+    console.log('got subscription', uid);
 
     // Save the subscription to Firestore.
-    await admin.firestore()
-      .collection('stripe_customers')
-      .doc(uid)
-      .collection('subscriptions')
-      .doc(subscription.id)
-      .set(subscription);
+    await admin.firestore().runTransaction(async transaction => {
+      const ref = admin.firestore()
+        .collection('stripe_customers')
+        .doc(uid)
+        .collection('subscriptions')
+        .doc(subscription.id);
+
+      await transaction.set(ref, { test: 'hello' });
+    })
+    // await admin.firestore()
+    //   .collection('stripe_customers')
+    //   .doc(uid)
+    //   .collection('subscriptions')
+    //   .doc(subscription.id)
+    //   .set({ test: 'hello' });
 
     const tierDef = tiers[tier - 1];
+    console.log('set subscription', uid, tier, tierDef);
     await setClaims({ uid, claims: { tier, subscribed: true, remaining: tierDef.unitsAmount * 60 } });
+    console.log('set claims');
 
     log({ message: `Billing: created a subscription for ${uid}...`, data: { id: subscription.id }, context });
   } catch (error) {

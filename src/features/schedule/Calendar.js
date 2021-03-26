@@ -1,5 +1,6 @@
 import React from 'react';
 import Iframe from 'react-iframe';
+import { url } from '../../__config__/easy.json';
 
 const Calendar = () => {
   return (
@@ -7,7 +8,7 @@ const Calendar = () => {
       <Iframe
         id="schedule"
         // url={`http://localhost:8000?provider=${providerId}`}
-        url={`http://localhost:8000/index.php/user/login`}
+        url={`${url}/index.php/user/login?admin`}
         width="800px"
         height="500px"
         display="block"

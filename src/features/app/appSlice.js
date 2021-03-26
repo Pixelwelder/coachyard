@@ -76,8 +76,6 @@ const init = createAsyncThunk(
       await dispatch(scheduleActions.init());
       await dispatch(dashboardActions.init());
 
-      // await dispatch(adminActions.init({ firebase: app }));
-
       // Set the query. For some reason the object returned from queryString is non-serializable.
       const query = queryString.parse(window.location.search);
       const queryObj = Object.entries(query)

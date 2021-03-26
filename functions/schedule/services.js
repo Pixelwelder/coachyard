@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { baseUrl } = require('./config.json');
+const { url } = require('../__config__/easy.json');
 const { getCategories } = require('./categories');
 
 const createService = (overrides) => ({
@@ -21,7 +21,7 @@ const createService = (overrides) => ({
 const getServices = async () => {
   console.log('getServices');
   const result = await fetch(
-    `${baseUrl}/services`,
+    `${url}/services`,
     {
       headers: getEasyHeaders()
     }
@@ -36,7 +36,7 @@ const clearServices = async () => {
   console.log('clearServices');
   const services = await getServices();
   const promises = await services.map(service => fetch(
-    `${baseUrl}/services/${service.id}`,
+    `${url}/services/${service.id}`,
     {
       headers: getEasyHeaders(),
       method: METHODS.DELETE
@@ -56,10 +56,10 @@ const addServices = async () => {
   const category = categories.find(category => category.name === 'Generic Timeslots');
   // const services = [15, 30, 45, 60, 75, 90, 105, 120].map((duration, index) => createService({
   // We create one service, because we can specify the length later.
-  const services = [CATEGORY_IDS.LIVE_SESSION].map((duration, index) => createService({
+  const services = [CATEGORY_IDS.LIVE_SESSION].map((value, index) => createService({
     id: index,
     name: `Live Session`,
-    duration,
+    duration: 60,
     price: 0,
     currency: 'USD',
     description: `A 1-on-1 live session`,
@@ -68,7 +68,7 @@ const addServices = async () => {
     categoryId: category.id
   }));
   const promises = services.map(service => fetch(
-      `${baseUrl}/services/`,
+      `${url}/services/`,
       {
         headers: getEasyHeaders(),
         method: METHODS.POST,

@@ -1,6 +1,7 @@
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import { loaderReducers, setValue } from '../../util/reduxUtils';
+import { url } from '../../__config__/easy.json';
 
 export const TABS = {
   CALENDAR: 0,
@@ -13,6 +14,7 @@ const name = 'schedule';
 const initialState = {
   isInitialized: false,
   isReadyForLogin: false,
+  numFailedLogins: 0,
   isLoggedIn: false,
   credentials: null,
   isLoading: false,
@@ -33,7 +35,10 @@ const init = createAsyncThunk(
 
     // Logs into the scheduler.
     const doLogin = () => {
-      console.log('doLogin...');
+      return;
+      const { numFailedLogins } = select(getState());
+      if (numFailedLogins > 3) return;
+      console.log(`doLogin #${numFailedLogins}...`);
       const { credentials, isReadyForLogin } = select(getState());
       if (!isReadyForLogin) {
         console.log('Form is not ready for login');
@@ -51,8 +56,9 @@ const init = createAsyncThunk(
       if (schedule) {
         schedule.contentWindow.postMessage(
           { type: 'login', username, password },
-          'http://localhost:8000' // TODO
+          '*'
         );
+        dispatch(generatedActions.setNumFailedLogins(numFailedLogins + 1));
       } else {
         console.log('No schedule iframe');
       }
@@ -62,7 +68,7 @@ const init = createAsyncThunk(
     const doLogout = () => {
       const schedule = document.getElementById('schedule');
       if (schedule) {
-        document.getElementById('schedule').src = "http://localhost:8000/index.php/user/logout"
+        document.getElementById('schedule').src = `${url}/index.php/user/logout`
       } else {
         console.log('No schedule iframe');
       }
@@ -75,6 +81,7 @@ const init = createAsyncThunk(
         const { type, value } = event.data;
         switch (type) {
           case 'scheduler-login-ready': {
+            console.log('scheduler login ready');
             const { isLoggedIn } = select(getState());
             if (!isLoggedIn) {
               dispatch(generatedActions.setIsReadyForLogin(value));
@@ -82,18 +89,24 @@ const init = createAsyncThunk(
                 doLogin();
               }
             }
+            break;
           }
 
           case 'schedule-login-is-loading': {
             dispatch(generatedActions.setIsLoading(value));
+            break;
           }
 
           case 'scheduler-login-logged-in': {
+            console.log('+++ logged in!');
+            const schedule = document.getElementById('schedule');
+            schedule.src = `${url}/index.php/backend`;
             // dispatch(generatedActions.setIsLoggedIn(value));
+            break;
           }
 
           default: {
-            //
+            break;
           }
         }
       }
@@ -103,6 +116,9 @@ const init = createAsyncThunk(
     app.auth().onAuthStateChanged((authUser) => {
       unsubscribeProviders();
       if (authUser) {
+        const schedule = document.getElementById('schedule')
+        if (schedule) schedule.src = `${url}/index.php/user/login?admin`;
+
         unsubscribeProviders = app.firestore()
           .collection('easy_providers')
           .doc(authUser.uid)
@@ -159,6 +175,7 @@ const { reducer, actions: generatedActions } = createSlice({
     setIsInitialized: setValue('isInitialized'),
     setIsReadyForLogin: setValue('isReadyForLogin'),
     setIsLoggedIn: setValue('isLoggedIn'),
+    setNumFailedLogins: setValue('numFailedLogins'),
     setIsLoading: setValue('isLoading'),
     setCredentials: setValue('credentials'),
     setServices: setValue('services'),

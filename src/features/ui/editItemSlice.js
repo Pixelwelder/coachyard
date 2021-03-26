@@ -1,5 +1,4 @@
 import { createUISlice } from './createUISlice';
-import { isPendingAction, isThisAction } from '../../util/reduxUtils';
 
 const initialState = {
   isChangingFile: false,
@@ -15,8 +14,6 @@ const initialState = {
 };
 
 const isUploadProgress = action => action.type === 'upload/progress';
-const isUploadError = action => action.type === 'upload/error';
-const isUploadComplete = action => action.type === 'upload/complete';
 
 export default createUISlice({
   name: 'updateItem',
@@ -29,7 +26,7 @@ export default createUISlice({
         state.totalBytes = action.payload.totalBytes;
       })
       .addMatcher(
-        action => action.type == '_uploadItem/pending',
+        action => action.type === '_uploadItem/pending',
         (state, action) => {
 
       })

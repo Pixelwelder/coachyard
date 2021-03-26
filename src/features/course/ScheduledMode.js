@@ -10,6 +10,7 @@ import { actions as catalogActions } from '../catalog/catalogSlice';
 import React from 'react';
 import ParticipantList from '../../components/ParticipantList';
 import Iframe from 'react-iframe';
+import { url } from '../../__config__/easy.json';
 
 const getDateTime = item => ({
   formattedDate: DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT),
@@ -85,7 +86,7 @@ const Student = () => {
         <Iframe
           id="schedule"
           // url={`http://localhost:8000?provider=${providerId}`}
-          url={`http://localhost:8000/index.php/user/login`}
+          url={`${url}/index.php/user/login?admin`}
           width="800px"
           height="900px"
           display="block"

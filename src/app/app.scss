@@ -1,6 +1,10 @@
 @import "variables";
 //$inner-padding: 12px;
 
+a {
+  text-decoration: none;
+}
+
 #root {
   display: flex;
   height: 100vh;

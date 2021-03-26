@@ -47,9 +47,10 @@ const init = createAsyncThunk(
 
               // Grab claims.
               const { claims } = await authUser.getIdTokenResult(true);
-              console.log('claims', claims);
               dispatch(generatedActions.setClaims(claims));
             } else {
+              // User doesn't exist!
+              // app.functions().httpsCallable('onCreateUser')({ uid: authUser.uid });
               generatedActions.setMeta(initialState.meta);
             }
           });

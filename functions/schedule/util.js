@@ -2,7 +2,6 @@ const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { v4: uuid } = require('uuid');
-const { baseUrl } = require('./config.json');
 const { addCategories, clearCategories, getCategories } = require('./categories');
 const { addServices, clearServices, getServices } = require('./services');
 const { clearProviders, listProviders, addProvider, updateProvider } = require('./providers');

@@ -19,7 +19,8 @@ const useStyles = makeStyles({
     flex: 0
   },
   title: {
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    textDecoration: 'none'
   }
 });
 
@@ -30,7 +31,7 @@ const Header = () => {
     <Box borderBottom={1} borderColor="lightgray" className={styles.container}>
       <Box className={styles.titleContainer}>
         <Link to='/dashboard'>
-          <Typography variant="h3" className={styles.title}>Coachyard</Typography>
+          <Typography variant="h5" className={styles.title}>Coachyard.io</Typography>
         </Link>
       </Box>
 

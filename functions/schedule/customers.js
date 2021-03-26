@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { baseUrl } = require('./config.json');
+const { url } = require('../__config__/easy.json');
 const { getServices } = require('./services');
 const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
 
@@ -18,7 +18,7 @@ const createCustomer = (overrides) => ({
   ...overrides
 });
 
-const _addCustomer = createAdd({ url: `${baseUrl}/customers` });
+const _addCustomer = createAdd({ url: `${url}/customers` });
 const addCustomer = async ({ uid, email }) => {
   const customer = createCustomer({
     firstName: email,
@@ -29,7 +29,7 @@ const addCustomer = async ({ uid, email }) => {
   return result;
 };
 
-const _updateCustomer = createUpdate({ url: `${baseUrl}/customers` })
+const _updateCustomer = createUpdate({ url: `${url}/customers` })
 const updateCustomer = async ({ id, data }) => {
   const existingCustomer = getCustomer({ id });
   const newCustomer = { ...existingCustomer, ...data };
@@ -37,9 +37,9 @@ const updateCustomer = async ({ id, data }) => {
   return result;
 };
 
-const getCustomer = createGet({ url: `${baseUrl}/customers` });
-const listCustomers = createList({ url: `${baseUrl}/customers` });
-const deleteCustomer = createDelete({ url: `${baseUrl}/customers` });
-const clearCustomers = createClear({ url: `${baseUrl}/customers`, listFunc: listCustomers });
+const getCustomer = createGet({ url: `${url}/customers` });
+const listCustomers = createList({ url: `${url}/customers` });
+const deleteCustomer = createDelete({ url: `${url}/customers` });
+const clearCustomers = createClear({ url: `${url}/customers`, listFunc: listCustomers });
 
 module.exports = { addCustomer, updateCustomer, deleteCustomer, getCustomer, listCustomers, clearCustomers };

@@ -24,4 +24,4 @@ const listTimes = ({ increment = 15 } = {}) => {
   return times;
 };
 
-module.exports = { padNum, to12Hour, listTimes };
+export { padNum, to12Hour, listTimes };

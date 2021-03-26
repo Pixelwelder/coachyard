@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { baseUrl } = require('./config.json');
+const { url } = require('../__config__/easy.json')
 
 const createCategory = (overrides) => ({
   id: 5,
@@ -13,7 +13,7 @@ const createCategory = (overrides) => ({
 const getCategories = async () => {
   console.log('getCategories');
   const result = await fetch(
-    `${baseUrl}/categories`,
+    `${url}/categories`,
     {
       method: METHODS.GET,
       headers: getEasyHeaders()
@@ -29,7 +29,7 @@ const clearCategories = async () => {
   console.log(`removing categories`);
   const categories = await getCategories();
   const promises = categories.map(category => fetch(
-    `${baseUrl}/categories/${category.id}`,
+    `${url}/categories/${category.id}`,
     {
       method: METHODS.DELETE,
       headers: getEasyHeaders()
@@ -51,7 +51,7 @@ const addCategories = async () => {
 
   const promises = categories.map(category => {
     return fetch(
-      `${baseUrl}/categories`,
+      `${url}/categories`,
       {
         method: METHODS.POST,
         headers: getEasyHeaders(),
