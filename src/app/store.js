@@ -10,6 +10,7 @@ import selectedCourseReducer from '../features/course/selectedCourseSlice';
 import scheduleReducer from '../features/schedule/scheduleSlice';
 import coachReducer from '../features/coach/coachSlice';
 import dashboardReducer from '../features/dashboard/dashboardSlice';
+import assetsReducer from '../features/assets/assetsSlice';
 
 export default configureStore({
   reducer: {
@@ -22,7 +23,8 @@ export default configureStore({
     selectedCourse: selectedCourseReducer,
     schedule: scheduleReducer,
     coach: coachReducer,
-    dashboard: dashboardReducer
+    dashboard: dashboardReducer,
+    assets: assetsReducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {

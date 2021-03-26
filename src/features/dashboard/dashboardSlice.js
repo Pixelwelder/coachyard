@@ -48,7 +48,15 @@ const { reducer, actions: generatedActions } = createSlice({
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens }) => tokens);
 const selectStudentTokens = createSelector(selectTokens, tokens => {
-  return tokens.filter(token => token.access === 'student')
+  return Object.values(
+    tokens
+      .filter(token => token.access === 'student')
+      .reduce((accum, token) => {
+        if (!accum[token.user]) accum[token.user] = [];
+        accum[token.user].push(token);
+        return accum;
+      }, {})
+  );
 });
 const selectors = { select, selectStudentTokens };
 

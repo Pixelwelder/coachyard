@@ -10,7 +10,7 @@ import { actions as catalogActions } from '../catalog/catalogSlice';
 import React from 'react';
 import ParticipantList from '../../components/ParticipantList';
 import Iframe from 'react-iframe';
-import { url } from '../../__config__/easy.json';
+import { url } from '../../__config__/easy.local.json';
 
 const getDateTime = item => ({
   formattedDate: DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT),

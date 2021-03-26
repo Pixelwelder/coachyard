@@ -18,11 +18,26 @@ dashboard-page {
 }
 
 .student-list {
-
+  display: flex;
 }
 
 .student-item {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  ul {
+    border: none;
+    list-style: none;
+    padding: 0;
+  }
+}
+
+$student-image-size: 100px;
+.student-item-image {
+  width: $student-image-size;
+  height: $student-image-size;
+  border-radius: $student-image-size / 2;
 }
 
 .student-name {
