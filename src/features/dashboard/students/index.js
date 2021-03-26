@@ -10,7 +10,8 @@ const StudentItem = ({ tokens }) => {
   const [token] = tokens; // Grab first one for user/image
   const { userDisplayName, user } = token;
   const path = `/avatars/${user}.png`;
-  const { [path]: imageUrl } = useSelector(assetsSelectors.select);
+  const { images } = useSelector(assetsSelectors.select);
+  const { [path]: imageUrl } = images;
 
   const dispatch = useDispatch();
   useEffect(() => {

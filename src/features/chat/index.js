@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import StorageImage from '../../components/StorageImage';
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from '../course/selectedCourseSlice';
+import { selectors as assetsSelectors, actions as assetsActions } from '../assets/assetsSlice';
 import './chat.scss';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import Typography from '@material-ui/core/Typography';
@@ -14,11 +15,18 @@ const EMPTY_MESSAGES = {
   NO_COURSE: 'No course selected.'
 }
 
-const ChatMessage = ({ message, imageUrls }) => {
+const ChatMessage = ({ message }) => {
+  const { images } = useSelector(assetsSelectors.select);
+  const dispatch = useDispatch();
   const authUser = app.auth().currentUser;
   const { text, sender } = message;
-  const imageUrl = imageUrls[sender];
+  const path = `/avatars/${sender}.png`;
+  const { [path]: imageUrl } = images;
   const messageClass = sender === authUser.uid ? 'sent' : 'received';
+
+  useEffect(() => {
+    dispatch(assetsActions.getAsset({ path }));
+  }, []);
 
   return (
     <li className={`chat-message ${messageClass}`}>
@@ -29,8 +37,6 @@ const ChatMessage = ({ message, imageUrls }) => {
 };
 
 const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED }) => {
-  console.log('chat', messages);
-  const { imageUrls } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
   const dummy = useRef();
   const [message, setMessage] = useState('');
@@ -58,7 +64,7 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
         ? (
           <ul className="chat-main">
             {messages.map((message, index) => (
-              <ChatMessage key={index} message={message} imageUrls={imageUrls}/>
+              <ChatMessage key={index} message={message} />
             ))}
             <span ref={dummy}></span>
           </ul>
