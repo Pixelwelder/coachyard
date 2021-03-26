@@ -66,13 +66,19 @@ $student-image-size: 100px;
   padding: 16px 16px;
   border-radius: 8px;
   width: 300px;
-  background: #eeeeee;
+  background: #dddddd;
   cursor: pointer;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
 
   &.selected {
-    background: lightgrey;
+    background: #ffffff;
   }
+}
+
+.chat-title-text {
+  flex: 1;
 }
 
 .chat-container {

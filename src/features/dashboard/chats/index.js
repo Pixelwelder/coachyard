@@ -4,18 +4,21 @@ import { selectors as dashboardSelectors, actions as dashboardActions } from '..
 import { selectors as assetsSelectors } from '../../assets/assetsSlice';
 import Typography from '@material-ui/core/Typography';
 import Badge from '@material-ui/core/Badge';
+import Paper from '@material-ui/core/Paper';
+import Chip from '@material-ui/core/Chip';
 import { BaseChat } from '../../chat';
 
 const ChatTitle = ({ course, isSelected, onClick }) => {
   const { displayName, numChats, numChatsUnseen } = course;
 
   return (
-    <li onClick={onClick} className={`chat-title${isSelected ? ' selected' : ''}`}>
-      <Badge badgeContent={numChats} color="primary">
-        <Typography>
+    <li onClick={onClick}>
+      <Paper className={`chat-title${isSelected ? ' selected' : ''}`} elevation={isSelected ? 5 : 0}>
+        <Typography className="chat-title-text">
           {displayName}
         </Typography>
-      </Badge>
+        <Chip label={numChats} color="primary" />
+      </Paper>
     </li>
   )
 }
