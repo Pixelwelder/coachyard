@@ -159,7 +159,10 @@ const sendItem = async (data, context) => {
     const itemData = itemDoc.data();
     if (itemData.streamingId) {
       // Already exists. Delete it.
-      log({ message: 'Streaming exists. Deleting...', data, context });
+      console.log('');
+      console.log('');
+      console.log('');
+      log({ message: `Streaming exists. Deleting ${itemData.streamingId}...`, data, context });
       const result = await fetch(
         `https://api.mux.com/video/v1/assets/${itemData.streamingId}`,
         {
@@ -167,8 +170,16 @@ const sendItem = async (data, context) => {
           headers: getMuxHeaders()
         }
       );
-      const json = await result.json();
-      log({ message: 'Existing streaming asset deleted.', data: json, context });
+      try {
+        const json = await result.json();
+        log({ message: 'Existing streaming asset deleted.', data: json, context });
+      } catch (error) {
+        log({ message: 'Existing streaming asset could not be deleted.', data: json, context, level: 'error' });
+        console.log('------ ERROR ------');
+        console.log(error);
+        console.log(result);
+        console.log('-----------------------------------');
+      }
     }
 
     const result = await fetch(
