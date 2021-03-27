@@ -23,7 +23,8 @@ const Locked = () => {
 };
 
 const ItemView = () => {
-  const { selectedItem: item } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem } = useSelector(selectedCourseSelectors.select);
+  console.log('ITEM', selectedItem);
   const location = useLocation();
   const query = queryString.parse(location.search);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
@@ -31,7 +32,7 @@ const ItemView = () => {
 
   useEffect(() => {
     // dispatch(uiActions2.editItem.reset());
-  }, [item]);
+  }, [selectedItem]);
 
   return (
     <Paper className="item-view" variant="outlined">
@@ -41,28 +42,28 @@ const ItemView = () => {
         refreshRate={500}
       >
         {({ size }) => (
-          <div className={`item-view-content item-view-content-${item?.status || ''}`}>
+          <div className={`item-view-content item-view-content-${selectedItem?.status || ''}`}>
             {
               hasAccess
                 ? (<>
-                  {!item && <NoItem />}
-                  {item && (
+                  {!selectedItem && <NoItem />}
+                  {selectedItem && (
                     <>
-                      {item.status === 'scheduled' && <ScheduledMode />}
-                      {item.status === 'initializing' && <InitializingMode />}
-                      {item.status === 'live' && (
+                      {selectedItem.status === 'scheduled' && <ScheduledMode />}
+                      {selectedItem.status === 'initializing' && <InitializingMode />}
+                      {selectedItem.status === 'live' && (
                         <>
                           {
                             barebones === 'true'
-                              ? <Redirect to={`/barebones?id=${item.uid}`} />
+                              ? <Redirect to={`/barebones?id=${selectedItem.uid}`} />
                               : <LiveMode size={size} />
                           }
                         </>
                       )}
-                      {(item.status === 'uploading' || item.status === 'processing') && (
-                        <ProcessingMode status={item.status} />
+                      {(selectedItem.status === 'uploading' || selectedItem.status === 'processing') && (
+                        <ProcessingMode status={selectedItem.status} />
                       )}
-                      {item.status === 'viewing' && <ViewingMode size={size} />}
+                      {selectedItem.status === 'viewing' && <ViewingMode size={size} />}
                     </>
                   )}
                   </>)

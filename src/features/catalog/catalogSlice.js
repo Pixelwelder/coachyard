@@ -78,8 +78,7 @@ const createNewCourse = createAsyncThunk(
   'createCourse',
   async (params, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.CREATE_COURSE_ATTEMPTED);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_COURSE);
-    const result = await callable(params);
+    await app.functions().httpsCallable('createCourse2')(params);
     app.analytics().logEvent(EventTypes.CREATE_COURSE);
   }
 );
@@ -224,11 +223,6 @@ const createItem = createAsyncThunk(
 const updateItem = createAsyncThunk(
   'updateItem',
   async ({ uid, update, file }, { dispatch }) => {
-    // Update data object.
-    app.analytics().logEvent(EventTypes.UPDATE_ITEM_ATTEMPTED);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
-    const updateResult = await callable({ uid, update });
-
     // Upload new file.
     if (file) {
       const { payload: downloadUrl } = await dispatch(_uploadItem({ uid, file }));
@@ -237,6 +231,11 @@ const updateItem = createAsyncThunk(
       await dispatch(_sendToStreamingService({ uid, downloadUrl }));
       console.log('updateItem: complete');
     }
+
+    // Update data object.
+    app.analytics().logEvent(EventTypes.UPDATE_ITEM_ATTEMPTED);
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
+    const updateResult = await callable({ uid, update });
 
     app.analytics().logEvent(EventTypes.UPDATE_ITEM);
   }

@@ -29,6 +29,8 @@ const EditItemView = ({ requireUpload = false }) => {
   const { displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
   const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
+  console.log('ITEM', item);
+
   useEffect(() => {
     onEdit();
 
@@ -158,13 +160,15 @@ const EditItemView = ({ requireUpload = false }) => {
           </Button>
         )}
 
-        <FormControl component="fieldset" variant="outlined" className="scheduler-control">
-          <FormLabel>Scheduled by:</FormLabel>
-          <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
-            <FormControlLabel value="teacher" control={<Radio />} label="Me" />
-            <FormControlLabel value="student" control={<Radio />} label="My Student" />
-          </RadioGroup>
-        </FormControl>
+        {item.type === 'scheduled' && (
+          <FormControl component="fieldset" variant="outlined" className="scheduler-control">
+            <FormLabel>Scheduled by:</FormLabel>
+            <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
+              <FormControlLabel value="teacher" control={<Radio />} label="Me" />
+              <FormControlLabel value="student" control={<Radio />} label="My Student" />
+            </RadioGroup>
+          </FormControl>
+        )}
 
         {scheduler === 'teacher' && (
           <FormControl className="date-control">

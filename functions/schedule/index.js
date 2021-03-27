@@ -53,21 +53,25 @@ const scheduling_onDeleteUser = functions.auth.user()
 const scheduling_onUpdateUser = functions.firestore
   .document('/users/{docId}')
   .onUpdate(async (change, context) => {
-    const { params: { docId: uid } } = context;
-    const { displayName } = change.after.data();
-
-    const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
-    if (providerDoc.exists) {
-      const { id, settings } = providerDoc.data()
-      const result = await updateProvider({ id, data: { firstName: displayName, lastName: '', settings } });
-      console.log(result);
-    }
-
-    const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
-    if (customerDoc.exists) {
-      const { id } = customerDoc.data();
-      await updateCustomer({ id, data: { firstName: displayName, lastName: '' } });
-    }
+    // console.log('-------------------------')
+    // console.log('UPDATE');
+    // console.log(change.before.data());
+    // console.log(change.after.data());
+    // console.log('-------------------------')
+    // const { params: { docId: uid } } = context;
+    // const { displayName } = change.after.data();
+    //
+    // const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
+    // if (providerDoc.exists) {
+    //   const { id, settings } = providerDoc.data()
+    //   const result = await updateProvider({ id, data: { firstName: displayName, lastName: '', settings } });
+    // }
+    //
+    // const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
+    // if (customerDoc.exists) {
+    //   const { id } = customerDoc.data();
+    //   await updateCustomer({ id, data: { firstName: displayName, lastName: '' } });
+    // }
   });
 
 const getServices = functions.https.onCall(async (data, context) => {

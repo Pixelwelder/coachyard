@@ -28,8 +28,6 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
     if (item) go();
   }, [item]);
 
-  console.log(item);
-  console.log(tokensByCourseUid);
   return (
     <Card
       className={`catalog-item${onSelect ? '' : ' placeholder'}`}

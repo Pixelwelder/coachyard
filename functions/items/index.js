@@ -10,17 +10,13 @@ const { newCourseItem } = require('../data');
 /**
  * Filters user input for item creation.
  */
-const filterItem = ({
-  displayName,
-  description,
-  file: originalFilename = '',
-  date
-}) => ({
-  displayName,
-  description,
-  originalFilename,
-  date
-});
+const filterItem = (inputObj, fields = ['displayName', 'description', 'date', 'status']) => {
+  return fields.reduce((accum, field) => {
+    const val = inputObj[field];
+    if (typeof val === 'undefined') return accum;
+    return { ...accum, [field]: val };
+  }, {});
+};
 
 const createItem = async (data, context) => {
   try {
@@ -48,7 +44,6 @@ const createItem = async (data, context) => {
         created: timestamp,
         updated: timestamp,
         date: newItem.date,
-        status: newItem.date ? 'scheduled' : 'viewing',
         ...filterItem(newItem)
       });
 
@@ -92,6 +87,7 @@ const updateItem = async (data, context) => {
 
       // Update it (but let's not be too trusting).
       const filteredUpdate = filterItem(update);
+      console.log('filteredUpdate', filteredUpdate);
       await transaction.update(itemRef, filteredUpdate);
       return { item: { ...itemData, ...filteredUpdate } };
     });
@@ -183,7 +179,7 @@ const sendItem = async (data, context) => {
         body: JSON.stringify({
           input,
           playback_policy,
-          // test: true
+          test: true
         })
       }
     );

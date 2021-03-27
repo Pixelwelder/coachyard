@@ -167,7 +167,7 @@ const openCalendar = createAsyncThunk(
     };
 
     window.addEventListener('message', onMessage);
-    newWindow = window.open(`${url}/index.php/user/login`, 'calendar');
+    newWindow = window.open(`${url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600')
   }
 )
 

@@ -8,20 +8,33 @@ const createDuration = (overrides) => ({
   ...overrides
 });
 
-const createDay = (overrides) => ({
-  ...createDuration({
-    start: "08:00",
-    end: "19:30"
-  }),
-  breaks: [
-    createDuration({
-      start: "12:00",
-      end: "14:00"
-    })
-  ]
-});
+const createDay = (overrides) => {
+  const day = {
+    ...createDuration({
+      start: "08:00",
+      end: "18:00"
+    }),
+    breaks: [
+      createDuration({
+        start: "12:00",
+        end: "13:00"
+      })
+    ]
+  };
+  console.log('DAY', day);
+  return day;
+};
 
 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+const createWorkingPlan = () => {
+  const workingPlan = days.reduce((accum, day) => ({
+    ...accum,
+    [day]: createDay()
+  }), {});
+  console.log('WORKING PLAN', workingPlan);
+  return workingPlan;
+};
 
 const createSettings = (overrides) => ({
   username: "zjordan",
@@ -33,10 +46,7 @@ const createSettings = (overrides) => ({
   syncFutureDays: 10,
   syncPastDays: 10,
   calendarView: "default",
-  workingPlan: days.reduce((accum, day) => ({
-    ...accum,
-    [day]: createDay()
-  }), {}),
+  working_plan: createWorkingPlan(),
   ...overrides
 });
 
@@ -51,7 +61,7 @@ const createProvider = (overrides) => ({
   city: "Some City",
   state: "Some State",
   zip: "12345",
-  timezone: 'UTC',
+  timezone: 'UTC', // TODO
   notes: "Test provider notes.",
   services: [
     2, 3, 4
@@ -93,4 +103,7 @@ const listProviders = createList({ url: `${url}/providers`});
 const deleteProvider = createDelete({ url: `${url}/providers` });
 const clearProviders = createClear({ url: `${url}/providers`, listFunc: listProviders });
 
-module.exports = { addProvider, updateProvider, deleteProvider, getProvider, listProviders, clearProviders };
+module.exports = {
+  createDuration, createDay, createSettings,
+  addProvider, updateProvider, deleteProvider, getProvider, listProviders, clearProviders
+};

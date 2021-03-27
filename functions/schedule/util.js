@@ -17,8 +17,7 @@ const clear = async () => {
   await clearCategories();
 };
 
-export const initSchedule = async () => {
-  await clear()
-  await initialize();
-  console.log('done');
-}
+module.exports = {
+  initialize,
+  clear
+};

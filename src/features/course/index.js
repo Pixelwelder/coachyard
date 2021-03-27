@@ -57,11 +57,11 @@ const Course = () => {
     setAnchorEl(null);
   };
 
-  const onCreate = async (type) => {
+  const onCreate = async (status) => {
     // dispatch(uiActions2.createItem.open())
     const { payload } = await dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName: 'New Item', description: '', date: null, file: '' }
+      item: { displayName: 'New Item', description: '', date: null, file: '', status }
     }));
     console.log('result', payload);
     history.push(`/course/${course.uid}/${payload.uid}`);
@@ -128,7 +128,10 @@ const Course = () => {
               onChange={(event, newValue) => dispatch(selectedCourseActions.setSidebarMode(newValue))}
             >
               <Tab label="Content" />
-              <Tab label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')}/>
+              <Tab
+                label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')}
+                disabled={course?.type === 'template'}
+              />
             </Tabs>
             {sidebarMode === SIDEBAR_MODES.CHAT && <CourseChat />}
             {sidebarMode === SIDEBAR_MODES.TOC && (
@@ -151,8 +154,8 @@ const Course = () => {
                         open={!!anchorEl}
                         onClose={onClose}
                       >
-                        <MenuItem onClick={() => onCreate('live')}>Live Session</MenuItem>
-                        <MenuItem onClick={() => onCreate('pre-recorded')}>Pre-Recorded Video</MenuItem>
+                        <MenuItem onClick={() => onCreate('scheduled')}>Live Session</MenuItem>
+                        <MenuItem onClick={() => onCreate('viewing')}>Pre-Recorded Video</MenuItem>
                       </Menu>
                     </>
                   )}

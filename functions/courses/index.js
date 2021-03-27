@@ -128,7 +128,6 @@ const createCourse = async (data, context) => {
     });
 
     // Don't actually need to wait for this.
-    console.log('COURSE', course);
     await uploadImage({
       path: './courses/generic-teacher-cropped.png',
       destination: `courses/${course.uid}.png`
@@ -136,6 +135,62 @@ const createCourse = async (data, context) => {
 
     log({ message: `Course created.`, data: course, context });
     return { message: `Course '${displayName}' created.`, course };
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
+
+/**
+ * A simpler createCourse.
+ * @param data.displayName
+ * @param data.type - see data/newCourse()
+ */
+const createCourse2 = async (data, context) => {
+  try {
+    log({ message: 'Attempting to create course...', data, context });
+    checkAuth(context);
+
+    const { auth: { token: { uid, email, name: teacherName } } } = context;
+    const { displayName, type } = data;
+
+    const course = await admin.firestore().runTransaction(async (transaction) => {
+      // Add a course object to the database.
+      const courseRef = admin.firestore().collection('courses').doc();
+      const timestamp = admin.firestore.Timestamp.now();
+      const course = newCourse({
+        uid: courseRef.id,
+        creatorUid: uid,
+        displayName,
+        type,
+        created: timestamp,
+        updated: timestamp
+      });
+      await transaction.set(courseRef, course);
+
+      // Now add the teacher's token to the database.
+      const teacherTokenRef = admin.firestore().collection('tokens').doc();
+      const teacherToken = newCourseToken({
+        uid: teacherTokenRef.id,
+        created: timestamp,
+        updated: timestamp,
+        user: uid,
+        userDisplayName: teacherName,
+        courseUid: courseRef.id,
+        access: 'admin',
+        displayName,
+        creatorUid: uid
+      });
+      await transaction.create(teacherTokenRef, teacherToken);
+
+      return course;
+    });
+
+    // Don't need to wait for this.
+    uploadImage({
+      path: './courses/generic-teacher-cropped.png',
+      destination: `courses/${course.uid}.png`
+    });
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -705,6 +760,7 @@ const onCourseDeleted = functions.firestore
 module.exports = {
   // Courses
   createCourse: functions.https.onCall(createCourse),
+  createCourse2: functions.https.onCall(createCourse2),
   updateCourse: functions.https.onCall(updateCourse),
   // getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),

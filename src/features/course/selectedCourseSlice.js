@@ -131,7 +131,6 @@ const setUid = createAsyncThunk(
           .collection('easy_providers')
           .doc(course.creatorUid)
           .onSnapshot(async (snapshot) => {
-            console.log('provider', snapshot.data());
             if (snapshot.exists) {
               const creatorProvider = parseUnserializables(snapshot.data());
               dispatch(generatedActions.setCourseCreatorProvider(creatorProvider));
@@ -154,7 +153,6 @@ const setUid = createAsyncThunk(
               const promises = uids.map(async (uid) => {
                 try {
                   const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
-                  console.log('uid', uid, url);
                   return { uid, url };
                 } catch (error) {
                   return { uid, url: '' };
@@ -198,7 +196,6 @@ const setUid = createAsyncThunk(
       .where('courseUid', '==', uid)
       .orderBy('created')
       .onSnapshot((snapshot) => {
-        console.log('received', snapshot.size, 'items');
         const items = snapshot.docs.map(item => parseUnserializables(item.data()));
         dispatch(generatedActions.setItems(items));
       });
@@ -211,7 +208,6 @@ const setSelectedItemUid = createAsyncThunk(
   async ({ uid, history }, { dispatch, getState }) => {
     const { selectedItem } = selectors.select(getState());
     if (selectedItem && selectedItem.uid === uid) {
-      console.log(`item uid ${uid} is unchanged`);
       return;
     }
 
@@ -284,7 +280,6 @@ const searchForEmail = createAsyncThunk(
       .where('email', '==', email)
       .get();
 
-    console.log('user', email, result.size);
     if (result.size) {
       const user = result.docs[0].data();
       // Check for dupe.
@@ -296,7 +291,6 @@ const searchForEmail = createAsyncThunk(
         .get();
       if (tokenDocs.size) throw new Error(`${user.displayName} already has access to this course.`);
 
-      console.log('found user', user);
       dispatch(generatedActions.setEmailResult(parseUnserializables(user)));
     } else {
       dispatch(generatedActions.setEmailResult(email));
@@ -315,9 +309,7 @@ const addUser = createAsyncThunk(
     const studentEmail = typeof emailResult === 'object' ? emailResult.email : emailResult;
     const { uid: courseUid } = course;
 
-    console.log('addUser', studentEmail, courseUid);
     const result = await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
-    console.log('addUser result', result);
     dispatch(generatedActions.resetEmailResult());
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   }
@@ -332,7 +324,6 @@ const purchaseCourse = createAsyncThunk(
       courseUid,
       studentUid: app.auth().currentUser.uid
     });
-    console.log('new course', newCourse);
     return newCourse;
   }
 );
@@ -341,14 +332,11 @@ const removeUser = createAsyncThunk(
   `${name}/removeUser`,
   async (_, { getState, dispatch }) => {
     const { tokenToRemove } = select(getState());
-    console.log('removeUser', tokenToRemove);
     if (!tokenToRemove) throw new Error('No token.');
 
     const { uid: tokenUid } = tokenToRemove;
 
-    console.log('removeUser', tokenUid);
     const result = await app.functions().httpsCallable('removeUser')({ tokenUid });
-    console.log('removeUser', result);
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   }
 );
@@ -361,20 +349,6 @@ const init = createAsyncThunk(
     })
   }
 );
-
-const onPending = (state) => {
-  state.error = initialState.error;
-  state.isLoading = true;
-};
-
-const onRejected = (state, action) => {
-  state.error = action.error;
-  state.isLoading = false;
-};
-
-const onFulfilled = (state) => {
-  state.isLoading = false;
-};
 
 const setValue = name => (state, action) => {
   state[name] = action.payload;
