@@ -35,6 +35,12 @@ const init = createAsyncThunk(
           .onSnapshot((snapshot) => {
             if (snapshot.size) {
               const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              for (let i = 0; i < 50; i++) {
+                tokens.push({
+                  ...tokens[1],
+                  user: Math.random().toString()
+                });
+              }
               dispatch(generatedActions.setTokens(tokens));
             }
           });

@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import { actions as assetsActions, selectors as assetsSelectors } from '../../assets/assetsSlice';
 
+
 const StudentItem = ({ tokens }) => {
   console.log('student item', tokens);
   const [token] = tokens; // Grab first one for user/image
   const { userDisplayName, user } = token;
   const path = `/avatars/${user}.png`;
   const { images } = useSelector(assetsSelectors.select);
-  const { [path]: imageUrl } = images;
+  const { [path]: imageUrl = '/images/generic-avatar-2.png' } = images;
 
   const dispatch = useDispatch();
   useEffect(() => {
