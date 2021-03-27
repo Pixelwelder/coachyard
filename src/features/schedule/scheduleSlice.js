@@ -169,7 +169,14 @@ const openCalendar = createAsyncThunk(
     window.addEventListener('message', onMessage);
     newWindow = window.open(`${url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600')
   }
-)
+);
+
+const openScheduler = createAsyncThunk(
+  `${name}/openScheduler`,
+  async () => {
+    const newWindow = window.open(`${url}/index.php`, 'calendar', 'left=100,right=100,width=900,height=600')
+  }
+);
 
 const { reducer, actions: generatedActions } = createSlice({
   name,
@@ -188,7 +195,7 @@ const { reducer, actions: generatedActions } = createSlice({
   extraReducers: loaderReducers(name, initialState)
 });
 
-const actions = { ...generatedActions, init, getServices, getProvider, openCalendar };
+const actions = { ...generatedActions, init, getServices, getProvider, openCalendar, openScheduler };
 
 const select = ({ schedule }) => schedule;
 const selectWorkingPlan = createSelector(

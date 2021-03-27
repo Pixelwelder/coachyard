@@ -31,7 +31,8 @@ const init = createAsyncThunk(
           .onSnapshot(async (snapshot) => {
             if (snapshot.exists) {
               const meta = parseUnserializables(snapshot.data());
-              generatedActions.setMeta(meta);
+              console.log('META', meta);
+              dispatch(generatedActions.setMeta(meta));
 
               try {
                 const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
@@ -51,7 +52,7 @@ const init = createAsyncThunk(
             } else {
               // User doesn't exist!
               // app.functions().httpsCallable('onCreateUser')({ uid: authUser.uid });
-              generatedActions.setMeta(initialState.meta);
+              dispatch(generatedActions.setMeta(initialState.meta));
             }
           });
       } else {

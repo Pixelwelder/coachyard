@@ -65,7 +65,8 @@ const Student = () => {
   const providerId = courseCreatorProvider?.id;
 
   const onSchedule = async () => {
-    dispatch(scheduleActions.getServices());
+    dispatch(scheduleActions.openScheduler());
+    // dispatch(scheduleActions.getServices());
   };
 
   return (
@@ -123,7 +124,12 @@ const Teacher = () => {
                   <Typography className="participant-name" variant="h6" component="p">
                     {selectedItem.displayName}
                   </Typography>
-                  <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
+                  <Typography className="meeting-date">
+                    {item.date !== null
+                      ? <>Scheduled for {formattedDate} (in {timeRemaining})</>
+                      : <>Unscheduled</>
+                    }
+                  </Typography>
                 </div>
                 <Button
                   color="primary" variant="contained"

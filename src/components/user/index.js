@@ -12,7 +12,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import './user.scss';
 
 const Auth = () => {
-  const { isSignedIn, image } = useSelector(userSelectors.select);
+  const { isSignedIn, image, meta: { slug } } = useSelector(userSelectors.select);
   const dispatch = useDispatch();
   const authUser = app.auth().currentUser;
   const history = useHistory();
@@ -31,16 +31,21 @@ const Auth = () => {
   const onLogOut = () => {
     onClose();
     dispatch(userActions.signOut());
-  }
+  };
 
   const onShowDashboard = () => {
     onClose();
     history.push('/dashboard');
-  }
+  };
 
   const onShowAccount = () => {
     onClose();
     dispatch(uiActions2.account.open());
+  };
+
+  const onShowCoachPage = () => {
+    onClose();
+    history.push(`/coach/${slug}/`);
   };
 
   return (
@@ -77,7 +82,9 @@ const Auth = () => {
               onClose={onClose}
             >
               <MenuItem onClick={onShowDashboard}>Dashboard</MenuItem>
-              <MenuItem onClick={onShowAccount}>Account</MenuItem>
+              <MenuItem onClick={onShowCoachPage}>Coach Page</MenuItem>
+              <MenuItem divider onClick={onShowAccount}>Account</MenuItem>
+
               <MenuItem onClick={onLogOut}>Logout</MenuItem>
             </Menu>
           </>

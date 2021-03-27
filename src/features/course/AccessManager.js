@@ -36,22 +36,22 @@ const AccessManager = () => {
   if (!course) return null;
   return (
     <div className="access-manager">
-      <FormControl component="fieldset" className="access-type" disabled={isLoading}>
-        <FormLabel component="legend">This course is:</FormLabel>
-        <RadioGroup
-          row aria-label="type" name="type" value={type}
-          onChange={({ target: { value } } ) => onChange({ type: value })}
-        >
-          <FormControlLabel value="public" control={<Radio />} label="Public" />
-          <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />
-          <FormControlLabel value="template" control={<Radio />} label="Template" />
-        </RadioGroup>
-        {/*{type !== course.type && (*/}
-        {/*  <Button size="small" color="secondary" variant="contained" onClick={onSave} disabled={isLoading}>*/}
-        {/*    Update*/}
-        {/*  </Button>*/}
-        {/*)}*/}
-      </FormControl>
+      {/*<FormControl component="fieldset" className="access-type" disabled={isLoading}>*/}
+      {/*  <FormLabel component="legend">This course is:</FormLabel>*/}
+      {/*  <RadioGroup*/}
+      {/*    row aria-label="type" name="type" value={type}*/}
+      {/*    onChange={({ target: { value } } ) => onChange({ type: value })}*/}
+      {/*  >*/}
+      {/*    <FormControlLabel value="public" control={<Radio />} label="Public" />*/}
+      {/*    <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />*/}
+      {/*    <FormControlLabel value="template" control={<Radio />} label="Template" />*/}
+      {/*  </RadioGroup>*/}
+      {/*  /!*{type !== course.type && (*!/*/}
+      {/*  /!*  <Button size="small" color="secondary" variant="contained" onClick={onSave} disabled={isLoading}>*!/*/}
+      {/*  /!*    Update*!/*/}
+      {/*  /!*  </Button>*!/*/}
+      {/*  /!*)}*!/*/}
+      {/*</FormControl>*/}
 
       {/*<InputMask*/}
       {/*  mask="9,999.99"*/}
@@ -62,24 +62,27 @@ const AccessManager = () => {
       {/*  <TextField />*/}
       {/*</InputMask>*/}
 
-      {type === 'public' && (
-        <div className="price-container">
-          <Typography className="currency-sign" variant="h6">$</Typography>
-          <TextField
-            variant="outlined" label="Price" placeholder="49.95"
-            id="students" name="students"
-            value={price / 100}
-            disabled={isLoading}
-            inputProps={{
-              type: 'number',
-              step: '0.01'
-            }}
-            onChange={({ target: { value } }) => onChange({
-              // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
-              price: value * 100
-            })}
-          />
-        </div>
+      {['public', 'template'].includes(type) && (
+        <>
+          <Typography className="light-text course-price">How much does this course cost?</Typography>
+          <div className="price-container">
+            <Typography className="currency-sign" variant="h6">$</Typography>
+            <TextField
+              variant="outlined" label="Price" placeholder="49.95"
+              id="students" name="students"
+              value={price / 100}
+              disabled={isLoading}
+              inputProps={{
+                type: 'number',
+                step: '0.01'
+              }}
+              onChange={({ target: { value } }) => onChange({
+                // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
+                price: value * 100
+              })}
+            />
+          </div>
+        </>
       )}
       <StudentManager />
     </div>

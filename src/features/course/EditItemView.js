@@ -16,6 +16,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import FormControl from '@material-ui/core/FormControl';
+import { getDefaultDateTime } from '../../util/itemUtils';
 
 const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
@@ -44,8 +45,9 @@ const EditItemView = ({ requireUpload = false }) => {
     dispatch(actions.setValues({
       displayName: item.displayName,
       description: item.description,
-      date: item.date,
-      file: item.file
+      date: item.date || getDefaultDateTime(),
+      file: item.file,
+      scheduler: !!item.date ? 'teacher' : 'student'
     }));
   };
 
@@ -122,7 +124,7 @@ const EditItemView = ({ requireUpload = false }) => {
           onChange={onChange}
         />
         {
-          (isChangingFile || !item.streamingId)
+          (item.status !== 'scheduled' && (isChangingFile || !item.streamingId))
             ? (
               <>
                 {
@@ -160,7 +162,7 @@ const EditItemView = ({ requireUpload = false }) => {
           </Button>
         )}
 
-        {item.type === 'scheduled' && (
+        {item.status === 'scheduled' && (
           <FormControl component="fieldset" variant="outlined" className="scheduler-control">
             <FormLabel>Scheduled by:</FormLabel>
             <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>

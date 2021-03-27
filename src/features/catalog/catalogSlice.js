@@ -362,8 +362,11 @@ const selectTeachingTokens = createSelector(selectTokens, tokens => {
 const selectLearningTokens = createSelector(selectTokens, tokens => {
   return tokens.filter(token => token.access === 'student')
 });
+const selectClonedTokens = createSelector(selectTeachingTokens, tokens => {
+  return tokens.filter(token => token.type !== 'basic')
+});
 
-const selectors = { select, selectTeachingTokens, selectLearningTokens };
+const selectors = { select, selectTeachingTokens, selectLearningTokens, selectClonedTokens };
 
 export { actions, selectors };
 export default reducer;

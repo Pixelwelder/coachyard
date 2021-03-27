@@ -96,8 +96,8 @@ const List = () => {
   }
 
   return (
-    <div className="student-manager-page student-list">
-      <Typography className="student-manager-title">Who has access to this course?</Typography>
+    <div className="student-manager-page access-student-list">
+      <Typography className="light-text">Who has access to this course?</Typography>
       <div className="student-manager-content">
         <ul>
           {tokens.map((token, index) => (
@@ -133,7 +133,7 @@ const Add = () => {
 
   return (
     <div className="student-manager-page student-add">
-      <Typography className="student-manager-title">Add Student</Typography>
+      <Typography className="light-text">Add Student</Typography>
       <div className="student-manager-content">
         <form className="student-search-form">
           <TextField
@@ -185,7 +185,7 @@ const Delete = () => {
 
   return (
     <div className="student-manager-page student-delete">
-      <Typography className="student-manager-title">Remove Student</Typography>
+      <Typography className="light-text">Remove Student</Typography>
       <div className="student-manager-content">
         <_UserView token={tokenToRemove} propName="userDisplayName" />
         <Typography>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</Typography>
@@ -208,7 +208,7 @@ const _UserView = ({ user, token }) => {
   return (
     <div className="_user-view">
       <_StudentImage uid={uid} cName="student-manager-image" />
-      <Typography variant="h6" className="student-manager-title">
+      <Typography variant="h6" className="light-text">
         {name}
       </Typography>
       {/*{!isMember(user) && (*/}
@@ -232,7 +232,7 @@ const ViewUser = () => {
 
   return (
     <div className="student-manager-page view-user">
-      <Typography className="student-manager-title">Add Student</Typography>
+      <Typography className="light-text">Add Student</Typography>
       <div className="student-manager-content">
         <_UserView user={emailResult} />
       </div>

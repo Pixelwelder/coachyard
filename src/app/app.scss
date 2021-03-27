@@ -396,8 +396,12 @@ $billing-width: 400px;
   }
 }
 
-.student-manager-title {
+.light-text {
   color: rgba(0, 0, 0, 0.54);
+}
+
+.course-price {
+  margin-bottom: 16px !important;
 }
 
 .student-manager-page {
@@ -423,7 +427,7 @@ $billing-width: 400px;
   }
 }
 
-.student-list {
+.access-student-list {
   flex: 1;
 
   ul {

@@ -400,6 +400,7 @@ const _cloneCourse = async (data, context) => {
       parent: courseUid,
       created: timestamp,
       updated: timestamp,
+      type: 'basic',
 
       // TODO TEMP
       displayName: `${original.displayName} Copy`
@@ -466,7 +467,13 @@ const _cloneCourse = async (data, context) => {
     await transaction.set(courseRef, newCourse);
     await Promise.all(promises);
     await transaction.set(studentTokenRef, studentToken);
-    // await transaction.set(teacherTokenRef, teacherToken);
+    await transaction.set(teacherTokenRef, teacherToken);
+
+    // Don't actually need to wait for this.
+    await uploadImage({
+      path: './courses/generic-teacher-cropped.png',
+      destination: `courses/${newCourse.uid}.png`
+    });
 
     return { newCourse }
   });

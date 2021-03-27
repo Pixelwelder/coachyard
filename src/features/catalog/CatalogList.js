@@ -51,7 +51,7 @@ const CatalogList = ({
   );
 };
 
-const TeachingCatalogList = () => {
+const TeachingCatalogList = ({ title = 'Teaching' }) => {
   const courses = useSelector(catalogSelectors.selectTeachingTokens);
   const dispatch = useDispatch();
   const { tier } = useSelector(billingSelectors2.select);
@@ -67,7 +67,7 @@ const TeachingCatalogList = () => {
 
   return (
     <CatalogList
-      title="Teaching"
+      title={title}
       onCreate={onCreate}
       onDelete={(item) => dispatch(uiActions.openDialog({
         name: 'deleteDialog',
@@ -82,38 +82,38 @@ const TeachingCatalogList = () => {
   );
 };
 
-const LearningCatalogList = () => {
+const LearningCatalogList = ({ title = 'Learning' }) => {
   const courses = useSelector(catalogSelectors.selectLearningTokens);
 
   return (
     <CatalogList
-      title="Learning"
+      title={title}
       items={courses}
       emptyMessage="You are not learning anything yet."
     />
   );
 };
 
-const PublicCatalogList = () => {
+const PublicCatalogList = ({ title = 'Group Courses' }) => {
   const { coach } = useSelector(coachSelectors.select);
   const courses = useSelector(coachSelectors.selectPublicCourses);
 
   return (
     <CatalogList
-      title="Public Courses"
+      title={title}
       items={courses}
       emptyMessage={`${coach?.displayName || 'This coach'} has no public courses.`}
     />
   );
 };
 
-const TemplateCatalogList = () => {
+const TemplateCatalogList = ({ title = 'One-on-One Courses'}) => {
   const { coach } = useSelector(coachSelectors.select);
   const courses = useSelector(coachSelectors.selectTemplateCourses);
 
   return (
     <CatalogList
-      title="Template Courses"
+      title={title}
       items={courses}
       emptyMessage={`${coach?.displayName || 'This coach'} has no template courses.`}
     />

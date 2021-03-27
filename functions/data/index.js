@@ -115,6 +115,7 @@ const newCourseToken = (overrides) => ({
   image: '',
   parent: '',
   creatorUid: '',
+  type: 'basic', // 'basic', 'template'
 
   ...overrides
 });

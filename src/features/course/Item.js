@@ -40,7 +40,12 @@ const Item = ({ item, isSelected, onSelect }) => {
           </>
         </Typography>
         {item.status === 'scheduled' && (
-          <Typography>{formattedTime} (in {timeRemaining})</Typography>
+          <Typography>
+            {formattedTime.indexOf('Invalid') === -1
+              ? <>{formattedTime} (in {timeRemaining})</>
+              : <>Unscheduled</>
+            }
+          </Typography>
         )}
         {item.status === 'live' && (
           <Typography>Now live</Typography>
