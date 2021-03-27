@@ -209,6 +209,19 @@ form {
   .edit-course-form {
     flex: 1;
   }
+
+  .course-small-image {
+    width: 75px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 16px;
+  }
+}
+
+.course-large-image {
+  width: 200px;
+  height: 266px;
+  object-fit: cover;
 }
 
 .edit-view {
@@ -242,13 +255,11 @@ form {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
   .MuiTypography-root {
     margin-bottom: 16px;
-  }
-
-  .course-description {
-    min-height: 200px;
   }
 }
 

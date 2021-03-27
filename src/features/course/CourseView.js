@@ -14,6 +14,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccessManager from './AccessManager';
 import { Link } from 'react-router-dom';
+import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -22,18 +23,29 @@ const CourseView = () => {
   const { course, courseCreator, editMode } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
+  const { images } = useSelector(assetsSelectors.select);
   const dispatch = useDispatch();
 
-  const { displayName, description, isEditing } = editCourse;
+  const { displayName, description, image, isEditing } = editCourse;
   const isLoading = false;
   const error = null;
+
+  const path = course ? `/courses/${course.uid}.png` : '';
+  const { [path]: imageUrl } = images;
 
   useEffect(() => {
     return () => {
       dispatch(uiActions2.editCourse.reset());
     }
-  }, [dispatch]);
+  }, []);
 
+  useEffect(() => {
+    if (course && !imageUrl) {
+      dispatch(assetsActions.getAsset({ path }))
+    }
+  }, [course, imageUrl]);
+
+  // TODO useCallback
   const onEdit = () => {
     dispatch(uiActions2.editCourse.setValues({
       isEditing: true,
@@ -96,6 +108,8 @@ const CourseView = () => {
                         onChange={({ target: { value } }) => onChange({ displayName: value })}
                       />
 
+                      <img className="course-small-image" src={imageUrl} />
+
                       <TextField
                         fullWidth
                         multiline rows={10}
@@ -119,14 +133,20 @@ const CourseView = () => {
               )
 
               : (
-                <div className="course-details">
-                  <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
-                  <Link to={`/coach/${courseCreator?.slug || 'dashboard'}`}>
-                    <Typography variant="h6" component="h4">{courseCreator?.displayName || ''}</Typography>
-                  </Link>
-                  <Typography className="course-description">{course.description}</Typography>
+                <>
+                  <div className="course-details">
+                    <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
+                    <img className="course-large-image" src={imageUrl} />
 
-                  <div className="spacer"/>
+                    <Typography variant="h6" component="h4">
+                      Coach: <Link to={`/coach/${courseCreator?.slug || 'dashboard'}`}>
+                        {courseCreator?.displayName || ''}
+                      </Link>
+                    </Typography>
+
+                    <Typography className="course-description">{course.description}</Typography>
+
+                  </div>
                   {ownsCourse && (
                     <div className="owner-controls">
                       <Button onClick={onEdit} variant="contained">
@@ -134,7 +154,7 @@ const CourseView = () => {
                       </Button>
                     </div>
                   )}
-                </div>
+                </>
               )
           }
         </>

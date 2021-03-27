@@ -6,6 +6,7 @@ const { checkAuth } = require('../util/auth');
 const { getMuxHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
+const { uploadImage } = require('./images');
 
 const createCourse = async (data, context) => {
   try {
@@ -18,7 +19,7 @@ const createCourse = async (data, context) => {
     // This is an array of emails.
     const students = _students ? _students.split(',').map(s => s.trim().toLowerCase()) : [];
 
-    const { course, item } = admin.firestore().runTransaction(async (transaction) => {
+    const { course } = await admin.firestore().runTransaction(async (transaction) => {
 
       // For all students that exist, replace the email with their uid.
       const studentPromises = students.map(student => {
@@ -121,6 +122,16 @@ const createCourse = async (data, context) => {
       await Promise.all(studentTokenPromises.filter(promise => !!promise)).catch(error => {
         log({ message: error.message, data: error, context, level: 'error' });
       });
+
+      console.log('DONE', course);
+      return { course };
+    });
+
+    // Don't actually need to wait for this.
+    console.log('COURSE', course);
+    await uploadImage({
+      path: './courses/generic-teacher-cropped.png',
+      destination: `courses/${course.uid}.png`
     });
 
     log({ message: `Course created.`, data: course, context });

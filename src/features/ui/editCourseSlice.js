@@ -5,6 +5,7 @@ const initialState = {
 
   displayName: '',
   description: '',
+  image: '',
   price: 0,
   type: 'invite'
 };

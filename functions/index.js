@@ -1,6 +1,5 @@
 const admin = require('firebase-admin');
 const { project_id, service_account } = require('./__config__/firebase.json');
-const functions = require('firebase-functions');
 
 console.log('initializing', project_id);
 admin.initializeApp({

@@ -40,7 +40,8 @@ const NewCourseDialog = () => {
     dispatch(actions.reset());
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (event) => {
+    event.preventDefault();
     // TODO This should be in the action.
     await dispatch(catalogActions.createNewCourse({
       displayName, students, description, type,
