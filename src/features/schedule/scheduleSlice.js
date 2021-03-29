@@ -174,7 +174,7 @@ const openCalendar = createAsyncThunk(
 const openScheduler = createAsyncThunk(
   `${name}/openScheduler`,
   async () => {
-    const newWindow = window.open(`${url}/index.php`, 'calendar', 'left=100,right=100,width=900,height=600')
+    const newWindow = window.open(`${url}/index.php`, 'calendar', 'left=100,right=100,width=800,height=800')
   }
 );
 

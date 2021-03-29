@@ -8,6 +8,7 @@ import {
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 import { EventTypes } from '../../constants/analytics';
+import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 
 const name = 'billing';
 const initialState = {
@@ -35,6 +36,7 @@ let unsubscribeStripeCustomer = () => {};
 let unsubscribePayments = () => {};
 let unsubscribePaymentMethods = () => {};
 let unsubscribeSubscriptions = () => {};
+let unsubscribeUnlocked = () => {};
 const _startDataListeners = createAsyncThunk(
   `${name}/startDataListeners`,
   async (_, { dispatch }) => {
@@ -67,6 +69,12 @@ const _startDataListeners = createAsyncThunk(
               const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setSubscriptions(subscriptions));
             });
+
+          unsubscribeUnlocked = stripeUserDoc
+            .collection('unlocked')
+            .onSnapshot((snapshot) => {
+              const unlocked = snapshot.docs.map(doc => parseUnserializables())
+            });
         }
       });
   }
@@ -77,6 +85,7 @@ const _stopDataListeners = () => {
   unsubscribePaymentMethods();
   unsubscribePaymentMethods();
   unsubscribeSubscriptions();
+  unsubscribeUnlocked();
 };
 
 const getTier = async (_authUser = null) => {
@@ -134,6 +143,26 @@ const _addPaymentMethod = createAsyncThunk(
     console.log('Payment method saved.');
   }
 );
+
+const unlockCourse = createAsyncThunk(
+  `${name}/unlockCourse`,
+  async ({ stripe, card }, { dispatch, getState }) => {
+    const state = getState();
+    const { course } = selectedCourseSelectors.select(state);
+    console.log('unlocking', course.uid);
+
+    const { paymentMethods, ui: { selectedTierId } } = select(getState());
+    // First create a payment method with the provided card.
+    if (!paymentMethods.length) {
+      console.log('No payment method. Creating.');
+      await dispatch(_addPaymentMethod({ stripe, card }));
+    }
+
+    console.log('Unlocking...');
+    await app.functions().httpsCallable('unlockCourse')({ uid: course.uid });
+    console.log('Unlocking complete');
+  }
+)
 
 const createSubscription = createAsyncThunk(
   `${name}/createSubscription`,
@@ -241,7 +270,11 @@ const { actions: generatedActions, reducer } = createSlice({
   },
 });
 
-const actions = { ...generatedActions, init, setTier, createSubscription, updateSubscription, cancelSubscription };
+const actions = {
+  ...generatedActions, init, setTier,
+  createSubscription, updateSubscription, cancelSubscription,
+  unlockCourse
+};
 
 const select = ({ billing }) => billing;
 /**

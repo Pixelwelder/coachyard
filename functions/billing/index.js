@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { newStripeCustomer, newStripePayment } = require('../data');
+const { newStripeCustomer, newStripePayment, newCourseToken } = require('../data');
 const { checkAuth } = require('../util/auth');
 const { log } = require ('../logging');
 const express = require('express');
@@ -137,6 +137,58 @@ const createPaymentMethod = functions.https.onCall(async (data, context) => {
       message: 'Billing: payment method created and added successfully.',
       data: { uid, paymentMethodId }
     });
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+});
+
+const unlockCourse = functions.https.onCall(async (data, context) => {
+  try {
+    log({ message: 'Unlocking course...', data, context });
+    checkAuth(context);
+    const { uid: courseUid } = data;
+    const { auth: { uid } } = context;
+
+    const result = await admin.firestore().runTransaction(async (transaction) => {
+      const studentRef = admin.firestore().collection('users').doc(uid);
+      const studentDoc = await transaction.get(studentRef);
+
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const courseDoc = await transaction.get(courseRef);
+
+      const tokensRef = admin.firestore().collection('tokens')
+        .where('courseUid', '==', courseUid)
+        .where('user', '==', uid);
+      const tokensDocs = await transaction.get(tokensRef);
+      if (tokensDocs.size) throw new Error('User already has access this course.');
+
+      const student = studentDoc.data();
+      const course = courseDoc.data();
+      const timestamp = admin.firestore.Timestamp.now();
+
+      // Now create access token.
+      const token = newCourseToken({
+        user: uid,
+        userDisplayName: student.displayName,
+        courseUid,
+
+        created: timestamp,
+        updated: timestamp,
+
+        // Abbreviated Course
+        displayName: course.displayName,
+        description: course.description,
+        image: course.image,
+        parent: course.uid,
+        creatorUid: course.creatorUid,
+        type: 'basic', // 'basic', 'template'
+      });
+      const tokenRef = admin.firestore().collection('tokens').doc();
+      await transaction.set(tokenRef, token);
+    });
+
+    log({ message: 'Course unlocked.', data, context });
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -429,6 +481,7 @@ stripe_webhooks.post(
 module.exports = {
   getTiers,
   createPaymentMethod,
+  unlockCourse,
   createSubscription,
   updateSubscription,
   cancelSubscription,

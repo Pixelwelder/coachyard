@@ -77,7 +77,12 @@ const Student = () => {
         <Typography className="participant-name" variant="h6" component="p">
           {courseCreator?.displayName}
         </Typography>
-        <Typography className="meeting-date">Scheduled for {formattedDate} (in {timeRemaining})</Typography>
+        <Typography className="meeting-date">
+          {item.date !== null
+            ? <>Scheduled for {formattedDate} (in {timeRemaining})</>
+            : <>This Live Session has not yet been scheduled.</>
+          }
+        </Typography>
         <Button variant="contained" color="primary" onClick={onSchedule}>
           Schedule
         </Button>

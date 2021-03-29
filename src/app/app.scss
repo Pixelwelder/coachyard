@@ -546,3 +546,18 @@ $billing-width: 400px;
   display: flex;
   margin-bottom: 16px;
 }
+
+// ------------------------------------ Dialogs ------------------------------------ //
+.unlock-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  .credit-card {
+    margin-bottom: 32px;
+  }
+
+  button {
+    align-self: center;
+  }
+}

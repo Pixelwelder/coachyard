@@ -22,6 +22,7 @@ import Iframe from 'react-iframe';
 import Coach from '../features/coach';
 import Dashboard from '../features/dashboard';
 import FirebaseSignIn from '../components/FirebaseSignIn';
+import UnlockDialog from '../features/billing2/UnlockDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -81,11 +82,11 @@ const App = () => {
 
       {/* DIALOGS */}
       <DeleteDialog />
-
       <CreateCourseDialog />
       <CreateItemDialog />
       <DeleteCourseDialog />
       <DeleteItemDialog />
+      {/*<UnlockDialog />*/}
 
       {/*<Iframe*/}
       {/*  id="schedule"*/}
