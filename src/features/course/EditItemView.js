@@ -23,6 +23,7 @@ const EditItemView = ({ requireUpload = false }) => {
   const { editItem: actions } = uiActions2;
 
   const item = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const { course } = useSelector(selectedCourseSelectors.select);
   const editItem = useSelector(selectors.select);
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
@@ -166,8 +167,8 @@ const EditItemView = ({ requireUpload = false }) => {
           <FormControl component="fieldset" variant="outlined" className="scheduler-control">
             <FormLabel>Scheduled by:</FormLabel>
             <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
-              <FormControlLabel value="teacher" control={<Radio />} label="Me" />
-              <FormControlLabel value="student" control={<Radio />} label="My Student" />
+              <FormControlLabel value="teacher" control={<Radio />} label="Me" disabled={course.type !== 'basic'} />
+              <FormControlLabel value="student" control={<Radio />} label="My Student" disabled={course.type !== 'basic'} />
             </RadioGroup>
           </FormControl>
         )}

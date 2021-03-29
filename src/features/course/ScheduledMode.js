@@ -105,7 +105,7 @@ const Teacher = () => {
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
-  const { selectedItem, courseCreatorImageUrl } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem, courseCreatorImageUrl, course } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const { formattedDate, timeRemaining } = getDateTime(item);
@@ -127,13 +127,14 @@ const Teacher = () => {
                   <Typography className="meeting-date">
                     {item.date !== null
                       ? <>Scheduled for {formattedDate} (in {timeRemaining})</>
-                      : <>Unscheduled</>
+                      : <>This Live Session has not yet been scheduled.</>
                     }
                   </Typography>
                 </div>
                 <Button
                   color="primary" variant="contained"
                   onClick={() => dispatch(catalogActions.launchItem(item))}
+                  disabled={course.type === 'template'}
                 >
                   Go Live
                 </Button>

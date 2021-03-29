@@ -22,7 +22,7 @@ const Catalog = () => {
       <div className="catalog-content">
         {tab === TABS.TEACHING && (
           <>
-            <TemplateCatalogList />
+            <TeachingCatalogList />
             <PublicCatalogList />
           </>
         )}
