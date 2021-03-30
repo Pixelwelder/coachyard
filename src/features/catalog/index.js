@@ -1,5 +1,5 @@
 import React from 'react';
-import { TeachingCatalogList, LearningCatalogList, TemplateCatalogList, PublicCatalogList } from './CatalogList';
+import { LearningCatalogList, TemplateCatalogList, NonTemplateCatalogList, PublicCatalogList } from './CatalogList';
 import './catalog.scss';
 import { actions as catalogActions, selectors as catalogSelectors, TABS } from './catalogSlice';
 import Tab from '@material-ui/core/Tab';
@@ -22,8 +22,8 @@ const Catalog = () => {
       <div className="catalog-content">
         {tab === TABS.TEACHING && (
           <>
-            <TeachingCatalogList />
-            <PublicCatalogList />
+            <TemplateCatalogList />
+            <NonTemplateCatalogList />
           </>
         )}
         {tab === TABS.LEARNING && (<LearningCatalogList />)}

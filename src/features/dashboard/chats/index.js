@@ -1,9 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as dashboardSelectors, actions as dashboardActions } from '../dashboardSlice';
-import { selectors as assetsSelectors } from '../../assets/assetsSlice';
 import Typography from '@material-ui/core/Typography';
-import Badge from '@material-ui/core/Badge';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
 import { BaseChat } from '../../chat';
@@ -24,11 +22,11 @@ const ChatTitle = ({ course, isSelected, onClick }) => {
 }
 
 const Chats = () => {
-  const { courses, selectedChat, selectedChatUid } = useSelector(dashboardSelectors.select);
+  const { selectedChat, selectedChatUid } = useSelector(dashboardSelectors.select);
+  const chatCourses = useSelector(dashboardSelectors.selectNonTemplateCourses);
   const dispatch = useDispatch();
 
   const onClick = (course) => {
-    console.log('onClick', course.uid);
     dispatch(dashboardActions.setSelectedChat(course));
   };
 
@@ -36,7 +34,7 @@ const Chats = () => {
     <div className="chats">
       <ul className="chats-list">
         {
-          courses.map((course, index) => (
+          chatCourses.map((course, index) => (
             <ChatTitle
               key={index}
               course={course}

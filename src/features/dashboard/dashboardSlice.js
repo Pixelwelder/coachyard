@@ -97,7 +97,13 @@ const selectStudentTokens = createSelector(selectTokens, tokens => {
       }, {})
   );
 });
-const selectors = { select, selectStudentTokens };
+const selectTemplateCourses = createSelector(select, ({ courses }) => {
+  return courses.filter(({ type }) => type === 'template');
+})
+const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
+  return courses.filter(({ type }) => type !== 'template');
+})
+const selectors = { select, selectStudentTokens, selectTemplateCourses, selectNonTemplateCourses };
 
 const actions = { ...generatedActions, init, setSelectedChat };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
+import Chip from '@material-ui/core/Chip';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -52,6 +53,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
               </Typography>
             )
           }
+          {item.type === 'template' && <Chip label="Template" color="primary" size="small" />}
         </CardContent>
       </CardActionArea>
       {/*<CardActions>*/}
