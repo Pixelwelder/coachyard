@@ -9,7 +9,6 @@ const Participant = ({ token }) => {
 
   const path = `/avatars/${token.user}.png`;
   const { [path]: imageUrl } = images;
-  console.log(token.user);
 
   useEffect(() => {
     if (!imageUrl) {

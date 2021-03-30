@@ -108,7 +108,7 @@ const Teacher = () => {
     const clear = () => clearInterval(interval);
 
     clear();
-    if (selectedItem) interval = setInterval(() => setUpdate(value => value + 1), 1000)
+    if (selectedItem?.date) interval = setInterval(() => setUpdate(value => value + 1), 1000)
 
     return clear;
   }, [selectedItem, setUpdate]);
