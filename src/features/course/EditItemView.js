@@ -22,7 +22,7 @@ const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
 
-  const { course, selectedItem: item } = useSelector(selectedCourseSelectors.select);
+  const { course, selectedItem } = useSelector(selectedCourseSelectors.select);
   const editItem = useSelector(selectors.select);
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
@@ -30,7 +30,7 @@ const EditItemView = ({ requireUpload = false }) => {
   const { displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
   const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
-  console.log('ITEM', item);
+  console.log('ITEM', selectedItem);
 
   useEffect(() => {
     onEdit();
@@ -38,16 +38,16 @@ const EditItemView = ({ requireUpload = false }) => {
     return () => {
       dispatch(actions.reset());
     }
-  }, [item]);
+  }, [selectedItem]);
 
   const onEdit = () => {
     dispatch(actions.open());
     dispatch(actions.setValues({
-      displayName: item.displayName,
-      description: item.description,
-      date: item.date || getDefaultDateTime(),
-      file: item.file,
-      scheduler: !!item.date ? 'teacher' : 'student'
+      displayName: selectedItem.displayName,
+      description: selectedItem.description,
+      date: selectedItem.date || getDefaultDateTime(),
+      file: selectedItem.file,
+      scheduler: !!selectedItem.date ? 'teacher' : 'student'
     }));
   };
 
@@ -91,13 +91,13 @@ const EditItemView = ({ requireUpload = false }) => {
       displayName, description, file, scheduler,
       date: scheduler === 'teacher' ? date : null,
     };
-    dispatch(catalogActions.updateItem({ uid: item.uid, update, file }));
+    dispatch(catalogActions.updateItem({ uid: selectedItem.uid, update, file }));
   };
 
   const onDelete = () => {
     dispatch(uiActions2.deleteItem.setValues({
       mode: MODES.OPEN,
-      toDelete: item
+      toDelete: selectedItem
     }));
   };
 
@@ -124,7 +124,7 @@ const EditItemView = ({ requireUpload = false }) => {
           onChange={onChange}
         />
         {
-          (item.status !== 'scheduled' && (isChangingFile || !item.streamingId))
+          (selectedItem.status !== 'scheduled' && (isChangingFile || !selectedItem.streamingId))
             ? (
               <>
                 {
@@ -137,13 +137,13 @@ const EditItemView = ({ requireUpload = false }) => {
             : (
               <>
                 {
-                  item.streamingId && (
+                  selectedItem.streamingId && (
                     <>
                       <ReactPlayer
                         className="edit-player"
                         width={300}
                         height={200}
-                        url={`https://stream.mux.com/${item.playbackId}.m3u8`}
+                        url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
                         controls={true}
                       />
                     </>
@@ -152,7 +152,7 @@ const EditItemView = ({ requireUpload = false }) => {
               </>
             )
         }
-        {!!item.streamingId && !isLoading && (
+        {!!selectedItem.streamingId && !isLoading && (
           <Button
             className="change-video-btn"
             variant="outlined"
@@ -162,7 +162,7 @@ const EditItemView = ({ requireUpload = false }) => {
           </Button>
         )}
 
-        {item.status === 'scheduled' && (
+        {selectedItem.status === 'scheduled' && (
           <FormControl component="fieldset" variant="outlined" className="scheduler-control">
             <FormLabel>Scheduled by:</FormLabel>
             <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
@@ -172,7 +172,7 @@ const EditItemView = ({ requireUpload = false }) => {
           </FormControl>
         )}
 
-        {scheduler === 'teacher' && (
+        {scheduler === 'teacher' && selectedItem.status === 'scheduled' && (
           <FormControl className="date-control">
             <FormLabel>Date:</FormLabel>
             <DateTimePicker

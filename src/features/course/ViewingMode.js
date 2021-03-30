@@ -11,6 +11,7 @@ import Tabs from '@material-ui/core/Tabs';
 
 const ViewingMode = ({ size }) => {
   const { selectedItem } = useSelector(selectedCourseSelectors.select);
+  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const [tab, setTab] = useState(0);
   const dispatch = useDispatch();
@@ -50,15 +51,19 @@ const ViewingMode = ({ size }) => {
                 <Typography>{selectedItem?.description || ''}</Typography>
               )}
 
-              <div className="spacer"/>
-              <div className="owner-controls">
-                <Button
-                  variant="contained"
-                  onClick={() => dispatch(uiActions2.editItem.open())}
-                >
-                  Edit
-                </Button>
-              </div>
+              {ownsCourse && (
+                <>
+                  <div className="spacer"/>
+                  <div className="owner-controls">
+                    <Button
+                      variant="contained"
+                      onClick={() => dispatch(uiActions2.editItem.open())}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </>
+              )}
             </>
           )
       }
