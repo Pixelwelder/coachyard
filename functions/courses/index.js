@@ -8,6 +8,22 @@ const { METHODS } = require('../util/methods');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
 
+const tokenFromCourse = (course, user) => {
+  const timestamp = admin.firestore.Timestamp.now();
+  return {
+    courseUid: course.uid,
+    created: timestamp,
+    creatorUid: course.creatorUid,
+    description: course.description,
+    displayName: course.displayName,
+    parent: course.uid,
+    type: 'basic',
+    updated: timestamp,
+    user: user.uid,
+    userDisplayName: user.displayName
+  };
+};
+
 const createCourse = async (data, context) => {
   try {
     log({ message: 'Attempting to create course...', data, context });
@@ -58,6 +74,7 @@ const createCourse = async (data, context) => {
 
       // Now create the first item in the course.
       // TODO Move this into a handler if possible... though date is tricky.
+      // TODO No reason to create first item here.
       if (date) {
         const itemRef = admin.firestore().collection('items').doc();
         const item = newCourseItem({
@@ -77,19 +94,26 @@ const createCourse = async (data, context) => {
 
       // Now create access tokens.
       const teacherTokenRef = admin.firestore().collection('tokens').doc();
-      const teacherToken = newCourseToken({
-        uid: teacherTokenRef.id,
-        created: timestamp,
-        updated: timestamp,
-        user: uid,
-        userDisplayName: teacherName,
-        courseUid: courseRef.id,
+      const teacherToken = {
+        ...tokenFromCourse(course, { uid, displayName: teacherName }),
         access: 'admin',
-        displayName,
-        description,
-        image,
-        creatorUid: uid
-      });
+        uid: teacherTokenRef.id,
+        courseUid: courseRef.id,
+        type
+      };
+      // const teacherToken = newCourseToken({
+      //   uid: teacherTokenRef.id,
+      //   created: timestamp,
+      //   updated: timestamp,
+      //   user: uid,
+      //   userDisplayName: teacherName,
+      //   courseUid: courseRef.id,
+      //   access: 'admin',
+      //   displayName,
+      //   description,
+      //   image,
+      //   creatorUid: uid
+      // });
 
       await transaction.create(teacherTokenRef, teacherToken)
 
@@ -102,19 +126,28 @@ const createCourse = async (data, context) => {
         const studentTokenRef = admin.firestore().collection('tokens').doc();
         const studentUid = studentUids[index];
         const student = studentsById[studentUid];
-        const studentToken = newCourseToken({
+        const studentToken = {
+          ...tokenFromCourse(course, { uid, student }),
+          access: 'student',
           uid: studentTokenRef.id,
-          created: timestamp,
-          updated: timestamp,
           user: studentUid || studentEmail,
           userDisplayName: student ? student.displayName : studentEmail,
           courseUid: courseRef.id,
-          access: 'student',
-          displayName,
-          description,
-          image,
-          creatorUid: uid
-        });
+          type
+        };
+        // const studentToken = newCourseToken({
+        //   uid: studentTokenRef.id,
+        //   created: timestamp,
+        //   updated: timestamp,
+        //   user: studentUid || studentEmail,
+        //   userDisplayName: student ? student.displayName : studentEmail,
+        //   courseUid: courseRef.id,
+        //   access: 'student',
+        //   displayName,
+        //   description,
+        //   image,
+        //   creatorUid: uid
+        // });
 
         return transaction.set(studentTokenRef, studentToken);
       });
@@ -170,17 +203,24 @@ const createCourse2 = async (data, context) => {
 
       // Now add the teacher's token to the database.
       const teacherTokenRef = admin.firestore().collection('tokens').doc();
-      const teacherToken = newCourseToken({
-        uid: teacherTokenRef.id,
-        created: timestamp,
-        updated: timestamp,
-        user: uid,
-        userDisplayName: teacherName,
-        courseUid: courseRef.id,
+      const teacherToken = {
+        ...tokenFromCourse(course, { uid, displayName: teacherName }),
         access: 'admin',
-        displayName,
-        creatorUid: uid
-      });
+        uid: teacherTokenRef.id,
+        courseUid: courseRef.id,
+        type
+      };
+      // const teacherToken = newCourseToken({
+      //   uid: teacherTokenRef.id,
+      //   created: timestamp,
+      //   updated: timestamp,
+      //   user: uid,
+      //   userDisplayName: teacherName,
+      //   courseUid: courseRef.id,
+      //   access: 'admin',
+      //   displayName,
+      //   creatorUid: uid
+      // });
       await transaction.create(teacherTokenRef, teacherToken);
 
       return course;
@@ -341,7 +381,7 @@ const _unlockCourse = async (data, context) => {
     const courseRef = admin.firestore().collection('courses').doc(courseUid);
     const courseDoc = await transaction.get(courseRef);
     if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-    const { displayName, description, image, creatorUid } = courseDoc.data();
+    const course = courseDoc.data();
 
     // const studentRef = admin.firestore().collection('users').doc(uid);
     // const studentDoc = await transaction.get(studentRef);
@@ -349,20 +389,21 @@ const _unlockCourse = async (data, context) => {
     // const { displayName: userDisplayName } = studentDoc.data();
 
     const tokenRef = admin.firestore().collection('tokens').doc();
-    const timestamp = admin.firestore.Timestamp.now()
-    const studentToken = newCourseToken({
-      uid: tokenRef.id,
-      created: timestamp,
-      updated: timestamp,
-      user: uid,
-      userDisplayName,
-      courseUid,
+    const studentToken = {
+      ...tokenFromCourse(course, { uid, displayName: userDisplayName }),
       access: 'student',
-      displayName,
-      description,
-      image,
-      creatorUid
-    });
+      uid: tokenRef.id
+    };
+    // const studentToken = newCourseToken({
+    //   uid: tokenRef.id,
+    //   created: timestamp,
+    //   updated: timestamp,
+    //   user: uid,
+    //   userDisplayName,
+    //   courseUid,
+    //   access: 'student',
+    //   creatorUid
+    // });
 
     await transaction.set(tokenRef, studentToken);
   });
@@ -433,37 +474,47 @@ const _cloneCourse = async (data, context) => {
     // Create student token for the new course.
     // TODO Update descendant tokens when parent course is updated.
     const studentTokenRef = admin.firestore().collection('tokens').doc();
-    const studentToken = newCourseToken({
-      uid: studentTokenRef.id,
-      created: timestamp,
-      updated: timestamp,
-      user: studentUid,
-      userDisplayName: student.displayName,
-      courseUid: courseRef.id,
+    const studentToken = {
+      ...tokenFromCourse(newCourse, student),
       access: 'student',
-      displayName: newCourse.displayName,
-      description: newCourse.description,
-      image: newCourse.image,
-      parent: courseUid,
-      creatorUid: original.creatorUid
-    });
+      uid: studentTokenRef.id
+    };
+    // const studentToken = newCourseToken({
+    //   uid: studentTokenRef.id,
+    //   created: timestamp,
+    //   updated: timestamp,
+    //   user: studentUid,
+    //   userDisplayName: student.displayName,
+    //   courseUid: courseRef.id,
+    //   access: 'student',
+    //   displayName: newCourse.displayName,
+    //   description: newCourse.description,
+    //   image: newCourse.image,
+    //   parent: courseUid,
+    //   creatorUid: original.creatorUid
+    // });
 
     // Create teacher token for the new course.
     const teacherTokenRef = admin.firestore().collection('tokens').doc();
-    const teacherToken = newCourseToken({
-      uid: teacherTokenRef.id,
-      created: timestamp,
-      updated: timestamp,
-      user: teacher.uid,
-      userDisplayName: teacher.displayName,
-      courseUid: courseRef.id,
+    const teacherToken = {
+      ...tokenFromCourse(newCourse, teacher),
       access: 'admin',
-      displayName: newCourse.displayName,
-      description: newCourse.description,
-      image: newCourse.image,
-      parent: courseUid,
-      creator: original.creatorUid
-    });
+      uid: teacherTokenRef.id
+    };
+    // const teacherToken = newCourseToken({
+    //   uid: teacherTokenRef.id,
+    //   created: timestamp,
+    //   updated: timestamp,
+    //   user: teacher.uid,
+    //   userDisplayName: teacher.displayName,
+    //   courseUid: courseRef.id,
+    //   access: 'admin',
+    //   displayName: newCourse.displayName,
+    //   description: newCourse.description,
+    //   image: newCourse.image,
+    //   parent: courseUid,
+    //   creatorUid: original.creatorUid
+    // });
 
     // Save all
     await transaction.set(courseRef, newCourse);

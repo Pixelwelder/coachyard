@@ -113,7 +113,6 @@ const newCourseToken = (overrides) => ({
   // Abbreviated Course
   displayName: '',
   description: '',
-  image: '',
   parent: '',
   creatorUid: '',
   type: 'basic', // 'basic', 'template'
