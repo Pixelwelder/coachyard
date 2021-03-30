@@ -232,14 +232,15 @@ const users_onCreateUser = functions.auth.user()
 
       // For the love of FSM change this as soon as possible.
       console.log('add scheduling user')
-      const cachedProvider = { ...schedulingProvider, settings: { ...schedulingProvider.settings, password } }
+      const cachedProvider = { ...schedulingProvider, uid, settings: { ...schedulingProvider.settings, password } };
       const providerRef = admin.firestore().collection('easy_providers').doc(uid);
       await transaction.set(providerRef, cachedProvider);
       console.log('add scheduling user complete')
 
-      console.log('add scheduling customer')
+      console.log('add scheduling customer');
+      const cachedSchedulingCustomer = { ...schedulingCustomer, uid };
       const schedulingCustomerRef = admin.firestore().collection('easy_customers').doc(uid);
-      await transaction.set(schedulingCustomerRef, schedulingCustomer);
+      await transaction.set(schedulingCustomerRef, cachedSchedulingCustomer);
       console.log('add scheduling customer complete')
     });
 

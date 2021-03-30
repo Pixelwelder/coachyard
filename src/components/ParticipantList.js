@@ -20,7 +20,7 @@ const Participant = ({ token }) => {
   return (
     <li className="token-item">
       <img src={imageUrl || '/images/generic-avatar-2.png'} className="item-info-image" />
-      <Typography>{token.userDisplayName}</Typography>
+      <Typography variant="h6">{token.userDisplayName}</Typography>
     </li>
   );
 }

@@ -12,7 +12,8 @@
     "start:dev": "firebase use dev && npm run prep:dev && firebase emulators:start",
     "start:prod": "firebase use prod && npm run prep:prod && firebase emulators:start",
     "deploy:dev": "firebase use dev && npm run prep:dev && firebase deploy --only functions",
-    "deploy:prod": "firebase use prod && npm run prep:prod && firebase deploy --only functions"
+    "deploy:prod": "firebase use prod && npm run prep:prod && firebase deploy --only functions",
+    "start:ngrok": "ngrok http -region=us -hostname=coachyard.ngrok.io 5001"
   },
   "engines": {
     "node": "12"

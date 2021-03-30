@@ -7,5 +7,6 @@ describe('toKebab', () => {
     expect(toKebab()).toBe('');
     expect(toKebab('oneWord')).toBe('oneword');
     expect(toKebab('snake_case')).toBe('snake-case');
+    expect(toKebab('Teacher #1')).toBe('teacher-1');
   });
 });

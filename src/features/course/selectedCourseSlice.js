@@ -413,10 +413,6 @@ const actions = {
 };
 
 const select = ({ selectedCourse }) => selectedCourse;
-const selectSelectedItem = createSelector(
-  select,
-  ({ selectedItem }) => selectedItem
-);
 const selectOwnsCourse = createSelector(
   select,
   ({ course }) => {
@@ -438,7 +434,7 @@ const selectStudentTokens = createSelector(
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
 const selectors = {
-  select, selectSelectedItem, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat
+  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat
 };
 
 export { actions, selectors };

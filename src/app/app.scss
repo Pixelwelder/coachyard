@@ -315,9 +315,8 @@ $billing-width: 400px;
 }
 
 .owner-controls {
-  //flex: 0 0;
   display: flex;
-  justify-content: flex-end;
+  flex-flow: row nowrap;
   height: 46px;
   border-top: 1px solid lightgray;
   padding-top: 8px;
@@ -329,6 +328,8 @@ $billing-width: 400px;
   .recording-warning {
     flex: 1;
     margin-right: 16px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 

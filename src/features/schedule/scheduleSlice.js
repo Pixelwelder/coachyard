@@ -2,6 +2,7 @@ import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit'
 import app from 'firebase/app';
 import { loaderReducers, setValue } from '../../util/reduxUtils';
 import { url } from '../../__config__/easy.local.json';
+import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 
 export const TABS = {
   CALENDAR: 0,
@@ -173,8 +174,23 @@ const openCalendar = createAsyncThunk(
 
 const openScheduler = createAsyncThunk(
   `${name}/openScheduler`,
-  async () => {
-    const newWindow = window.open(`${url}/index.php`, 'calendar', 'left=100,right=100,width=800,height=800')
+  async (_, { getState }) => {
+    console.log('openScheduler');
+    try {
+      const state = getState();
+      const { course, selectedItem } = selectedCourseSelectors.select(state);
+      const { creatorUid } = course;
+      const providerDoc = await app.firestore().collection('easy_providers').doc(creatorUid).get();
+      const { id } = providerDoc.data();
+
+      const newWindow = window.open(
+        `${url}/index.php?provider=${id}&item=${selectedItem.uid}`,
+        'calendar',
+        'left=100,right=100,width=800,height=800'
+      );
+    } catch (error) {
+      console.error(error);
+    }
   }
 );
 

@@ -189,7 +189,7 @@ form {
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
   text-align: center;
 }
 
@@ -200,9 +200,10 @@ form {
 .centered-mode {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-flow: column nowrap;
   justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .participant-name {

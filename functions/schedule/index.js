@@ -6,6 +6,7 @@ const { addCustomer, deleteCustomer, updateCustomer } = require('./customers');
 const { getServices: _getServices } = require('./services');
 const { checkAuth } = require('../util/auth');
 const { log } = require('../logging');
+const { schedule } = require('./webhooks');
 
 // const scheduling_onCreateUser = functions.auth.user()
 //   .onCreate(async (user, context) => {
@@ -127,6 +128,7 @@ module.exports = {
   scheduling_onUpdateUser,
   scheduling_onDeleteUser,
   getServices,
-  getProvider
+  getProvider,
+  schedule
   // scheduling_onUpdateUser
 };

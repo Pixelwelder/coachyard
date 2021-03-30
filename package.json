@@ -46,8 +46,7 @@
     "deploy:prod": "firebase use prod && npm run prep:prod && npm run build && firebase deploy --except functions",
     "start:dev": "firebase use dev && npm run prep:dev && npm run start",
     "start:prod": "firebase use prod && npm run prep:prod && npm run start",
-    "start:stripe": "stripe listen --forward-to localhost:5001/coach-yard/us-central1/stripe",
-    "start:ngrok": "ngrok http 5001"
+    "start:stripe": "stripe listen --forward-to localhost:5001/coach-yard/us-central1/stripe"
   },
   "eslintConfig": {
     "extends": "react-app"

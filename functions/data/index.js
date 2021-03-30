@@ -83,6 +83,7 @@ const newCourseItem = (overrides) => ({
 
   // This is for invites. TODO - Review.
   date: '',
+  dateEnd: '',
   room: false,
   status: 'viewing', // pre-recorded, scheduled, initializing, live, uploading, processing, viewing
   started: false,

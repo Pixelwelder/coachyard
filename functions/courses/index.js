@@ -407,15 +407,18 @@ const _cloneCourse = async (data, context) => {
     };
 
     // Clone template items.
+    // TODO Move to items/index.js.
     const itemsRef = admin.firestore().collection('items')
       .where('courseUid', '==', courseUid);
     const itemDocs = await transaction.get(itemsRef);
     if (itemDocs.size > 495) throw new Error('Not implemented: too many items to clone.');
 
     const promises = itemDocs.docs.map((itemDoc) => {
+      const ref = admin.firestore().collection('items').doc();
       const item = itemDoc.data();
       const newItem = {
         ...item,
+        uid: ref.id,
         courseUid: newCourse.uid,
         parent: item.uid,
         created: timestamp,
@@ -424,7 +427,6 @@ const _cloneCourse = async (data, context) => {
         // TODO TEMP
         displayName: `${item.displayName} Copy`
       };
-      const ref = admin.firestore().collection('items').doc();
       return transaction.set(ref, newItem);
     });
 

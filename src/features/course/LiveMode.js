@@ -7,13 +7,13 @@ import Alert from '@material-ui/lab/Alert';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import Typography from '@material-ui/core/Typography';
 import ParticipantList from '../../components/ParticipantList';
+import ItemInfo from './ItemInfo';
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { selectedItem: item, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
   const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
-  const { uid, status } = item;
   const dispatch = useDispatch();
   const [callFrame, setCallFrame] = useState(null);
   const [hasRecorded, setHasRecorded] = useState(false);
@@ -68,7 +68,7 @@ const LiveMode = ({ size }) => {
   }, []);
 
   const onJoin = () => {
-    const url = `https://coachyard.daily.co/${uid}`;
+    const url = `https://coachyard.daily.co/${selectedItem.uid}`;
     setInSession(true);
     callFrame.join({ url });
   };
@@ -81,7 +81,7 @@ const LiveMode = ({ size }) => {
 
   const onEnd = () => {
     // TODO Verify.
-    dispatch(catalogActions.endItem(item));
+    dispatch(catalogActions.endItem(selectedItem));
   };
 
   const shouldShowWarning = () => {
@@ -120,6 +120,42 @@ const LiveMode = ({ size }) => {
 
   const tokens = ownsCourse ? studentTokens : adminTokens;
 
+  const OwnerControls = () => {
+    // Out of session, only the teacher sees controls.
+    if (!inSession) {
+      if (!ownsCourse) return null;
+      return (
+        <div className="owner-controls">
+          <div className="spacer" />
+          <Button
+            color="secondary" variant="contained"
+            onClick={onEnd}
+            disabled={hasRecorded && isRecording}
+          >
+            End
+          </Button>
+        </div>
+      );
+    } else {
+      // In session, both see the same thing.
+      return (
+        <div className="owner-controls">
+          {shouldShowWarning()
+            ? <Alert className="recording-warning" severity="error">Not recording!</Alert>
+            : <div className="spacer" />
+          }
+          <Button
+            color="primary" variant="contained"
+            onClick={onLeave}
+            disabled={hasRecorded && isRecording}
+          >
+            Leave
+          </Button>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="item-mode live-mode">
       <div id="live-mode-target" className={getSessionClasses()}>
@@ -132,51 +168,17 @@ const LiveMode = ({ size }) => {
       </div>
       {!inSession && (
         <div className="out-of-session-container mode-inner">
-          <div className="item-info">
-            <ParticipantList tokens={tokens} />
-            <Typography className="out-of-session-title" variant="h6" component="p">
-              This session is currently live.
-            </Typography>
-          </div>
+          <ItemInfo item={selectedItem} status={'This session is currently live.'} tokens={tokens} />
+          <Button
+            color="primary" variant="contained"
+            onClick={onJoin}
+            disabled={hasRecorded && isRecording}
+          >
+            Join
+          </Button>
         </div>
       )}
-      <div className="owner-controls">
-        {inSession
-          ? (
-            <>
-              {shouldShowWarning() && (
-                <Alert className="recording-warning" severity="error">Not recording!</Alert>
-              )}
-              <Button
-                color="primary" variant="contained"
-                onClick={onLeave}
-                disabled={hasRecorded && isRecording}
-              >
-                Leave
-              </Button>
-            </>
-          )
-          : (
-            <>
-              <Button
-                color="secondary" variant="contained"
-                onClick={onEnd}
-                disabled={hasRecorded && isRecording}
-              >
-                End
-              </Button>
-              <div className="spacer" />
-              <Button
-                color="primary" variant="contained"
-                onClick={onJoin}
-                disabled={hasRecorded && isRecording}
-              >
-                Join
-              </Button>
-            </>
-          )
-        }
-      </div>
+      <OwnerControls />
     </div>
   );
 };
