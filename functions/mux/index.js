@@ -32,12 +32,11 @@ mux_webhooks.post('/webhooks', async (request, response) => {
         const itemRef = admin.firestore()
           .collection('courses').doc(courseUid)
           .collection('items').doc(itemUid);
-        const itemDocs = await transaction.get(itemRef);
-        if (itemDocs.size) {
-          const doc = itemDocs.docs[0];
-          await transaction.update(doc.ref, { ...muxData, status: 'viewing', streamingInfo: body });
+        const itemDoc = await transaction.get(itemRef);
+        if (itemDoc.exists) {
+          await transaction.update(itemRef, { ...muxData, status: 'viewing', streamingInfo: body });
           await transaction.delete(procRef);
-          return doc;
+          return itemDoc;
         } else {
           log({ message: `Did not find a doc for streaming id ${muxData.streamingId}.`, data: body, level: 'error' });
         }

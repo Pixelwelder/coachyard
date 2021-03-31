@@ -229,7 +229,7 @@ const updateItem = createAsyncThunk(
       const { payload: downloadUrl } = await dispatch(_uploadItem({ uid: itemUid, file }));
 
       // Send to streaming service.
-      await dispatch(_sendToStreamingService({ uid: itemUid, downloadUrl }));
+      await dispatch(_sendToStreamingService({ courseUid, itemUid, downloadUrl }));
       console.log('updateItem: complete');
     }
 

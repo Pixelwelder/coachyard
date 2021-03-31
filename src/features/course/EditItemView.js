@@ -30,8 +30,6 @@ const EditItemView = ({ requireUpload = false }) => {
   const { displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
   const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
-  console.log('ITEM', selectedItem);
-
   useEffect(() => {
     onEdit();
 
