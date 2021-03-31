@@ -309,7 +309,7 @@ const handleItemUpdate = functions.firestore
       } else {
         // The room does not exist. Create it.
         log({ message: 'Attempting to launch room...', data: change.after.data(), context });
-        const newRoom = await _launchRoom({ name: `${courseUid}-${itemUid}` });
+        const newRoom = await _launchRoom({ name: itemUid });
         if (newRoom.error) {
           // There was a problem creating the room.
           // Change back to previous status.
@@ -325,7 +325,7 @@ const handleItemUpdate = functions.firestore
 
       // Update record.
       const ref = admin.firestore()
-        .collection('course').doc(courseUid)
+        .collection('courses').doc(courseUid)
         .collection('items').doc(itemUid);
       await ref.update(update);
 

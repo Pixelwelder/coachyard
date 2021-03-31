@@ -703,5 +703,10 @@ module.exports = {
   // getAllCourses: functions.https.onCall(getAllCourses),
   // getCreatedCourses: functions.https.onCall(getCreatedCourses),
   onCourseUpdated,
-  onCourseDeleted
+  onCourseDeleted,
+  onOther: functions.firestore
+    .document('/courses/{courseUid}/items/{itemUid}')
+    .onUpdate(async () => {
+      console.log('update')
+    })
 };
