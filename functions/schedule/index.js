@@ -33,6 +33,7 @@ const { schedule } = require('./webhooks');
 //   })
 
 // TODO We can easily end up with orphaned providers and customers here.
+// TODO Consider hanging stuff on user, in subcollections.
 const scheduling_onDeleteUser = functions.auth.user()
   .onDelete(async (user, context) => {
     const { uid } = user;

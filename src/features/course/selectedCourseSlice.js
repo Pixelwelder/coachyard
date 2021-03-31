@@ -187,26 +187,28 @@ const setUid = createAsyncThunk(
             }
             dispatch(generatedActions.setChat(messages));
           });
+
+        // Get the items.
+        console.log('subscribing items');
+        unsubscribeItems();
+        unsubscribeItems = courseDoc.ref.collection('items')
+          // .orderBy('created')
+          .onSnapshot((snapshot) => {
+            console.log('items', snapshot.size);
+            const items = snapshot.docs.map(item => parseUnserializables(item.data()));
+            dispatch(generatedActions.setItems(items));
+          });
       });
 
-    // Get the items.
-    unsubscribeItems();
-    unsubscribeItems = app.firestore()
-      .collection('items')
-      .where('courseUid', '==', uid)
-      .orderBy('created')
-      .onSnapshot((snapshot) => {
-        const items = snapshot.docs.map(item => parseUnserializables(item.data()));
-        dispatch(generatedActions.setItems(items));
-      });
+
   }
 );
 
 let unsubscribeItem = () => {};
 const setSelectedItemUid = createAsyncThunk(
   `${name}/setSelectedItemUid`,
-  async ({ uid, history }, { dispatch, getState }) => {
-    const { selectedItem } = selectors.select(getState());
+  async ({ uid, history } = {}, { dispatch, getState }) => {
+    const { course, selectedItem } = selectors.select(getState());
     if (selectedItem && selectedItem.uid === uid) {
       return;
     }
@@ -216,8 +218,8 @@ const setSelectedItemUid = createAsyncThunk(
 
     if (uid) {
       unsubscribeItem = app.firestore()
-        .collection('items')
-        .doc(uid)
+        .collection('courses').doc(course.uid)
+        .collection('items').doc(uid)
         .onSnapshot((snapshot) => {
           if (snapshot.exists) {
             const data = parseUnserializables(snapshot.data());

@@ -7,6 +7,7 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import { selectors as uiSelectors2, actions as uiActions2 } from '../features/ui/uiSlice2';
 import { selectors as catalogSelectors, actions as catalogActions } from '../features/catalog/catalogSlice';
+import { selectors as selectedCourseSelectors } from '../features/course/selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const DeleteDialog = ({ selector, uiActions, onConfirm }) => {
@@ -64,13 +65,14 @@ const DeleteCourseDialog = () => {
 
 const DeleteItemDialog = () => {
   const dispatch = useDispatch();
+  const { course } = useSelector(selectedCourseSelectors.select);
 
   return (
     <DeleteDialog
       selector={uiSelectors2.deleteItem.select}
       uiActions={uiActions2.deleteItem}
       onConfirm={(item) => {
-        dispatch(catalogActions.deleteItem(item));
+        dispatch(catalogActions.deleteItem({ courseUid: course.uid, itemUid: item.uid }));
       }}
     />
   );

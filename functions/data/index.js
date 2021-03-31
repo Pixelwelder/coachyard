@@ -62,8 +62,8 @@ const newCourse = (overrides) => ({
   creatorUid: '',
   displayName: '',
   description: '',
-  image: '',
-  type: 'invite', // public, invite, template
+  // Once this is cloned for a user, it becomes basic.
+  type: 'invite', // public(?), invite(?), template, basic
   price: 1000, // in cents
   parent: '',
   numChats: 0,
@@ -77,13 +77,12 @@ const newCourseItem = (overrides) => ({
   courseUid: '',
   displayName: '',
   description: '',
-  image: '',
   type: 'basic', // 'basic', 'template'
-  parent: '',
+  parent: null,
 
   // This is for invites. TODO - Review.
-  date: '',
-  dateEnd: '',
+  date: null,
+  dateEnd: null,
   room: false,
   status: 'viewing', // pre-recorded, scheduled, initializing, live, uploading, processing, viewing
   started: false,
@@ -112,7 +111,6 @@ const newCourseToken = (overrides) => ({
 
   // Abbreviated Course
   displayName: '',
-  description: '',
   parent: '',
   creatorUid: '',
   type: 'basic', // 'basic', 'template'

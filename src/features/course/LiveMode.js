@@ -11,7 +11,7 @@ import ItemInfo from './ItemInfo';
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { selectedItem, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
+  const { course, selectedItem, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
   const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const dispatch = useDispatch();
@@ -81,7 +81,7 @@ const LiveMode = ({ size }) => {
 
   const onEnd = () => {
     // TODO Verify.
-    dispatch(catalogActions.endItem(selectedItem));
+    dispatch(catalogActions.endItem({ courseUid: course.uid, itemUid: selectedItem.uid }));
   };
 
   const shouldShowWarning = () => {

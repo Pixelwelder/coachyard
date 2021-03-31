@@ -4,7 +4,6 @@ import { actions as uiActions } from '../ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
 import { selectors as coachSelectors } from '../coach/coachSlice';
-import { selectors as dashboardSelectors } from '../dashboard/dashboardSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
@@ -83,13 +82,17 @@ const ProductCatalogList = ({ title = 'Teaching', courses, showCreate = false })
 };
 
 const TemplateCatalogList = () => {
-  const courses = useSelector(dashboardSelectors.selectTemplateCourses);
-  return <ProductCatalogList title="Products" courses={courses} showCreate={true} />
+  const tokens = useSelector(coachSelectors.selectTemplateTokens);
+  return <ProductCatalogList title="Products" courses={tokens} showCreate={true} />
 };
 
 const NonTemplateCatalogList = () => {
-  const courses = useSelector(dashboardSelectors.selectNonTemplateCourses);
+  const courses = useSelector(coachSelectors.selectNonTemplateTokens);
   return <ProductCatalogList title="Teaching" courses={courses} />
+};
+
+const BaseCatalogList = ({ items, title, showCreate }) => {
+  return <ProductCatalogList title={title} courses={items} showCreate={showCreate} />
 };
 
 const LearningCatalogList = ({ title = 'Learning' }) => {
@@ -106,15 +109,18 @@ const LearningCatalogList = ({ title = 'Learning' }) => {
 
 const PublicCatalogList = ({ title = 'Group Courses' }) => {
   const { coach } = useSelector(coachSelectors.select);
-  const courses = useSelector(coachSelectors.selectPublicCourses);
+  const tokens = useSelector(coachSelectors.selectPublicTokens);
 
   return (
     <CatalogList
       title={title}
-      items={courses}
+      items={tokens}
       emptyMessage={`${coach?.displayName || 'This coach'} has no public courses.`}
     />
   );
 };
 
-export { ProductCatalogList, LearningCatalogList, PublicCatalogList, TemplateCatalogList, NonTemplateCatalogList };
+export {
+  ProductCatalogList, LearningCatalogList, PublicCatalogList, TemplateCatalogList, NonTemplateCatalogList,
+  BaseCatalogList
+};

@@ -1,7 +1,8 @@
 import React from 'react';
-import { LearningCatalogList, TemplateCatalogList, NonTemplateCatalogList, PublicCatalogList } from './CatalogList';
+import { LearningCatalogList, BaseCatalogList } from './CatalogList';
 import './catalog.scss';
 import { actions as catalogActions, selectors as catalogSelectors, TABS } from './catalogSlice';
+import { selectors as dashboardSelectors } from '../dashboard/dashboardSlice';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 const Catalog = () => {
   const dispatch = useDispatch();
   const { tab } = useSelector(catalogSelectors.select);
+  const products = useSelector(dashboardSelectors.selectTemplateTokens);
+  const courses = useSelector(dashboardSelectors.selectNonTemplateTokens);
 
   return (
     <div className="catalog">
@@ -22,8 +25,8 @@ const Catalog = () => {
       <div className="catalog-content">
         {tab === TABS.TEACHING && (
           <>
-            <TemplateCatalogList />
-            <NonTemplateCatalogList />
+            <BaseCatalogList title="Products" items={products} showCreate={true} />
+            <BaseCatalogList title="Teaching" items={courses} />
           </>
         )}
         {tab === TABS.LEARNING && (<LearningCatalogList />)}

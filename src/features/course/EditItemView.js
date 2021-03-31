@@ -91,7 +91,9 @@ const EditItemView = ({ requireUpload = false }) => {
       displayName, description, file, scheduler,
       date: scheduler === 'teacher' ? date : null,
     };
-    dispatch(catalogActions.updateItem({ uid: selectedItem.uid, update, file }));
+    dispatch(catalogActions.updateItem({
+      courseUid: course.uid, itemUid: selectedItem.uid, update, file
+    }));
   };
 
   const onDelete = () => {

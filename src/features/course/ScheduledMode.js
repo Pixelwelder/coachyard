@@ -130,7 +130,9 @@ const Teacher = () => {
                 <ItemInfo tokens={tokens} status={str} item={selectedItem} />
                 <Button
                   color="primary" variant="contained"
-                  onClick={() => dispatch(catalogActions.launchItem(selectedItem))}
+                  onClick={() => dispatch(
+                    catalogActions.launchItem({ courseUid: course.uid, itemUid: selectedItem.uid })
+                  )}
                   disabled={!canLaunch()}
                 >
                   Go Live

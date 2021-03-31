@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { setValue } from '../../util/reduxUtils';
+import { reset, setValue } from '../../util/reduxUtils';
 import app from 'firebase';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { SIDEBAR_MODES } from '../course/selectedCourseSlice';
@@ -46,6 +46,9 @@ const init = createAsyncThunk(
             const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
             dispatch(generatedActions.setCourses(courses));
           })
+      } else {
+        console.log('dashboard.reset');
+        dispatch(generatedActions.reset());
       }
     })
   }
@@ -80,9 +83,14 @@ const { reducer, actions: generatedActions } = createSlice({
     setTokens: setValue('tokens'),
     setCourses: setValue('courses'),
     setSelectedChatUid: setValue('selectedChatUid'),
-    _setSelectedChat: setValue('selectedChat')
+    _setSelectedChat: setValue('selectedChat'),
+    reset: reset(initialState)
   }
 });
+
+// TODO Duplicate code.
+const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type === type);
+const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
 
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens }) => tokens);
@@ -97,13 +105,9 @@ const selectStudentTokens = createSelector(selectTokens, tokens => {
       }, {})
   );
 });
-const selectTemplateCourses = createSelector(select, ({ courses }) => {
-  return courses.filter(({ type }) => type === 'template');
-})
-const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
-  return courses.filter(({ type }) => type !== 'template');
-})
-const selectors = { select, selectStudentTokens, selectTemplateCourses, selectNonTemplateCourses };
+const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
+const selectNonTemplateTokens = createSelector(select, createNegativeTypeFilter('template'));
+const selectors = {select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens };
 
 const actions = { ...generatedActions, init, setSelectedChat };
 

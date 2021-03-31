@@ -3,7 +3,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { useDispatch, useSelector } from 'react-redux';
-import { PublicCatalogList, TemplateCatalogList } from '../catalog/CatalogList';
+import { PublicCatalogList, TemplateCatalogList, BaseCatalogList } from '../catalog/CatalogList';
 import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -14,6 +14,7 @@ const Coach = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { isLoading, error, coach, courses } = useSelector(coachSelectors.select);
+  const products = useSelector(coachSelectors.selectTemplateTokens);
   const update = useSelector(uiSelectors2.editCoach.select);
   const { isOpen, description } = update;
 
@@ -56,8 +57,8 @@ const Coach = () => {
       }
       {isLoading && <p>Loading...</p>}
       {!!error && <Alert severity="error">{error.message}</Alert>}
-      <PublicCatalogList />
-      <TemplateCatalogList />
+      {/*<PublicCatalogList />*/}
+      <BaseCatalogList title="Products" items={products} />
       {/*{courses.map((course, index) => {*/}
       {/*  return <p key={index}>{course.displayName}</p>*/}
       {/*})}*/}

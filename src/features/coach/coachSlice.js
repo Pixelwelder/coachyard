@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { loaderReducers, setValue } from '../../util/reduxUtils';
+import { loaderReducers, reset, setValue } from '../../util/reduxUtils';
 import app from 'firebase/app';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
@@ -11,17 +11,20 @@ const initialState = {
   error: null,
   coach: null,
   courses: [],
+  tokens: [],
   students: [],
   provider: {}
 };
 
 let unsubscribeCoach = () => {}
 let unsubscribeCourses = () => {};
+let unsubscribeTokens = () => {};
 const load = createAsyncThunk(
   `${name}/load`,
   async ({ slug, history }, { dispatch }) => {
     unsubscribeCoach();
     unsubscribeCourses();
+    unsubscribeTokens();
 
     unsubscribeCoach = app.firestore().collection('users')
       .where('slug', '==', slug).limit(1)
@@ -37,8 +40,17 @@ const load = createAsyncThunk(
             .where('creatorUid', '==', coach.uid)
             .where('type', 'in', ['public', 'template'])
             .onSnapshot((snapshot) => {
-              const courses = snapshot.docs.map((doc => parseUnserializables(doc.data())));
+              const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setCourses(courses));
+            })
+
+          unsubscribeTokens = app.firestore().collection('tokens')
+            .where('user', '==', coach.uid)
+            .where('type', 'in', ['public', 'template'])
+            .where('access', '==', 'admin')
+            .onSnapshot((snapshot) => {
+              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              dispatch(generatedActions.setTokens(tokens));
             })
         } else {
           history.push('/dashboard');
@@ -63,10 +75,15 @@ const update = createAsyncThunk(
   }
 );
 
-const getProvider = createAsyncThunk(
-  `${name}/getProvider`,
+const init = createAsyncThunk(
+  `${name}/init`,
   async (_, { dispatch }) => {
-
+    app.auth().onAuthStateChanged((authUser) => {
+      console.log('LOGGED OUT');
+      if (!authUser) {
+        // dispatch(generatedActions.reset());
+      }
+    })
   }
 );
 
@@ -76,18 +93,22 @@ const { actions: generatedActions, reducer } = createSlice({
   reducers: {
     setCoach: setValue('coach'),
     setCourses: setValue('courses'),
-    setProvider: setValue('provider')
+    setTokens: setValue('tokens'),
+    setProvider: setValue('provider'),
+    reset: reset(initialState)
   },
   extraReducers: loaderReducers(name, initialState)
 });
 
-const actions = { ...generatedActions, load, update };
+const actions = { ...generatedActions, load, update, init };
 
-const createTypeFilter = type => ({ courses }) => courses.filter(course => course.type === type);
+const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type === type);
+const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
 const select = ({ coach }) => coach;
-const selectPublicCourses = createSelector(select, createTypeFilter('public'));
-const selectTemplateCourses = createSelector(select, createTypeFilter('template'));
-const selectors = { select, selectPublicCourses, selectTemplateCourses };
+const selectPublicTokens = createSelector(select, createTypeFilter('public'));
+const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
+const selectNonTemplateTokens = createSelector(select, createNegativeTypeFilter('template'));
+const selectors = { select, selectPublicTokens, selectTemplateTokens, selectNonTemplateTokens };
 
 export { actions, selectors };
 export default reducer;

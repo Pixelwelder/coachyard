@@ -184,7 +184,7 @@ const openScheduler = createAsyncThunk(
       const { id } = providerDoc.data();
 
       const newWindow = window.open(
-        `${url}/index.php?provider=${id}&item=${selectedItem.uid}`,
+        `${url}/index.php?provider=${id}&course=${course.uid}&item=${selectedItem.uid}`,
         'calendar',
         'left=100,right=100,width=800,height=800'
       );

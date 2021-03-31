@@ -14,9 +14,9 @@ const tokenFromCourse = (course, user) => {
     courseUid: course.uid,
     created: timestamp,
     creatorUid: course.creatorUid,
-    description: course.description,
     displayName: course.displayName,
     parent: course.uid,
+    price: course.price,
     type: 'basic',
     updated: timestamp,
     user: user.uid,
@@ -24,155 +24,155 @@ const tokenFromCourse = (course, user) => {
   };
 };
 
-const createCourse = async (data, context) => {
-  try {
-    log({ message: 'Attempting to create course...', data, context });
-    checkAuth(context);
-
-    const { auth: { token: { uid, email, name: teacherName } } } = context;
-    const { displayName, type, students: _students, description = '', date, image = '' } = data;
-
-    // This is an array of emails.
-    const students = _students ? _students.split(',').map(s => s.trim().toLowerCase()) : [];
-
-    const { course } = await admin.firestore().runTransaction(async (transaction) => {
-
-      // For all students that exist, replace the email with their uid.
-      const studentPromises = students.map(student => {
-        const ref = admin.firestore().collection('users').where('email', '==', student);
-        return transaction.get(ref);
-      });
-
-      const studentResults = await Promise.all(studentPromises).catch(error => {
-        log({ message: error.message, data: error, context, level: 'error' });
-      });
-      const studentsById = studentResults.reduce((accum, result) => {
-        if (!result.size) return accum;
-
-        const data = result.docs[0].data();
-        return { ...accum, [data.uid]: data };
-      }, {});
-      const studentUids = studentResults.map(result => {
-        return result.size ? result.docs[0].data().uid : null
-      });
-
-      // Create course object.
-      const courseRef = admin.firestore().collection('courses').doc();
-      const timestamp = admin.firestore.Timestamp.now();
-      const course = newCourse({
-        uid: courseRef.id,
-        creatorUid: uid,
-        displayName,
-        description,
-        type,
-        created: timestamp,
-        updated: timestamp
-      });
-
-      // Add it.
-      await transaction.set(courseRef, course);
-
-      // Now create the first item in the course.
-      // TODO Move this into a handler if possible... though date is tricky.
-      // TODO No reason to create first item here.
-      if (date) {
-        const itemRef = admin.firestore().collection('items').doc();
-        const item = newCourseItem({
-          uid: itemRef.id,
-          creatorUid: uid,
-          courseUid: courseRef.id,
-          created: timestamp,
-          updated: timestamp,
-
-          displayName: 'First Meeting',
-          date,
-          status: date ? 'scheduled' : 'viewing'
-        });
-
-        await transaction.set(itemRef, item);
-      }
-
-      // Now create access tokens.
-      const teacherTokenRef = admin.firestore().collection('tokens').doc();
-      const teacherToken = {
-        ...tokenFromCourse(course, { uid, displayName: teacherName }),
-        access: 'admin',
-        uid: teacherTokenRef.id,
-        courseUid: courseRef.id,
-        type
-      };
-      // const teacherToken = newCourseToken({
-      //   uid: teacherTokenRef.id,
-      //   created: timestamp,
-      //   updated: timestamp,
-      //   user: uid,
-      //   userDisplayName: teacherName,
-      //   courseUid: courseRef.id,
-      //   access: 'admin',
-      //   displayName,
-      //   description,
-      //   image,
-      //   creatorUid: uid
-      // });
-
-      await transaction.create(teacherTokenRef, teacherToken)
-
-      const studentTokenPromises = students.map((studentEmail, index) => {
-        if (studentEmail === email) {
-          log({ message: `Cannot take your own course. Skipping ${studentEmail}.`, data, context });
-          return null;
-        }
-
-        const studentTokenRef = admin.firestore().collection('tokens').doc();
-        const studentUid = studentUids[index];
-        const student = studentsById[studentUid];
-        const studentToken = {
-          ...tokenFromCourse(course, { uid, student }),
-          access: 'student',
-          uid: studentTokenRef.id,
-          user: studentUid || studentEmail,
-          userDisplayName: student ? student.displayName : studentEmail,
-          courseUid: courseRef.id,
-          type
-        };
-        // const studentToken = newCourseToken({
-        //   uid: studentTokenRef.id,
-        //   created: timestamp,
-        //   updated: timestamp,
-        //   user: studentUid || studentEmail,
-        //   userDisplayName: student ? student.displayName : studentEmail,
-        //   courseUid: courseRef.id,
-        //   access: 'student',
-        //   displayName,
-        //   description,
-        //   image,
-        //   creatorUid: uid
-        // });
-
-        return transaction.set(studentTokenRef, studentToken);
-      });
-
-      await Promise.all(studentTokenPromises.filter(promise => !!promise)).catch(error => {
-        log({ message: error.message, data: error, context, level: 'error' });
-      });
-
-      console.log('DONE', course);
-      return { course };
-    });
-
-    // Don't actually need to wait for this.
-    await uploadImage({
-      path: './courses/generic-teacher-cropped.png',
-      destination: `courses/${course.uid}.png`
-    });
-
-    log({ message: `Course created.`, data: course, context });
-    return { message: `Course '${displayName}' created.`, course };
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
+// const createCourse = async (data, context) => {
+//   try {
+//     log({ message: 'Attempting to create course...', data, context });
+//     checkAuth(context);
+//
+//     const { auth: { token: { uid, email, name: teacherName } } } = context;
+//     const { displayName, type, students: _students, description = '', date, image = '' } = data;
+//
+//     // This is an array of emails.
+//     const students = _students ? _students.split(',').map(s => s.trim().toLowerCase()) : [];
+//
+//     const { course } = await admin.firestore().runTransaction(async (transaction) => {
+//
+//       // For all students that exist, replace the email with their uid.
+//       const studentPromises = students.map(student => {
+//         const ref = admin.firestore().collection('users').where('email', '==', student);
+//         return transaction.get(ref);
+//       });
+//
+//       const studentResults = await Promise.all(studentPromises).catch(error => {
+//         log({ message: error.message, data: error, context, level: 'error' });
+//       });
+//       const studentsById = studentResults.reduce((accum, result) => {
+//         if (!result.size) return accum;
+//
+//         const data = result.docs[0].data();
+//         return { ...accum, [data.uid]: data };
+//       }, {});
+//       const studentUids = studentResults.map(result => {
+//         return result.size ? result.docs[0].data().uid : null
+//       });
+//
+//       // Create course object.
+//       const courseRef = admin.firestore().collection('courses').doc();
+//       const timestamp = admin.firestore.Timestamp.now();
+//       const course = newCourse({
+//         uid: courseRef.id,
+//         creatorUid: uid,
+//         displayName,
+//         description,
+//         type,
+//         created: timestamp,
+//         updated: timestamp
+//       });
+//
+//       // Add it.
+//       await transaction.set(courseRef, course);
+//
+//       // Now create the first item in the course.
+//       // TODO Move this into a handler if possible... though date is tricky.
+//       // TODO No reason to create first item here.
+//       if (date) {
+//         const itemRef = admin.firestore().collection('items').doc();
+//         const item = newCourseItem({
+//           uid: itemRef.id,
+//           creatorUid: uid,
+//           courseUid: courseRef.id,
+//           created: timestamp,
+//           updated: timestamp,
+//
+//           displayName: 'First Meeting',
+//           date,
+//           status: date ? 'scheduled' : 'viewing'
+//         });
+//
+//         await transaction.set(itemRef, item);
+//       }
+//
+//       // Now create access tokens.
+//       const teacherTokenRef = admin.firestore().collection('tokens').doc();
+//       const teacherToken = {
+//         ...tokenFromCourse(course, { uid, displayName: teacherName }),
+//         access: 'admin',
+//         uid: teacherTokenRef.id,
+//         courseUid: courseRef.id,
+//         type
+//       };
+//       // const teacherToken = newCourseToken({
+//       //   uid: teacherTokenRef.id,
+//       //   created: timestamp,
+//       //   updated: timestamp,
+//       //   user: uid,
+//       //   userDisplayName: teacherName,
+//       //   courseUid: courseRef.id,
+//       //   access: 'admin',
+//       //   displayName,
+//       //   description,
+//       //   image,
+//       //   creatorUid: uid
+//       // });
+//
+//       await transaction.create(teacherTokenRef, teacherToken)
+//
+//       const studentTokenPromises = students.map((studentEmail, index) => {
+//         if (studentEmail === email) {
+//           log({ message: `Cannot take your own course. Skipping ${studentEmail}.`, data, context });
+//           return null;
+//         }
+//
+//         const studentTokenRef = admin.firestore().collection('tokens').doc();
+//         const studentUid = studentUids[index];
+//         const student = studentsById[studentUid];
+//         const studentToken = {
+//           ...tokenFromCourse(course, { uid, student }),
+//           access: 'student',
+//           uid: studentTokenRef.id,
+//           user: studentUid || studentEmail,
+//           userDisplayName: student ? student.displayName : studentEmail,
+//           courseUid: courseRef.id,
+//           type
+//         };
+//         // const studentToken = newCourseToken({
+//         //   uid: studentTokenRef.id,
+//         //   created: timestamp,
+//         //   updated: timestamp,
+//         //   user: studentUid || studentEmail,
+//         //   userDisplayName: student ? student.displayName : studentEmail,
+//         //   courseUid: courseRef.id,
+//         //   access: 'student',
+//         //   displayName,
+//         //   description,
+//         //   image,
+//         //   creatorUid: uid
+//         // });
+//
+//         return transaction.set(studentTokenRef, studentToken);
+//       });
+//
+//       await Promise.all(studentTokenPromises.filter(promise => !!promise)).catch(error => {
+//         log({ message: error.message, data: error, context, level: 'error' });
+//       });
+//
+//       console.log('DONE', course);
+//       return { course };
+//     });
+//
+//     // Don't actually need to wait for this.
+//     await uploadImage({
+//       path: './courses/generic-teacher-cropped.png',
+//       destination: `courses/${course.uid}.png`
+//     });
+//
+//     log({ message: `Course created.`, data: course, context });
+//     return { message: `Course '${displayName}' created.`, course };
+//   } catch (error) {
+//     log({ message: error.message, data: error, context, level: 'error' });
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// };
 
 /**
  * A simpler createCourse.
@@ -210,17 +210,6 @@ const createCourse2 = async (data, context) => {
         courseUid: courseRef.id,
         type
       };
-      // const teacherToken = newCourseToken({
-      //   uid: teacherTokenRef.id,
-      //   created: timestamp,
-      //   updated: timestamp,
-      //   user: uid,
-      //   userDisplayName: teacherName,
-      //   courseUid: courseRef.id,
-      //   access: 'admin',
-      //   displayName,
-      //   creatorUid: uid
-      // });
       await transaction.create(teacherTokenRef, teacherToken);
 
       return course;
@@ -321,7 +310,8 @@ const addUser = async (data, context) => {
       const courseRef = admin.firestore().collection('courses').doc(courseUid);
       const courseDoc = await transaction.get(courseRef);
       if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-      const { displayName, description, image, creatorUid } = courseDoc.data();
+      const course = courseDoc.data();
+      const { displayName, image, creatorUid } = course;
 
       // Grab the student.
       const studentRef = admin.firestore()
@@ -329,37 +319,24 @@ const addUser = async (data, context) => {
         .where('email', '==', studentEmail)
         .limit(1);
       const studentDocs = await transaction.get(studentRef);
-      let student;
-      let studentUid;
-      if (studentDocs.size) {
-        student = studentDocs.docs[0].data();
-        studentUid = studentDocs.docs[0].id;
-      }
-      console.log('student', studentUid, student);
+      const student = studentDocs.size
+        ? studentDocs.docs[0].data()
+        : { uid: studentEmail, displayName: studentEmail };
 
       // Check to make sure token doesn't already exist.
       const existingTokenRef = admin.firestore().collection('tokens')
         .where('courseUid', '==', courseUid)
-        .where('user', '==', studentUid || studentEmail)
+        .where('user', '==', student.uid)
         .limit(1);
       const existingTokenDoc = await transaction.get(existingTokenRef);
-      if (existingTokenDoc.size) throw new Error(`User ${studentUid || studentEmail} already has access to ${courseUid}.`);
+      if (existingTokenDoc.size) throw new Error(`User ${studentEmail} already has access to ${courseUid}.`);
 
       const tokenRef = admin.firestore().collection('tokens').doc();
-      const timestamp = admin.firestore.Timestamp.now()
-      const studentToken = newCourseToken({
-        uid: tokenRef.id,
-        created: timestamp,
-        updated: timestamp,
-        user: studentUid || studentEmail,
-        userDisplayName: student ? student.displayName : studentEmail,
-        courseUid,
+      const studentToken = {
+        ...tokenFromCourse(course, student),
         access: 'student',
-        displayName,
-        description,
-        image,
-        creatorUid
-      });
+        uid: tokenRef.id
+      };
 
       await transaction.set(tokenRef, studentToken);
     });
@@ -469,19 +446,19 @@ const _cloneCourse = async (data, context) => {
 
     // Clone template items.
     // TODO Move to items/index.js.
-    const itemsRef = admin.firestore().collection('items')
-      .where('courseUid', '==', courseUid);
+    const itemsRef = originalRef.collection('items');
     const itemDocs = await transaction.get(itemsRef);
     if (itemDocs.size > 495) throw new Error('Not implemented: too many items to clone.');
 
     const promises = itemDocs.docs.map((itemDoc) => {
-      const ref = admin.firestore().collection('items').doc();
+      const ref = courseRef.collection('items').doc();
       const item = itemDoc.data();
+      const isCloneable = item.status !== 'scheduled'; // Only future live sessions.
       const newItem = {
         ...item,
         uid: ref.id,
         courseUid: newCourse.uid,
-        parent: item.uid,
+        parent: isCloneable ? item.uid : null,
         created: timestamp,
         updated: timestamp,
 
@@ -576,133 +553,6 @@ const purchaseCourse = async (data, context) => {
 };
 
 /**
- * Allows one user to give a course they created to another user.
- * TODO - Must be rewritten
- *
- * @param data
- * @param context
- * @returns {Promise<{message: string}>}
- */
-// const giveCourse = async (data, context) => {
-//   try {
-//     checkAuth(context);
-//     const { auth: { token: { uid } } } = context;
-//     const { courseUid, email } = data;
-//
-//     const user = await admin.auth().getUserByEmail(email);
-//     if (!user) throw new Error(`No user with email ${email}.`);
-//
-//     await admin.firestore().runTransaction(async (transaction) => {
-//       // Get the course.
-//       const courseRef = admin.firestore().collection('courses').doc(courseUid);
-//       const courseDoc = await transaction.get(courseRef);
-//       if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-//
-//       // See if the giver has the right to give it.
-//       const course = courseDoc.data();
-//       if (course.creatorUid !== uid) throw new Error(`Course was not created by ${uid}.`);
-//
-//       const gifteeRef = admin.firestore().collection('users').doc(user.uid);
-//       const gifteeDoc = await transaction.get(gifteeRef);
-//
-//       const giftee = gifteeDoc.data();
-//       if (giftee.enrolled[courseUid]) throw new Error(`User is already enrolled in course ${courseUid}.`);
-//
-//       console.log('giving', giftee, courseUid);
-//       await transaction.update(gifteeRef, { enrolled: { ...giftee.enrolled, [courseUid]: true } });
-//     });
-//
-//     return { message: `User ${email} now owns course ${courseUid}.`};
-//
-//   } catch (error) {
-//     console.error(error);
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// };
-
-/**
- * Utility function - asynchronously loads a user meta.
- * @private
- * @param uid
- */
-// const _getUserMeta = async ({ uid }) => {
-//   const doc = await admin.firestore().collection('users').doc(uid).get();
-//   if (!doc.exists) throw new Error(`No user by uid ${uid}.`);
-//
-//   return { doc, data: doc.data() };
-// };
-
-/**
- * Utility function - tells us whether a user is cleared to load a course.
- * @private
- * @param userMeta
- * @param courseUid
- */
-const _canGetCourse = ({ userMeta, course }) => {
-  return course.creatorUid === userMeta.uid || !!userMeta.enrolled[course.uid];
-};
-
-/**
- * Utility function - asynchronously loads a course.
- * @private
- * @param userMeta - the user meta of the user who wishes to load the course
- * @param courseUid - the id of the course to load
- * @param doCheck - whether we should check if the user is allowed
- */
-// const _getCourse = async ({ userMeta, courseUid, doCheck = true }) => {
-//   console.log('_getCourse', courseUid);
-//   if (doCheck) {
-//     if (!_canGetCourse({ userMeta, courseUid })) throw new Error(`User ${userMeta.uid} cannot get course ${courseUid}`)
-//   }
-//
-//   const doc = await admin.firestore().collection('courses').doc(courseUid).get();
-//   if (!doc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-//
-//   return { doc, data: doc.data() };
-// };
-
-// /**
-//  * Gets a specific course.
-//  * @param.uid - the id of the course to return
-//  */
-// const getCourse = async (data, context) => {
-//   try {
-//     log({ message: 'Attempting to get course...', data, context });
-//     checkAuth(context);
-//
-//     const { course, items } = await admin.firestore().runTransaction(async (transaction) => {
-//       const { auth: { uid } } = context;
-//
-//       // Grab the user.
-//       const userRef = admin.firestore().collection('users').doc(uid);
-//       const userDoc = await transaction.get(userRef);
-//       const userMeta = userDoc.data();
-//
-//       // Grab the course.
-//       const courseRef = admin.firestore().collection('courses').doc(data.uid);
-//       const courseDoc = await transaction.get(courseRef);
-//       const course = courseDoc.data();
-//
-//       // Does the user have access?
-//       if (!_canGetCourse({ userMeta, course })) throw new Error(`User ${uid} can't get course ${data.uid}.`);
-//
-//       // Now grab the items in the course.
-//       const itemsRef = admin.firestore().collection('items')
-//         .where('courseUid', '==', data.uid );
-//       const itemsDoc = await transaction.get(itemsRef);
-//       const items = itemsDoc.docs.map(item => item.data());
-//
-//       return { course, items };
-//     });
-//
-//     return { course, items };
-//   } catch (error) {
-//     log({ message: error.message, data: error, context, level: 'error' });
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// };
-
-/**
  * Deletes a specific course AND all its items.
  * @param.uid - the id of the course to delete
  */
@@ -743,7 +593,7 @@ const onCourseUpdated = functions.firestore
     log({ message: `Course ${docId} was updated.`, data: change.after.data(), context });
 
     // Update all tokens.
-    const result = await admin.firestore().runTransaction((async (transaction) => {
+    await admin.firestore().runTransaction((async (transaction) => {
       try {
         const { displayName, description, image, uid } = change.after.data();
         const tokensRef = admin.firestore()
@@ -786,8 +636,8 @@ const onCourseDeleted = functions.firestore
         const tokens = await transaction.get(tokensRef);
 
         const itemsRef = admin.firestore()
-          .collection('items')
-          .where('courseUid', '==', uid)
+          .collection('courses').doc(docId)
+          .collection('items');
         const items = await transaction.get(itemsRef);
 
         // Delete tokens.
@@ -839,7 +689,7 @@ const onCourseDeleted = functions.firestore
 
 module.exports = {
   // Courses
-  createCourse: functions.https.onCall(createCourse),
+  // createCourse: functions.https.onCall(createCourse),
   createCourse2: functions.https.onCall(createCourse2),
   updateCourse: functions.https.onCall(updateCourse),
   // getCourse: functions.https.onCall(getCourse),

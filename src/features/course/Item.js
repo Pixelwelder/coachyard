@@ -23,7 +23,6 @@ const getDurationString = (seconds) => {
 
 const Item = ({ item, isSelected, onSelect }) => {
   const formattedTime = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
-  console.log('formattedTime', item)
   const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local()).toFormat('h:mm');
   const duration = getDurationString(item?.streamingInfo?.data?.duration || 0);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);

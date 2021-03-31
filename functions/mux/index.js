@@ -24,13 +24,19 @@ mux_webhooks.post('/webhooks', async (request, response) => {
       const muxData = parseMuxResponse(body);
 
       const itemDoc = await admin.firestore().runTransaction(async (transaction) => {
+        const procRef = admin.firestore().collection('mux_processing').doc(muxData.streamingId);
+        const procDoc = await transaction.get(procRef);
+        if (!procDoc) throw new Error(`Received webhook for streamingId ${muxData.streamingId} but it wasn't processing.`);
+        const { courseUid, itemUid } = procDoc.data();
+
         const itemRef = admin.firestore()
-          .collection('items')
-          .where('streamingId', '==', muxData.streamingId);
-        const docs = await transaction.get(itemRef);
-        if (docs.size) {
-          const doc = docs.docs[0];
+          .collection('courses').doc(courseUid)
+          .collection('items').doc(itemUid);
+        const itemDocs = await transaction.get(itemRef);
+        if (itemDocs.size) {
+          const doc = itemDocs.docs[0];
           await transaction.update(doc.ref, { ...muxData, status: 'viewing', streamingInfo: body });
+          await transaction.delete(procRef);
           return doc;
         } else {
           log({ message: `Did not find a doc for streaming id ${muxData.streamingId}.`, data: body, level: 'error' });

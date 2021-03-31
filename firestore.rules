@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**}/documents {
-      allow read, write: if false;
+      allow read, write: if true;
     }
 
     match /users/{uid} {
@@ -11,10 +11,10 @@ service cloud.firestore {
     }
 
     // Currently unused since we update/delete through cloud functions.
-    match /invites/{uid} {
-      allow read: if isCreator() || isInvited();
-      allow write: if isCreator();
-    }
+    // match /invites/{uid} {
+    //   allow read: if isCreator() || isInvited();
+    //   allow write: if isCreator();
+    // }
 
     match /tokens/{uid} {
       allow list: if true;
@@ -39,18 +39,23 @@ service cloud.firestore {
         // TODO
         allow read, write: if true;
       }
+
+      match /items/{uid} {
+        // TODO
+        allow read, write: if true;
+      }
     }
 
-    match /items/{uid} {
-      allow list: if true;
-      allow get: if true; // TODO isCreator() || isEnrolledInParentCourse();
-      allow write: if isCreator();
+    // match /items/{uid} {
+      // allow list: if true;
+      // allow get: if true; // TODO isCreator() || isEnrolledInParentCourse();
+      // allow write: if isCreator();
 
       // function isEnrolledInParentCourse() {
       //   let parentCourse = get(/databases/$(database)/documents/courses/$(resource.data.courseUid));
       //   return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolled[parentCourse.uid] != null;
       // }
-    }
+    // }
 
     match /easy_customers/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid; // isCreator2();
@@ -76,10 +81,6 @@ service cloud.firestore {
         allow write: if false;
       }
 
-      function isLoggedIn() {
-        return request.auth != null;
-      }
-
       function isUser() {
         return request.auth != null && request.auth.uid == uid;
       }
@@ -89,16 +90,8 @@ service cloud.firestore {
     //   return request.auth != null;
     // }
 
-    function isCreator2() {
-      return request.auth != null && request.auth.uid == uid;
-    }
-
     function isCreator() {
       return resource.data.creatorUid == request.auth.uid;
-    }
-
-    function isInvited() {
-      return resource.data.email == request.auth.token.email;
     }
   }
 }

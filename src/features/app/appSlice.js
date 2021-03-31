@@ -14,6 +14,7 @@ import { actions as userActions } from './userSlice';
 import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { actions as scheduleActions } from '../schedule/scheduleSlice';
 import { actions as dashboardActions } from '../dashboard/dashboardSlice';
+import { actions as coachActions } from '../coach/coachSlice';
 import { resetValue, setValue } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 
@@ -75,6 +76,7 @@ const init = createAsyncThunk(
       await dispatch(selectedCourseActions.init());
       await dispatch(scheduleActions.init());
       await dispatch(dashboardActions.init());
+      await dispatch(coachActions.init());
 
       // Set the query. For some reason the object returned from queryString is non-serializable.
       const query = queryString.parse(window.location.search);

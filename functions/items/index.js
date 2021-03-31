@@ -35,7 +35,8 @@ const createItem = async (data, context) => {
       const course = courseDoc.data();
       if (course.creatorUid !== uid) throw new Error('Only the creator of a course can add an item.');
 
-      const itemRef = admin.firestore().collection('items').doc();
+      // const itemRef = admin.firestore().collection('items').doc();
+      const itemRef = courseRef.collection('items').doc();
       const timestamp = admin.firestore.Timestamp.now();
       const item = newCourseItem({
         uid: itemRef.id,
@@ -47,8 +48,8 @@ const createItem = async (data, context) => {
         ...filterItem(newItem)
       });
 
-      // Add it to the items table.
-      await transaction.create(itemRef, item);
+      // Add it to the course.
+      await transaction.set(itemRef, item);
 
       // Now update course.
       // await transaction.update(courseRef, { items: [ ...course.items, item.uid ]});
@@ -74,13 +75,15 @@ const updateItem = async (data, context) => {
     checkAuth(context);
 
     const { auth: { uid } } = context;
-    const { uid: itemUid, update } = data;
+    const { courseUid, itemUid, update } = data;
 
     if (!update) throw new Error('Update param required.');
 
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
       // Grab the item.
-      const itemRef = admin.firestore().collection('items').doc(itemUid);
+      const itemRef = admin.firestore()
+        .collection('courses').doc(courseUid)
+        .collection('items').doc(itemUid);
       const itemDoc = await transaction.get(itemRef);
       const itemData = itemDoc.data();
       if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
@@ -112,10 +115,14 @@ const deleteItem = async (data, context) => {
     log({ message: 'Attempting to delete item...', data, context });
     checkAuth(context);
     const { auth: { uid } } = context;
-    const { uid: itemUid } = data;
+    const { courseUid, itemUid } = data;
+    console.log(courseUid, itemUid);
 
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
-      const itemRef = admin.firestore().collection('items').doc(itemUid);
+      const itemRef = admin.firestore()
+        .collection('courses').doc(courseUid)
+        .collection('items').doc(itemUid);
+
       const itemDoc = await itemRef.get();
       const itemData = itemDoc.data();
       if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
@@ -150,18 +157,18 @@ const sendItem = async (data, context) => {
     log({ message: 'Attempting to send item to streaming server...', data, context });
     checkAuth(context);
     const {
-      uid,
+      courseUid,
+      itemUid,
       params: { input, playback_policy }
     } = data;
 
-    const itemRef = admin.firestore().collection('items').doc(uid);
+    const itemRef = admin.firestore()
+      .collection('courses').doc(courseUid)
+      .collection('items').doc(itemUid);
     const itemDoc = await itemRef.get();
     const itemData = itemDoc.data();
     if (itemData.streamingId) {
       // Already exists. Delete it.
-      console.log('');
-      console.log('');
-      console.log('');
       log({ message: `Streaming exists. Deleting ${itemData.streamingId}...`, data, context });
       const result = await fetch(
         `https://api.mux.com/video/v1/assets/${itemData.streamingId}`,
@@ -196,10 +203,21 @@ const sendItem = async (data, context) => {
     );
 
     const json = await result.json();
+    const { data: { id: streamingId } } = json;
     log({ message: 'Created new streaming asset.', data: json, context });
 
-    // Now record the result.
-    await itemRef.update({ streamingId: json.data.id, status: 'processing' });
+    await admin.firestore().runTransaction(async (transaction) => {
+      // Now record the result.
+      await transaction.update(itemRef, { streamingId, status: 'processing' });
+
+      // Also store it elsewhere for the webhook later.
+      const procRef = admin.firestore().collection('mux_processing').doc(streamingId);
+      const procItem = {
+        courseUid,
+        itemUid,
+      };
+      await transaction.set(procRef, procItem);
+    });
 
     log({ message: 'Updated database with streaming asset.', data: json, context });
     return { message: 'Done. I think.', result: json };
@@ -267,10 +285,10 @@ const _deleteRoom = async ({ name }) => {
 }
 
 const handleItemUpdate = functions.firestore
-  .document('items/{docId}')
+  .document('courses/{courseUid}/items/{itemUid}')
   .onUpdate(async (change, context) => {
-    const { docId } = context.params;
-    log({ message: `Item ${docId} has been updated.`, data: change.after.data(), context });
+    const { courseUid, itemUid } = context.params;
+    log({ message: `Item ${itemUid} has been updated.`, data: change.after.data(), context });
 
     const oldValue = change.before.data();
     const newValue = change.after.data();
@@ -279,7 +297,7 @@ const handleItemUpdate = functions.firestore
     if (oldValue.status === 'scheduled' && newValue.status === 'initializing') {
       const update = {};
 
-      const existingRoom = await _checkRoom({ name: docId });
+      const existingRoom = await _checkRoom({ name: itemUid });
       if (!existingRoom.error) {
         // The room already exists, which means something is screwed up before now.
         log({ message: 'Room already exists.', data: existingRoom, context, level: 'warning' });
@@ -287,7 +305,7 @@ const handleItemUpdate = functions.firestore
       } else {
         // The room does not exist. Create it.
         log({ message: 'Attempting to launch room...', data: change.after.data(), context });
-        const newRoom = await _launchRoom({ name: docId });
+        const newRoom = await _launchRoom({ name: `${courseUid}-${itemUid}` });
         if (newRoom.error) {
           // There was a problem creating the room.
           // Change back to previous status.
@@ -302,7 +320,9 @@ const handleItemUpdate = functions.firestore
       }
 
       // Update record.
-      const ref = admin.firestore().collection('items').doc(docId);
+      const ref = admin.firestore()
+        .collection('course').doc(courseUid)
+        .collection('items').doc(itemUid);
       await ref.update(update);
 
       // If we move from 'live' to 'uploading', delete a room.
@@ -310,7 +330,7 @@ const handleItemUpdate = functions.firestore
       const update = { started: false };
 
       // Does it exist?
-      const existingRoom = await _checkRoom({ name: docId });
+      const existingRoom = await _checkRoom({ name: itemUid });
       if (existingRoom.error) {
         // It does not exist, which is a problem somewhere else.
         // Still, we can delete it.
@@ -318,7 +338,7 @@ const handleItemUpdate = functions.firestore
         update.room = false;
       } else {
         // It exists. Delete it.
-        const room = await _deleteRoom({ name: docId });
+        const room = await _deleteRoom({ name: itemUid });
         if (room.error) {
           // There was a problem deleting the (existing) room.
           // That means we're still live.
@@ -331,7 +351,9 @@ const handleItemUpdate = functions.firestore
         }
       }
 
-      const ref = admin.firestore().collection('items').doc(docId);
+      const ref = admin.firestore()
+        .collection('courses').doc(courseUid)
+        .collection('items').doc(itemUid);
       await ref.update(update);
 
       // Stop counting and subtract time from what user has left.
