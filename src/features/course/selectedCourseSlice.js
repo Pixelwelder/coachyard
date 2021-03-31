@@ -207,19 +207,20 @@ const setUid = createAsyncThunk(
 let unsubscribeItem = () => {};
 const setSelectedItemUid = createAsyncThunk(
   `${name}/setSelectedItemUid`,
-  async ({ uid, history } = {}, { dispatch, getState }) => {
-    const { course, selectedItem } = selectors.select(getState());
-    if (selectedItem && selectedItem.uid === uid) {
+  async ({ courseUid, itemUid, history } = {}, { dispatch, getState }) => {
+    console.log('setSelectedItemUid', courseUid, itemUid);
+    const { selectedItem } = selectors.select(getState());
+    if (selectedItem && selectedItem.uid === itemUid) {
       return;
     }
 
-    app.analytics().logEvent(EventTypes.SELECT_ITEM, { uid });
+    app.analytics().logEvent(EventTypes.SELECT_ITEM, { courseUid, itemUid });
     unsubscribeItem();
 
-    if (uid) {
+    if (itemUid) {
       unsubscribeItem = app.firestore()
-        .collection('courses').doc(course.uid)
-        .collection('items').doc(uid)
+        .collection('courses').doc(courseUid)
+        .collection('items').doc(itemUid)
         .onSnapshot((snapshot) => {
           if (snapshot.exists) {
             const data = parseUnserializables(snapshot.data());

@@ -40,7 +40,7 @@ const Course = () => {
   useEffect(() => {
     const go = async () => {
       await dispatch(selectedCourseActions.setUid({ uid, history }));
-      await dispatch(selectedCourseActions.setSelectedItemUid({ uid: itemUid, history }));
+      await dispatch(selectedCourseActions.setSelectedItemUid({ courseUid: uid, itemUid, history }));
     }
 
     if (isSignedIn) {
