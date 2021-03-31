@@ -38,7 +38,7 @@ const initialState = {
   courseCreatorProvider: null,
   courseCreatorImageUrl: '',
   student: null,
-  items: [],
+  items: {},
   selectedItem: null,
   selectedItemUid: null,
 
@@ -195,7 +195,9 @@ const setUid = createAsyncThunk(
           // .orderBy('created')
           .onSnapshot((snapshot) => {
             console.log('items', snapshot.size);
-            const items = snapshot.docs.map(item => parseUnserializables(item.data()));
+            const items = snapshot.docs
+              .map(item => parseUnserializables(item.data()))
+              .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
             dispatch(generatedActions.setItems(items));
           });
       });
@@ -436,8 +438,16 @@ const selectStudentTokens = createSelector(
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
+const selectItems = createSelector(select, ({ items, course }) => {
+  const itemsList = (course?.itemOrder || [])
+    .reduce((accum, uid) => {
+      return items[uid] ? [...accum, items[uid]] : accum;
+    }, []);
+  return itemsList;
+});
+
 const selectors = {
-  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat
+  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat, selectItems
 };
 
 export { actions, selectors };

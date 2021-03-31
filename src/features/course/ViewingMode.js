@@ -8,9 +8,10 @@ import Button from '@material-ui/core/Button';
 import React, { useState } from 'react';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import ItemTitle from './ItemTitle';
 
 const ViewingMode = ({ size }) => {
-  const { selectedItem } = useSelector(selectedCourseSelectors.select);
+  const { selectedItem, course } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const [tab, setTab] = useState(0);
@@ -23,7 +24,7 @@ const ViewingMode = ({ size }) => {
           ? <EditItemView/>
           : (
             <>
-              <Typography className="item-title" variant="h6" component="h3">{selectedItem.displayName}</Typography>
+              <ItemTitle item={selectedItem} />
               <Tabs
                 className="edit-course-tabs"
                 onChange={(event, newValue) => setTab(newValue)}

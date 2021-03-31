@@ -68,6 +68,7 @@ const newCourse = (overrides) => ({
   parent: '',
   numChats: 0,
   numChatsUnseen: 0,
+  itemOrder: [],
   ...overrides
 });
 

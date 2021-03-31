@@ -271,3 +271,11 @@ form {
 .page {
 
 }
+
+.item-top-title {
+  display: flex;
+
+  .title-text {
+    margin-right: 16px;
+  }
+}

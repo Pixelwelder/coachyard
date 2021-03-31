@@ -52,6 +52,8 @@ const createItem = async (data, context) => {
       await transaction.set(itemRef, item);
 
       // Now update course.
+      await transaction.update(courseRef, { itemOrder: admin.firestore.FieldValue.arrayUnion(itemRef.id) });
+
       // await transaction.update(courseRef, { items: [ ...course.items, item.uid ]});
       return { item };
     });

@@ -109,7 +109,16 @@ const selectTemplateTokens = createSelector(select, createTypeFilter('template')
 const selectNonTemplateTokens = createSelector(select, ({ tokens }) => {
   return tokens.filter(({ access, type }) => access === 'admin' && type !== 'template');
 });
-const selectors = {select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens };
+const selectTemplateCourses = createSelector(select, ({ courses }) => {
+  return courses.filter(course => course.type === 'template')
+});
+const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
+  return courses.filter(course => course.type !== 'template')
+});
+const selectors = {
+  select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens,
+  selectTemplateCourses, selectNonTemplateCourses
+};
 
 const actions = { ...generatedActions, init, setSelectedChat };
 

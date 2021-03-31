@@ -9,6 +9,7 @@ import { BaseChat } from '../../chat';
 const ChatTitle = ({ course, isSelected, onClick }) => {
   const { displayName, numChats, numChatsUnseen } = course;
 
+  console.log(course);
   return (
     <li onClick={onClick}>
       <Paper className={`chat-title${isSelected ? ' selected' : ''}`} elevation={isSelected ? 5 : 0}>

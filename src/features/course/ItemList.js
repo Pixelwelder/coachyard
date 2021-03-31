@@ -7,7 +7,8 @@ import Item from './Item';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 
 const ItemList = () => {
-  const { items, selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
+  const { selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
+  const items = useSelector(selectedCourseSelectors.selectItems);
   const history = useHistory();
   const dispatch = useDispatch();
 
