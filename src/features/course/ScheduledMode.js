@@ -128,15 +128,17 @@ const Teacher = () => {
             <>
               <div className="mode-inner">
                 <ItemInfo tokens={tokens} status={str} item={selectedItem} />
-                <Button
-                  color="primary" variant="contained"
-                  onClick={() => dispatch(
-                    catalogActions.launchItem({ courseUid: course.uid, itemUid: selectedItem.uid })
-                  )}
-                  disabled={!canLaunch()}
-                >
-                  Go Live
-                </Button>
+                {course.type !== 'template' && (
+                  <Button
+                    color="primary" variant="contained"
+                    onClick={() => dispatch(
+                      catalogActions.launchItem({ courseUid: course.uid, itemUid: selectedItem.uid })
+                    )}
+                    disabled={false}
+                  >
+                    Go Live
+                  </Button>
+                )}
               </div>
               <div className="owner-controls">
                 <div className="spacer" />

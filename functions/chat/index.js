@@ -1,7 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-const onChatMessageCreated = functions.firestore.document('courses/{courseUid}/chat/{messageId}')
+const onChatMessageCreated = functions.firestore
+  .document('courses/{courseUid}/chat/{messageId}')
   .onCreate(async (snapshot, context) => {
     const courseRef = snapshot.ref.parent.parent;
     const courseDoc = await courseRef.get();

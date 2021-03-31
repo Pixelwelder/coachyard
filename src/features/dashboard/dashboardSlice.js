@@ -106,7 +106,9 @@ const selectStudentTokens = createSelector(selectTokens, tokens => {
   );
 });
 const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
-const selectNonTemplateTokens = createSelector(select, createNegativeTypeFilter('template'));
+const selectNonTemplateTokens = createSelector(select, ({ tokens }) => {
+  return tokens.filter(({ access, type }) => access === 'admin' && type !== 'template');
+});
 const selectors = {select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens };
 
 const actions = { ...generatedActions, init, setSelectedChat };

@@ -408,6 +408,7 @@ const _unlockCourse = async (data, context) => {
 
 const _cloneCourse = async (data, context) => {
   const { courseUid, studentUid } = data;
+  console.log(courseUid, studentUid);
   const { newCourse } = await admin.firestore().runTransaction(async (transaction) => {
     const originalRef = admin.firestore().collection('courses').doc(courseUid);
     const originalDoc = await transaction.get(originalRef);

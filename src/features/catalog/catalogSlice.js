@@ -264,7 +264,7 @@ const deleteItem = createAsyncThunk(
 const launchItem = createAsyncThunk(
   'launchItem',
   async ({ courseUid, itemUid }) => {
-    console.log('launch item', itemUid);
+    console.log('launch item', courseUid, itemUid);
     app.analytics().logEvent(EventTypes.LAUNCH_ITEM_ATTEMPTED);
     const itemData = (
       await app.firestore()

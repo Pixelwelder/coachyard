@@ -417,7 +417,7 @@ module.exports = {
   beginRecording,
   endRecording,
 
-  handleItemUpdate,
+  handleItemUpdate
 
   // handleFileUpload,
   // handleFileDelete
