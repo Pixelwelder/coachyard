@@ -51,7 +51,8 @@ const CourseView = () => {
       isEditing: true,
       displayName: course.displayName,
       description: course.description,
-      student: course.student
+      student: course.student,
+      type: course.type
     }));
   };
 

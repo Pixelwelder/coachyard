@@ -251,6 +251,11 @@ const filterCourseItem = (params) => {
   return courseItem;
 };
 
+const getChildCourseUpdate = ({ displayName = '', description = '' } = {}) => ({
+  displayName,
+  description
+});
+
 const updateCourse = async (data, context) => {
   try {
     log({ message: 'Attempting to update course...', data, context });
@@ -259,7 +264,6 @@ const updateCourse = async (data, context) => {
     const { uid: courseUid, update } = data;
 
     const filteredCourseItem = filterCourseItem(update);
-    console.log('fiteredCourseItem', update, filteredCourseItem);
 
     // Do we need to find a user?
     const { student } = filteredCourseItem;
@@ -279,6 +283,22 @@ const updateCourse = async (data, context) => {
       const course = doc.data();
       if (course.creatorUid !== uid) throw new Error(`User ${uid} cannot update course ${course.uid}.`);
 
+      // We also need to update all descendants.
+      // TODO This is not very scalable.
+      const childCourses = await transaction.get(
+        admin.firestore().collection('courses').where('parent', '==', ref.id)
+      );
+
+      if (childCourses.size) {
+        console.log(`Updating ${childCourses.size} child courses...`);
+        if (childCourses.size > 450) log({ message: 'updateCourse: Too many children!', data, context, level: 'warning' });
+        const childUpdate = getChildCourseUpdate(update);
+        await childCourses.docs.map(async (courseDoc) => {
+          await transaction.update(courseDoc.ref, childUpdate);
+        });
+      }
+
+      // Now update the central course.
       await transaction.update(ref, filteredCourseItem);
     });
 

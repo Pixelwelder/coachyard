@@ -11,6 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
 import { selectors as catalogSelectors } from './catalogSlice';
 import { useSelector } from 'react-redux';
+import capitalize from '@material-ui/core/utils/capitalize';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const { tokensByCourseUid } = useSelector(catalogSelectors.select);
@@ -53,7 +54,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
               </Typography>
             )
           }
-          {item.type === 'template' && <Chip label="Template" color="primary" size="small" />}
+          {item.type !== 'basic' && <Chip label={capitalize(item.type)} color="primary" size="small" />}
         </CardContent>
       </CardActionArea>
       {/*<CardActions>*/}

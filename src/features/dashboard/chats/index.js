@@ -19,7 +19,7 @@ const ChatTitle = ({ course, isSelected, onClick }) => {
       </Paper>
     </li>
   )
-}
+};
 
 const Chats = () => {
   const { selectedChat, selectedChatUid } = useSelector(dashboardSelectors.select);
