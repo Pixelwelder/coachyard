@@ -79,20 +79,20 @@ const NewCourseDialog = () => {
               <FormControlLabel value="template" control={<Radio />} label="Template" />
             </RadioGroup>
           </FormControl>
-          {(type === 'invite' || type === 'public') && (
-            <FormControl>
-              <FormLabel>When is your first live session?</FormLabel>
-              {
-                date && (
-                  <DateTimePicker
-                    value={date}
-                    onChange={onChangeDate}
-                    disabled={isLoading}
-                  />
-                )
-              }
-            </FormControl>
-          )}
+          {/*{(type === 'invite' || type === 'public') && (*/}
+          {/*  <FormControl>*/}
+          {/*    <FormLabel>When is your first live session?</FormLabel>*/}
+          {/*    {*/}
+          {/*      date && (*/}
+          {/*        <DateTimePicker*/}
+          {/*          value={date}*/}
+          {/*          onChange={onChangeDate}*/}
+          {/*          disabled={isLoading}*/}
+          {/*        />*/}
+          {/*      )*/}
+          {/*    }*/}
+          {/*  </FormControl>*/}
+          {/*)}*/}
           {type === 'invite' && (
             <FormControl>
               <TextField

@@ -52,10 +52,31 @@
   flex: 0 0 150px;
   margin-right: 8px;
 
-  .media {
+  .catalog-item-image {
     height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
     //background-size: stretch;
   }
+
+  .catalog-item-type {
+    text-transform: uppercase;
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    padding: 4px 0;
+
+    &.teacher {
+      background: #3f51b5; // Material
+    }
+
+    &.student {
+      background: #f50057; // Material
+    }
+  }
+
 
   &.placeholder {
     opacity: 0.5;

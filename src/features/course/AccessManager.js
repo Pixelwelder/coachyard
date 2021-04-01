@@ -36,32 +36,6 @@ const AccessManager = () => {
   if (!course) return null;
   return (
     <div className="access-manager">
-      {/*<FormControl component="fieldset" className="access-type" disabled={isLoading}>*/}
-      {/*  <FormLabel component="legend">This course is:</FormLabel>*/}
-      {/*  <RadioGroup*/}
-      {/*    row aria-label="type" name="type" value={type}*/}
-      {/*    onChange={({ target: { value } } ) => onChange({ type: value })}*/}
-      {/*  >*/}
-      {/*    <FormControlLabel value="public" control={<Radio />} label="Public" />*/}
-      {/*    <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />*/}
-      {/*    <FormControlLabel value="template" control={<Radio />} label="Template" />*/}
-      {/*  </RadioGroup>*/}
-      {/*  /!*{type !== course.type && (*!/*/}
-      {/*  /!*  <Button size="small" color="secondary" variant="contained" onClick={onSave} disabled={isLoading}>*!/*/}
-      {/*  /!*    Update*!/*/}
-      {/*  /!*  </Button>*!/*/}
-      {/*  /!*)}*!/*/}
-      {/*</FormControl>*/}
-
-      {/*<InputMask*/}
-      {/*  mask="9,999.99"*/}
-      {/*  value={price}*/}
-      {/*  disabled={false}*/}
-      {/*  onChange={({ target: { value } }) => setPrice(value)}*/}
-      {/*>*/}
-      {/*  <TextField />*/}
-      {/*</InputMask>*/}
-
       {['public', 'template'].includes(type) && (
         <>
           <Typography className="light-text course-price">How much does this course cost?</Typography>

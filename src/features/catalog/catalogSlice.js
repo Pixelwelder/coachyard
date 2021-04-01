@@ -6,6 +6,7 @@ import { actions as uiActions, selectors as uiSelectors } from '../ui/uiSlice';
 import MODES from '../ui/Modes';
 import { reset, setValue } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
+import { createTokenSelectors } from '../../util/storeUtils';
 
 export const TABS = {
   TEACHING: 0,
@@ -29,8 +30,7 @@ const initialState = {
     error: null
   },
 
-  tokens: [],
-  tokensByCourseUid: {},
+  tokensByUid: {},
 
   tab: TABS.TEACHING
 };
@@ -57,17 +57,13 @@ const init = createAsyncThunk(
           .where('user', '==', uid)
           .orderBy('created')
           .onSnapshot((snapshot) => {
-            let tokens = [];
-            let tokensByCourseUid = {};
             if (snapshot.size) {
-              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              tokensByCourseUid = tokens.reduce((accum, token) => ({
-                ...accum,
-                [token.courseUid]: token
-              }), {});
+              const tokensByUid = snapshot.docs
+                .map(doc => parseUnserializables(doc.data()))
+                .reduce((accum, token) => ({ ...accum, [token.uid]: token }), {});
+
+              dispatch(generatedActions.setTokensByUid(tokensByUid));
             }
-            dispatch(generatedActions.setTokens(tokens));
-            dispatch(generatedActions.setTokensByCourseUid(tokensByCourseUid));
           });
       }
     });
@@ -334,8 +330,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setLearning: mergeValue('learning'),
     resetLearning: resetValue('learning'),
 
-    setTokens: setValue('tokens'),
-    setTokensByCourseUid: setValue('tokensByCourseUid'),
+    setTokensByUid: setValue('tokensByUid'),
     reset: reset(initialState),
 
     setTab: setValue('tab')
@@ -368,20 +363,9 @@ const actions = {
 
 const select = ({ catalog }) => catalog;
 
-const selectTokens = createSelector(select, ({ tokens }) => tokens);
-const selectTeachingTokens = createSelector(selectTokens, tokens => {
-  return tokens.filter(token => token.access === 'admin');
-});
-const selectLearningTokens = createSelector(selectTokens, tokens => {
-  return tokens.filter(token => token.access === 'student')
-});
-const selectClonedTokens = createSelector(selectTeachingTokens, tokens => {
-  return tokens.filter(token => token.type !== 'basic')
-});
-
 const selectors = {
   select,
-  selectTeachingTokens, selectLearningTokens, selectClonedTokens
+  ...createTokenSelectors(select)
 };
 
 export { actions, selectors };

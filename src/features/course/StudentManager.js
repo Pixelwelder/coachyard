@@ -269,15 +269,23 @@ const EditInvite = () => {
 }
 
 const StudentManager = () => {
-  const { studentManagerMode, error } = useSelector(selectedCourseSelectors.select);
+  const { studentManagerMode, error, course } = useSelector(selectedCourseSelectors.select);
 
   return (
     <div className="student-manager">
-      {studentManagerMode === STUDENT_MANAGER_MODE.LIST && <List />}
-      {studentManagerMode === STUDENT_MANAGER_MODE.ADD && <Add />}
-      {studentManagerMode === STUDENT_MANAGER_MODE.DELETE && <Delete />}
-      {studentManagerMode === STUDENT_MANAGER_MODE.VIEW_USER && <ViewUser />}
-      {studentManagerMode === STUDENT_MANAGER_MODE.EDIT_INVITE && <EditInvite />}
+      {course.type === 'template' && (
+        <Typography>This course is available to anyone who purchases it.</Typography>
+      )}
+
+      {course.type !== 'template' && (
+        <>
+          {studentManagerMode === STUDENT_MANAGER_MODE.LIST && <List />}
+          {studentManagerMode === STUDENT_MANAGER_MODE.ADD && <Add />}
+          {studentManagerMode === STUDENT_MANAGER_MODE.DELETE && <Delete />}
+          {studentManagerMode === STUDENT_MANAGER_MODE.VIEW_USER && <ViewUser />}
+          {studentManagerMode === STUDENT_MANAGER_MODE.EDIT_INVITE && <EditInvite />}
+        </>
+      )}
     </div>
   );
 };

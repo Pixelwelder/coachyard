@@ -13,8 +13,8 @@ const Coach = () => {
   const history = useHistory();
   const { slug } = useParams();
   const dispatch = useDispatch();
-  const { isLoading, error, coach, courses } = useSelector(coachSelectors.select);
-  const products = useSelector(coachSelectors.selectTemplateTokens);
+  const { isLoading, error, coach } = useSelector(coachSelectors.select);
+  const products = useSelector(coachSelectors.selectProductTokens);
   const update = useSelector(uiSelectors2.editCoach.select);
   const { isOpen, description } = update;
 

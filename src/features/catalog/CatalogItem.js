@@ -14,7 +14,18 @@ import { useSelector } from 'react-redux';
 import capitalize from '@material-ui/core/utils/capitalize';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
-  const { tokensByCourseUid } = useSelector(catalogSelectors.select);
+  const tokensByParentUid = useSelector(catalogSelectors.selectTokensByParentUid);
+  const tokensByCourseUid = useSelector(catalogSelectors.selectTokensByCourseUid);
+  const accessibleTokensByCourseUid = useSelector(catalogSelectors.selectAccessibleTokensByCourseUid);
+  const isCreator = item.creatorUid === app.auth().currentUser?.uid;
+  const hasAccessToChild = !!tokensByParentUid[item.courseUid];
+  const hasAccessToPublic = !!tokensByCourseUid[item.courseUid];
+  const hasAccess = hasAccessToChild || hasAccessToPublic;
+  console.log('by parent', tokensByParentUid);
+  console.log('by course', tokensByCourseUid);
+  console.log('access', accessibleTokensByCourseUid);
+  console.log('item', item);
+  console.log('---');
   const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
 
@@ -38,23 +49,27 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
       variant="outlined"
     >
       <CardActionArea>
+        {/* TODO This should use new system. */}
         <CardMedia
-          className="media"
+          className="catalog-item-image"
           title={displayName}
           // image={imageUrl || '/images/generic-teacher-cropped.png'}
           image={'/images/generic-teacher-cropped.png'}
-        />
+        >
+          {isCreator && (
+            <Typography className="catalog-item-type teacher">{capitalize(item.type)}</Typography>
+          )}
+          {!isCreator && hasAccess && (
+            <Typography className="catalog-item-type student">Owned</Typography>
+          )}
+        </CardMedia>
         <CardContent>
           <Typography>{displayName}</Typography>
-          {tokensByCourseUid[item.courseUid || item.uid]
-            ? (<Typography variant="body2">Owned</Typography>)
-            : (
-              <Typography variant="body2">
-                {(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-              </Typography>
-            )
-          }
-          {item.type !== 'basic' && <Chip label={capitalize(item.type)} color="primary" size="small" />}
+          {(!hasAccess || isCreator) && (
+            <Typography variant="body2">
+              {(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+            </Typography>
+          )}
         </CardContent>
       </CardActionArea>
       {/*<CardActions>*/}

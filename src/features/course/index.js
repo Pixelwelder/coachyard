@@ -71,7 +71,6 @@ const Course = () => {
 
   const onUnlock = async () => {
     const result = await dispatch(selectedCourseActions.purchaseCourse());
-    console.log('result', result.payload);
     history.push(`/${result.payload.uid}`);
   };
 

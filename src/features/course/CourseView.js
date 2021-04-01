@@ -150,6 +150,7 @@ const CourseView = () => {
                   </div>
                   {ownsCourse && (
                     <div className="owner-controls">
+                      <div className="spacer" />
                       <Button onClick={onEdit} variant="contained">
                         Edit
                       </Button>

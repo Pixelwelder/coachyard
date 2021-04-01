@@ -3,9 +3,9 @@ import { selectors as selectedCourseSelectors } from '../course/selectedCourseSl
 import { selectors as catalogSelectors } from '../catalog/catalogSlice';
 
 const selectHasAccessToCurrentCourse = createSelector(
-  catalogSelectors.select,
+  catalogSelectors.selectTokens,
   selectedCourseSelectors.select,
-  ({ tokens }, { course }) => {
+  (tokens, { course }) => {
     return !!course && !!tokens.find(token => token.courseUid === course.uid);
   }
 );

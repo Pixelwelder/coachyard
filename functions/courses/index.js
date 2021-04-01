@@ -15,7 +15,7 @@ const tokenFromCourse = (course, user) => {
     created: timestamp,
     creatorUid: course.creatorUid,
     displayName: course.displayName,
-    parent: course.uid,
+    parent: course.parent,
     price: course.price,
     type: 'basic',
     updated: timestamp,
@@ -253,6 +253,7 @@ const _unlockCourse = async (data, context) => {
     // });
 
     await transaction.set(tokenRef, studentToken);
+    return course;
   });
 };
 

@@ -4,6 +4,7 @@ import app from 'firebase/app';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 import { actions as uiActions2 } from '../ui/uiSlice2';
+import { createTokenSelectors } from '../../util/storeUtils';
 
 const name = 'coach';
 const initialState = {
@@ -11,7 +12,7 @@ const initialState = {
   error: null,
   coach: null,
   courses: [],
-  tokens: [],
+  tokensByUid: {},
   students: [],
   provider: {}
 };
@@ -49,8 +50,10 @@ const load = createAsyncThunk(
             .where('type', 'in', ['public', 'template'])
             .where('access', '==', 'admin')
             .onSnapshot((snapshot) => {
-              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setTokens(tokens));
+              const tokens = snapshot.docs
+                .map(doc => parseUnserializables(doc.data()))
+                .reduce((accum, token) => ({ ...accum, [token.uid]: token }), {});
+              dispatch(generatedActions.setTokensByUid(tokens));
             })
         } else {
           history.push('/dashboard');
@@ -93,7 +96,7 @@ const { actions: generatedActions, reducer } = createSlice({
   reducers: {
     setCoach: setValue('coach'),
     setCourses: setValue('courses'),
-    setTokens: setValue('tokens'),
+    setTokensByUid: setValue('tokensByUid'),
     setProvider: setValue('provider'),
     reset: reset(initialState)
   },
@@ -102,13 +105,10 @@ const { actions: generatedActions, reducer } = createSlice({
 
 const actions = { ...generatedActions, load, update, init };
 
-const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type === type);
-const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
 const select = ({ coach }) => coach;
-const selectPublicTokens = createSelector(select, createTypeFilter('public'));
-const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
-const selectNonTemplateTokens = createSelector(select, createNegativeTypeFilter('template'));
-const selectors = { select, selectPublicTokens, selectTemplateTokens, selectNonTemplateTokens };
+const selectors = {
+  select, ...createTokenSelectors(select)
+};
 
 export { actions, selectors };
 export default reducer;
