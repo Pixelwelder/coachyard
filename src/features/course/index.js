@@ -167,8 +167,8 @@ const Course = () => {
                         open={!!anchorEl}
                         onClose={onClose}
                       >
-                        {getMenu().map(({ name, displayName }) => (
-                          <MenuItem onClick={() => onCreate(name)}>{displayName}</MenuItem>
+                        {getMenu().map(({ name, displayName }, index) => (
+                          <MenuItem key={index} onClick={() => onCreate(name)}>{displayName}</MenuItem>
                         ))}
                       </Menu>
                     </>
