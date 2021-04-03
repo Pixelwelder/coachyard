@@ -67,7 +67,7 @@ const init = createAsyncThunk(
           });
       } else {
         console.log('LOGGED OUT');
-        dispatch(generatedActions.reset);
+        dispatch(generatedActions.reset());
       }
     });
     dispatch(generatedActions.setIsInitialized(true));

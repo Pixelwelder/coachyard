@@ -7,7 +7,7 @@ import Item from './Item';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 
 const ItemList = () => {
-  const { selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
+  const { course, selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
   const items = useSelector(selectedCourseSelectors.selectItems);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -24,7 +24,7 @@ const ItemList = () => {
               if (isRecording) {
                 alert('Please stop the recording before navigating away.');
               } else {
-                history.push(`/course/${item.courseUid}/${item.uid}`);
+                history.push(`/course/${course.uid}/${item.uid}`);
                 dispatch(uiActions2.editItem.reset());
                 // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
               }

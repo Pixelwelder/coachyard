@@ -307,7 +307,7 @@ const _cloneCourse = async (data, context) => {
         item: itemDoc.data()
       };
     });
-    const newItems = [];
+    const itemsByUid = {};
 
     const promises = newItemRefs.map(({ item, ref }) => {
       if (item.status === 'scheduled') { // Only future live sessions.
@@ -323,11 +323,11 @@ const _cloneCourse = async (data, context) => {
           displayName: `${item.displayName} Copy`
         };
 
+        itemsByUid[item.uid] = newItem;
         return transaction.set(ref, newItem);
-      };
+      }
 
-      newItems.push(newItem); // Bleah.
-
+      itemsByUid[item.uid] = item;
       return null;
     }).filter(item => !!item);
 
@@ -349,11 +349,16 @@ const _cloneCourse = async (data, context) => {
     };
 
     // Save all
+    const newItemOrder = original.itemOrder.map((uid) => {
+      // Nest them.
+      console.log('finding', uid, 'in', itemsByUid);
+      const item = itemsByUid[uid];
+      if (item.status === 'scheduled') return item.uid;
+      return `${original.uid}|${item.uid}`;
+    })
     await transaction.set(courseRef, {
       ...newCourse,
-      itemOrder: ginewItemRefs.map(({ ref }) => {
-        return ref.id
-      })
+      itemOrder: newItemOrder
     });
     await Promise.all(promises);
     await transaction.set(studentTokenRef, studentToken);

@@ -42,6 +42,9 @@ const initialState = {
   selectedItem: null,
   selectedItemUid: null,
 
+  parentCourse: null,
+  parentItems: {},
+
   adminImageUrl: '',
 
   chat: [],
@@ -58,9 +61,11 @@ const initialState = {
   currentToken: null
 };
 
-let unsubscribeCourse = () => {};
 let unsubscribeToken = () => {};
+let unsubscribeCourse = () => {};
 let unsubscribeLocalItems = () => {};
+let unsubscribeParentCourse = () => {};
+let unsubscribeParentItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeCreatorSchedule = () => {};
 let unsubscribeStudent = () => {};
@@ -199,6 +204,30 @@ const setUid = createAsyncThunk(
               .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
             dispatch(generatedActions.setItems(items));
           });
+
+        // We also listen to the parent course, if it exists.
+        if (course.parent) {
+          unsubscribeParentCourse();
+          unsubscribeParentCourse = app.firestore().collection('courses').doc(course.parent)
+            .onSnapshot((snapshot) => {
+              if (snapshot.exists) {
+                const parent = parseUnserializables(snapshot.data());
+                dispatch(generatedActions.setParentCourse(parent));
+
+                unsubscribeParentItems();
+                unsubscribeParentItems = snapshot.ref.collection('items')
+                  .onSnapshot((snapshot) => {
+                    if (snapshot.size) {
+                      const parentItems = snapshot.docs
+                        .map(doc => parseUnserializables(doc.data()))
+                        .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
+
+                      dispatch(generatedActions.setParentItems(parentItems));
+                    }
+                  })
+              }
+            })
+        }
       });
 
 
@@ -210,7 +239,7 @@ const setSelectedItemUid = createAsyncThunk(
   `${name}/setSelectedItemUid`,
   async ({ courseUid, itemUid, history } = {}, { dispatch, getState }) => {
     console.log('setSelectedItemUid', courseUid, itemUid);
-    const { selectedItem } = selectors.select(getState());
+    const { selectedItem, items, parentItems, parentCourse } = selectors.select(getState());
     if (selectedItem && selectedItem.uid === itemUid) {
       return;
     }
@@ -219,8 +248,21 @@ const setSelectedItemUid = createAsyncThunk(
     unsubscribeItem();
 
     if (itemUid) {
+      // courseUid is from the original course, while itemUid is a child of the new course.
+      let parentCourseUid;
+      if (items[itemUid]) {
+        parentCourseUid = courseUid;
+        console.log('LOCAL');
+      } else if (parentItems[itemUid]) {
+        parentCourseUid = parentCourse.uid;
+        console.log('PARENT');
+      } else {
+        throw new Error(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
+      }
+
+      // If the item has a parent, we can map.
       unsubscribeItem = app.firestore()
-        .collection('courses').doc(courseUid)
+        .collection('courses').doc(parentCourseUid)
         .collection('items').doc(itemUid)
         .onSnapshot((snapshot) => {
           if (snapshot.exists) {
@@ -387,6 +429,8 @@ const { actions: generatedActions, reducer } = createSlice({
     addImageUrls: (state, action) => {
       state.imageUrls = { ...state.imageUrls, ...action.payload };
     },
+    setParentCourse: setValue('parentCourse'),
+    setParentItems: setValue('parentItems'),
 
     setAdminImageUrl: setValue('adminImageUrl'),
     reset: (state, action) => initialState,
@@ -437,10 +481,14 @@ const selectStudentTokens = createSelector(
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
-const selectItems = createSelector(select, ({ items, course }) => (course?.itemOrder || [])
-    .reduce((accum, uid) => {
-      return items[uid] ? [...accum, items[uid]] : accum;
-    }, [])
+const selectItems = createSelector(select, ({ items, parentItems, course }) => {
+  const allItems = { ...parentItems, ...items };
+  return (course?.itemOrder || [])
+    .reduce((accum, address) => {
+      const uid = address.includes('|') ? address.split('|')[1] : address;
+      return allItems[uid] ? [...accum, allItems[uid]] : accum;
+    }, []);
+  }
 );
 
 const selectors = {
