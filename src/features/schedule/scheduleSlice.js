@@ -1,6 +1,6 @@
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 import app from 'firebase/app';
-import { loaderReducers, setValue } from '../../util/reduxUtils';
+import { loaderReducers, reset, setValue } from '../../util/reduxUtils';
 import { url } from '../../__config__/easy.local.json';
 import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 
@@ -21,8 +21,9 @@ const initialState = {
   isLoading: false,
   services: [],
   provider: null,
+  scheduleOpenCalendar: false,
 
-  tab: TABS.WORKING_PLAN,
+  tab: TABS.WORKING_PLAN
 };
 
 let unsubscribeProviders = () => {};
@@ -38,7 +39,7 @@ const init = createAsyncThunk(
       unsubscribeProviders();
       if (authUser) {
         const schedule = document.getElementById('schedule')
-        if (schedule) schedule.src = `${url}/index.php/user/login`;
+        if (schedule) schedule.src = `${url}/index.php/user/login?admin`;
 
         unsubscribeProviders = app.firestore()
           .collection('easy_providers')
@@ -53,6 +54,12 @@ const init = createAsyncThunk(
                 const data = snapshot.data();
                 const { settings: { username, password } } = data;
                 dispatch(generatedActions.setCredentials({ username: authUser.uid, password }));
+                dispatch(generatedActions.setProvider(data));
+
+                const { scheduleOpenCalendar } = getState();
+                if (scheduleOpenCalendar) {
+                  dispatch(openCalendar());
+                }
               } else {
                 console.log('scheduler: already logged in');
               }
@@ -60,7 +67,7 @@ const init = createAsyncThunk(
           });
       } else {
         console.log('LOGGED OUT');
-        // doLogout();
+        dispatch(generatedActions.reset);
       }
     });
     dispatch(generatedActions.setIsInitialized(true));
@@ -88,8 +95,25 @@ const openCalendar = createAsyncThunk(
   `${name}/openCalendar`,
   async (_, { dispatch, getState }) => {
     console.log('openCalendar');
-    let newWindow;
+    const { provider, scheduleOpenCalendar } = select(getState());
+    if (!provider) {
+      try {
+        // Try to create, then return and wait for the data to come through a listener elsewhere.
+        await app.functions().httpsCallable('createSchedulingUser')();
+        dispatch(generatedActions.setScheduleOpenCalendar(true));
+      } catch (error) {
+        // Didn't work.
+      } finally {
+        console.log('RETURNING');
+        return;
+      }
+    }
 
+    if (scheduleOpenCalendar) {
+      dispatch(generatedActions.setScheduleOpenCalendar(false));
+    }
+
+    let newWindow;
     const doLogin = () => {
       console.log('doLogin');
       const { credentials, isReadyForLogin } = select(getState());
@@ -206,7 +230,9 @@ const { reducer, actions: generatedActions } = createSlice({
     setCredentials: setValue('credentials'),
     setServices: setValue('services'),
     setProvider: setValue('provider'),
-    setTab: setValue('tab')
+    setTab: setValue('tab'),
+    setScheduleOpenCalendar: setValue('scheduleOpenCalendar'),
+    reset: reset(initialState)
   },
   extraReducers: loaderReducers(name, initialState)
 });

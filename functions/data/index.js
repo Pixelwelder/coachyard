@@ -69,6 +69,7 @@ const newCourse = (overrides) => ({
   numChats: 0,
   numChatsUnseen: 0,
   itemOrder: [],
+  localItemOrder: [],
   ...overrides
 });
 

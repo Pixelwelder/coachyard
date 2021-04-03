@@ -259,7 +259,6 @@ const _unlockCourse = async (data, context) => {
 
 const _cloneCourse = async (data, context) => {
   const { courseUid, studentUid } = data;
-  console.log(courseUid, studentUid);
   const { newCourse } = await admin.firestore().runTransaction(async (transaction) => {
     const originalRef = admin.firestore().collection('courses').doc(courseUid);
     const originalDoc = await transaction.get(originalRef);
@@ -302,23 +301,35 @@ const _cloneCourse = async (data, context) => {
     const itemDocs = await transaction.get(itemsRef);
     if (itemDocs.size > 495) throw new Error('Not implemented: too many items to clone.');
 
-    const promises = itemDocs.docs.map((itemDoc) => {
-      const ref = courseRef.collection('items').doc();
-      const item = itemDoc.data();
-      const isCloneable = item.status !== 'scheduled'; // Only future live sessions.
-      const newItem = {
-        ...item,
-        uid: ref.id,
-        courseUid: newCourse.uid,
-        parent: isCloneable ? item.uid : null,
-        created: timestamp,
-        updated: timestamp,
-
-        // TODO TEMP
-        displayName: `${item.displayName} Copy`
+    const newItemRefs = itemDocs.docs.map((itemDoc) => {
+      return {
+        ref: courseRef.collection('items').doc(),
+        item: itemDoc.data()
       };
-      return transaction.set(ref, newItem);
     });
+    const newItems = [];
+
+    const promises = newItemRefs.map(({ item, ref }) => {
+      if (item.status === 'scheduled') { // Only future live sessions.
+        const newItem = {
+          ...item,
+          uid: ref.id,
+          courseUid: newCourse.uid,
+          parent: item.uid,
+          created: timestamp,
+          updated: timestamp,
+
+          // TODO TEMP
+          displayName: `${item.displayName} Copy`
+        };
+
+        return transaction.set(ref, newItem);
+      };
+
+      newItems.push(newItem); // Bleah.
+
+      return null;
+    }).filter(item => !!item);
 
     // Create student token for the new course.
     // TODO Update descendant tokens when parent course is updated.
@@ -328,20 +339,6 @@ const _cloneCourse = async (data, context) => {
       access: 'student',
       uid: studentTokenRef.id
     };
-    // const studentToken = newCourseToken({
-    //   uid: studentTokenRef.id,
-    //   created: timestamp,
-    //   updated: timestamp,
-    //   user: studentUid,
-    //   userDisplayName: student.displayName,
-    //   courseUid: courseRef.id,
-    //   access: 'student',
-    //   displayName: newCourse.displayName,
-    //   description: newCourse.description,
-    //   image: newCourse.image,
-    //   parent: courseUid,
-    //   creatorUid: original.creatorUid
-    // });
 
     // Create teacher token for the new course.
     const teacherTokenRef = admin.firestore().collection('tokens').doc();
@@ -350,23 +347,14 @@ const _cloneCourse = async (data, context) => {
       access: 'admin',
       uid: teacherTokenRef.id
     };
-    // const teacherToken = newCourseToken({
-    //   uid: teacherTokenRef.id,
-    //   created: timestamp,
-    //   updated: timestamp,
-    //   user: teacher.uid,
-    //   userDisplayName: teacher.displayName,
-    //   courseUid: courseRef.id,
-    //   access: 'admin',
-    //   displayName: newCourse.displayName,
-    //   description: newCourse.description,
-    //   image: newCourse.image,
-    //   parent: courseUid,
-    //   creatorUid: original.creatorUid
-    // });
 
     // Save all
-    await transaction.set(courseRef, newCourse);
+    await transaction.set(courseRef, {
+      ...newCourse,
+      itemOrder: ginewItemRefs.map(({ ref }) => {
+        return ref.id
+      })
+    });
     await Promise.all(promises);
     await transaction.set(studentTokenRef, studentToken);
     await transaction.set(teacherTokenRef, teacherToken);

@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 
 const Schedule = () => {
   const dispatch = useDispatch();
-  const { tab } = useSelector(scheduleSelectors.select);
+  const { tab, isLoading } = useSelector(scheduleSelectors.select);
 
   return (
     <div className="schedule">
@@ -20,6 +20,7 @@ const Schedule = () => {
         }}
         variant="contained"
         color="primary"
+        disabled={isLoading}
       >
         Open Calendar
       </Button>

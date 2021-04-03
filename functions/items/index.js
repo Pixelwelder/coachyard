@@ -48,6 +48,19 @@ const createItem = async (data, context) => {
         ...filterItem(newItem)
       });
 
+      // If it's a template course, we're going to update all child courses.
+      if (course.type === 'template') {
+        const childCourses = admin.firestore().collection('courses')
+          .where('parent', '==', course.uid);
+
+        const childDocs = await transaction.get(childCourses);
+        console.log(`Found ${childDocs.size} child courses.`);
+
+        // const promises = childDocs.docs.map(async (doc) => {
+        //   await doc.ref.collection('items').
+        // })
+      }
+
       // Add it to the course.
       await transaction.set(itemRef, item);
 

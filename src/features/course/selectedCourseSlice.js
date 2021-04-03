@@ -60,7 +60,7 @@ const initialState = {
 
 let unsubscribeCourse = () => {};
 let unsubscribeToken = () => {};
-let unsubscribeItems = () => {};
+let unsubscribeLocalItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeCreatorSchedule = () => {};
 let unsubscribeStudent = () => {};
@@ -188,10 +188,9 @@ const setUid = createAsyncThunk(
             dispatch(generatedActions.setChat(messages));
           });
 
-        // Get the items.
-        console.log('subscribing items');
-        unsubscribeItems();
-        unsubscribeItems = courseDoc.ref.collection('items')
+        console.log('subscribing local items');
+        unsubscribeLocalItems();
+        unsubscribeLocalItems = courseDoc.ref.collection('items')
           // .orderBy('created')
           .onSnapshot((snapshot) => {
             console.log('items', snapshot.size);
@@ -438,13 +437,11 @@ const selectStudentTokens = createSelector(
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
-const selectItems = createSelector(select, ({ items, course }) => {
-  const itemsList = (course?.itemOrder || [])
+const selectItems = createSelector(select, ({ items, course }) => (course?.itemOrder || [])
     .reduce((accum, uid) => {
       return items[uid] ? [...accum, items[uid]] : accum;
-    }, []);
-  return itemsList;
-});
+    }, [])
+);
 
 const selectors = {
   select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat, selectItems

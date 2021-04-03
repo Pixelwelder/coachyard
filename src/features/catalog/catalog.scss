@@ -68,11 +68,11 @@
     text-align: center;
     padding: 4px 0;
 
-    &.teacher {
+    &.item-type {
       background: #3f51b5; // Material
     }
 
-    &.student {
+    &.item-owned {
       background: #f50057; // Material
     }
   }
