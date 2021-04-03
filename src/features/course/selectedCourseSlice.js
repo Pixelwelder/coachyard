@@ -472,6 +472,11 @@ const selectHasAccess = createSelector(
   select,
   () => {}
 );
+const selectIsCreator = createSelector(select, ({ course }) => {
+  return (app.auth().currentUser && course)
+    ? app.auth().currentUser.uid === course.creatorUid
+    : false;
+})
 const selectAdminTokens = createSelector(
   select,
   ({ tokens }) => tokens.filter(({ access }) => access === 'admin')
@@ -492,7 +497,8 @@ const selectItems = createSelector(select, ({ items, parentItems, course }) => {
 );
 
 const selectors = {
-  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat, selectItems
+  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat, selectItems,
+  selectIsCreator
 };
 
 export { actions, selectors };

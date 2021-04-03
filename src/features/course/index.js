@@ -37,6 +37,12 @@ const Course = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
+  const getMenu = () => {
+    const items = [{ name: 'scheduled', displayName: 'Live Session' }];
+    if (!ownsCourse) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
+    return items;
+  };
+
   useEffect(() => {
     const go = async () => {
       await dispatch(selectedCourseActions.setUid({ uid, history }));
@@ -50,7 +56,15 @@ const Course = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const onOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+    const menu = getMenu();
+    if (menu.length === 1) {
+      // Just do the first action.
+      const { name } = menu[0];
+      onCreate(name);
+    } else {
+      // Open the menu.
+      setAnchorEl(event.currentTarget);
+    }
   };
 
   const onClose = () => {
@@ -153,8 +167,9 @@ const Course = () => {
                         open={!!anchorEl}
                         onClose={onClose}
                       >
-                        <MenuItem onClick={() => onCreate('scheduled')}>Live Session</MenuItem>
-                        <MenuItem onClick={() => onCreate('viewing')}>Pre-Recorded Video</MenuItem>
+                        {getMenu().map(({ name, displayName }) => (
+                          <MenuItem onClick={() => onCreate(name)}>{displayName}</MenuItem>
+                        ))}
                       </Menu>
                     </>
                   )}
