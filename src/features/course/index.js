@@ -33,13 +33,13 @@ const Course = () => {
   } = useSelector(selectedCourseSelectors.select);
   const { isSignedIn } = useSelector(userSelectors.select);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
-  const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
+  const isCreator = useSelector(selectedCourseSelectors.selectIsCreator);
   const history = useHistory();
   const dispatch = useDispatch();
 
   const getMenu = () => {
     const items = [{ name: 'scheduled', displayName: 'Live Session' }];
-    if (!ownsCourse) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
+    if (isCreator) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
     return items;
   };
 
@@ -151,7 +151,7 @@ const Course = () => {
               <>
                 <ItemList />
                 <div className="toc-footer">
-                  {ownsCourse && (
+                  {hasAccess && (
                     <>
                       <Button
                         variant="contained"
