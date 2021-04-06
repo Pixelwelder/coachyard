@@ -28,6 +28,7 @@ const ItemView = () => {
   const query = queryString.parse(location.search);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const { barebones } = query;
+  console.log('selectedItem', selectedItem);
 
   useEffect(() => {
     // dispatch(uiActions2.editItem.reset());

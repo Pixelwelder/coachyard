@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   actions as selectedCourseActions,
@@ -13,7 +13,6 @@ import './course.scss';
 import ItemList from './ItemList';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 import CourseSummary from './CourseSummary';
 import ItemView from './ItemView';
 import CourseView from './CourseView';
@@ -21,7 +20,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import { getDefaultDateTime } from '../../util/itemUtils';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
@@ -37,12 +35,6 @@ const Course = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const getMenu = () => {
-    const items = [{ name: 'scheduled', displayName: 'Live Session' }];
-    if (isCreator) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
-    return items;
-  };
-
   useEffect(() => {
     const go = async () => {
       await dispatch(selectedCourseActions.setUid({ uid, history }));
@@ -55,12 +47,18 @@ const Course = () => {
   }, [uid, itemUid, isSignedIn]);
 
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const getMenu = () => {
+    const items = [{ name: 'scheduled', displayName: 'Live Session' }];
+    if (isCreator) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
+    return items.map(item => ({ ...item, type: course.type }));
+  };
+
   const onOpen = (event) => {
     const menu = getMenu();
     if (menu.length === 1) {
       // Just do the first action.
-      const { name } = menu[0];
-      onCreate(name);
+      onCreate(menu[0]);
     } else {
       // Open the menu.
       setAnchorEl(event.currentTarget);
@@ -71,15 +69,14 @@ const Course = () => {
     setAnchorEl(null);
   };
 
-  const onCreate = async (status) => {
+  const onCreate = async ({ name, type }) => {
     // dispatch(uiActions2.createItem.open())
     const { payload } = await dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName: 'New Item', description: '', date: null, file: '', status }
+      item: { displayName: 'New Item', description: '', date: null, file: '', status: name, type }
     }));
-    console.log('result', payload);
-    history.push(`/course/${course.uid}/${payload.uid}`);
-    dispatch(uiActions2.editItem.open());
+    // history.push(`/course/${course.uid}/${payload.uid}`);
+    // dispatch(uiActions2.editItem.open());
     onClose();
   };
 
@@ -167,8 +164,8 @@ const Course = () => {
                         open={!!anchorEl}
                         onClose={onClose}
                       >
-                        {getMenu().map(({ name, displayName }, index) => (
-                          <MenuItem key={index} onClick={() => onCreate(name)}>{displayName}</MenuItem>
+                        {getMenu().map((menuItem, index) => (
+                          <MenuItem key={index} onClick={() => onCreate(menuItem)}>{menuItem.displayName}</MenuItem>
                         ))}
                       </Menu>
                     </>

@@ -54,8 +54,6 @@ const _startDataListeners = createAsyncThunk(
 const createSubscription = createAsyncThunk(
   'createSubscription',
   async ({ stripe, card }) => {
-    console.log('Billing: createSubscription', stripe, card);
-
     // First create a payment method with the provided card.
     const paymentMethodResult = await stripe.createPaymentMethod({
       type: 'card',
@@ -63,12 +61,10 @@ const createSubscription = createAsyncThunk(
     });
 
     if (paymentMethodResult.error) {
-      console.error(paymentMethodResult.error);
       throw new Error(paymentMethodResult.error);
     }
 
     const { paymentMethod } = paymentMethodResult;
-    console.log('payment method created', paymentMethodResult.paymentMethod);
 
     // Save the payment method.
     const { uid } = app.auth().currentUser;
@@ -78,8 +74,6 @@ const createSubscription = createAsyncThunk(
       .collection('payment_methods')
       .doc(paymentMethod.id)
       .set({ id: paymentMethod.id });
-
-    console.log('Payment method saved.');
   }
 );
 
@@ -88,7 +82,6 @@ const cancelSubscription = createAsyncThunk(
   async (_, { getState, dispatch }) => {
     const active = selectSubscription(getState());
     if (!active) {
-      console.error('No subscription to cancel.');
       throw new Error('No subscription to cancel.');
     }
 
@@ -123,7 +116,6 @@ const init = createAsyncThunk(
           .doc(authUser.uid)
           .onSnapshot((snapshot) => {
             const customerData = snapshot.data();
-            console.log('Billing:', customerData);
             if (customerData) {
               dispatch(generatedActions.setCustomerData(parseUnserializables(customerData)));
               dispatch(_startDataListeners());

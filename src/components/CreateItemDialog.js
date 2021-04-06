@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import MODES from '../features/ui/Modes';
-import { actions as uiActions } from '../features/ui/uiSlice';
+import React from 'react';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';

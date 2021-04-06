@@ -15,19 +15,29 @@ import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { actions as scheduleActions } from '../schedule/scheduleSlice';
 import { actions as dashboardActions } from '../dashboard/dashboardSlice';
 import { actions as coachActions } from '../coach/coachSlice';
-import { resetValue, setValue } from '../../util/reduxUtils';
+import {
+  isFulfilledAction,
+  isPendingAction,
+  isRejectedAction,
+  isThisAction,
+  resetValue,
+  setValue
+} from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 
+const name = 'app';
 const initialState = {
-  isInitialised: false,
+  isInitialized: false,
   isLoading: false, // TODO
   error: null,
+  globalIsLoading: false,
+  globalError: null,
   signInAttempted: false,
   query: {}
 };
 
-const _initApp = createAsyncThunk(
-  'appInit',
+const _init = createAsyncThunk(
+  `${name}/_init`,
   async (_, { getState }) => {
     const { isInitialized } = select(getState());
     if (isInitialized) throw new Error('Firebase is already initialized.');
@@ -46,9 +56,9 @@ const _initApp = createAsyncThunk(
 );
 
 const setupFirebase = createAsyncThunk(
-  'setupFirebase',
+  `${name}/setupFirebase`,
   async (_, { dispatch, getState }) => {
-    await dispatch(_initApp());
+    await dispatch(_init());
 
     app.auth().onAuthStateChanged(
       async (authUser) => {
@@ -66,7 +76,7 @@ const setupFirebase = createAsyncThunk(
 );
 
 const init = createAsyncThunk(
-  'initApp',
+  `${name}/init`,
   async (_, { getState, dispatch }) => {
     try {
       await dispatch(setupFirebase());
@@ -91,16 +101,41 @@ const init = createAsyncThunk(
 );
 
 const { reducer, actions: generatedActions } = createSlice({
-  name: 'init',
+  name,
   initialState,
   reducers: {
     clearError: resetValue('error', initialState.error),
+    clearGlobalError: resetValue('globalError', initialState.globalError),
     setQuery: setValue('query'),
     setSignInAttempted: setValue('signInAttempted')
   },
-  extraReducers: {
-    [init.fulfilled]: (state) => { state.isInitialized = true; }
-  }
+  extraReducers: builder => builder
+    .addMatcher(isPendingAction, (state, action) => {
+      state.globalIsLoading = true;
+      state.globalError = null;
+      if (isThisAction(name)) {
+        state.isLoading = true;
+        state.error = null;
+      }
+    })
+    .addMatcher(isRejectedAction, (state, action) => {
+      state.globalIsLoading = false;
+      state.globalError = action.error;
+      if (isThisAction(name)) {
+        state.isLoading = false;
+        state.error = action.error;
+      }
+    })
+    .addMatcher(isFulfilledAction, (state, action) => {
+      state.globalIsLoading = false;
+      state.globalError = null;
+      if (isThisAction(name)) {
+        state.isLoading = false;
+        state.error = null;
+
+        if (action.type === init.fulfilled.toString()) state.isInitialized = true;
+      }
+    })
 });
 
 const select = ({ app }) => app;

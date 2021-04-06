@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from './selectedCourseSlice';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import Item from './Item';
 import { actions as uiActions2 } from '../ui/uiSlice2';
 
 const ItemList = () => {
   const { course, selectedItemUid, isRecording } = useSelector(selectedCourseSelectors.select);
-  const items = useSelector(selectedCourseSelectors.selectItems);
+  const items = useSelector(selectedCourseSelectors.selectAllItems);
   const history = useHistory();
   const dispatch = useDispatch();
 

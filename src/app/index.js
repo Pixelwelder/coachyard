@@ -8,21 +8,16 @@ import Footer from '../components/Footer';
 import Account from '../features/account';
 import './app.scss';
 import Course from '../features/course';
-import Catalog from '../features/catalog';
 import CreateCourseDialog from '../components/CreateCourseDialog3';
 import CreateItemDialog from '../components/CreateItemDialog';
 import DeleteDialog from '../components/DeleteDialog';
 import { DeleteCourseDialog, DeleteItemDialog } from '../components/DeleteDialogs';
-import CreateAccountDialog from '../components/CreateAccountDialog';
 import Barebones from '../features/barebones';
-import Button from '@material-ui/core/Button';
-import app from 'firebase/app';
 import Billing from '../features/billing2';
-import Iframe from 'react-iframe';
 import Coach from '../features/coach';
 import Dashboard from '../features/dashboard';
 import FirebaseSignIn from '../components/FirebaseSignIn';
-import UnlockDialog from '../features/billing2/UnlockDialog';
+import { GlobalError } from './Error';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -67,9 +62,7 @@ const App = () => {
       </div>
 
       {/* Footer. */}
-      <div className="footer-container">
-        <Footer />
-      </div>
+      <Footer />
 
       {/* MODALS */}
       {/* Are we logged in? */}
@@ -86,6 +79,7 @@ const App = () => {
       <CreateItemDialog />
       <DeleteCourseDialog />
       <DeleteItemDialog />
+      <GlobalError />
       {/*<UnlockDialog />*/}
 
       {/*<Iframe*/}

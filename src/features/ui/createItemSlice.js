@@ -7,6 +7,7 @@ const initialState = {
   description: '',
   date: '',
   file: '',
+  type: '',
 
   isChangingFile: false,
   bytesTransferred: 0,

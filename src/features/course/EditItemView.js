@@ -45,7 +45,8 @@ const EditItemView = ({ requireUpload = false }) => {
       description: selectedItem.description,
       date: selectedItem.date || getDefaultDateTime(),
       file: selectedItem.file,
-      scheduler: !!selectedItem.date ? 'teacher' : 'student'
+      scheduler: !!selectedItem.date ? 'teacher' : 'student',
+      type: 'basic'
     }));
   };
 

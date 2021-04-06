@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MODES from '../features/ui/Modes';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -6,7 +6,6 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
-import { DateTimePicker } from '@material-ui/pickers';
 import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';

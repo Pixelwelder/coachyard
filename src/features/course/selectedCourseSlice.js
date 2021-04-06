@@ -240,9 +240,9 @@ const setSelectedItemUid = createAsyncThunk(
   async ({ courseUid, itemUid, history } = {}, { dispatch, getState }) => {
     console.log('setSelectedItemUid', courseUid, itemUid);
     const { selectedItem, items, parentItems, parentCourse } = selectors.select(getState());
-    if (selectedItem && selectedItem.uid === itemUid) {
-      return;
-    }
+    // if (selectedItem && selectedItem.uid === itemUid) {
+    //   return;
+    // }
 
     app.analytics().logEvent(EventTypes.SELECT_ITEM, { courseUid, itemUid });
     unsubscribeItem();
@@ -257,7 +257,8 @@ const setSelectedItemUid = createAsyncThunk(
         parentCourseUid = parentCourse.uid;
         console.log('PARENT');
       } else {
-        throw new Error(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
+        console.log(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
+        // throw new Error(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
       }
 
       // If the item has a parent, we can map.
@@ -486,19 +487,37 @@ const selectStudentTokens = createSelector(
   ({ tokens }) => tokens.filter(({ access }) => access === 'student')
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
+
+// This only gets parent items, but replaces them with local items when they exist.
+const selectParentItems = createSelector(select, ({ parentCourse, parentItems, items }) => {
+  // Returns all parent items in an ordered array.
+  if (!parentCourse) return [];
+  return parentCourse.itemOrder.map((uid) => {
+    const item = items[uid] || parentItems[uid];
+    return item;
+  }).filter(item => !!item);
+});
+
+// This only gets local items.
 const selectItems = createSelector(select, ({ items, parentItems, course }) => {
-  const allItems = { ...parentItems, ...items };
-  return (course?.itemOrder || [])
-    .reduce((accum, address) => {
-      const uid = address.includes('|') ? address.split('|')[1] : address;
-      return allItems[uid] ? [...accum, allItems[uid]] : accum;
-    }, []);
-  }
+  if (!course) return [];
+  return course.itemOrder.map((uid) => {
+    return items[uid];
+  }).filter(item => !!item);
+});
+
+const selectAllItems = createSelector(
+  selectParentItems,
+  selectItems,
+  (parentItems, items) => ([
+    ...parentItems, ...items
+  ])
 );
 
 const selectors = {
-  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat, selectItems,
-  selectIsCreator
+  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
+  selectIsCreator,
+  selectItems, selectParentItems, selectAllItems
 };
 
 export { actions, selectors };

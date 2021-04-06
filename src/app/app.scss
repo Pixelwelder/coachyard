@@ -53,14 +53,24 @@ a {
   flex: 0;
 }
 
+.footer {
+  display: flex;
+  padding: 16px 0;
+}
+
 .footer-list {
   display: flex;
   padding: 0;
+  margin: 0;
 
   li {
     list-style: none;
     margin-right: $outer-padding-lg;
   }
+}
+
+.status-indicator {
+
 }
 
 .MuiGrid-item {

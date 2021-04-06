@@ -10,7 +10,7 @@ const { newCourseItem } = require('../data');
 /**
  * Filters user input for item creation.
  */
-const filterItem = (inputObj, fields = ['displayName', 'description', 'date', 'status']) => {
+const filterItem = (inputObj, fields = ['displayName', 'description', 'date', 'status', 'type']) => {
   return fields.reduce((accum, field) => {
     const val = inputObj[field];
     if (typeof val === 'undefined') return accum;
