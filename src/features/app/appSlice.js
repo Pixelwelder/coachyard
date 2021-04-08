@@ -30,6 +30,7 @@ const initialState = {
   isInitialized: false,
   isLoading: false, // TODO
   error: null,
+  globalLoadingLevels: 0, // For nested async.
   globalIsLoading: false,
   globalError: null,
   signInAttempted: false,
@@ -113,22 +114,25 @@ const { reducer, actions: generatedActions } = createSlice({
     .addMatcher(isPendingAction, (state, action) => {
       state.globalIsLoading = true;
       state.globalError = null;
+      state.globalLoadingLevels ++;
       if (isThisAction(name)) {
         state.isLoading = true;
         state.error = null;
       }
     })
     .addMatcher(isRejectedAction, (state, action) => {
-      state.globalIsLoading = false;
       state.globalError = action.error;
+      state.globalLoadingLevels --;
+      if (!state.globalLoadingLevels) state.globalIsLoading = false;
       if (isThisAction(name)) {
         state.isLoading = false;
         state.error = action.error;
       }
     })
     .addMatcher(isFulfilledAction, (state, action) => {
-      state.globalIsLoading = false;
       state.globalError = null;
+      state.globalLoadingLevels --;
+      if (!state.globalLoadingLevels) state.globalIsLoading = false;
       if (isThisAction(name)) {
         state.isLoading = false;
         state.error = null;

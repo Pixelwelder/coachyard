@@ -18,6 +18,7 @@ import Coach from '../features/coach';
 import Dashboard from '../features/dashboard';
 import FirebaseSignIn from '../components/FirebaseSignIn';
 import { GlobalError } from './Error';
+import LoadingModal from '../components/LoadingModal';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -80,6 +81,7 @@ const App = () => {
       <DeleteCourseDialog />
       <DeleteItemDialog />
       <GlobalError />
+      <LoadingModal />
       {/*<UnlockDialog />*/}
 
       {/*<Iframe*/}

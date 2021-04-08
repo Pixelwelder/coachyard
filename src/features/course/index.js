@@ -71,13 +71,16 @@ const Course = () => {
 
   const onCreate = async ({ name, type }) => {
     // dispatch(uiActions2.createItem.open())
+    onClose();
     const { payload } = await dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName: 'New Item', description: '', date: null, file: '', status: name, type }
+      item: { displayName: 'New Item', description: '', date: null, file: '', status: name, type },
+      ui: { delay: 500 }
     }));
-    // history.push(`/course/${course.uid}/${payload.uid}`);
-    // dispatch(uiActions2.editItem.open());
-    onClose();
+    if (payload?.uid) {
+      history.push(`/course/${course.uid}/${payload.uid}`);
+      dispatch(uiActions2.editItem.open());
+    }
   };
 
   const onUnlock = async () => {

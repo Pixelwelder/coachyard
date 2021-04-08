@@ -185,7 +185,7 @@ const _sendToStreamingService = createAsyncThunk(
  */
 const createItem = createAsyncThunk(
   'createItem',
-  async ({ courseUid, item, file }, { dispatch, getState }) => {
+  async ({ courseUid, item, file, onComplete, ui }, { dispatch, getState }) => {
     try {
       app.analytics().logEvent(EventTypes.CREATE_ITEM_ATTEMPTED);
       // Create the data object.
@@ -202,10 +202,16 @@ const createItem = createAsyncThunk(
 
         // Send to streaming service.
         await dispatch(_sendToStreamingService({ courseUid, itemUid: uid, downloadUrl }));
-        console.log('createItem: complete');
       }
       app.analytics().logEvent(EventTypes.CREATE_ITEM);
       // Reset UI.
+
+      // TODO This is so ugly.
+      if (ui?.delay) {
+        console.log('delay', ui.delay);
+        await new Promise(resolve => setTimeout(resolve, ui.delay));
+      }
+      console.log('createItem: complete');
 
       // return
       return { uid };
