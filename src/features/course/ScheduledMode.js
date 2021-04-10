@@ -31,12 +31,10 @@ const getDateTime = ({ course, item }) => {
 };
 
 const Student = () => {
-  const {
-    courseCreator, courseCreatorProvider, courseCreatorImageUrl, course, selectedItem
-  } = useSelector(selectedCourseSelectors.select);
+  const { courseCreatorProvider, course } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const dispatch = useDispatch();
-  const { services } = useSelector(scheduleSelectors.select);
   const [update, setUpdate] = useState(0);
 
   const { str } = getDateTime({ course, item: selectedItem });
@@ -94,7 +92,8 @@ const Teacher = () => {
   const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { course, selectedItem } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
+  const { course } = useSelector(selectedCourseSelectors.select);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const dispatch = useDispatch();
   const [update, setUpdate] = useState(0);

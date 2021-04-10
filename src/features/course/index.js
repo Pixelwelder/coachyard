@@ -25,26 +25,30 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 
 const Course = () => {
-  const { uid, itemUid } = useParams();
+  const { courseUid, itemUid } = useParams();
   const {
-    course, selectedItem, isRecording, sidebarMode, numOutstandingChats
+    course, sidebarMode, numOutstandingChats
   } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const { isSignedIn } = useSelector(userSelectors.select);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const isCreator = useSelector(selectedCourseSelectors.selectIsCreator);
   const history = useHistory();
   const dispatch = useDispatch();
 
+  console.log('course/index: selectedItem', selectedItem);
+
   useEffect(() => {
     const go = async () => {
-      await dispatch(selectedCourseActions.setUid({ uid, history }));
-      await dispatch(selectedCourseActions.setSelectedItemUid({ courseUid: uid, itemUid, history }));
+      await dispatch(selectedCourseActions.setLocation({ courseUid, itemUid, history }));
+      // await dispatch(selectedCourseActions.setUid({ uid, history }));
+      // await dispatch(selectedCourseActions.setSelectedItemUid({ courseUid: uid, itemUid, history }));
     }
 
     if (isSignedIn) {
       go();
     }
-  }, [uid, itemUid, isSignedIn]);
+  }, [courseUid, itemUid, isSignedIn]);
 
   const [anchorEl, setAnchorEl] = useState(null);
 

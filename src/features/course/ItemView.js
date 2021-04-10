@@ -23,7 +23,7 @@ const Locked = () => {
 };
 
 const ItemView = () => {
-  const { selectedItem } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const location = useLocation();
   const query = queryString.parse(location.search);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);

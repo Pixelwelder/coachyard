@@ -11,7 +11,8 @@ import ItemInfo from './ItemInfo';
 
 const LiveMode = ({ size }) => {
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const { course, selectedItem, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
+  const { course, isRecording, isFullscreen } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
   const adminTokens = useSelector(selectedCourseSelectors.selectAdminTokens);
   const dispatch = useDispatch();

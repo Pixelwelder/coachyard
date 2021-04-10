@@ -21,11 +21,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const hasAccessToChild = !!tokensByParentUid[item.courseUid];
   const hasAccessToPublic = !!tokensByCourseUid[item.courseUid];
   const hasAccess = hasAccessToChild || hasAccessToPublic;
-  console.log('by parent', tokensByParentUid);
-  console.log('by course', tokensByCourseUid);
-  console.log('access', accessibleTokensByCourseUid);
-  console.log('item', item);
-  console.log('---');
+
   const { displayName = '', user, price } = item;
   const [imageUrl, setImageUrl] = useState('');
 

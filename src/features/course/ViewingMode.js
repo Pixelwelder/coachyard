@@ -11,7 +11,8 @@ import Tabs from '@material-ui/core/Tabs';
 import ItemTitle from './ItemTitle';
 
 const ViewingMode = ({ size }) => {
-  const { selectedItem, course } = useSelector(selectedCourseSelectors.select);
+  const { course } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const { isOpen } = useSelector(uiSelectors2.editItem.select);
   const [tab, setTab] = useState(0);

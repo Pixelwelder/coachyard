@@ -40,6 +40,7 @@ const EventTypes = Object.freeze({
 
   SELECT_COURSE: 'selectCourse',
   SELECT_ITEM: 'selectItem',
+  SELECT_COURSE_AND_ITEM: 'selectCourseAndItem',
 });
 
 export { EventTypes };

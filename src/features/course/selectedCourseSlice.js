@@ -39,13 +39,11 @@ const initialState = {
   courseCreatorImageUrl: '',
   student: null,
   items: {},
-  selectedItem: null,
-  selectedItemUid: null,
 
   parentCourse: null,
   parentItems: {},
 
-  adminImageUrl: '',
+  selectedItemUid: null,
 
   chat: [],
   chatMessage: '',
@@ -61,226 +59,337 @@ const initialState = {
   currentToken: null
 };
 
+/**
+ * Parses a snapshot full of items into an object keyed by item uid.
+ *
+ * @param snapshot - a Firestore snapshot containing zero or more items, each with a uid property
+ * @returns the items in an object keyed by uid
+ */
+const parseItems = (snapshot) => {
+  if (!snapshot.size) return {};
+  return snapshot.docs
+    .map(item => parseUnserializables(item.data()))
+    .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
+};
+
 let unsubscribeToken = () => {};
 let unsubscribeCourse = () => {};
 let unsubscribeLocalItems = () => {};
 let unsubscribeParentCourse = () => {};
 let unsubscribeParentItems = () => {};
 let unsubscribeCreator = () => {};
-let unsubscribeCreatorSchedule = () => {};
+let unsubscribeCreatorProvider = () => {};
 let unsubscribeStudent = () => {};
 let unsubscribeStudentTokens = () => {};
 let unsubscribeChat = () => {};
+
+const setLocation = createAsyncThunk(
+  `${name}/setLocation`,
+  async ({ courseUid, itemUid, history }, { dispatch, getState }) => {
+    app.analytics().logEvent(EventTypes.SELECT_COURSE_AND_ITEM, { courseUid, itemUid });
+
+    // TODO TODO TODO If we're already there, don't waste time navigating.
+    console.log('setLocation', courseUid, itemUid);
+
+    unsubscribeCourse();
+    unsubscribeCreator();
+    unsubscribeCreatorProvider();
+    unsubscribeLocalItems();
+    unsubscribeParentCourse();
+    unsubscribeParentItems();
+    unsubscribeStudentTokens();
+    unsubscribeChat();
+
+    const abandon = () => {
+      history.push('/dashboard');
+    };
+
+    if (!courseUid) return abandon();
+
+    // First up: subscribe to the course.
+    unsubscribeCourse = app.firestore().collection('courses').doc(courseUid)
+      .onSnapshot(async (snapshot) => {
+        if (snapshot.exists) {
+          // This course exists.
+          const course = parseUnserializables(snapshot.data());
+          dispatch(generatedActions.setCourse(course));
+          dispatch(generatedActions.setSelectedItemUid(itemUid));
+
+          // Grab the creator.
+          unsubscribeCreator = app.firestore().collection('users').doc(course.creatorUid)
+            .onSnapshot((snapshot) => {
+              dispatch(generatedActions.setCourseCreator(parseUnserializables(snapshot.data())));
+            });
+
+          // Grab the creator's scheduling provider.
+          // TODO This doesn't have to happen now.
+          unsubscribeCreatorProvider = app.firestore().collection('providers').doc(course.creatorUid)
+            .onSnapshot((snapshot) => {
+              dispatch(generatedActions.setCourseCreatorProvider(parseUnserializables(snapshot.data())));
+            });
+
+          // Grab the items.
+          let localItems;
+          unsubscribeLocalItems = snapshot.ref.collection('items')
+            .onSnapshot((snapshot) => {
+              localItems = parseItems(snapshot);
+              dispatch(generatedActions.setItems(localItems));
+            });
+
+          // If it has a parent, grab the parent course
+          let parentItems = {};
+          if (course.parent) {
+            unsubscribeParentCourse = app.firestore().collection('courses').doc(course.parent)
+              .onSnapshot((snapshot) => {
+                const parent = parseUnserializables(snapshot.data());
+                dispatch(generatedActions.setParentCourse(parent));
+
+                // ...and _its_ items.
+                unsubscribeParentItems = snapshot.ref.collection('items')
+                  .onSnapshot((snapshot) => {
+                    parentItems = parseItems(snapshot);
+                    dispatch(generatedActions.setItems(parentItems));
+                  });
+              });
+          }
+
+          // Get all access tokens.
+          unsubscribeStudentTokens = app.firestore().collection('tokens')
+            .where('courseUid', '==', course.uid)
+            .onSnapshot((snapshot) => {
+              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              dispatch(generatedActions.setTokens(tokens));
+            });
+
+          // Get the chat.
+          unsubscribeChat = snapshot.ref.collection('chat')
+            .onSnapshot((snapshot) => {
+              const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              dispatch(generatedActions.setChat(messages));
+              // TODO Outstanding messages.
+            });
+
+        } else {
+          // This course does not exist, so we abandon ship.
+          unsubscribeCourse();
+          // return abandon();
+        }
+      })
+  }
+);
+
 /**
  * Sets the selected course.
  * This loads the course and its items.
  * @param id - the id of the course to load.
  */
-const setUid = createAsyncThunk(
-  `${name}/setUid`,
-  async ({ uid, history }, { dispatch, getState }) => {
-    app.analytics().logEvent(EventTypes.SELECT_COURSE, { uid });
-    const { course } = selectors.select(getState());
-    if (course?.uid === uid) {
-      return;
-    }
+// const setUid = createAsyncThunk(
+//   `${name}/setUid`,
+//   async ({ uid, history }, { dispatch, getState }) => {
+//     app.analytics().logEvent(EventTypes.SELECT_COURSE, { uid });
+//     const { course } = selectors.select(getState());
+//     // if (course?.uid === uid) {
+//     //   return;
+//     // }
+//
+//     dispatch(generatedActions._setSelectedItemUid(null));
+//     dispatch(generatedActions._setSelectedItem(null));
+//
+//     const abandon = () => {
+//       // history.push('/dashboard');
+//     };
+//
+//     // We check for a token when the UID is set, but we don't subscribe.
+//     // TODO Ensure we only have one.
+//     // const tokenDocs = await app.firestore()
+//     //   .collection('tokens')
+//     //   .where('user', '==', app.auth().currentUser.uid)
+//     //   .where('courseUid', '==', uid)
+//     //   .get();
+//     //
+//     // if (!tokenDocs.size) return abandon();
+//
+//     // If there's a token, grab the course and items it refers to.
+//     unsubscribeCourse();
+//     unsubscribeCourse = app.firestore()
+//       .collection('courses')
+//       .doc(uid)
+//       .onSnapshot(async (snapshot) => {
+//         // dispatch(generatedActions.reset());
+//         if (!snapshot.exists) {
+//           // If there's no course, just return.
+//           history.push('/dashboard');
+//           return;
+//         }
+//         const courseDoc = snapshot;
+//         const course = parseUnserializables(courseDoc.data());
+//         dispatch(generatedActions.setCourse(course));
+//
+//         // Get the creator.
+//         unsubscribeCreator();
+//         unsubscribeCreator = app.firestore()
+//           .collection('users')
+//           .doc(course.creatorUid)
+//           .onSnapshot(async (snapshot) => {
+//             const creator = parseUnserializables(snapshot.data());
+//             dispatch(generatedActions.setCourseCreator(creator));
+//
+//             const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
+//             dispatch(generatedActions.setCourseCreatorImageUrl(url));
+//           });
+//
+//         unsubscribeCreatorProvider();
+//         unsubscribeCreatorProvider = app.firestore()
+//           .collection('easy_providers')
+//           .doc(course.creatorUid)
+//           .onSnapshot(async (snapshot) => {
+//             if (snapshot.exists) {
+//               const creatorProvider = parseUnserializables(snapshot.data());
+//               dispatch(generatedActions.setCourseCreatorProvider(creatorProvider));
+//             }
+//           });
+//
+//         // Get all tokens.
+//         unsubscribeStudentTokens();
+//         unsubscribeStudentTokens = app.firestore().collection('tokens')
+//           .where('courseUid', '==', course.uid)
+//           .onSnapshot(async (snapshot) => {
+//             if (snapshot.size) {
+//               const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+//               dispatch(generatedActions.setTokens(tokens));
+//
+//               // Now images
+//               // TODO This should be universal. REMOVE. cacheSlice exists now.
+//               const { imageUrls } = select(getState());
+//               const uids = tokens.map(({ user }) => user).filter(uid => !imageUrls[uid]);
+//               const promises = uids.map(async (uid) => {
+//                 try {
+//                   const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
+//                   return { uid, url };
+//                 } catch (error) {
+//                   return { uid, url: '' };
+//                 }
+//               });
+//               const result = await Promise.all(promises);
+//               const urls = result.reduce((accum, { uid, url }) => ({
+//                 ...accum,
+//                 [uid]: url
+//               }), {});
+//               dispatch(generatedActions.addImageUrls(urls));
+//             }
+//           });
+//
+//         // Get chat, then subscribe for more.
+//         // const chatRef = courseDoc.ref.collection('chat');
+//         // const existingChat = await chatRef.get();
+//         // const chatMessages = existingChat.docs.map(doc => parseUnserializables(doc.data()));
+//         // dispatch(generatedActions.setChat(chatMessages));
+//
+//         unsubscribeChat();
+//         unsubscribeChat = courseDoc.ref.collection('chat')
+//           .orderBy('created')
+//           // .limit(1)
+//           .onSnapshot((snapshot) => {
+//             const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+//
+//             const { numOutstandingChats, sidebarMode, chat } = select(getState());
+//             if (sidebarMode === SIDEBAR_MODES.TOC) {
+//               const diff = messages.length - chat.length;
+//               dispatch(generatedActions.setNumOutstandingChats(numOutstandingChats + diff));
+//             }
+//             dispatch(generatedActions.setChat(messages));
+//           });
+//
+//         console.log('subscribing local items');
+//         unsubscribeLocalItems();
+//         unsubscribeLocalItems = courseDoc.ref.collection('items')
+//           // .orderBy('created')
+//           .onSnapshot((snapshot) => {
+//             console.log('items', snapshot.size);
+//             const items = snapshot.docs
+//               .map(item => parseUnserializables(item.data()))
+//               .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
+//             dispatch(generatedActions.setItems(items));
+//           });
+//
+//         // We also listen to the parent course, if it exists.
+//         if (course.parent) {
+//           unsubscribeParentCourse();
+//           unsubscribeParentCourse = app.firestore().collection('courses').doc(course.parent)
+//             .onSnapshot((snapshot) => {
+//               if (snapshot.exists) {
+//                 const parent = parseUnserializables(snapshot.data());
+//                 dispatch(generatedActions.setParentCourse(parent));
+//
+//                 unsubscribeParentItems();
+//                 unsubscribeParentItems = snapshot.ref.collection('items')
+//                   .onSnapshot((snapshot) => {
+//                     if (snapshot.size) {
+//                       const parentItems = snapshot.docs
+//                         .map(doc => parseUnserializables(doc.data()))
+//                         .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
+//
+//                       dispatch(generatedActions.setParentItems(parentItems));
+//                     }
+//                   })
+//               }
+//             })
+//         }
+//       });
+//
+//
+//   }
+// );
 
-    dispatch(generatedActions._setSelectedItemUid(null));
-    dispatch(generatedActions._setSelectedItem(null));
-
-    const abandon = () => {
-      // history.push('/dashboard');
-    };
-
-    // We check for a token when the UID is set, but we don't subscribe.
-    // TODO Ensure we only have one.
-    // const tokenDocs = await app.firestore()
-    //   .collection('tokens')
-    //   .where('user', '==', app.auth().currentUser.uid)
-    //   .where('courseUid', '==', uid)
-    //   .get();
-    //
-    // if (!tokenDocs.size) return abandon();
-
-    // If there's a token, grab the course and items it refers to.
-    unsubscribeCourse();
-    unsubscribeCourse = app.firestore()
-      .collection('courses')
-      .doc(uid)
-      .onSnapshot(async (snapshot) => {
-        // dispatch(generatedActions.reset());
-        if (!snapshot.exists) {
-          // If there's no course, just return.
-          history.push('/dashboard');
-          return;
-        }
-        const courseDoc = snapshot;
-        const course = parseUnserializables(courseDoc.data());
-        dispatch(generatedActions.setCourse(course));
-
-        // Get the creator.
-        unsubscribeCreator();
-        unsubscribeCreator = app.firestore()
-          .collection('users')
-          .doc(course.creatorUid)
-          .onSnapshot(async (snapshot) => {
-            const creator = parseUnserializables(snapshot.data());
-            dispatch(generatedActions.setCourseCreator(creator));
-
-            const url = await app.storage().ref(`/avatars/${course.creatorUid}.png`).getDownloadURL();
-            dispatch(generatedActions.setCourseCreatorImageUrl(url));
-          });
-
-        unsubscribeCreatorSchedule();
-        unsubscribeCreatorSchedule = app.firestore()
-          .collection('easy_providers')
-          .doc(course.creatorUid)
-          .onSnapshot(async (snapshot) => {
-            if (snapshot.exists) {
-              const creatorProvider = parseUnserializables(snapshot.data());
-              dispatch(generatedActions.setCourseCreatorProvider(creatorProvider));
-            }
-          });
-
-        // Get all tokens.
-        unsubscribeStudentTokens();
-        unsubscribeStudentTokens = app.firestore().collection('tokens')
-          .where('courseUid', '==', course.uid)
-          .onSnapshot(async (snapshot) => {
-            if (snapshot.size) {
-              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setTokens(tokens));
-
-              // Now images
-              // TODO This should be universal. REMOVE. cacheSlice exists now.
-              const { imageUrls } = select(getState());
-              const uids = tokens.map(({ user }) => user).filter(uid => !imageUrls[uid]);
-              const promises = uids.map(async (uid) => {
-                try {
-                  const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
-                  return { uid, url };
-                } catch (error) {
-                  return { uid, url: '' };
-                }
-              });
-              const result = await Promise.all(promises);
-              const urls = result.reduce((accum, { uid, url }) => ({
-                ...accum,
-                [uid]: url
-              }), {});
-              dispatch(generatedActions.addImageUrls(urls));
-            }
-          });
-
-        // Get chat, then subscribe for more.
-        // const chatRef = courseDoc.ref.collection('chat');
-        // const existingChat = await chatRef.get();
-        // const chatMessages = existingChat.docs.map(doc => parseUnserializables(doc.data()));
-        // dispatch(generatedActions.setChat(chatMessages));
-
-        unsubscribeChat();
-        unsubscribeChat = courseDoc.ref.collection('chat')
-          .orderBy('created')
-          // .limit(1)
-          .onSnapshot((snapshot) => {
-            const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-
-            const { numOutstandingChats, sidebarMode, chat } = select(getState());
-            if (sidebarMode === SIDEBAR_MODES.TOC) {
-              const diff = messages.length - chat.length;
-              dispatch(generatedActions.setNumOutstandingChats(numOutstandingChats + diff));
-            }
-            dispatch(generatedActions.setChat(messages));
-          });
-
-        console.log('subscribing local items');
-        unsubscribeLocalItems();
-        unsubscribeLocalItems = courseDoc.ref.collection('items')
-          // .orderBy('created')
-          .onSnapshot((snapshot) => {
-            console.log('items', snapshot.size);
-            const items = snapshot.docs
-              .map(item => parseUnserializables(item.data()))
-              .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
-            dispatch(generatedActions.setItems(items));
-          });
-
-        // We also listen to the parent course, if it exists.
-        if (course.parent) {
-          unsubscribeParentCourse();
-          unsubscribeParentCourse = app.firestore().collection('courses').doc(course.parent)
-            .onSnapshot((snapshot) => {
-              if (snapshot.exists) {
-                const parent = parseUnserializables(snapshot.data());
-                dispatch(generatedActions.setParentCourse(parent));
-
-                unsubscribeParentItems();
-                unsubscribeParentItems = snapshot.ref.collection('items')
-                  .onSnapshot((snapshot) => {
-                    if (snapshot.size) {
-                      const parentItems = snapshot.docs
-                        .map(doc => parseUnserializables(doc.data()))
-                        .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
-
-                      dispatch(generatedActions.setParentItems(parentItems));
-                    }
-                  })
-              }
-            })
-        }
-      });
-
-
-  }
-);
-
-let unsubscribeItem = () => {};
-const setSelectedItemUid = createAsyncThunk(
-  `${name}/setSelectedItemUid`,
-  async ({ courseUid, itemUid, history } = {}, { dispatch, getState }) => {
-    console.log('setSelectedItemUid', courseUid, itemUid);
-    const { selectedItem, items, parentItems, parentCourse } = selectors.select(getState());
-    // if (selectedItem && selectedItem.uid === itemUid) {
-    //   return;
-    // }
-
-    app.analytics().logEvent(EventTypes.SELECT_ITEM, { courseUid, itemUid });
-    unsubscribeItem();
-
-    if (itemUid) {
-      // courseUid is from the original course, while itemUid is a child of the new course.
-      let parentCourseUid;
-      if (items[itemUid]) {
-        parentCourseUid = courseUid;
-        console.log('LOCAL');
-      } else if (parentItems[itemUid]) {
-        parentCourseUid = parentCourse.uid;
-        console.log('PARENT');
-      } else {
-        console.log(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
-        // throw new Error(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
-      }
-
-      // If the item has a parent, we can map.
-      unsubscribeItem = app.firestore()
-        .collection('courses').doc(parentCourseUid)
-        .collection('items').doc(itemUid)
-        .onSnapshot((snapshot) => {
-          if (snapshot.exists) {
-            const data = parseUnserializables(snapshot.data());
-            dispatch(generatedActions._setSelectedItemUid(data.uid));
-            dispatch(generatedActions._setSelectedItem(data));
-          } else {
-            dispatch(generatedActions._setSelectedItemUid(null));
-            dispatch(generatedActions._setSelectedItem(null));
-          }
-        });
-    } else {
-      dispatch(generatedActions._setSelectedItemUid(null));
-      dispatch(generatedActions._setSelectedItem(null));
-    }
-  }
-);
+// let unsubscribeItem = () => {};
+// const setSelectedItemUid = createAsyncThunk(
+//   `${name}/setSelectedItemUid`,
+//   async ({ courseUid, itemUid, history } = {}, { dispatch, getState }) => {
+//     console.log('setSelectedItemUid', courseUid, itemUid);
+//     const { selectedItem, items, parentItems, parentCourse } = selectors.select(getState());
+//     // if (selectedItem && selectedItem.uid === itemUid) {
+//     //   return;
+//     // }
+//
+//     console.log('setSelectedItemUid', courseUid, itemUid);
+//
+//     app.analytics().logEvent(EventTypes.SELECT_ITEM, { courseUid, itemUid });
+//     unsubscribeItem();
+//
+//     if (itemUid) {
+//       // courseUid is from the original course, while itemUid is a child of the new course.
+//       let parentCourseUid;
+//       if (items[itemUid]) {
+//         parentCourseUid = courseUid;
+//         console.log('LOCAL');
+//       } else if (parentItems[itemUid]) {
+//         parentCourseUid = parentCourse.uid;
+//         console.log('PARENT');
+//       } else {
+//         console.log(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
+//         // throw new Error(`Item ${courseUid} | ${itemUid} is not a member of this course or the parent`);
+//       }
+//
+//       // If the item has a parent, we can map.
+//       unsubscribeItem = app.firestore()
+//         .collection('courses').doc(parentCourseUid)
+//         .collection('items').doc(itemUid)
+//         .onSnapshot((snapshot) => {
+//           if (snapshot.exists) {
+//             const data = parseUnserializables(snapshot.data());
+//             dispatch(generatedActions._setSelectedItemUid(data.uid));
+//             dispatch(generatedActions._setSelectedItem(data));
+//           } else {
+//             dispatch(generatedActions._setSelectedItemUid(null));
+//             dispatch(generatedActions._setSelectedItem(null));
+//           }
+//         });
+//     } else {
+//       dispatch(generatedActions._setSelectedItemUid(null));
+//       dispatch(generatedActions._setSelectedItem(null));
+//     }
+//   }
+// );
 
 const update = createAsyncThunk(
   `${name}/update`,
@@ -413,8 +522,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
     setStudent: setValue('student'),
     setItems: setValue('items'),
-    _setSelectedItemUid: setValue('selectedItemUid'),
-    _setSelectedItem: setValue('selectedItem'),
+    setSelectedItemUid: setValue('selectedItemUid'),
     setIsRecording: setValue('isRecording'),
     setIsFullscreen: setValue('isFullscreen'),
     setSidebarMode: (state, action) => {
@@ -455,7 +563,7 @@ const { actions: generatedActions, reducer } = createSlice({
 
 const actions = {
   ...generatedActions, init, update,
-  setUid, setSelectedItemUid,
+  setLocation,
   submitChatMessage, searchForEmail,
   addUser, removeUser,
   purchaseCourse
@@ -514,10 +622,18 @@ const selectAllItems = createSelector(
   ])
 );
 
+const selectSelectedItem = createSelector(
+  select,
+  ({ items, parentItems, selectedItemUid }) => {
+    console.log('select', items, selectedItemUid);
+    return items[selectedItemUid] || parentItems[selectedItemUid];
+  }
+);
+
 const selectors = {
   select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
   selectIsCreator,
-  selectItems, selectParentItems, selectAllItems
+  selectItems, selectParentItems, selectAllItems, selectSelectedItem
 };
 
 export { actions, selectors };

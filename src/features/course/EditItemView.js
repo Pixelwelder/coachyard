@@ -22,7 +22,8 @@ const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
   const { editItem: actions } = uiActions2;
 
-  const { course, selectedItem } = useSelector(selectedCourseSelectors.select);
+  const { course } = useSelector(selectedCourseSelectors.select);
+  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
   const editItem = useSelector(selectors.select);
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);

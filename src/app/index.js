@@ -54,7 +54,7 @@ const App = () => {
         <Switch>
           <Route path="/dashboard" component={Dashboard} />
           {/*<Route path="/course/:uid" component={Course} />*/}
-          <Route path="/course/:uid/:itemUid?" component={Course} />
+          <Route path="/course/:courseUid/:itemUid?" component={Course} />
           <Route path="/barebones" component={Barebones} />
           <Route path="/billing" component={Billing} />
           <Route path="/coach/:slug" component={Coach} />

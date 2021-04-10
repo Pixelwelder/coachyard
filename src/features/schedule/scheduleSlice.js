@@ -202,7 +202,8 @@ const openScheduler = createAsyncThunk(
     console.log('openScheduler');
     try {
       const state = getState();
-      const { course, selectedItem } = selectedCourseSelectors.select(state);
+      const { course } = selectedCourseSelectors.select(state);
+      const selectedItem = selectedCourseSelectors.selectSelectedItem(state);
       const { creatorUid } = course;
       const providerDoc = await app.firestore().collection('easy_providers').doc(creatorUid).get();
       const { id } = providerDoc.data();
