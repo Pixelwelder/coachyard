@@ -529,7 +529,7 @@ const onCourseUpdated = functions.firestore
     // Update all tokens if necessary.
     const before = change.before.data();
     const after = change.after.data();
-    const updateRequired = ['displayName', 'description'].find(key => before[key] !== after[key]);
+    const updateRequired = ['displayName', 'description', 'price'].find(key => before[key] !== after[key]);
     if (!updateRequired) {
       console.log('No update required.');
       return;
@@ -537,7 +537,7 @@ const onCourseUpdated = functions.firestore
 
     await admin.firestore().runTransaction((async (transaction) => {
       try {
-        const { displayName, description, uid } = change.after.data();
+        const { displayName, description, price, uid } = change.after.data();
         const tokensRef = admin.firestore()
           .collection('tokens')
           .where('courseUid', '==', uid)
@@ -547,7 +547,8 @@ const onCourseUpdated = functions.firestore
         const promises = tokens.docs.map((doc) => {
           return transaction.update(doc.ref, {
             displayName,
-            description
+            description,
+            price
           })
         });
 
@@ -643,10 +644,5 @@ module.exports = {
   // getAllCourses: functions.https.onCall(getAllCourses),
   // getCreatedCourses: functions.https.onCall(getCreatedCourses),
   onCourseUpdated,
-  onCourseDeleted,
-  onOther: functions.firestore
-    .document('/courses/{courseUid}/items/{itemUid}')
-    .onUpdate(async () => {
-      console.log('update')
-    })
+  onCourseDeleted
 };
