@@ -35,13 +35,13 @@ const Item = ({ item, isSelected, onSelect }) => {
         onClick={onSelect}
         className="item-title"
       >
-        <Typography className="item-name">
-          <>
+        <div className="item-name">
+          <Typography>
             {item.displayName}
             {!hasAccess && <LockIcon className="item-name-icon" color="disabled" />}
-            <Chip className="item-name-type" label={item.type} color="primary" size="small" />
-          </>
-        </Typography>
+          </Typography>
+          <Chip className="item-name-type" label={item.type} color="primary" size="small" />
+        </div>
         {item.status === 'scheduled' && (
           <Typography>
             {formattedTime.indexOf('Invalid') === -1
