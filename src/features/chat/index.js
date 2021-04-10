@@ -25,8 +25,10 @@ const ChatMessage = ({ message }) => {
   const messageClass = sender === authUser.uid ? 'sent' : 'received';
 
   useEffect(() => {
-    dispatch(assetsActions.getAsset({ path }));
-  }, []);
+    if (!imageUrl) {
+      dispatch(assetsActions.getAsset({ path }));
+    }
+  }, [imageUrl, path]);
 
   return (
     <li className={`chat-message ${messageClass}`}>
@@ -53,6 +55,7 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
   };
 
   useEffect(() => {
+    console.log('SCROLL');
     if (dummy.current) {
       dummy.current.scrollIntoView({ behavior: 'smooth' });
     }

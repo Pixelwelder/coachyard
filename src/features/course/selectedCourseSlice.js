@@ -256,6 +256,7 @@ const setLocation = createAsyncThunk(
 
     // Get the chat.
     unsubscribeChat = courseRef.collection('chat')
+      .orderBy('created')
       .onSnapshot((snapshot) => {
         const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setChat(messages));

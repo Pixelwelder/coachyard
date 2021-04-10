@@ -76,6 +76,7 @@ const createItem = async (data, context) => {
     return { message: `Added new course item to course ${courseUid}.`, item };
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
   }
 };
 

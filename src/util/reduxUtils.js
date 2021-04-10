@@ -22,6 +22,7 @@ export const isRejectedAction = action => action.type.endsWith('/rejected');
 export const isFulfilledAction = action => action.type.endsWith('/fulfilled');
 export const isThisAction = name => action => action.type.startsWith(name);
 export const isAuthAction = action => action.type === 'auth/stateChanged';
+export const createIgnoreAction = string => action => action.type.indexOf(string) !== -1;
 
 export const isThisPendingAction = name => action => isThisAction(name)(action) && isPendingAction(action);
 export const isThisRejectedAction = name => action => isThisAction(name)(action) && isRejectedAction(action);

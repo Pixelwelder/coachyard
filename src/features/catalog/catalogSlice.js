@@ -123,8 +123,8 @@ const _addItemToCourse = createAsyncThunk(
   '_addItemToCourse',
   async ({ item, courseUid }, { getState }) => {
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.CREATE_ITEM);
-    const { data } = await callable({ courseUid, item });
-    return data.item;
+    const result = await callable({ courseUid, item });
+    return result.data.item;
   }
 );
 
@@ -189,7 +189,10 @@ const createItem = createAsyncThunk(
     try {
       app.analytics().logEvent(EventTypes.CREATE_ITEM_ATTEMPTED);
       // Create the data object.
-      const { payload } = await dispatch(_addItemToCourse({ courseUid, item }));
+      console.log('before');
+      const { error, payload } = await dispatch(_addItemToCourse({ courseUid, item }));
+      if (error) throw new Error(error.message);
+
       const { uid } = payload;
 
       // Upload the file if applicable.
@@ -201,7 +204,8 @@ const createItem = createAsyncThunk(
         if (error) throw new Error(error.message);
 
         // Send to streaming service.
-        await dispatch(_sendToStreamingService({ courseUid, itemUid: uid, downloadUrl }));
+        const streamingResult = await dispatch(_sendToStreamingService({ courseUid, itemUid: uid, downloadUrl }));
+        if (streamingResult.error) throw new error(streamingResult.error.message);
       }
       app.analytics().logEvent(EventTypes.CREATE_ITEM);
       // Reset UI.
@@ -228,10 +232,12 @@ const updateItem = createAsyncThunk(
   async ({ courseUid, itemUid, update, file }, { dispatch }) => {
     // Upload new file.
     if (file) {
-      const { payload: downloadUrl } = await dispatch(_uploadItem({ uid: itemUid, file }));
+      const { payload: downloadUrl, error } = await dispatch(_uploadItem({ uid: itemUid, file }));
+      if (error) throw new Error(error.message);
 
       // Send to streaming service.
-      await dispatch(_sendToStreamingService({ courseUid, itemUid, downloadUrl }));
+      const streamingResult = await dispatch(_sendToStreamingService({ courseUid, itemUid, downloadUrl }));
+      if (streamingResult.error) throw new Error(streamingResult.error);
       console.log('updateItem: complete');
     }
 
