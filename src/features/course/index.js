@@ -36,8 +36,6 @@ const Course = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  console.log('course/index: selectedItem', selectedItem);
-
   useEffect(() => {
     const go = async () => {
       await dispatch(selectedCourseActions.setLocation({ courseUid, itemUid, history }));

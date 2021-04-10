@@ -49,6 +49,8 @@ const initialState = {
   chatMessage: '',
   numOutstandingChats: 0,
 
+  courseIsLoaded: false,
+
   imageUrls: {},
 
   sidebarMode: SIDEBAR_MODES.TOC,
@@ -92,106 +94,193 @@ const unsubscribe = () => {
   unsubscribeChat();
 };
 
+const _loadCourse = createAsyncThunk(
+  `${name}/_loadCourse`,
+  async () => {}
+);
+
+const _loadCourseDependents = createAsyncThunk(
+  `${name}/_loadCourseDependents`,
+  async () => {}
+);
+
 const setLocation = createAsyncThunk(
   `${name}/setLocation`,
   async ({ courseUid, itemUid, history }, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.SELECT_COURSE_AND_ITEM, { courseUid, itemUid });
 
-    // TODO TODO TODO If we're already there, don't waste time navigating.
-    console.log('setLocation', courseUid, itemUid);
-
-    const abandon = () => {
+    const reset = () => {
+      console.log('resetting');
+      dispatch(generatedActions.reset());
       unsubscribe();
+    };
+
+    const abandon = (message) => {
+      if (message) console.error(message);
+      reset();
       history.push('/dashboard');
     };
 
-    if (!courseUid) return abandon();
+    console.log('setLocation', courseUid, itemUid);
+    if (!courseUid) abandon('No courseUid.');
 
-    // Clear all subscriptions.
-    unsubscribe();
+    const state = select(getState());
 
-    // First up: subscribe to the course.
+    // Do we have a course loaded?
+    const { course: currentCourse } = state;
+    if (currentCourse) {
+      // We have a course. Is it the same one?
+      if (currentCourse.uid === courseUid) {
+        // Do not load; just set the selected item.
+        console.log('Same course. Not loading ANYTHING.');
+
+        if (itemUid) {
+          console.log('setting itemUid:', itemUid);
+          // That means the item should exist.
+          const { items, parentItems } = state;
+          if (items[itemUid] || parentItems[itemUid]) {
+            // This is valid. Go ahead and set it.
+            console.log('END | itemUid is valid: setting');
+            return dispatch(generatedActions.setSelectedItemUid(itemUid));
+          } else {
+            // This is invalid. Call setLocation again, but with a null itemUid.
+            console.log('itemUid is invalid - navigating to bare course');
+            return history.push(`/course/${courseUid}`);
+          }
+        } else {
+          console.log('No itemUid. Stop here.')
+          return dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
+        }
+      } else {
+        // Load the course.
+        console.log('Different course loaded.');
+        // Clear all subscriptions.
+        // Proceed.
+      }
+    } else {
+      console.log('No course loaded. Proceeding.');
+    }
+
+    // Proceed.
+    console.log('Nuking everything and loading course.');
+    reset();
+
+    // If we've made it this far, we are definitely loading a course OR returning to dashboard.
+    // Load the course or die.
+    const courseRef = app.firestore().collection('courses').doc(courseUid);
+    const courseDoc = await courseRef.get();
+    if (!courseDoc.exists) {
+      return abandon(`Course ${courseUid} doesn't exist.`);
+    }
+
+    // The course exists, but does this user have access to it?
+    const course = parseUnserializables(courseDoc.data());
+    if (course.type !== 'template') {
+      // If it's not a template, only logged-in users could possibly have access.
+      if (!app.auth().currentUser) {
+        return abandon('User is not logged in, and this is not a template course.');
+      }
+
+      // User is logged in. Do they have access?
+      const tokenDoc = await app.firestore().collection('tokens')
+        .where('courseUid', '==', courseUid)
+        .where('user', '==', app.auth().currentUser.uid)
+        .get();
+
+      if (!tokenDoc.size) {
+        return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
+      }
+    }
+
+    console.log('User has access to the course.');
+
+    // Go ahead and set the course, even though we'll be listening to it later.
+    dispatch(generatedActions.setCourse(course));
+
+    // We can also set the itemUid, though a later load failure will still abandon us to the dashboard.
+    dispatch(generatedActions.setSelectedItemUid(itemUid));
+
+    // Now grab all items. TODO This could be more elegant.
+    // This will run twice: once after each item collection load.
+    let localItems;
+    let parentItems;
+    const checkItemUid = (uid) => {
+      if (!itemUid) return; // Don't care if we didn't get an itemUid at all.
+      if (!localItems || !parentItems) return;
+      if (!localItems[uid] && !parentItems[uid]) abandon(`Invalid itemUid ${uid}.`);
+    };
+
+    // Grab the items.
+    unsubscribeLocalItems = courseRef.collection('items')
+      .onSnapshot((snapshot) => {
+        console.log(`setting ${snapshot.size} items`);
+        localItems = parseItems(snapshot);
+        checkItemUid(itemUid);
+        dispatch(generatedActions.setItems(localItems));
+      });
+
+    // Grab the parent.
+    if (course.parent) {
+      const parentRef = app.firestore().collection('courses').doc(course.parent);
+      unsubscribeParentCourse = parentRef.onSnapshot((snapshot) => {
+        if (snapshot.exists) {
+          console.log('setting parent course');
+          const parent = parseUnserializables(snapshot.data());
+          dispatch(generatedActions.setParentCourse(parent));
+        } else {
+          return abandon(`Course ${courseUid}'s parent ${course.parent} does not exist.`);
+        }
+      });
+
+      // ...and _its_ items.
+      unsubscribeParentItems = parentRef.collection('items').onSnapshot((snapshot) => {
+        console.log(`setting ${snapshot.size} parent items`);
+        parentItems = parseItems(snapshot);
+        checkItemUid(itemUid);
+        dispatch(generatedActions.setParentItems(parentItems));
+      });
+    }
+
+    // Grab the creator.
+    unsubscribeCreator = app.firestore().collection('users').doc(course.creatorUid)
+      .onSnapshot((snapshot) => {
+        dispatch(generatedActions.setCourseCreator(parseUnserializables(snapshot.data())));
+      });
+
+    // Grab the creator's scheduling provider.
+    // TODO This doesn't have to happen now.
+    unsubscribeCreatorProvider = app.firestore().collection('providers').doc(course.creatorUid)
+      .onSnapshot((snapshot) => {
+        dispatch(generatedActions.setCourseCreatorProvider(parseUnserializables(snapshot.data())));
+      });
+
+    // Get the chat.
+    unsubscribeChat = courseRef.collection('chat')
+      .onSnapshot((snapshot) => {
+        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        dispatch(generatedActions.setChat(messages));
+        // TODO Outstanding messages.
+      });
+
+    // Get all access tokens.
+    // TODO Is this necessary?
+    unsubscribeStudentTokens = app.firestore().collection('tokens')
+      .where('courseUid', '==', course.uid)
+      .where('user', '==', app.auth().currentUser.uid)
+      .onSnapshot((snapshot) => {
+        const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        dispatch(generatedActions.setTokens(tokens));
+      });
+
+    // And finally, listen to future changes.
     unsubscribeCourse = app.firestore().collection('courses').doc(courseUid)
       .onSnapshot(async (snapshot) => {
         if (snapshot.exists) {
           // This course exists.
           const course = parseUnserializables(snapshot.data());
           dispatch(generatedActions.setCourse(course));
-          dispatch(generatedActions.setSelectedItemUid(itemUid));
-
-          // Before subscribing, let's see if we actually have access to this course.
-          if (course.type !== 'template') {
-            const tokenDoc = await app.firestore().collection('tokens')
-              .where('courseUid', '==', course.uid)
-              .where('user', '==', app.auth().currentUser.uid)
-              .get();
-
-            if (!tokenDoc.size) {
-              console.error(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
-              return abandon();
-            }
-          }
-
-          // Grab the creator.
-          unsubscribeCreator = app.firestore().collection('users').doc(course.creatorUid)
-            .onSnapshot((snapshot) => {
-              dispatch(generatedActions.setCourseCreator(parseUnserializables(snapshot.data())));
-            });
-
-          // Grab the creator's scheduling provider.
-          // TODO This doesn't have to happen now.
-          unsubscribeCreatorProvider = app.firestore().collection('providers').doc(course.creatorUid)
-            .onSnapshot((snapshot) => {
-              dispatch(generatedActions.setCourseCreatorProvider(parseUnserializables(snapshot.data())));
-            });
-
-          // Grab the items.
-          let localItems;
-          unsubscribeLocalItems = snapshot.ref.collection('items')
-            .onSnapshot((snapshot) => {
-              localItems = parseItems(snapshot);
-              dispatch(generatedActions.setItems(localItems));
-            });
-
-          // If it has a parent, grab the parent course
-          let parentItems = {};
-          if (course.parent) {
-            unsubscribeParentCourse = app.firestore().collection('courses').doc(course.parent)
-              .onSnapshot((snapshot) => {
-                const parent = parseUnserializables(snapshot.data());
-                dispatch(generatedActions.setParentCourse(parent));
-
-                // ...and _its_ items.
-                unsubscribeParentItems = snapshot.ref.collection('items')
-                  .onSnapshot((snapshot) => {
-                    parentItems = parseItems(snapshot);
-                    dispatch(generatedActions.setParentItems(parentItems));
-                  });
-              });
-          }
-
-          // Get the chat.
-          unsubscribeChat = snapshot.ref.collection('chat')
-            .onSnapshot((snapshot) => {
-              const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setChat(messages));
-              // TODO Outstanding messages.
-            });
-
-          // Get all access tokens.
-          // TODO Is this necessary?
-          unsubscribeStudentTokens = app.firestore().collection('tokens')
-            .where('courseUid', '==', course.uid)
-            .where('user', '==', app.auth().currentUser.uid)
-            .onSnapshot((snapshot) => {
-              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setTokens(tokens));
-            });
-
         } else {
-          // This course does not exist, so we abandon ship.
-          unsubscribeCourse();
-          // return abandon();
+          return abandon(`Course ${courseUid} no longer exists.`);
         }
       })
   }
@@ -414,9 +503,9 @@ const selectParentItems = createSelector(select, ({ parentCourse, parentItems, i
 // This only gets local items.
 const selectItems = createSelector(select, ({ items, parentItems, course }) => {
   if (!course) return [];
-  const { localItemOrder } = course;
+  const { itemOrder, localItemOrder } = course;
 
-  return localItemOrder
+  return [...itemOrder, ...localItemOrder]
     .map((uid) => items[uid])
     .filter(item => !!item)
     // .sort((a, b) => {});
@@ -427,9 +516,6 @@ const selectAllItems = createSelector(
   selectParentItems,
   selectItems,
   (parentItems, items) => {
-    console.log('---')
-    console.log('parentItems', parentItems);
-    console.log('items', items);
     return [
       ...parentItems, ...items
     ];
@@ -446,7 +532,6 @@ const selectCourseItems = createSelector(
 const selectSelectedItem = createSelector(
   select,
   ({ items, parentItems, selectedItemUid }) => {
-    console.log('select', items, selectedItemUid);
     return items[selectedItemUid] || parentItems[selectedItemUid];
   }
 );
