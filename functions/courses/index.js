@@ -280,7 +280,7 @@ const _unlockCourse = async (data, context) => {
   });
 };
 
-const createGetData = transaction => async (collection, uid) => {
+const createGetItem = transaction => async (collection, uid) => {
   const ref = admin.firestore().collection(collection).doc(uid);
   const doc = await transaction.get(ref);
   if (!doc.exists) throw new Error(`No ${uid} in ${collection}.`);
@@ -299,6 +299,7 @@ const cloneCourseData = (original) => {
     created: timestamp,
     updated: timestamp,
     type: 'basic',
+    itemOrder: [], // The clone will look to its parent for these.
 
     // TODO TEMP
     displayName: `${original.displayName} Copy`
@@ -309,18 +310,18 @@ const cloneCourseData = (original) => {
 
 const _cloneCourse2 = async (data, context) => {
   const { courseUid, studentUid } = data;
-  const c = admin.firestore().collection;
   const course = await admin.firestore().runTransaction(async (transaction) => {
     // Bail early if student already owns a descendant of this course.
     const token = await admin.firestore().collection('tokens')
       .where('parent', '==', courseUid).get();
     if (token.exists) throw new Error(`${studentUid} already owns a descendant of ${courseUid}.`);
 
-    // Grab the course, the student, and the teacher.
-    const getData = createGetData(transaction);
+    // Grab the course, the student, the teacher, and the course items.
+    const getData = createGetItem(transaction);
     const original = await getData('courses', courseUid);
     const student = await getData('users', studentUid);
     const teacher = await getData('users', original.data.creatorUid);
+    const originalItemDocs = await transaction.get(original.ref.collection('items').where('type', '==', 'template'));
 
     // Create the new course.
     const newCourse = cloneCourseData(original.data);
@@ -334,6 +335,19 @@ const _cloneCourse2 = async (data, context) => {
     await transaction.set(studentToken.ref, studentToken.data);
     await transaction.set(teacherToken.ref, teacherToken.data);
 
+    // Create the new items for the course.
+    const oldItemsById = originalItemDocs.docs.reduce((accum, doc) => {
+      return { ...accum, [doc.id]: doc.data() }
+    }, {});
+    const itemWrites = newCourse.data.localItemOrder.map((uid) => {
+      const oldItem = oldItemsById[uid];
+      const newItem = { ...oldItem, type: 'basic', parent: oldItem.uid }; // TODO Remove 'parent'?
+      const newRef = newCourse.ref.collection('items').doc(uid); // Same ID as old one.
+      return transaction.set(newRef, newItem);
+    });
+
+    await Promise.all(itemWrites);
+
     return newCourse.data;
   });
 
@@ -345,125 +359,6 @@ const _cloneCourse2 = async (data, context) => {
 
   // Return the new course to the front end.
   return course;
-};
-
-const _cloneCourse = async (data, context) => {
-  const { courseUid, studentUid } = data;
-  const { newCourse } = await admin.firestore().runTransaction(async (transaction) => {
-    const originalRef = admin.firestore().collection('courses').doc(courseUid);
-    const originalDoc = await transaction.get(originalRef);
-    if (!originalDoc.exists) throw new Error(`No course by uid ${courseUid} exists.`);
-    const original = originalDoc.data();
-
-    const studentRef = admin.firestore().collection('users').doc(studentUid);
-    const studentDoc = await transaction.get(studentRef);
-    if (!studentDoc.exists) throw new Error(`No student by uid ${studentUid} exists.`);
-    const student = studentDoc.data();
-
-    // Make sure the student doesn't already own a descendent of this course.
-    const owned = admin.firestore().collection('tokens')
-      .where('parent', '==', courseUid).limit(1);
-    if (owned.size) throw new Error(`${studentUid} already owns a descendant of ${courseUid}.`)
-
-    const teacherRef = admin.firestore().collection('users').doc(original.creatorUid);
-    const teacherDoc = await transaction.get(teacherRef);
-    const teacher = teacherDoc.data();
-
-    // Create the new course.
-    // TODO Update descendant courses when parent course is updated.
-    const courseRef = admin.firestore().collection('courses').doc();
-    const timestamp = admin.firestore.Timestamp.now();
-    const newCourse = {
-      ...original,
-      uid: courseRef.id,
-      parent: courseUid,
-      created: timestamp,
-      updated: timestamp,
-      type: 'basic',
-
-      // TODO TEMP
-      displayName: `${original.displayName} Copy`
-    };
-
-    // Clone template items.
-    // TODO Move to items/index.js.
-    const itemsRef = originalRef.collection('items');
-    const itemDocs = await transaction.get(itemsRef);
-    if (itemDocs.size > 495) throw new Error('Not implemented: too many items to clone.');
-
-    const newItemRefs = itemDocs.docs.map((itemDoc) => {
-      return {
-        ref: courseRef.collection('items').doc(),
-        item: itemDoc.data()
-      };
-    });
-    const itemsByUid = {};
-
-    const promises = newItemRefs.map(({ item, ref }) => {
-      if (item.status === 'scheduled') { // Only future live sessions.
-        const newItem = {
-          ...item,
-          uid: ref.id,
-          courseUid: newCourse.uid,
-          parent: item.uid,
-          created: timestamp,
-          updated: timestamp,
-
-          // TODO TEMP
-          displayName: `${item.displayName} Copy`
-        };
-
-        itemsByUid[item.uid] = newItem;
-        return transaction.set(ref, newItem);
-      }
-
-      itemsByUid[item.uid] = item;
-      return null;
-    }).filter(item => !!item);
-
-    // Create student token for the new course.
-    // TODO Update descendant tokens when parent course is updated.
-    const studentTokenRef = admin.firestore().collection('tokens').doc();
-    const studentToken = {
-      ...tokenFromCourse(newCourse, student),
-      access: 'student',
-      uid: studentTokenRef.id
-    };
-
-    // Create teacher token for the new course.
-    const teacherTokenRef = admin.firestore().collection('tokens').doc();
-    const teacherToken = {
-      ...tokenFromCourse(newCourse, teacher),
-      access: 'admin',
-      uid: teacherTokenRef.id
-    };
-
-    // Save all
-    const newItemOrder = original.itemOrder.map((uid) => {
-      // Nest them.
-      console.log('finding', uid, 'in', itemsByUid);
-      const item = itemsByUid[uid];
-      if (item.status === 'scheduled') return item.uid;
-      return `${original.uid}|${item.uid}`;
-    })
-    await transaction.set(courseRef, {
-      ...newCourse,
-      itemOrder: newItemOrder
-    });
-    await Promise.all(promises);
-    await transaction.set(studentTokenRef, studentToken);
-    await transaction.set(teacherTokenRef, teacherToken);
-
-    // Don't actually need to wait for this.
-    await uploadImage({
-      path: './courses/generic-teacher-cropped.png',
-      destination: `courses/${newCourse.uid}.png`
-    });
-
-    return { newCourse }
-  });
-
-  return newCourse;
 };
 
 const purchaseCourse = async (data, context) => {

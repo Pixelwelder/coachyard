@@ -53,9 +53,12 @@ const Course = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const getMenu = () => {
-    const items = [{ name: 'scheduled', displayName: 'Live Session' }];
-    if (isCreator) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video' });
-    return items.map(item => ({ ...item, type: course.type }));
+    // New items share their course's type.
+    const items = [];
+    if (isCreator) items.push({ name: 'viewing', displayName: 'Pre-Recorded Video', type: 'basic' });
+    items.push({ name: 'scheduled', displayName: 'Live Session', type: course.type });
+    // But creators can create basic items.
+    return items;
   };
 
   const onOpen = (event) => {

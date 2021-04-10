@@ -68,8 +68,8 @@ const newCourse = (overrides) => ({
   parent: '',
   numChats: 0,
   numChatsUnseen: 0,
-  itemOrder: [],
-  localItemOrder: [],
+  itemOrder: [],      // Items that in this course plus all descendant courses.
+  localItemOrder: [], // Items that are _only_ in this course. They are cloned for descendant courses.
   ...overrides
 });
 
@@ -109,6 +109,7 @@ const newCourseToken = (overrides) => ({
   user: '', // Could be email (if pending) or uid.
   userDisplayName: '',
   courseUid: '',
+  price: 0,
   access: 'student', // 'student' | 'editor' | 'admin'
 
   // Abbreviated Course

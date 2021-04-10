@@ -35,7 +35,6 @@ const createItem = async (data, context) => {
       const course = courseDoc.data();
       if (course.creatorUid !== uid) throw new Error('Only the creator of a course can add an item.');
 
-      // const itemRef = admin.firestore().collection('items').doc();
       const itemRef = courseRef.collection('items').doc();
       const timestamp = admin.firestore.Timestamp.now();
       const item = newCourseItem({
@@ -49,23 +48,25 @@ const createItem = async (data, context) => {
       });
 
       // If it's a template course, we're going to update all child courses.
-      if (course.type === 'template') {
-        const childCourses = admin.firestore().collection('courses')
-          .where('parent', '==', course.uid);
-
-        const childDocs = await transaction.get(childCourses);
-        console.log(`Found ${childDocs.size} child courses.`);
-
-        // const promises = childDocs.docs.map(async (doc) => {
-        //   await doc.ref.collection('items').
-        // })
-      }
+      // if (course.type === 'template') {
+      //   const childCourses = admin.firestore().collection('courses')
+      //     .where('parent', '==', course.uid);
+      //
+      //   const childDocs = await transaction.get(childCourses);
+      //   console.log(`Found ${childDocs.size} child courses.`);
+      //
+      //   // const promises = childDocs.docs.map(async (doc) => {
+      //   //   await doc.ref.collection('items').
+      //   // })
+      // }
 
       // Add it to the course.
       await transaction.set(itemRef, item);
 
       // Now update course.
-      await transaction.update(courseRef, { itemOrder: admin.firestore.FieldValue.arrayUnion(itemRef.id) });
+      // Where we put the item ID depends on what kind of item we're dealing with.
+      const arrayName = item.type === 'template' ? 'localItemOrder' : 'itemOrder';
+      await transaction.update(courseRef, { [arrayName]: admin.firestore.FieldValue.arrayUnion(itemRef.id) });
 
       // await transaction.update(courseRef, { items: [ ...course.items, item.uid ]});
       return { item };
@@ -134,17 +135,29 @@ const deleteItem = async (data, context) => {
     console.log(courseUid, itemUid);
 
     const { item } = await admin.firestore().runTransaction(async (transaction) => {
-      const itemRef = admin.firestore()
-        .collection('courses').doc(courseUid)
-        .collection('items').doc(itemUid);
+      const courseRef = admin.firestore().collection('courses').doc(courseUid);
+      const itemRef = courseRef.collection('items').doc(itemUid);
 
-      const itemDoc = await itemRef.get();
-      const itemData = itemDoc.data();
-      if (itemData.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
+      const courseDoc = await transaction.get(courseRef);
+      const course = courseDoc.data();
 
+      const itemDoc = await transaction.get(itemRef);
+      const item = itemDoc.data();
+
+      if (course.creatorUid !== uid) throw new Error(`User ${uid} did not create item ${itemUid}.`);
+
+      // Delete the actual item.
       await transaction.delete(itemRef);
 
-      return { item: itemData };
+      // Now remove the reference.
+      const updatedCourse = {
+        ...course,
+        itemOrder: course.itemOrder.filter(uid => uid !== itemUid),
+        localItemOrder: course.localItemOrder.filter(uid => uid !== itemUid)
+      };
+      await transaction.update(courseRef, updatedCourse);
+
+      return { item: item };
     });
 
     log({ message: 'Successfully deleted item from database.', data: item, context });

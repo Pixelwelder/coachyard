@@ -148,7 +148,7 @@ const setLocation = createAsyncThunk(
                 unsubscribeParentItems = snapshot.ref.collection('items')
                   .onSnapshot((snapshot) => {
                     parentItems = parseItems(snapshot);
-                    dispatch(generatedActions.setItems(parentItems));
+                    dispatch(generatedActions.setParentItems(parentItems));
                   });
               });
           }
@@ -388,25 +388,40 @@ const selectParentItems = createSelector(select, ({ parentCourse, parentItems, i
   // Returns all parent items in an ordered array.
   if (!parentCourse) return [];
   return parentCourse.itemOrder.map((uid) => {
-    const item = items[uid] || parentItems[uid];
-    return item;
+    return parentItems[uid];
   }).filter(item => !!item);
 });
 
 // This only gets local items.
 const selectItems = createSelector(select, ({ items, parentItems, course }) => {
   if (!course) return [];
-  return course.itemOrder.map((uid) => {
-    return items[uid];
-  }).filter(item => !!item);
+  const { localItemOrder } = course;
+
+  return localItemOrder
+    .map((uid) => items[uid])
+    .filter(item => !!item)
+    // .sort((a, b) => {});
 });
 
+// This gets all items.
 const selectAllItems = createSelector(
   selectParentItems,
   selectItems,
-  (parentItems, items) => ([
-    ...parentItems, ...items
-  ])
+  (parentItems, items) => {
+    console.log('---')
+    console.log('parentItems', parentItems);
+    console.log('items', items);
+    return [
+      ...parentItems, ...items
+    ];
+  }
+);
+
+// This gets the actual combination of local and parent items that makes up the course.
+const selectCourseItems = createSelector(
+  selectItems,
+  selectParentItems,
+  () => ([])
 );
 
 const selectSelectedItem = createSelector(
@@ -420,7 +435,7 @@ const selectSelectedItem = createSelector(
 const selectors = {
   select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
   selectIsCreator,
-  selectItems, selectParentItems, selectAllItems, selectSelectedItem
+  selectItems, selectParentItems, selectAllItems, selectCourseItems, selectSelectedItem
 };
 
 export { actions, selectors };

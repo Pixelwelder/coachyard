@@ -2,8 +2,10 @@ import React from 'react';
 import { DateTime, Duration } from 'luxon';
 import Typography from '@material-ui/core/Typography';
 import LockIcon from '@material-ui/icons/Lock';
+import Chip from '@material-ui/core/Chip';
 import { useSelector } from 'react-redux';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
+import capitalize from '@material-ui/core/utils/capitalize';
 
 const getDurationString = (seconds) => {
   // const d = Duration.fromMillis(seconds * 1000);
@@ -37,6 +39,7 @@ const Item = ({ item, isSelected, onSelect }) => {
           <>
             {item.displayName}
             {!hasAccess && <LockIcon className="item-name-icon" color="disabled" />}
+            <Chip className="item-name-type" label={capitalize(item.type)} color="primary" size="small" />
           </>
         </Typography>
         {item.status === 'scheduled' && (
