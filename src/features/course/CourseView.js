@@ -47,13 +47,8 @@ const CourseView = () => {
 
   // TODO useCallback
   const onEdit = () => {
-    dispatch(uiActions2.editCourse.setValues({
-      isEditing: true,
-      displayName: course.displayName,
-      description: course.description,
-      student: course.student,
-      type: course.type
-    }));
+    dispatch(uiActions2.editCourse.setValues(course));
+    dispatch(uiActions2.editCourse.setIsEditing(true));
   };
 
   const onCancelEdit = () => {

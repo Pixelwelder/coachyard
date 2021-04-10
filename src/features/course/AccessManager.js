@@ -20,9 +20,9 @@ const AccessManager = () => {
   const dispatch = useDispatch();
   const { price, type } = editCourse;
 
-  useEffect(() => {
-    dispatch(uiActions2.editCourse.setValues(course));
-  }, [course]);
+  // useEffect(() => {
+  //   dispatch(uiActions2.editCourse.setValues(course));
+  // }, [course]);
 
   const onSave = async () => {
     // await dispatch(catalogSelectors.updateCourse({ uid: course.uid, update: editCourse }));
