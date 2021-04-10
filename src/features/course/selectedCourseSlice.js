@@ -72,16 +72,25 @@ const parseItems = (snapshot) => {
     .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
 };
 
-let unsubscribeToken = () => {};
 let unsubscribeCourse = () => {};
 let unsubscribeLocalItems = () => {};
 let unsubscribeParentCourse = () => {};
 let unsubscribeParentItems = () => {};
 let unsubscribeCreator = () => {};
 let unsubscribeCreatorProvider = () => {};
-let unsubscribeStudent = () => {};
 let unsubscribeStudentTokens = () => {};
 let unsubscribeChat = () => {};
+
+const unsubscribe = () => {
+  unsubscribeCourse();
+  unsubscribeCreator();
+  unsubscribeCreatorProvider();
+  unsubscribeLocalItems();
+  unsubscribeParentCourse();
+  unsubscribeParentItems();
+  unsubscribeStudentTokens();
+  unsubscribeChat();
+};
 
 const setLocation = createAsyncThunk(
   `${name}/setLocation`,
@@ -91,20 +100,15 @@ const setLocation = createAsyncThunk(
     // TODO TODO TODO If we're already there, don't waste time navigating.
     console.log('setLocation', courseUid, itemUid);
 
-    unsubscribeCourse();
-    unsubscribeCreator();
-    unsubscribeCreatorProvider();
-    unsubscribeLocalItems();
-    unsubscribeParentCourse();
-    unsubscribeParentItems();
-    unsubscribeStudentTokens();
-    unsubscribeChat();
-
     const abandon = () => {
+      unsubscribe();
       history.push('/dashboard');
     };
 
     if (!courseUid) return abandon();
+
+    // Clear all subscriptions.
+    unsubscribe();
 
     // First up: subscribe to the course.
     unsubscribeCourse = app.firestore().collection('courses').doc(courseUid)
@@ -114,6 +118,19 @@ const setLocation = createAsyncThunk(
           const course = parseUnserializables(snapshot.data());
           dispatch(generatedActions.setCourse(course));
           dispatch(generatedActions.setSelectedItemUid(itemUid));
+
+          // Before subscribing, let's see if we actually have access to this course.
+          if (course.type !== 'template') {
+            const tokenDoc = await app.firestore().collection('tokens')
+              .where('courseUid', '==', course.uid)
+              .where('user', '==', app.auth().currentUser.uid)
+              .get();
+
+            if (!tokenDoc.size) {
+              console.error(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
+              return abandon();
+            }
+          }
 
           // Grab the creator.
           unsubscribeCreator = app.firestore().collection('users').doc(course.creatorUid)
@@ -153,20 +170,22 @@ const setLocation = createAsyncThunk(
               });
           }
 
-          // Get all access tokens.
-          unsubscribeStudentTokens = app.firestore().collection('tokens')
-            .where('courseUid', '==', course.uid)
-            .onSnapshot((snapshot) => {
-              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setTokens(tokens));
-            });
-
           // Get the chat.
           unsubscribeChat = snapshot.ref.collection('chat')
             .onSnapshot((snapshot) => {
               const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setChat(messages));
               // TODO Outstanding messages.
+            });
+
+          // Get all access tokens.
+          // TODO Is this necessary?
+          unsubscribeStudentTokens = app.firestore().collection('tokens')
+            .where('courseUid', '==', course.uid)
+            .where('user', '==', app.auth().currentUser.uid)
+            .onSnapshot((snapshot) => {
+              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              dispatch(generatedActions.setTokens(tokens));
             });
 
         } else {

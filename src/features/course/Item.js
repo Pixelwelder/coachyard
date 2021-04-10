@@ -39,7 +39,7 @@ const Item = ({ item, isSelected, onSelect }) => {
           <>
             {item.displayName}
             {!hasAccess && <LockIcon className="item-name-icon" color="disabled" />}
-            <Chip className="item-name-type" label={capitalize(item.type)} color="primary" size="small" />
+            <Chip className="item-name-type" label={item.type} color="primary" size="small" />
           </>
         </Typography>
         {item.status === 'scheduled' && (
