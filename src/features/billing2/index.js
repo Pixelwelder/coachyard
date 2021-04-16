@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { DateTime } from 'luxon';
 import { Link } from 'react-router-dom';
+import CreditCard from './CreditCard';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -43,7 +44,9 @@ const Billing = () => {
   const stripe = useStripe();
   const elements = useElements();
 
-  const onSubmit = () => {};
+  const onSubmit = ({ card }) => {
+    dispatch(billingActions2.createSubscription({ stripe, card }));
+  };
 
   const isDisabled = () => {
     return (actualTierId === selectedTierId)
@@ -83,15 +86,10 @@ const Billing = () => {
     dispatch(billingActions2.setUI({ showBilling: true }));
   };
 
+  // TODO Not ideal that this knows about the Card in a child component.
   const onUpdatePlan = () => {
     const card = elements.getElement(CardElement);
     dispatch(billingActions2.updateSubscription({ stripe, card }));
-  }
-
-  const onSetTier = () => {
-    // dispatch(billingActions2.setTier({ id: selectedTierId }));
-    const card = elements.getElement(CardElement);
-    dispatch(billingActions2.createSubscription({ stripe, card }))
   }
 
   return (
@@ -141,35 +139,7 @@ const Billing = () => {
         </Button>
       )}
 
-      {shouldShowBilling() && (
-        <form onSubmit={onSubmit} className="card-container">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }}
-          />
-          <Button
-            className="change-plan-button"
-            variant="contained"
-            color="primary"
-            onClick={onSetTier}
-            disabled={isDisabled()}
-          >
-            Get Started
-          </Button>
-        </form>
-      )}
+      {shouldShowBilling() && <CreditCard onSubmit={onSubmit} />}
 
       {/* TODO Reconsider. */}
       {shouldShowCancel() && (

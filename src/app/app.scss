@@ -585,6 +585,17 @@ $billing-width: 400px;
   button {
     align-self: center;
   }
+
+  .button-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cancel-button {
+
+  }
 }
 
 // ---

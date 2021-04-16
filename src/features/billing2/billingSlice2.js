@@ -25,8 +25,10 @@ const initialState = {
   ui: {
     showBilling: false,
     selectedTierId: 0,
+    billingIsComplete: false,
 
-    showUnlock: false
+    showUnlock: false,
+    unlockIsComplete: false
   }
 };
 

@@ -17,7 +17,9 @@ const UnlockDialog = () => {
   const stripe = useStripe();
   const elements = useElements();
 
-  const onCancel = () => {};
+  const onCancel = () => {
+    dispatch(billingActions2.setUI({ showUnlock: false }));
+  };
 
   const onUnlock = () => {
     const card = elements.getElement(CardElement);
@@ -58,15 +60,19 @@ const UnlockDialog = () => {
             },
           }}
         />
-        <Button
-          className="change-plan-button"
-          variant="contained"
-          color="primary"
-          onClick={onUnlock}
-          disabled={isDisabled()}
-        >
-          Purchase for {toDollars(course.price)}
-        </Button>
+        <div className="button-container">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onUnlock}
+            disabled={isDisabled()}
+          >
+            Purchase for {toDollars(course.price)}
+          </Button>
+          <Button className="cancel-button" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
