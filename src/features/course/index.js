@@ -20,6 +20,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
 import { actions as catalogActions } from '../catalog/catalogSlice';
+import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
@@ -89,8 +90,9 @@ const Course = () => {
   };
 
   const onUnlock = async () => {
-    const result = await dispatch(selectedCourseActions.purchaseCourse());
-    history.push(`/${result.payload.uid}`);
+    await dispatch(billingActions2.setUI({ showUnlock: true }));
+    // const result = await dispatch(selectedCourseActions.purchaseCourse());
+    // history.push(`/${result.payload.uid}`);
   };
 
   return (

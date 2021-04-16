@@ -24,7 +24,9 @@ const initialState = {
   // UI
   ui: {
     showBilling: false,
-    selectedTierId: 0
+    selectedTierId: 0,
+
+    showUnlock: false
   }
 };
 
@@ -159,7 +161,7 @@ const unlockCourse = createAsyncThunk(
     }
 
     console.log('Unlocking...');
-    await app.functions().httpsCallable('unlockCourse')({ uid: course.uid });
+    await app.functions().httpsCallable('purchaseCourse')({ uid: course.uid });
     console.log('Unlocking complete');
   }
 )

@@ -19,6 +19,7 @@ import Dashboard from '../features/dashboard';
 import FirebaseSignIn from '../components/FirebaseSignIn';
 import { GlobalError } from './Error';
 import LoadingModal from '../components/LoadingModal';
+import UnlockDialog from '../features/billing2/UnlockDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -82,7 +83,7 @@ const App = () => {
       <DeleteItemDialog />
       <GlobalError />
       <LoadingModal />
-      {/*<UnlockDialog />*/}
+      <UnlockDialog />
 
       {/*<Iframe*/}
       {/*  id="schedule"*/}

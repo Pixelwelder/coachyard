@@ -8,10 +8,11 @@ import Button from '@material-ui/core/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 import { toDollars } from '../../util/currency';
-import { actions as billingActions2 } from './billingSlice2';
+import { actions as billingActions2, selectors as billingSelectors2 } from './billingSlice2';
 
-const UnlockDialog = ({ isOpen = true }) => {
+const UnlockDialog = () => {
   const { course } = useSelector(selectedCourseSelectors.select);
+  const { ui: { showUnlock } } = useSelector(billingSelectors2.select);
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
@@ -29,7 +30,7 @@ const UnlockDialog = ({ isOpen = true }) => {
   return (
     <Dialog
       fullWidth
-      open={isOpen}
+      open={showUnlock}
       onClose={onCancel}
       aria-labelledby="form-dialog-title"
     >
