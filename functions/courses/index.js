@@ -7,6 +7,9 @@ const { getMuxHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
+const stripe = require('../billing/stripe');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 const tokenFromCourse = (course, user) => {
   const timestamp = admin.firestore.Timestamp.now();
@@ -23,28 +26,6 @@ const tokenFromCourse = (course, user) => {
     user: user.uid,
     userDisplayName: user.displayName
   };
-};
-
-const tokenFromCourse2 = (course, user, overrides = {}) => {
-  const ref = admin.firestore().collection('tokens').doc();
-  const timestamp = admin.firestore.Timestamp.now();
-  const data = {
-    access: 'student',
-    courseUid: course.uid,
-    created: timestamp,
-    creatorUid: course.creatorUid,
-    displayName: course.displayName,
-    parent: course.parent,
-    price: course.price,
-    type: 'basic',
-    updated: timestamp,
-    user: user.uid,
-    userDisplayName: user.displayName,
-    uid: ref.id,
-    ...overrides
-  };
-
-  return { data, ref };
 };
 
 /**
@@ -280,105 +261,137 @@ const _unlockCourse = async (data, context) => {
   });
 };
 
-const createGetItem = transaction => async (collection, uid) => {
-  const ref = admin.firestore().collection(collection).doc(uid);
-  const doc = await transaction.get(ref);
-  if (!doc.exists) throw new Error(`No ${uid} in ${collection}.`);
-  const data = doc.data();
+const purchaseCourse2 = async (data, context) => {
+  try {
+    checkAuth(context);
 
-  return { ref, data };
-};
+    const { auth: { token: { uid, email } } } = context;
+    const { uid: courseUid, url } = data;
+    console.log('checking course', courseUid);
+    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
+    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
+    console.log('got course', courseUid);
 
-const cloneCourseData = (original) => {
-  const ref = admin.firestore().collection('courses').doc();
-  const timestamp = admin.firestore.Timestamp.now();
-  const data = {
-    ...original,
-    uid: ref.id,
-    parent: original.uid,
-    created: timestamp,
-    updated: timestamp,
-    type: 'basic',
-    itemOrder: [], // The clone will look to its parent for these.
+    console.log('checking tokens');
+    const tokenDocs = await admin.firestore().collection('tokens')
+      .where('courseUid', '==', courseUid)
+      .where('user', '==', uid).get();
+    if (tokenDocs.size) throw new Error(`User ${uid} already owns ${courseUid}.`);
 
-    // TODO TEMP
-    displayName: `${original.displayName} Copy`
-  };
+    console.log('getting customer');
+    console.log('Getting Stripe customer');
+    const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
+    if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
+    console.log('got Stripe customer');
 
-  return { ref, data };
-};
+    const course = courseDoc.data();
+    const customer = customerDoc.data();
 
-const _cloneCourse2 = async (data, context) => {
-  const { courseUid, studentUid } = data;
-  const course = await admin.firestore().runTransaction(async (transaction) => {
-    // Bail early if student already owns a descendant of this course.
-    const token = await admin.firestore().collection('tokens')
-      .where('parent', '==', courseUid).get();
-    if (token.exists) throw new Error(`${studentUid} already owns a descendant of ${courseUid}.`);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Unlock: ${course.displayName}`,
+            },
+            unit_amount: course.price,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      // success_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/success',
+      success_url: url,
+      // cancel_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/cancel',
+      cancel_url: url,
 
-    // Grab the course, the student, the teacher, and the course items.
-    const getData = createGetItem(transaction);
-    const original = await getData('courses', courseUid);
-    const student = await getData('users', studentUid);
-    const teacher = await getData('users', original.data.creatorUid);
-    const originalItemDocs = await transaction.get(original.ref.collection('items').where('type', '==', 'template'));
+      // Optional stuff.
+      // client_reference_id: uid,
 
-    // Create the new course.
-    const newCourse = cloneCourseData(original.data);
+      // Pass this so it will attach to existing customer.
+      customer: customer.id,
+      customer_email: email,
 
-    // Create access tokens: teacher and student.
-    const studentToken = tokenFromCourse2(newCourse.data, student.data);
-    const teacherToken = tokenFromCourse2(newCourse.data, teacher.data, { access: 'admin' });
+      payment_intent_data: {
+        // Attach payment method to the customer.
+        setup_future_usage: 'off_session'
+      },
 
-    // Perform all writes: new course plus two tokens.
-    await transaction.set(newCourse.ref, newCourse.data);
-    await transaction.set(studentToken.ref, studentToken.data);
-    await transaction.set(teacherToken.ref, teacherToken.data);
-
-    // Create the new items for the course.
-    const oldItemsById = originalItemDocs.docs.reduce((accum, doc) => {
-      return { ...accum, [doc.id]: doc.data() }
-    }, {});
-    const itemWrites = newCourse.data.localItemOrder.map((uid) => {
-      const oldItem = oldItemsById[uid];
-      const newItem = { ...oldItem, type: 'basic', parent: oldItem.uid }; // TODO Remove 'parent'?
-      const newRef = newCourse.ref.collection('items').doc(uid); // Same ID as old one.
-      return transaction.set(newRef, newItem);
+      metadata: {
+        studentUid: uid,
+        courseUid
+      }
     });
 
-    await Promise.all(itemWrites);
-
-    return newCourse.data;
-  });
-
-  // Add a course image.
-  await uploadImage({
-    path: './courses/generic-teacher-cropped.png',
-    destination: `courses/${course.uid}.png`
-  });
-
-  // Return the new course to the front end.
-  return course;
+    console.log('Session created', session.id);
+    return { sessionId: session.id };
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 };
 
 const purchaseCourse = async (data, context) => {
-  // try {
+  try {
     checkAuth(context);
-    const { courseUid } = data;
+    const { auth: { uid } } = context;
+    const { uid: courseUid } = data;
+    console.log('checking course', courseUid);
     const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
     if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
 
     const course = courseDoc.data();
+    console.log('got course', course);
+
+    // Make sure this user does not already have access.
+    console.log('checking tokens');
+    const tokenDocs = await admin.firestore().collection('tokens')
+      .where('courseUid', '==', courseUid)
+      .where('user', '==', uid).get();
+    if (tokenDocs.size) throw new Error(`User ${uid} already owns ${courseUid}.`);
+
+    // Actually purchase it. Assumes we already have a payment method.
+    // Grab the customer.
+    console.log('Getting Stripe customer');
+    const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
+    if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
+    const customer = customerDoc.data();
+    console.log('got Stripe customer');
+
+    // TODO For now we are assuming there is only one payment method.
+    const paymentMethodDocs = await customerDoc.ref.collection('payment_methods').limit(1).get();
+    if (!paymentMethodDocs.size) throw new Error(`No payment method for customer ${uid}`);
+    const paymentMethodDoc = paymentMethodDocs.docs[0];
+    const paymentMethod = paymentMethodDoc.data();
+    console.log('got Stripe payment method');
+
+    console.log('making payment...');
+    const result = await stripe.paymentIntents.create({
+      amount: course.price,
+      currency: 'usd',
+      payment_method: paymentMethodDoc.id,
+      customer: customer.customer_id,
+      description: `Purchase: ${course.displayName}`,
+      metadata: { creatorUid: course.creatorUid },
+      statement_descriptor_suffix: course.displayName.slice(0, 22)
+    });
+
+    console.log('payment complete:', result);
+    const doc = customerDoc.ref.collection('payments').doc();
+    doc.set({ ...result, uid: doc.id });
+
     if (course.type === 'template') {
       return _cloneCourse2(data, context);
     } else {
       return _unlockCourse(data, context);
     }
 
-  // } catch (error) {
-  //   log({ message: error.message, data: error, context, level: 'error' });
-  //   throw new functions.https.HttpsError('internal', error.message, error);
-  // }
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
 };
 
 /**
@@ -533,7 +546,7 @@ module.exports = {
   deleteCourse: functions.https.onCall(deleteCourse),
   addUser: functions.https.onCall(addUser),
   removeUser: functions.https.onCall(removeUser),
-  purchaseCourse: functions.https.onCall(purchaseCourse),
+  purchaseCourse: functions.https.onCall(purchaseCourse2),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),

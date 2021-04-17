@@ -9,10 +9,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 import { toDollars } from '../../util/currency';
 import { actions as billingActions2, selectors as billingSelectors2 } from './billingSlice2';
+import PaymentMethod from './PaymentMethod';
+import { useHistory } from 'react-router-dom';
 
 const UnlockDialog = () => {
+  const history = useHistory();
   const { course } = useSelector(selectedCourseSelectors.select);
-  const { ui: { showUnlock } } = useSelector(billingSelectors2.select);
+  const { ui: { showUnlock }, paymentMethods } = useSelector(billingSelectors2.select);
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
@@ -21,12 +24,9 @@ const UnlockDialog = () => {
     dispatch(billingActions2.setUI({ showUnlock: false }));
   };
 
-  const onUnlock = () => {
-    const card = elements.getElement(CardElement);
+  const onUnlock = ({ card } = {}) => {
     dispatch(billingActions2.unlockCourse({ stripe, card }));
   };
-
-  const isDisabled = () => false;
 
   if (!course) return null;
   return (
@@ -41,38 +41,12 @@ const UnlockDialog = () => {
       </DialogTitle>
       <DialogContent className="unlock-dialog-content">
         <DialogContentText>
-          Unlock!
+          Do you want to unlock this item for $x?
         </DialogContentText>
-        <CardElement
-          className="credit-card"
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                  color: '#aab7c4',
-                },
-              },
-              invalid: {
-                color: '#9e2146',
-              },
-            },
-          }}
-        />
-        <div className="button-container">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onUnlock}
-            disabled={isDisabled()}
-          >
-            Purchase for {toDollars(course.price)}
-          </Button>
-          <Button className="cancel-button" onClick={onCancel}>
-            Cancel
-          </Button>
-        </div>
+        {!!paymentMethods.length
+          ? <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>
+          : <PaymentMethod paymentMethods={paymentMethods} onSubmit={onUnlock} />
+        }
       </DialogContent>
     </Dialog>
   );

@@ -155,15 +155,22 @@ const unlockCourse = createAsyncThunk(
     const { course } = selectedCourseSelectors.select(state);
     console.log('unlocking', course.uid);
 
-    const { paymentMethods, ui: { selectedTierId } } = select(getState());
-    // First create a payment method with the provided card.
-    if (!paymentMethods.length) {
-      console.log('No payment method. Creating.');
-      await dispatch(_addPaymentMethod({ stripe, card }));
-    }
+    // const { paymentMethods, ui: { selectedTierId } } = select(getState());
+    // // First create a payment method with the provided card.
+    // if (!paymentMethods.length) {
+    //   console.log('No payment method. Creating.');
+    //   if (!card) throw new Error('No payment methods, and no card provided.');
+    //   await dispatch(_addPaymentMethod({ stripe, card }));
+    // }
 
     console.log('Unlocking...');
-    await app.functions().httpsCallable('purchaseCourse')({ uid: course.uid });
+    const { data: { sessionId } } = await app.functions().httpsCallable('purchaseCourse')({
+      uid: course.uid,
+      url: window.location.href
+    });
+    console.log('sessionId', sessionId)
+    stripe.redirectToCheckout({ sessionId });
+
     console.log('Unlocking complete');
   }
 )

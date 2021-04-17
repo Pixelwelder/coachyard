@@ -182,26 +182,26 @@ $billing-width: 400px;
   flex: 1;
   display: flex;
   flex-direction: column;
+}
 
-  .card-container {
-    display: flex;
-    align-self: center;
-    width: $billing-width;
-    max-width: $billing-width;
-    border: 1px solid lightgray;
-    padding: 16px;
-    border-radius: 8px;
-  }
+.payment-method {
+  display: flex;
+  align-self: center;
+  width: $billing-width;
+  max-width: $billing-width;
+  border: 1px solid lightgray;
+  padding: 16px;
+  border-radius: 8px;
 
-  .change-plan-button {
+  .payment-button {
     align-self: center;
     margin-top: 32px;
   }
+}
 
-  .cancel-plan-button {
-    margin-top: 16px;
-    align-self: center;
-  }
+.cancel-plan-button {
+  margin-top: 16px;
+  align-self: center;
 }
 
 .tier-list {

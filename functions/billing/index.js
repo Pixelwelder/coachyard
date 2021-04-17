@@ -6,7 +6,9 @@ const { log } = require ('../logging');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { setClaims } = require('../util/claims');
-const stripe = require('./stripe')
+const stripe = require('./stripe');
+const { webhook_secret } = require('../__config__/stripe.json');
+const { unlockCourse } = require('../courses/unlockCourse');
 
 /**
  * When a new user is created, create a matching Stripe Customer.
@@ -143,57 +145,57 @@ const createPaymentMethod = functions.https.onCall(async (data, context) => {
   }
 });
 
-const unlockCourse = functions.https.onCall(async (data, context) => {
-  try {
-    log({ message: 'Unlocking course...', data, context });
-    checkAuth(context);
-    const { uid: courseUid } = data;
-    const { auth: { uid } } = context;
-
-    const result = await admin.firestore().runTransaction(async (transaction) => {
-      const studentRef = admin.firestore().collection('users').doc(uid);
-      const studentDoc = await transaction.get(studentRef);
-
-      const courseRef = admin.firestore().collection('courses').doc(courseUid);
-      const courseDoc = await transaction.get(courseRef);
-
-      const tokensRef = admin.firestore().collection('tokens')
-        .where('courseUid', '==', courseUid)
-        .where('user', '==', uid);
-      const tokensDocs = await transaction.get(tokensRef);
-      if (tokensDocs.size) throw new Error('User already has access this course.');
-
-      const student = studentDoc.data();
-      const course = courseDoc.data();
-      const timestamp = admin.firestore.Timestamp.now();
-
-      // Now create access token.
-      const token = newCourseToken({
-        user: uid,
-        userDisplayName: student.displayName,
-        courseUid,
-
-        created: timestamp,
-        updated: timestamp,
-
-        // Abbreviated Course
-        displayName: course.displayName,
-        description: course.description,
-        image: course.image,
-        parent: course.uid,
-        creatorUid: course.creatorUid,
-        type: 'basic', // 'basic', 'template'
-      });
-      const tokenRef = admin.firestore().collection('tokens').doc();
-      await transaction.set(tokenRef, token);
-    });
-
-    log({ message: 'Course unlocked.', data, context });
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-});
+// const unlockCourse = functions.https.onCall(async (data, context) => {
+//   try {
+//     log({ message: 'Unlocking course...', data, context });
+//     checkAuth(context);
+//     const { uid: courseUid } = data;
+//     const { auth: { uid } } = context;
+//
+//     const result = await admin.firestore().runTransaction(async (transaction) => {
+//       const studentRef = admin.firestore().collection('users').doc(uid);
+//       const studentDoc = await transaction.get(studentRef);
+//
+//       const courseRef = admin.firestore().collection('courses').doc(courseUid);
+//       const courseDoc = await transaction.get(courseRef);
+//
+//       const tokensRef = admin.firestore().collection('tokens')
+//         .where('courseUid', '==', courseUid)
+//         .where('user', '==', uid);
+//       const tokensDocs = await transaction.get(tokensRef);
+//       if (tokensDocs.size) throw new Error('User already has access this course.');
+//
+//       const student = studentDoc.data();
+//       const course = courseDoc.data();
+//       const timestamp = admin.firestore.Timestamp.now();
+//
+//       // Now create access token.
+//       const token = newCourseToken({
+//         user: uid,
+//         userDisplayName: student.displayName,
+//         courseUid,
+//
+//         created: timestamp,
+//         updated: timestamp,
+//
+//         // Abbreviated Course
+//         displayName: course.displayName,
+//         description: course.description,
+//         image: course.image,
+//         parent: course.uid,
+//         creatorUid: course.creatorUid,
+//         type: 'basic', // 'basic', 'template'
+//       });
+//       const tokenRef = admin.firestore().collection('tokens').doc();
+//       await transaction.set(tokenRef, token);
+//     });
+//
+//     log({ message: 'Course unlocked.', data, context });
+//   } catch (error) {
+//     log({ message: error.message, data: error, context, level: 'error' });
+//     throw new functions.https.HttpsError('internal', error.message, error);
+//   }
+// });
 
 /**
  * Sets billing tier for the user.
@@ -215,9 +217,9 @@ const createSubscription = functions.https.onCall(async (data, context) => {
     const subscription = await stripe.subscriptions.create({
       customer: customer.customer_id,
       items: [{ price }],
-      expand: ['latest_invoice.payment_intent'] // TODO No idea what this does.
+      expand: ['latest_invoice.payment_intent']
     });
-    console.log('got subscription', uid);
+    console.log('got subscription', subscription);
 
     // Save the subscription to Firestore.
     await admin.firestore().runTransaction(async transaction => {
@@ -227,7 +229,7 @@ const createSubscription = functions.https.onCall(async (data, context) => {
         .collection('subscriptions')
         .doc(subscription.id);
 
-      await transaction.set(ref, { test: 'hello' });
+      await transaction.set(ref, subscription);
     })
     // await admin.firestore()
     //   .collection('stripe_customers')
@@ -410,26 +412,35 @@ const getTiers = functions.https.onCall((data, context) => {
 });
 
 const stripe_webhooks = express();
-stripe_webhooks.use(bodyParser.urlencoded({ extended: false }));
-stripe_webhooks.use(bodyParser.json());
+// stripe_webhooks.use(bodyParser.urlencoded({ extended: false }));
+// stripe_webhooks.use(bodyParser.json());
 stripe_webhooks.post(
   '/webhooks',
+  // bodyParser.raw({type: 'application/json'}),
   async (request, response) => {
+    console.log('STRIPE WEBHOOK');
     try {
-      const { body } = request;
+      const { body, rawBody, headers } = request;
+      const signature = headers['stripe-signature'];
+      const event = stripe.webhooks.constructEvent(rawBody, signature, webhook_secret);
+
       const {
         type,
         data: {
           object: {
             id,
-            customer
+            customer,
+            metadata
           }
         }
-      } = body;
-      log({ message: 'Billing: Received Stripe webhook.', data: type });
+      } = event;
+      log({ message: 'Billing: Received Stripe webhook.', data: { type, id } });
 
       // IDEMPOTENCY
-      const exists = admin.firestore().runTransaction(async (transaction) => {
+      const exists = await admin.firestore().runTransaction(async (transaction) => {
+        // Test webhook.
+        if (id === 'cs_00000000000000') return false;
+
         const eventRef = admin.firestore().collection('stripe_events').doc(id);
         const event = await transaction.get(eventRef);
         if (event.exists) return true;
@@ -438,9 +449,10 @@ stripe_webhooks.post(
         return false;
       });
 
-      if (exists) return response.status(200).end();
+      if (exists) return response.status(200).send('Already handled.').end();
 
       // Handle the event.
+      console.log('handling webhook event');
       switch (type) {
         case 'customer.subscription.updated': {
 
@@ -466,6 +478,15 @@ stripe_webhooks.post(
           }
         }
 
+        case 'checkout.session.completed': {
+          const { studentUid, courseUid } = metadata;
+          console.log('Checkout completed!', studentUid, courseUid );
+
+          // This is where we do the actual cloning of courses and such.
+          await unlockCourse({ studentUid, courseUid });
+          console.log('webhook done');
+        }
+
         default: {
           // Unhandled.
         }
@@ -473,7 +494,7 @@ stripe_webhooks.post(
       return response.status(200).end();
     } catch (error) {
       log({ message: error.message, data: error, level: 'error' });
-      return response.status(500).end();
+      return response.status(400).send(`Webhook error: ${error.message}`);
     }
   }
 );
@@ -481,7 +502,7 @@ stripe_webhooks.post(
 module.exports = {
   getTiers,
   createPaymentMethod,
-  unlockCourse,
+  // unlockCourse,
   createSubscription,
   updateSubscription,
   cancelSubscription,

@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { DateTime } from 'luxon';
 import { Link } from 'react-router-dom';
-import CreditCard from './CreditCard';
+import PaymentMethod from './PaymentMethod';
 
 const Tier = ({ tier, selected, subscribed, onClick }) => {
   return (
@@ -17,15 +17,6 @@ const Tier = ({ tier, selected, subscribed, onClick }) => {
         <Typography className="tier-item-price">${tier.price}</Typography>
         <Typography className="tier-item-period">{tier.period}</Typography>
         <div className="spacer" />
-        {/*<Button*/}
-        {/*  className="tier-item-button"*/}
-        {/*  variant="contained"*/}
-        {/*  color="primary"*/}
-        {/*  onClick={onClick}*/}
-        {/*  disabled={selected}*/}
-        {/*>*/}
-        {/*  Select*/}
-        {/*</Button>*/}
         <Typography className="tier-item-subscribed">Currently Subscribed</Typography>
       </div>
     </li>
@@ -37,7 +28,8 @@ const Billing = () => {
     isLoading,
     tiers,
     tier: actualTierId,
-    ui: { selectedTierId, showBilling }
+    ui: { selectedTierId, showBilling },
+    paymentMethods
   } = useSelector(billingSelectors2.select);
   const subscription = useSelector(billingSelectors2.selectSubscription);
   const dispatch = useDispatch();
@@ -139,7 +131,12 @@ const Billing = () => {
         </Button>
       )}
 
-      {shouldShowBilling() && <CreditCard onSubmit={onSubmit} />}
+      {shouldShowBilling() && (
+        <PaymentMethod
+          paymentMethods={paymentMethods}
+          onSubmit={onSubmit}
+        />
+      )}
 
       {/* TODO Reconsider. */}
       {shouldShowCancel() && (
