@@ -572,10 +572,11 @@ const selectSelectedItem = createSelector(
   }
 );
 
+// TODO This could result in double billing, but that's probably better than no billing.
 const selectIsBeingPurchased = createSelector(
   select,
   ({ sessions }) => {
-    return sessions.find(session => session.session.payment_status === 'unpaid');
+    return false;//sessions.find(session => session.session.payment_status === 'unpaid');
   }
 );
 
@@ -584,11 +585,16 @@ const selectOwnsDescendant = createSelector(
   ({ descendantTokens }) => !!descendantTokens.length
 );
 
+const selectOwnedDescendant = createSelector(
+  select,
+  ({ descendantTokens }) => descendantTokens.length ? descendantTokens[0] : null
+);
+
 const selectors = {
   select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
   selectIsCreator,
   selectItems, selectParentItems, selectAllItems, selectCourseItems, selectSelectedItem,
-  selectIsBeingPurchased, selectOwnsDescendant
+  selectIsBeingPurchased, selectOwnsDescendant, selectOwnedDescendant
 };
 
 export { actions, selectors };

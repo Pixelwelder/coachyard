@@ -413,6 +413,23 @@ const getTiers = functions.https.onCall((data, context) => {
   return tiers;
 });
 
+const deleteSessions = async ({ studentUid, courseUid }) => {
+  await admin.firestore().runTransaction(async (transaction) => {
+    const docs = await admin.firestore()
+      .collection('stripe_customers').doc(studentUid)
+      .collection('sessions').doc(courseUid)
+      .collection('sessions')
+      .get();
+
+    if (docs.size) {
+      console.log('Deleting all sessions');
+      await Promise.all(docs.docs.map((doc) => {
+        return transaction.delete(doc.ref);
+      }));
+    }
+  });
+};
+
 const stripe_webhooks = express();
 // stripe_webhooks.use(bodyParser.urlencoded({ extended: false }));
 // stripe_webhooks.use(bodyParser.json());
@@ -489,24 +506,40 @@ stripe_webhooks.post(
           //   .collection('sessions').doc(id)
           //   .update({ session: object });
 
-          await admin.firestore().runTransaction(async (transaction) => {
-            const docs = await admin.firestore()
-              .collection('stripe_customers').doc(studentUid)
-              .collection('sessions').doc(courseUid)
-              .collection('sessions')
-              .get();
-
-            if (docs.size) {
-              console.log('Deleting all sessions');
-              await Promise.all(docs.docs.map((doc) => {
-                return transaction.delete(doc.ref);
-              }));
-            }
-          });
+          await deleteSessions({ courseUid, studentUid });
 
           // This is where we do the actual cloning of courses and such.
           await unlockCourse(object);
           console.log('webhook complete');
+        }
+
+        case 'checkout.session.async_payment_failed': {
+          // Delete the specific session that failed.
+          const { studentUid, courseUid } = metadata;
+          console.log('FAILED')
+          await admin.firestore()
+            .collection('stripe_customers').doc(studentUid)
+            .collection('sessions').doc(courseUid)
+            .collection('sessions').doc(object.id)
+            .delete();
+          console.log('DELETED');
+
+          /*
+          await admin.firestore().runTransaction(async (transaction) => {
+    const docs = await admin.firestore()
+      .collection('stripe_customers').doc(studentUid)
+      .collection('sessions').doc(courseUid)
+      .collection('sessions')
+      .get();
+
+    if (docs.size) {
+      console.log('Deleting all sessions');
+      await Promise.all(docs.docs.map((doc) => {
+        return transaction.delete(doc.ref);
+      }));
+    }
+  });
+           */
         }
 
         default: {

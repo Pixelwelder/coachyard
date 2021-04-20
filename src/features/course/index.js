@@ -24,6 +24,8 @@ import { actions as billingActions2, selectors as billingSelectors2 } from '../b
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 
 const MultiButton = () => {
 
@@ -40,6 +42,7 @@ const Course = () => {
   const isCreator = useSelector(selectedCourseSelectors.selectIsCreator);
   const isPurchasing = useSelector(selectedCourseSelectors.selectIsBeingPurchased);
   const ownsDescendant = useSelector(selectedCourseSelectors.selectOwnsDescendant);
+  const ownedDescendant = useSelector(selectedCourseSelectors.selectOwnedDescendant);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -101,8 +104,21 @@ const Course = () => {
     // history.push(`/${result.payload.uid}`);
   };
 
+  const goToDescendant = () => {
+    history.push(`/course/${ownedDescendant.courseUid}`);
+  };
+
   return (
     <div className="app-content">
+      <Dialog open={ownsDescendant} fullWidth>
+        <DialogTitle>Course Owned</DialogTitle>
+        <DialogContent>
+          <Typography>You own this course!</Typography>
+          <DialogActions>
+            <Button variant="contained" color="primary" onClick={goToDescendant}>Go!</Button>
+          </DialogActions>
+        </DialogContent>
+      </Dialog>
       <div className="course-header">
         {/*<Typography variant="h6" component="h2">*/}
         {/*  <Link*/}
