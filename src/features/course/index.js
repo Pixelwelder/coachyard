@@ -20,10 +20,14 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import { actions as billingActions2 } from '../billing2/billingSlice2';
+import { actions as billingActions2, selectors as billingSelectors2 } from '../billing2/billingSlice2';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+
+const MultiButton = () => {
+
+};
 
 const Course = () => {
   const { courseUid, itemUid } = useParams();
@@ -34,6 +38,8 @@ const Course = () => {
   const { isSignedIn } = useSelector(userSelectors.select);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const isCreator = useSelector(selectedCourseSelectors.selectIsCreator);
+  const isPurchasing = useSelector(selectedCourseSelectors.selectIsBeingPurchased);
+  const ownsDescendant = useSelector(selectedCourseSelectors.selectOwnsDescendant);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -180,7 +186,25 @@ const Course = () => {
                       </Menu>
                     </>
                   )}
-                  {!hasAccess && course?.price && (
+                  {ownsDescendant && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled
+                    >
+                      Owned
+                    </Button>
+                  )}
+                  {isPurchasing && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled
+                    >
+                      Purchasing...
+                    </Button>
+                  )}
+                  {!ownsDescendant && !isPurchasing && !hasAccess && course?.price && (
                     <Button
                       variant="contained"
                       color="primary"

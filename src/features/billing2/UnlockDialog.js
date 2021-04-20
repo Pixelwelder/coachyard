@@ -41,12 +41,16 @@ const UnlockDialog = () => {
       </DialogTitle>
       <DialogContent className="unlock-dialog-content">
         <DialogContentText>
-          Do you want to unlock this item for $x?
+          Do you want to unlock this item?
         </DialogContentText>
-        {!!paymentMethods.length
-          ? <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>
-          : <PaymentMethod paymentMethods={paymentMethods} onSubmit={onUnlock} />
-        }
+        <div className="button-container">
+          <Button className="cancel-button" variant="contained" color="default" onClick={onCancel}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>
+        </div>
+        {/*{!!paymentMethods.length*/}
+        {/*  ? <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>*/}
+        {/*  : <PaymentMethod paymentMethods={paymentMethods} onSubmit={onUnlock} />*/}
+        {/*}*/}
       </DialogContent>
     </Dialog>
   );

@@ -7,6 +7,7 @@ const { getMuxHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
+const { initializePurchase } = require('./initializePurchase');
 const stripe = require('../billing/stripe');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -261,78 +262,6 @@ const _unlockCourse = async (data, context) => {
   });
 };
 
-const purchaseCourse2 = async (data, context) => {
-  try {
-    checkAuth(context);
-
-    const { auth: { token: { uid, email } } } = context;
-    const { uid: courseUid, url } = data;
-    console.log('checking course', courseUid);
-    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-    console.log('got course', courseUid);
-
-    console.log('checking tokens');
-    const tokenDocs = await admin.firestore().collection('tokens')
-      .where('courseUid', '==', courseUid)
-      .where('user', '==', uid).get();
-    if (tokenDocs.size) throw new Error(`User ${uid} already owns ${courseUid}.`);
-
-    console.log('getting customer');
-    console.log('Getting Stripe customer');
-    const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
-    if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
-    console.log('got Stripe customer');
-
-    const course = courseDoc.data();
-    const customer = customerDoc.data();
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Unlock: ${course.displayName}`,
-            },
-            unit_amount: course.price,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      // success_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/success',
-      success_url: url,
-      // cancel_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/cancel',
-      cancel_url: url,
-
-      // Optional stuff.
-      // client_reference_id: uid,
-
-      // Pass this so it will attach to existing customer.
-      customer: customer.id,
-      customer_email: email,
-
-      payment_intent_data: {
-        // Attach payment method to the customer.
-        setup_future_usage: 'off_session'
-      },
-
-      metadata: {
-        studentUid: uid,
-        courseUid
-      }
-    });
-
-    console.log('Session created', session.id);
-    return { sessionId: session.id };
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
 const purchaseCourse = async (data, context) => {
   try {
     checkAuth(context);
@@ -546,7 +475,7 @@ module.exports = {
   deleteCourse: functions.https.onCall(deleteCourse),
   addUser: functions.https.onCall(addUser),
   removeUser: functions.https.onCall(removeUser),
-  purchaseCourse: functions.https.onCall(purchaseCourse2),
+  initializePurchase: functions.https.onCall(initializePurchase),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),

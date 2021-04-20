@@ -42,6 +42,9 @@ const _cloneCourse2 = async ({ courseDoc, studentUid }) => {
       return transaction.set(newRef, newItem);
     });
 
+    // Update payment session.
+
+
     await Promise.all(itemWrites);
 
     return newCourse.data;
@@ -59,7 +62,8 @@ const _cloneCourse2 = async ({ courseDoc, studentUid }) => {
   return clonedCourse;
 };
 
-const unlockCourse = async ({ studentUid, courseUid }) => {
+const unlockCourse = async (object) => {
+  const { id, metadata: { studentUid, courseUid }} = object;
   console.log('unlocking course', studentUid, courseUid);
 
   const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();

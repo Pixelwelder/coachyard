@@ -58,7 +58,13 @@ const initialState = {
 
   studentManagerMode: STUDENT_MANAGER_MODE.LIST,
   emailResult: null,
-  currentToken: null
+  currentToken: null,
+
+  // Purchases in process.
+  sessions: [],
+
+  // Descendants
+  descendantTokens: []
 };
 
 /**
@@ -82,6 +88,8 @@ let unsubscribeCreator = () => {};
 let unsubscribeCreatorProvider = () => {};
 let unsubscribeStudentTokens = () => {};
 let unsubscribeChat = () => {};
+let unsubscribeSessions = () => {};
+let unsubscribeDescendants = () => {};
 
 const unsubscribe = () => {
   unsubscribeCourse();
@@ -92,6 +100,7 @@ const unsubscribe = () => {
   unsubscribeParentItems();
   unsubscribeStudentTokens();
   unsubscribeChat();
+  unsubscribeSessions();
 };
 
 const _loadCourse = createAsyncThunk(
@@ -283,7 +292,30 @@ const setLocation = createAsyncThunk(
         } else {
           return abandon(`Course ${courseUid} no longer exists.`);
         }
-      })
+      });
+
+    unsubscribeSessions = app.firestore()
+      .collection('stripe_customers').doc(app.auth().currentUser.uid)
+      .collection('sessions').doc(courseUid)
+      .collection('sessions')
+      .onSnapshot((snapshot) => {
+        console.log('sessions', snapshot.docs.length);
+        if (snapshot.size) {
+          const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+          dispatch(generatedActions.setSessions(sessions));
+        }
+      });
+
+    unsubscribeDescendants = app.firestore().collection('tokens')
+      .where('user', '==', app.auth().currentUser.uid)
+      .where('parent', '==', courseUid)
+      .where('access', '==', 'student')
+      .onSnapshot((snapshot) => {
+        if (snapshot.size) {
+          const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+          dispatch(generatedActions.setDescendantTokens(tokens));
+        }
+      });
   }
 );
 
@@ -452,7 +484,10 @@ const { actions: generatedActions, reducer } = createSlice({
     setEmailResult: setValue('emailResult'),
     resetEmailResult: resetValue('emailResult', initialState.emailResult),
     setCurrentToken: setValue('tokenToRemove'),
-    resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove)
+    resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove),
+
+    setSessions: setValue('sessions'),
+    setDescendantTokens: setValue('descendantTokens')
   },
   extraReducers: loaderReducers(name, initialState)
 });
@@ -537,10 +572,23 @@ const selectSelectedItem = createSelector(
   }
 );
 
+const selectIsBeingPurchased = createSelector(
+  select,
+  ({ sessions }) => {
+    return sessions.find(session => session.session.payment_status === 'unpaid');
+  }
+);
+
+const selectOwnsDescendant = createSelector(
+  select,
+  ({ descendantTokens }) => !!descendantTokens.length
+);
+
 const selectors = {
   select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
   selectIsCreator,
-  selectItems, selectParentItems, selectAllItems, selectCourseItems, selectSelectedItem
+  selectItems, selectParentItems, selectAllItems, selectCourseItems, selectSelectedItem,
+  selectIsBeingPurchased, selectOwnsDescendant
 };
 
 export { actions, selectors };

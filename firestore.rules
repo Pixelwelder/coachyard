@@ -80,6 +80,15 @@ service cloud.firestore {
         allow read: if isUser();
         allow write: if false;
       }
+      match /sessions/{id} {
+        allow read: if isUser();
+        allow write: if false;
+
+        match /sessions/{id} {
+          allow read: if isUser();
+          allow write: if false;
+        }
+      }
 
       function isUser() {
         return request.auth != null && request.auth.uid == uid;

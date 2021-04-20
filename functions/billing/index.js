@@ -50,6 +50,7 @@ const { unlockCourse } = require('../courses/unlockCourse');
 /**
  * Any time a user is deleted, we delete all record of (1) their Stripe Customer, and (2) their payment methods.
  * TODO This is totally untested.
+ * TODO Also remove all sessions.
  */
 const stripe_onDeleteUser = functions.auth.user()
   .onDelete(async (user) => {
@@ -205,7 +206,7 @@ const createSubscription = functions.https.onCall(async (data, context) => {
   try {
     log({ message: `Billing: creating a subscription.`, data, context });
     checkAuth(context);
-    const { id: tier } = data;
+    const { tier } = data;
     const { auth: { uid } } = context;
 
     // This assumes we have a payment method.
@@ -214,6 +215,7 @@ const createSubscription = functions.https.onCall(async (data, context) => {
     const customer = customerDoc.data();
     console.log('got customer');
     const price = pricesByTier[tier];
+    console.log('price', price);
     const subscription = await stripe.subscriptions.create({
       customer: customer.customer_id,
       items: [{ price }],
@@ -425,15 +427,9 @@ stripe_webhooks.post(
       const event = stripe.webhooks.constructEvent(rawBody, signature, webhook_secret);
 
       const {
-        type,
-        data: {
-          object: {
-            id,
-            customer,
-            metadata
-          }
-        }
+        type, data: { object }
       } = event;
+      const { id, customer, metadata } = object;
       log({ message: 'Billing: Received Stripe webhook.', data: { type, id } });
 
       // IDEMPOTENCY
@@ -479,12 +475,38 @@ stripe_webhooks.post(
         }
 
         case 'checkout.session.completed': {
+          console.log('COMPLETED');
+          console.log(object);
           const { studentUid, courseUid } = metadata;
           console.log('Checkout completed!', studentUid, courseUid );
+          if (!studentUid || !courseUid) throw new Error(`Received ${studentUid}/${courseUid} for studentUid/courseUid.`);
+
+          // TODO It's possible to get more than one here, in the user has started more than one.
+          // When we get a success, we delete all pending sessions. TODO Revisit.
+          // await admin.firestore()
+          //   .collection('stripe_customers').doc(studentUid)
+          //   .collection('sessions').doc(courseUid)
+          //   .collection('sessions').doc(id)
+          //   .update({ session: object });
+
+          await admin.firestore().runTransaction(async (transaction) => {
+            const docs = await admin.firestore()
+              .collection('stripe_customers').doc(studentUid)
+              .collection('sessions').doc(courseUid)
+              .collection('sessions')
+              .get();
+
+            if (docs.size) {
+              console.log('Deleting all sessions');
+              await Promise.all(docs.docs.map((doc) => {
+                return transaction.delete(doc.ref);
+              }));
+            }
+          });
 
           // This is where we do the actual cloning of courses and such.
-          await unlockCourse({ studentUid, courseUid });
-          console.log('webhook done');
+          await unlockCourse(object);
+          console.log('webhook complete');
         }
 
         default: {

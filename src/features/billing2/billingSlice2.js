@@ -16,6 +16,8 @@ const initialState = {
   paymentMethods: [],
   payments: [],
   subscriptions: [],
+  sessions: [],
+
   tiers: [],
   tier: 0,
 
@@ -40,6 +42,7 @@ let unsubscribeStripeCustomer = () => {};
 let unsubscribePayments = () => {};
 let unsubscribePaymentMethods = () => {};
 let unsubscribeSubscriptions = () => {};
+let unsubscribeSessions = () => {};
 let unsubscribeUnlocked = () => {};
 const _startDataListeners = createAsyncThunk(
   `${name}/startDataListeners`,
@@ -49,6 +52,7 @@ const _startDataListeners = createAsyncThunk(
 
     unsubscribeStripeCustomer = stripeUserDoc
       .onSnapshot((snapshot) => {
+        console.log('stripe customer', snapshot.exists);
         if (snapshot.exists) {
           const customerData = snapshot.data();
           dispatch(generatedActions.setCustomerData(parseUnserializables(customerData)));
@@ -74,6 +78,22 @@ const _startDataListeners = createAsyncThunk(
               dispatch(generatedActions.setSubscriptions(subscriptions));
             });
 
+          // console.log('unsubscribeSessions');
+          // const { course } = selectedCourseSelectors.select(getState());
+          // unsubscribeSessions = stripeUserDoc
+          //   .collection('sessions')
+          //   .onSnapshot((snapshot) => {
+          //     console.log('sessions', snapshot.docs);
+          //     snapshot.docChanges().forEach((change) => {
+          //       if (change.type === 'modified') {
+          //         // Here we go.
+          //
+          //       }
+          //     })
+          //     const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+          //     dispatch(generatedActions.setSessions(sessions));
+          //   });
+
           unsubscribeUnlocked = stripeUserDoc
             .collection('unlocked')
             .onSnapshot((snapshot) => {
@@ -89,6 +109,7 @@ const _stopDataListeners = () => {
   unsubscribePaymentMethods();
   unsubscribePaymentMethods();
   unsubscribeSubscriptions();
+  unsubscribeSessions();
   unsubscribeUnlocked();
 };
 
@@ -163,8 +184,9 @@ const unlockCourse = createAsyncThunk(
     //   await dispatch(_addPaymentMethod({ stripe, card }));
     // }
 
+    // Start the purchase session, then redirect.
     console.log('Unlocking...');
-    const { data: { sessionId } } = await app.functions().httpsCallable('purchaseCourse')({
+    const { data: { sessionId } } = await app.functions().httpsCallable('initializePurchase')({
       uid: course.uid,
       url: window.location.href
     });
@@ -186,9 +208,9 @@ const createSubscription = createAsyncThunk(
     if (!paymentMethods.length) await dispatch(_addPaymentMethod({ stripe, card }));
 
     // Now create the order.
-    console.log('ordering...');
+    console.log(`ordering ${selectedTierId}...`);
     app.analytics().logEvent(EventTypes.CREATE_SUBSCRIPTION_ATTEMPTED, { tier: selectedTierId });
-    await app.functions().httpsCallable('createSubscription')({ id: selectedTierId });
+    await app.functions().httpsCallable('createSubscription')({ tier: selectedTierId });
     app.analytics().logEvent(EventTypes.CREATE_SUBSCRIPTION, { tier: selectedTierId });
     console.log('order complete');
 
@@ -260,6 +282,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setPaymentMethods: setValue('paymentMethods'),
     setSubscriptions: setValue('subscriptions'),
     setPayments: setValue('payments'),
+    setSessions: setValue('sessions'),
     setTiers: setValue('tiers'),
     setTier: setValue('tier'),
 
@@ -297,7 +320,20 @@ const selectSubscription = createSelector(select, ({ subscriptions }) => {
   return active === undefined ? null : active;
 });
 const selectTier = createSelector(select, ({ tiers, tier }) => tiers[tier - 1]);
-const selectors = { select, selectSubscription, selectTier };
+const selectSessionsByCourseUid = createSelector(
+  select,
+  ({ sessions }) => {
+    console.log('reducing sessions', sessions);
+    return sessions.reduce((accum, session) => {
+      console.log('accum', accum);
+      if (!accum[session.courseUid]) accum[session.courseUid] = [];
+      console.log('added array');
+      accum[session.courseUid].push(session.session);
+      console.log()
+    }, {});
+  }
+);
+const selectors = { select, selectSubscription, selectTier, selectSessionsByCourseUid };
 
 export { actions, selectors };
 export default reducer;
