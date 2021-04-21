@@ -441,7 +441,10 @@ stripe_webhooks.post(
     try {
       const { body, rawBody, headers } = request;
       const signature = headers['stripe-signature'];
-      const event = stripe.webhooks.constructEvent(rawBody, signature, webhook_secret);
+
+      const event = process.env.FUNCTIONS_EMULATOR
+        ? body
+        : stripe.webhooks.constructEvent(rawBody, signature, webhook_secret);
 
       const {
         type, data: { object }
