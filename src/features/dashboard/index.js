@@ -13,6 +13,7 @@ import Chats from './chats';
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { tab } = useSelector(dashboardSelectors.select);
+  const isTeacher = useSelector(dashboardSelectors.selectIsTeacher);
 
   return (
     <div className="dashboard">
@@ -23,8 +24,8 @@ const Dashboard = () => {
         onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
       >
         <Tab label="Courses" />
-        <Tab label="Students" />
-        <Tab label="Chats" />
+        {isTeacher && <Tab label="Students"/>}
+        {isTeacher && <Tab label="Chats"/>}
         <Tab label="Schedule" />
       </Tabs>
       <div className="dashboard-content">

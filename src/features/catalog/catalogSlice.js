@@ -9,8 +9,8 @@ import { EventTypes } from '../../constants/analytics';
 import { createTokenSelectors } from '../../util/storeUtils';
 
 export const TABS = {
-  TEACHING: 0,
-  LEARNING: 1
+  TEACHING: 1,
+  LEARNING: 0
 };
 
 /**
@@ -32,7 +32,7 @@ const initialState = {
 
   tokensByUid: {},
 
-  tab: TABS.TEACHING
+  tab: TABS.LEARNING
 };
 
 let userListener = () => {};
@@ -57,13 +57,14 @@ const init = createAsyncThunk(
           .where('user', '==', uid)
           .orderBy('created')
           .onSnapshot((snapshot) => {
+            let tokensByUid = {};
             if (snapshot.size) {
-              const tokensByUid = snapshot.docs
+              tokensByUid = snapshot.docs
                 .map(doc => parseUnserializables(doc.data()))
                 .reduce((accum, token) => ({ ...accum, [token.uid]: token }), {});
-
-              dispatch(generatedActions.setTokensByUid(tokensByUid));
             }
+
+            dispatch(generatedActions.setTokensByUid(tokensByUid));
           });
       }
     });

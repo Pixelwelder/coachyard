@@ -197,7 +197,7 @@ const setLocation = createAsyncThunk(
         .get();
 
       if (!tokenDoc.size) {
-        return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
+        // return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
       }
     }
 

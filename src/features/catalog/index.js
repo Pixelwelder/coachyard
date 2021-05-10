@@ -12,6 +12,7 @@ const Catalog = () => {
   const { tab } = useSelector(catalogSelectors.select);
   const products = useSelector(dashboardSelectors.selectTemplateTokens);
   const courses = useSelector(dashboardSelectors.selectNonTemplateTokens);
+  const isTeacher = useSelector(dashboardSelectors.selectIsTeacher);
 
   return (
     <div className="catalog">
@@ -19,8 +20,8 @@ const Catalog = () => {
         value={tab}
         onChange={(event, newValue) => dispatch(catalogActions.setTab(newValue))}
       >
-        <Tab label="Teaching" />
         <Tab label="Learning" />
+        <Tab label="Teaching" />
       </Tabs>
       <div className="catalog-content">
         {tab === TABS.TEACHING && (

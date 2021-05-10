@@ -33,10 +33,11 @@ const init = createAsyncThunk(
         unsubscribeTokens = app.firestore().collection('tokens')
           .where('creatorUid', '==', authUser.uid)
           .onSnapshot((snapshot) => {
+            let tokens = [];
             if (snapshot.size) {
-              const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-              dispatch(generatedActions.setTokens(tokens));
+              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
             }
+            dispatch(generatedActions.setTokens(tokens));
           });
 
         unsubscribeCourses();
@@ -115,9 +116,15 @@ const selectTemplateCourses = createSelector(select, ({ courses }) => {
 const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
   return courses.filter(course => course.type !== 'template')
 });
+const selectIsTeacher = createSelector(select, ({ tokens }) => {
+  const isTeacher = !!tokens.find(({ access }) => access === 'admin');
+  console.log('isTeacher?', isTeacher);
+  return isTeacher;
+})
 const selectors = {
   select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens,
-  selectTemplateCourses, selectNonTemplateCourses
+  selectTemplateCourses, selectNonTemplateCourses,
+  selectIsTeacher
 };
 
 const actions = { ...generatedActions, init, setSelectedChat };

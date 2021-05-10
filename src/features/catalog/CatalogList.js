@@ -51,16 +51,17 @@ const CatalogList = ({
   );
 };
 
+const requireBilling = false;
 const ProductCatalogList = ({ title = 'Teaching', courses, showCreate = false }) => {
   const dispatch = useDispatch();
   const { tier } = useSelector(billingSelectors2.select);
   const history = useHistory();
 
   const onCreate = () => {
-    if (tier) {
-      dispatch(uiActions2.createCourse.open())
-    } else {
+    if (requireBilling && !tier) {
       history.push('/billing');
+    } else {
+      dispatch(uiActions2.createCourse.open())
     }
   };
 
