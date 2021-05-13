@@ -116,15 +116,9 @@ const selectTemplateCourses = createSelector(select, ({ courses }) => {
 const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
   return courses.filter(course => course.type !== 'template')
 });
-const selectIsTeacher = createSelector(select, ({ tokens }) => {
-  const isTeacher = !!tokens.find(({ access }) => access === 'admin');
-  console.log('isTeacher?', isTeacher);
-  return isTeacher;
-})
 const selectors = {
   select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens,
-  selectTemplateCourses, selectNonTemplateCourses,
-  selectIsTeacher
+  selectTemplateCourses, selectNonTemplateCourses
 };
 
 const actions = { ...generatedActions, init, setSelectedChat };

@@ -16,6 +16,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import { useHistory } from 'react-router-dom';
 
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
@@ -24,6 +25,7 @@ const NewCourseDialog = () => {
   const [lastIsOpen, setLastIsOpen] = useState(MODES.CLOSED);
   const dispatch = useDispatch();
   const { isOpen, displayName, students, description, date, type, isLoading, error } = useSelector(selectors.select);
+  const history = useHistory();
 
   const onChange = ({ target }) => {
     const { value } = target;
@@ -42,11 +44,18 @@ const NewCourseDialog = () => {
   const onSubmit = async (event) => {
     event.preventDefault();
     // TODO This should be in the action.
-    await dispatch(catalogActions.createNewCourse({
-      displayName, students, description, type,
-      // Don't create a first item on a template.
-      date: type === 'template' ? null : date
-    }));
+    const { payload: course } = await dispatch(
+      catalogActions.createNewCourse({
+        displayName, students, description, type,
+        // Don't create a first item on a template.
+        date: type === 'template' ? null : date
+      })
+    );
+
+    console.log('created', course);
+    dispatch(uiActions2.editCourse.setValues(course));
+    dispatch(uiActions2.editCourse.setIsEditing(true));
+    history.push(`/course/${course.uid}`);
   };
 
   return (
@@ -92,16 +101,16 @@ const NewCourseDialog = () => {
           {/*    }*/}
           {/*  </FormControl>*/}
           {/*)}*/}
-          {type === 'invite' && (
-            <FormControl>
-              <TextField
-                fullWidth
-                variant="outlined" label="Who's Invited?" placeholder="student1@gmail.com, student2@gmail.com, ..."
-                id="students" name="students" type="email" value={students} disabled={isLoading}
-                onChange={onChange}
-              />
-            </FormControl>
-          )}
+          {/*{type === 'invite' && (*/}
+          {/*  <FormControl>*/}
+          {/*    <TextField*/}
+          {/*      fullWidth*/}
+          {/*      variant="outlined" label="Who's Invited?" placeholder="student1@gmail.com, student2@gmail.com, ..."*/}
+          {/*      id="students" name="students" type="email" value={students} disabled={isLoading}*/}
+          {/*      onChange={onChange}*/}
+          {/*    />*/}
+          {/*  </FormControl>*/}
+          {/*)}*/}
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>
@@ -115,7 +124,7 @@ const NewCourseDialog = () => {
         </Button>
         <Button
           color="primary"
-          disabled={!displayName || (type === 'invite' && !students) || isLoading}
+          disabled={!displayName || isLoading}
           onClick={onSubmit}
         >
           Create!

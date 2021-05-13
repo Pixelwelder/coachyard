@@ -12,7 +12,7 @@ const Catalog = () => {
   const { tab } = useSelector(catalogSelectors.select);
   const products = useSelector(dashboardSelectors.selectTemplateTokens);
   const courses = useSelector(dashboardSelectors.selectNonTemplateTokens);
-  const isTeacher = useSelector(dashboardSelectors.selectIsTeacher);
+  const isTeacher = useSelector(catalogSelectors.selectIsTeacher);
 
   return (
     <div className="catalog">

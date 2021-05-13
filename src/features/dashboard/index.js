@@ -4,6 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Catalog from '../catalog';
 import './dashboard.scss';
 import { actions as dashboardActions, selectors as dashboardSelectors, TABS } from './dashboardSlice';
+import { selectors as catalogSelectors } from '../catalog/catalogSlice';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Schedule from '../schedule';
@@ -13,7 +14,7 @@ import Chats from './chats';
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { tab } = useSelector(dashboardSelectors.select);
-  const isTeacher = useSelector(dashboardSelectors.selectIsTeacher);
+  const isTeacher = useSelector(catalogSelectors.selectIsTeacher);
 
   return (
     <div className="dashboard">

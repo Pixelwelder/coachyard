@@ -75,8 +75,9 @@ const createNewCourse = createAsyncThunk(
   'createCourse',
   async (params, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.CREATE_COURSE_ATTEMPTED);
-    await app.functions().httpsCallable('createCourse2')(params);
+    const { data: course } = await app.functions().httpsCallable('createCourse2')(params);
     app.analytics().logEvent(EventTypes.CREATE_COURSE);
+    return course;
   }
 );
 
@@ -375,9 +376,14 @@ const actions = {
 };
 
 const select = ({ catalog }) => catalog;
+const selectTokens = createSelector(select, ({ tokensByUid }) => Object.values(tokensByUid));
+const selectIsTeacher = createSelector(
+  selectTokens, tokens => !!tokens.find(({ access }) => access === 'admin')
+);
 
 const selectors = {
   select,
+  selectIsTeacher,
   ...createTokenSelectors(select)
 };
 

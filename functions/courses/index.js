@@ -70,11 +70,13 @@ const createCourse2 = async (data, context) => {
       return course;
     });
 
-    // Don't need to wait for this.
-    uploadImage({
+    // Don't really need to wait for this.
+    await uploadImage({
       path: './courses/generic-teacher-cropped.png',
       destination: `courses/${course.uid}.png`
     });
+
+    return course;
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -344,6 +346,12 @@ const deleteCourse = async (data, context) => {
       const courseDoc = await transaction.get(courseRef);
       const course = courseDoc.data();
       if (course.creatorUid !== uid) throw new Error(`User ${uid} did not create ${courseUid}.`);
+
+      // Currently, the user can't delete a course that has children.
+      const childrenRef = admin.firestore().collection('courses')
+        .where('parent', '==', courseUid);
+      const childrenDocs = await transaction.get(childrenRef);
+      if (childrenDocs.size) throw new Error('Cannot delete a course that has already been purchased.');
 
       transaction.delete(courseRef);
     });

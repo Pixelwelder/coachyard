@@ -26,10 +26,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-
-const MultiButton = () => {
-
-};
+import { selectors as catalogSelectors } from '../catalog/catalogSlice';
 
 const Course = () => {
   const { courseUid, itemUid } = useParams();
@@ -43,6 +40,7 @@ const Course = () => {
   const isPurchasing = useSelector(selectedCourseSelectors.selectIsBeingPurchased);
   const ownsDescendant = useSelector(selectedCourseSelectors.selectOwnsDescendant);
   const ownedDescendant = useSelector(selectedCourseSelectors.selectOwnedDescendant);
+  const isTeacher = useSelector(catalogSelectors.selectIsTeacher);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -180,7 +178,7 @@ const Course = () => {
               <>
                 <ItemList />
                 <div className="toc-footer">
-                  {hasAccess && (
+                  {hasAccess && isTeacher && (
                     <>
                       <Button
                         variant="contained"
