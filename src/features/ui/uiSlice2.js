@@ -6,6 +6,7 @@ import editItemSlice from './editItemSlice';
 import createAccountSlice from './createAccountSlice';
 import accountSlice from './accountSlice';
 import editCoachSlice from './editCoachSlice';
+import confirmActionSlice from './confirmActionSlice';
 import { deleteCourseSlice, deleteItemSlice } from './deleteSlice';
 
 // Create a combined reducer, with one slice per UI element.
@@ -18,7 +19,8 @@ export default combineReducers({
   deleteCourse: deleteCourseSlice.reducer,
   deleteItem: deleteItemSlice.reducer,
   editCoach: editCoachSlice.reducer,
-  account: accountSlice.reducer
+  account: accountSlice.reducer,
+  confirmAction: confirmActionSlice.reducer
 });
 
 const select = ({ ui2 }) => ui2;
@@ -31,6 +33,7 @@ const selectDeleteCourse = createSelector(select, ({ deleteCourse }) => deleteCo
 const selectDeleteItem = createSelector(select, ({ deleteItem }) => deleteItem);
 const selectEditCoach = createSelector(select, ({ editCoach }) => editCoach);
 const selectAccount = createSelector(select, ({ account }) => account);
+const selectConfirmAction = createSelector(select, ({ confirmAction }) => confirmAction);
 const selectors = {
   select,
   createAccount: { select: selectCreateAccount },
@@ -41,7 +44,8 @@ const selectors = {
   deleteCourse: { select: selectDeleteCourse },
   deleteItem: { select: selectDeleteItem },
   editCoach: { select: selectEditCoach },
-  account: { select: selectAccount }
+  account: { select: selectAccount },
+  confirmAction: { select: selectConfirmAction }
 };
 
 const actions = {
@@ -53,7 +57,8 @@ const actions = {
   deleteCourse: deleteCourseSlice.actions,
   deleteItem: deleteItemSlice.actions,
   editCoach: editCoachSlice.actions,
-  account: accountSlice.actions
+  account: accountSlice.actions,
+  confirmAction: confirmActionSlice.actions
 };
 
 export { selectors, actions };

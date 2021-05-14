@@ -9,8 +9,6 @@ const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
 const { initializePurchase } = require('./initializePurchase');
 const stripe = require('../billing/stripe');
-const express = require('express');
-const bodyParser = require('body-parser');
 
 const tokenFromCourse = (course, user) => {
   const timestamp = admin.firestore.Timestamp.now();

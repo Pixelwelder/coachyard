@@ -4,7 +4,6 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectors as billingSelectors, actions as billingActions } from './billingSlice';
 import Subscription from './Subscription';
-import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 const Billing = () => {
   const stripe = useStripe();

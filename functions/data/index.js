@@ -63,13 +63,14 @@ const newCourse = (overrides) => ({
   displayName: '',
   description: '',
   // Once this is cloned for a user, it becomes basic.
-  type: 'invite', // public(?), invite(?), template, basic
-  price: 1000, // in cents
+  type: 'basic', // template, basic
+  price: 4995, // in cents
   parent: '',
   numChats: 0,
   numChatsUnseen: 0,
   itemOrder: [],      // Items that in this course plus all descendant courses.
   localItemOrder: [], // Items that are _only_ in this course. They are cloned for descendant courses.
+  isPublic: false,
   ...overrides
 });
 
@@ -117,6 +118,7 @@ const newCourseToken = (overrides) => ({
   parent: '',
   creatorUid: '',
   type: 'basic', // 'basic', 'template'
+  isPublic: false,
 
   ...overrides
 });

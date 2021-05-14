@@ -37,6 +37,7 @@ const tokenFromCourse2 = (course, user, overrides = {}) => {
     created: timestamp,
     creatorUid: course.creatorUid,
     displayName: course.displayName,
+    isPublic: course.isPublic,
     parent: course.parent,
     price: course.price,
     type: 'basic',

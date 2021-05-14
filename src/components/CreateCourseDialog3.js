@@ -82,8 +82,7 @@ const NewCourseDialog = () => {
           <FormControl component="fieldset">
             <FormLabel component="legend">This course is:</FormLabel>
             <RadioGroup row aria-label="type" name="type" value={type} onChange={onChange}>
-              <FormControlLabel value="invite" control={<Radio />} label="Invite-only" />
-              <FormControlLabel value="public" control={<Radio />} label="Public" />
+              <FormControlLabel value="basic" control={<Radio />} label="Basic" />
               <FormControlLabel value="template" control={<Radio />} label="Template" />
             </RadioGroup>
           </FormControl>

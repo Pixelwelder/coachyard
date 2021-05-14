@@ -191,12 +191,14 @@ const setLocation = createAsyncThunk(
       }
 
       // User is logged in. Do they have access?
-      const tokenDoc = await app.firestore().collection('tokens')
+      const tokenDocs = await app.firestore().collection('tokens')
         .where('courseUid', '==', courseUid)
         .where('user', '==', app.auth().currentUser.uid)
         .get();
 
-      if (!tokenDoc.size) {
+      if (tokenDocs.size) {
+        if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
+        dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
         // return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
       }
     }
@@ -272,11 +274,10 @@ const setLocation = createAsyncThunk(
         // TODO Outstanding messages.
       });
 
-    // Get all access tokens.
+    // Get all access tokens - TODO if the user is admin.
     // TODO Is this necessary?
     unsubscribeStudentTokens = app.firestore().collection('tokens')
       .where('courseUid', '==', course.uid)
-      .where('user', '==', app.auth().currentUser.uid)
       .onSnapshot((snapshot) => {
         const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setTokens(tokens));
@@ -443,6 +444,7 @@ const { actions: generatedActions, reducer } = createSlice({
   initialState,
   reducers: {
     // _setUid: setValue('uid'),
+    setToken: setValue('token'),
     setTokens: setValue('tokens'),
     setCourse: setValue('course'),
     setCourseCreator: setValue('courseCreator'),
@@ -495,7 +497,8 @@ const { actions: generatedActions, reducer } = createSlice({
 const actions = {
   ...generatedActions, init, update,
   setLocation,
-  submitChatMessage, searchForEmail,
+  submitChatMessage,
+  searchForEmail,
   addUser, removeUser,
   purchaseCourse
 };

@@ -74,7 +74,16 @@ const setSelectedChat = createAsyncThunk(
         dispatch(generatedActions._setSelectedChat(messages));
       });
   }
-)
+);
+
+const clearChat = createAsyncThunk(
+  `${name}/clearChat`,
+  async (_, { getState }) => {
+    const { selectedChatUid } = select(getState());
+    const result = await app.functions().httpsCallable('clearChat')({ courseUid: selectedChatUid });
+    console.log('chat cleared');
+  }
+);
 
 const { reducer, actions: generatedActions } = createSlice({
   name,
@@ -121,7 +130,7 @@ const selectors = {
   selectTemplateCourses, selectNonTemplateCourses
 };
 
-const actions = { ...generatedActions, init, setSelectedChat };
+const actions = { ...generatedActions, init, setSelectedChat, clearChat };
 
 export { selectors, actions };
 export default reducer;

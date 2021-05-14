@@ -20,6 +20,7 @@ import FirebaseSignIn from '../components/FirebaseSignIn';
 import { GlobalError } from './Error';
 import LoadingModal from '../components/LoadingModal';
 import UnlockDialog from '../features/billing2/UnlockDialog';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -84,6 +85,7 @@ const App = () => {
       <GlobalError />
       <LoadingModal />
       <UnlockDialog />
+      <ConfirmationDialog />
 
       {/*<Iframe*/}
       {/*  id="schedule"*/}

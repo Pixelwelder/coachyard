@@ -28,7 +28,8 @@ export default configureStore({
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {
-      ignoredActions: ['auth/stateChanged']
+      ignoredActions: ['auth/stateChanged', 'confirmAction/open'],
+      ignoredPaths: ['ui2.confirmAction.onConfirm']
     }
   })
 });

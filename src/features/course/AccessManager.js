@@ -19,6 +19,7 @@ const AccessManager = () => {
   const { course, isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
   const { price, type } = editCourse;
+  const isPublic = false;
 
   // useEffect(() => {
   //   dispatch(uiActions2.editCourse.setValues(course));
@@ -33,12 +34,22 @@ const AccessManager = () => {
     dispatch(uiActions2.editCourse.setValues(data));
   };
 
+  const onChangePublic = (value) => {
+
+  }
+
   if (!course) return null;
   return (
     <div className="access-manager">
       {['public', 'template'].includes(type) && (
         <>
-          <Typography className="light-text course-price">How much does this course cost?</Typography>
+          <p>{type}</p>
+          <Typography className="light-text">Is this course open to the public?</Typography>
+          <RadioGroup className="vertical-spacer" row aria-label="type" name="public" value={isPublic} onChange={onChange}>
+            <FormControlLabel value="true" control={<Radio />} label="Public" />
+            <FormControlLabel value="false" control={<Radio />} label="Private" />
+          </RadioGroup>
+          <Typography className="light-text vertical-spacer">How much does this course cost?</Typography>
           <div className="price-container">
             <Typography className="currency-sign" variant="h6">$</Typography>
             <TextField

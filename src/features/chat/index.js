@@ -3,9 +3,10 @@ import app from 'firebase/app';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import StorageImage from '../../components/StorageImage';
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { selectors as assetsSelectors, actions as assetsActions } from '../assets/assetsSlice';
+import { selectors as uiSelectors2, actions as uiActions2 } from '../ui/uiSlice2';
+import { actions as dashboardActions } from '../dashboard/dashboardSlice';
 import './chat.scss';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
 import Typography from '@material-ui/core/Typography';
@@ -54,15 +55,27 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
     setMessage('');
   };
 
+  const onClear = async () => {
+    // const result = await dispatch(getConfirmation());
+    dispatch(uiActions2.confirmAction.open({
+      onConfirm: () => {
+        dispatch(dashboardActions.clearChat());
+      }
+    }));
+  };
+
+  const isDisabled = !hasAccess || !courseUid;
+
   useEffect(() => {
     console.log('SCROLL');
     if (dummy.current) {
       dummy.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [dummy, messages])
+  }, [dummy, messages]);
 
   return (
     <>
+      <Button onClick={onClear} disabled={isDisabled || !messages.length}>Clear</Button>
       {hasAccess && !!courseUid
         ? (
           <ul className="chat-main">
@@ -86,14 +99,14 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
           placeholder="Send message"
           value={message}
           onChange={({ target: { value } }) => onChange(value)}
-          disabled={!hasAccess || !courseUid}
+          disabled={isDisabled}
         />
         <Button
           variant="contained"
           color="primary"
           type="submit"
           onClick={onSubmit}
-          disabled={!hasAccess || !courseUid}
+          disabled={isDisabled}
         >
           Submit
         </Button>
