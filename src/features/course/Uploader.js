@@ -15,7 +15,7 @@ export const Uploader = ({ onChange, disabled }) => {
     const go = async () => {
       const authUser = app.auth().currentUser;
       const { claims: { remaining = 0 } } = await authUser.getIdTokenResult(true);
-      if (remaining <= 0) setAccountLimited(true);
+      // if (remaining <= 0) setAccountLimited(true);
       setRemaining(Math.floor(remaining));
     }
     go();
@@ -27,28 +27,18 @@ export const Uploader = ({ onChange, disabled }) => {
 
   return (
     <div className="uploader-container">
-      {/*<FileDrop*/}
-      {/*  onDrop={() => {}}*/}
-      {/*  onTargetClick={onTargetClick}*/}
-      {/*/>*/}
       <input className="upload-input" ref={fileInputRef} type="file" onChange={onChange} disabled={isDisabled()}/>
-      {accountLimited
-        ? (
-          <>
-            <p className="account-warning">You have reached the limits of your account.</p>
-            <Link to="/billing">Upgrade here</Link>.
-          </>
-        )
-        : (
-          <p className="account-info">You have {remaining} video minutes remaining on your account.</p>
-        )
-      }
+      {/*{accountLimited*/}
+      {/*  ? (*/}
+      {/*    <>*/}
+      {/*      <p className="account-warning">You have reached the limits of your account.</p>*/}
+      {/*      <Link to="/billing">Upgrade here</Link>.*/}
+      {/*    </>*/}
+      {/*  )*/}
+      {/*  : (*/}
+      {/*    <p className="account-info">You have {remaining} video minutes remaining on your account.</p>*/}
+      {/*  )*/}
+      {/*}*/}
     </div>
-    // <input className="upload-input" type="file" onChange={onChange} />
-    // : <DropzoneArea
-    //     filesLimit={1}
-    //     maxFileSize={5000000000}
-    //     onChange={onUpload}
-    //   />
   );
 };
