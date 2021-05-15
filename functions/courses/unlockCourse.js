@@ -1,7 +1,29 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { uploadImage } = require('./images');
-const { cloneCourseData, createGetItem, tokenFromCourse2} = require('./utils');
+const { cloneCourseData, createGetItem, tokenFromCourse2 } = require('./utils');
+
+const _unlockCourse = async ({ courseDoc, studentUid }) => {
+
+  await admin.firestore().runTransaction(async (transaction) => {
+    // This is a real problem; the student has paid twice.
+    const tokenCheck = await admin.firestore().collection('tokens')
+      .where('courseUid', '==', courseDoc.id)
+      .where('user', '==', studentUid);
+    if (tokenCheck.exists) throw new Error(`${studentUid} already has access to ${courseDoc.id}.`);
+
+    const course = courseDoc.data();
+
+    const studentRef = admin.firestore().collection('users').doc(studentUid);
+    const studentDoc = await transaction.get(studentRef);
+    const student = studentDoc.data();
+
+    // Create a new token.
+    const { ref, data } = tokenFromCourse2(course, student);
+    await transaction.set(ref, data);
+    return course;
+  });
+};
 
 const _cloneCourse2 = async ({ courseDoc, studentUid }) => {
   console.log('cloning...');
@@ -72,8 +94,7 @@ const unlockCourse = async (object) => {
   if (course.type === 'template') {
     return _cloneCourse2({ courseDoc, studentUid });
   } else {
-    throw new Error('Not implemented: unlock basic course.')
-    // return _unlockCourse(data, context);
+    return _unlockCourse({ courseDoc, studentUid });
   }
 };
 

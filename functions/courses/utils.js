@@ -28,11 +28,10 @@ const createGetItem = transaction => async (collection, uid) => {
   return { ref, data };
 };
 
-const tokenFromCourse2 = (course, user, overrides = {}) => {
-  const ref = admin.firestore().collection('tokens').doc();
+const tokenUpdateFromCourse = (course) => {
   const timestamp = admin.firestore.Timestamp.now();
-  const data = {
-    access: 'student',
+
+  return {
     courseUid: course.uid,
     created: timestamp,
     creatorUid: course.creatorUid,
@@ -42,6 +41,16 @@ const tokenFromCourse2 = (course, user, overrides = {}) => {
     price: course.price,
     type: 'basic',
     updated: timestamp,
+  }
+};
+
+const tokenFromCourse2 = (course, user, overrides = {}) => {
+  const ref = admin.firestore().collection('tokens').doc();
+
+  const data = {
+    ...tokenUpdateFromCourse(course),
+    access: 'student',
+    type: 'basic',
     user: user.uid,
     userDisplayName: user.displayName,
     uid: ref.id,
@@ -51,8 +60,30 @@ const tokenFromCourse2 = (course, user, overrides = {}) => {
   return { data, ref };
 };
 
+const getChildCourseUpdate = ({ displayName = '', description = '' } = {}) => ({
+  displayName,
+  description
+});
+
+/**
+ * Filter out the junk.
+ */
+const filterCourseItem = (params) => {
+  const paramNames = ['displayName', 'description', 'type', 'price', 'isPublic'];
+  const courseItem = paramNames.reduce((accum, paramName) => {
+    return params.hasOwnProperty(paramName) && params[paramName] !== null && params[paramName] !== undefined
+      ? { ...accum, [paramName]: params[paramName ]}
+      : accum;
+  }, {});
+
+  return courseItem;
+};
+
 module.exports = {
   cloneCourseData,
   createGetItem,
-  tokenFromCourse2
+  tokenUpdateFromCourse,
+  tokenFromCourse2,
+  getChildCourseUpdate,
+  filterCourseItem
 };

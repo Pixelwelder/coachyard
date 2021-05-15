@@ -5,25 +5,11 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { getMuxHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
+const { tokenUpdateFromCourse, tokenFromCourse2, getChildCourseUpdate, filterCourseItem } = require('./utils');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
 const { initializePurchase } = require('./initializePurchase');
 const stripe = require('../billing/stripe');
-
-const tokenUpdateFromCourse = (course) => {
-  const timestamp = admin.firestore.Timestamp.now();
-
-  return {
-    courseUid: course.uid,
-    created: timestamp,
-    creatorUid: course.creatorUid,
-    displayName: course.displayName,
-    isPublic: course.isPublic,
-    parent: course.parent,
-    price: course.price,
-    updated: timestamp
-  }
-};
 
 const tokenFromCourse = (course, user) => {
   return {
@@ -63,15 +49,16 @@ const createCourse2 = async (data, context) => {
       await transaction.set(courseRef, course);
 
       // Now add the teacher's token to the database.
-      const teacherTokenRef = admin.firestore().collection('tokens').doc();
-      const teacherToken = {
-        ...tokenFromCourse(course, { uid, displayName: teacherName }),
-        access: 'admin',
-        uid: teacherTokenRef.id,
-        courseUid: courseRef.id,
-        type
-      };
-      await transaction.create(teacherTokenRef, teacherToken);
+      const { data, ref } = tokenFromCourse2(
+        course,
+        { uid, displayName: teacherName },
+        {
+          access: 'admin',
+          courseUid: courseRef.id,
+          type
+        }
+      );
+      await transaction.create(ref, data);
 
       return course;
     });
@@ -89,43 +76,12 @@ const createCourse2 = async (data, context) => {
   }
 };
 
-/**
- * Filter out the junk.
- */
-const filterCourseItem = (params) => {
-  const paramNames = ['displayName', 'description', 'type', 'price', 'isPublic'];
-  const courseItem = paramNames.reduce((accum, paramName) => {
-    return params.hasOwnProperty(paramName) && params[paramName] !== null && params[paramName] !== undefined
-      ? { ...accum, [paramName]: params[paramName ]}
-      : accum;
-  }, {});
-
-  return courseItem;
-};
-
-const getChildCourseUpdate = ({ displayName = '', description = '' } = {}) => ({
-  displayName,
-  description
-});
-
 const updateCourse = async (data, context) => {
   try {
     log({ message: 'Attempting to update course...', data, context });
     checkAuth(context);
     const { auth: { uid } } = context;
     const { uid: courseUid, update } = data;
-
-    // Do we need to find a user?
-    // const { student } = filteredCourseItem;
-    // let studentUser;
-    // if (student) {
-    //   try {
-    //     studentUser = await admin.auth().getUserByEmail(student);
-    //     filteredCourseItem.student = studentUser.uid;
-    //   } catch (error) {
-    //     log({ message: `No student ${student}.`, data, context });
-    //   }
-    // }
 
     await admin.firestore().runTransaction(async (transaction) => {
       const ref = admin.firestore().collection('courses').doc(courseUid);
@@ -176,175 +132,6 @@ const updateCourse = async (data, context) => {
 
     log({ message: 'Course successfully updated.', data, context });
     return { message: 'Course updated.', course: data };
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-const addUser = async (data, context) => {
-  try {
-    checkAuth(context);
-    const { courseUid, studentEmail } = data;
-    console.log(data);
-
-    await admin.firestore().runTransaction(async (transaction) => {
-      // Grab the course.
-      const courseRef = admin.firestore().collection('courses').doc(courseUid);
-      const courseDoc = await transaction.get(courseRef);
-      if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-      const course = courseDoc.data();
-      const { displayName, image, creatorUid } = course;
-
-      // Grab the student.
-      const studentRef = admin.firestore()
-        .collection('users')
-        .where('email', '==', studentEmail)
-        .limit(1);
-      const studentDocs = await transaction.get(studentRef);
-      const student = studentDocs.size
-        ? studentDocs.docs[0].data()
-        : { uid: studentEmail, displayName: studentEmail };
-
-      // Check to make sure token doesn't already exist.
-      const existingTokenRef = admin.firestore().collection('tokens')
-        .where('courseUid', '==', courseUid)
-        .where('user', '==', student.uid)
-        .limit(1);
-      const existingTokenDoc = await transaction.get(existingTokenRef);
-      if (existingTokenDoc.size) throw new Error(`User ${studentEmail} already has access to ${courseUid}.`);
-
-      const tokenRef = admin.firestore().collection('tokens').doc();
-      const studentToken = {
-        ...tokenFromCourse(course, student),
-        access: 'student',
-        uid: tokenRef.id
-      };
-
-      await transaction.set(tokenRef, studentToken);
-    });
-
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-const removeUser = async (data, context) => {
-  try {
-    checkAuth(context);
-    const { tokenUid } = data;
-    const result = await admin.firestore().runTransaction(async (transaction) => {
-
-      const tokenRef = admin.firestore().collection('tokens').doc(tokenUid);
-      const tokenDoc = await transaction.get(tokenRef);
-      if (!tokenDoc.exists) throw new Error(`Token ${tokenUid} does not exist.`);
-
-      await transaction.delete(tokenRef);
-    });
-  } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-const _unlockCourse = async (data, context) => {
-  const { courseUid } = data;
-  const {
-    auth: {
-      uid,
-      token: { name: userDisplayName }
-    }
-  } = context;
-
-  await admin.firestore().runTransaction(async (transaction) => {
-    const courseRef = admin.firestore().collection('courses').doc(courseUid);
-    const courseDoc = await transaction.get(courseRef);
-    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-    const course = courseDoc.data();
-
-    // const studentRef = admin.firestore().collection('users').doc(uid);
-    // const studentDoc = await transaction.get(studentRef);
-    // if (!studentDoc.exists) throw new Error(`Student ${uid} does not exist.`);
-    // const { displayName: userDisplayName } = studentDoc.data();
-
-    const tokenRef = admin.firestore().collection('tokens').doc();
-    const studentToken = {
-      ...tokenFromCourse(course, { uid, displayName: userDisplayName }),
-      access: 'student',
-      uid: tokenRef.id
-    };
-    // const studentToken = newCourseToken({
-    //   uid: tokenRef.id,
-    //   created: timestamp,
-    //   updated: timestamp,
-    //   user: uid,
-    //   userDisplayName,
-    //   courseUid,
-    //   access: 'student',
-    //   creatorUid
-    // });
-
-    await transaction.set(tokenRef, studentToken);
-    return course;
-  });
-};
-
-const purchaseCourse = async (data, context) => {
-  try {
-    checkAuth(context);
-    const { auth: { uid } } = context;
-    const { uid: courseUid } = data;
-    console.log('checking course', courseUid);
-    const courseDoc = await admin.firestore().collection('courses').doc(courseUid).get();
-    if (!courseDoc.exists) throw new Error(`Course ${courseUid} does not exist.`);
-
-    const course = courseDoc.data();
-    console.log('got course', course);
-
-    // Make sure this user does not already have access.
-    console.log('checking tokens');
-    const tokenDocs = await admin.firestore().collection('tokens')
-      .where('courseUid', '==', courseUid)
-      .where('user', '==', uid).get();
-    if (tokenDocs.size) throw new Error(`User ${uid} already owns ${courseUid}.`);
-
-    // Actually purchase it. Assumes we already have a payment method.
-    // Grab the customer.
-    console.log('Getting Stripe customer');
-    const customerDoc = await admin.firestore().collection('stripe_customers').doc(uid).get();
-    if (!customerDoc.exists) throw new Error(`Customer ${uid} doesn't exist.`);
-    const customer = customerDoc.data();
-    console.log('got Stripe customer');
-
-    // TODO For now we are assuming there is only one payment method.
-    const paymentMethodDocs = await customerDoc.ref.collection('payment_methods').limit(1).get();
-    if (!paymentMethodDocs.size) throw new Error(`No payment method for customer ${uid}`);
-    const paymentMethodDoc = paymentMethodDocs.docs[0];
-    const paymentMethod = paymentMethodDoc.data();
-    console.log('got Stripe payment method');
-
-    console.log('making payment...');
-    const result = await stripe.paymentIntents.create({
-      amount: course.price,
-      currency: 'usd',
-      payment_method: paymentMethodDoc.id,
-      customer: customer.customer_id,
-      description: `Purchase: ${course.displayName}`,
-      metadata: { creatorUid: course.creatorUid },
-      statement_descriptor_suffix: course.displayName.slice(0, 22)
-    });
-
-    console.log('payment complete:', result);
-    const doc = customerDoc.ref.collection('payments').doc();
-    doc.set({ ...result, uid: doc.id });
-
-    if (course.type === 'template') {
-      return _cloneCourse2(data, context);
-    } else {
-      return _unlockCourse(data, context);
-    }
-
   } catch (error) {
     log({ message: error.message, data: error, context, level: 'error' });
     throw new functions.https.HttpsError('internal', error.message, error);
@@ -507,13 +294,12 @@ module.exports = {
   updateCourse: functions.https.onCall(updateCourse),
   // getCourse: functions.https.onCall(getCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
-  addUser: functions.https.onCall(addUser),
-  removeUser: functions.https.onCall(removeUser),
   initializePurchase: functions.https.onCall(initializePurchase),
   // updateCourse: functions.https.onCall(updateCourse),
   // giveCourse: functions.https.onCall(giveCourse),
   // getAllCourses: functions.https.onCall(getAllCourses),
   // getCreatedCourses: functions.https.onCall(getCreatedCourses),
   onCourseUpdated,
-  onCourseDeleted
+  onCourseDeleted,
+  ...require('./users')
 };
