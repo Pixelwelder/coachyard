@@ -18,8 +18,7 @@ const AccessManager = () => {
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const { course, isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
-  const { price, type } = editCourse;
-  const isPublic = false;
+  const { price, type, isPublic } = editCourse;
 
   // useEffect(() => {
   //   dispatch(uiActions2.editCourse.setValues(course));
@@ -34,41 +33,38 @@ const AccessManager = () => {
     dispatch(uiActions2.editCourse.setValues(data));
   };
 
-  const onChangePublic = (value) => {
-
+  const onChangePublic = ({ target: { value } }) => {
+    dispatch(uiActions2.editCourse.setValues({ isPublic: value === 'true' }));
   }
 
   if (!course) return null;
   return (
     <div className="access-manager">
-      {['public', 'template'].includes(type) && (
-        <>
-          <p>{type}</p>
-          <Typography className="light-text">Is this course open to the public?</Typography>
-          <RadioGroup className="vertical-spacer" row aria-label="type" name="public" value={isPublic} onChange={onChange}>
-            <FormControlLabel value="true" control={<Radio />} label="Public" />
-            <FormControlLabel value="false" control={<Radio />} label="Private" />
-          </RadioGroup>
-          <Typography className="light-text vertical-spacer">How much does this course cost?</Typography>
-          <div className="price-container">
-            <Typography className="currency-sign" variant="h6">$</Typography>
-            <TextField
-              variant="outlined" label="Price" placeholder="49.95"
-              id="students" name="students"
-              value={price / 100}
-              disabled={isLoading}
-              inputProps={{
-                type: 'number',
-                step: '0.01'
-              }}
-              onChange={({ target: { value } }) => onChange({
-                // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
-                price: value * 100
-              })}
-            />
-          </div>
-        </>
-      )}
+      <Typography className="light-text">Is this course open to the public?</Typography>
+      <RadioGroup
+        className="vertical-spacer" row aria-label="type" name="public" value={isPublic.toString()} onChange={onChangePublic}
+      >
+        <FormControlLabel value="false" control={<Radio />} label="Private" />
+        <FormControlLabel value="true" control={<Radio />} label="Public" />
+      </RadioGroup>
+      <Typography className="light-text vertical-spacer">How much does this course cost?</Typography>
+      <div className="price-container">
+        <Typography className="currency-sign" variant="h6">$</Typography>
+        <TextField
+          variant="outlined" label="Price" placeholder="49.95"
+          id="students" name="students"
+          value={price / 100}
+          disabled={isLoading}
+          inputProps={{
+            type: 'number',
+            step: '0.01'
+          }}
+          onChange={({ target: { value } }) => onChange({
+            // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
+            price: Math.floor(value * 100)
+          })}
+        />
+      </div>
       <StudentManager />
     </div>
   );

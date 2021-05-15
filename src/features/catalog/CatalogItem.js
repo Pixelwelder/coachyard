@@ -49,7 +49,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           image={'/images/generic-teacher-cropped.png'}
         >
           {isCreator && (
-            <Typography className="catalog-item-type item-type">{capitalize(item.type)}</Typography>
+            <Typography className="catalog-item-type item-type">{item.isPublic ? 'published' : 'unpublished'}</Typography>
           )}
           {!isCreator && hasAccess && (
             <Typography className="catalog-item-type item-owned">Owned</Typography>

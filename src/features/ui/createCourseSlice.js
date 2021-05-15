@@ -6,7 +6,7 @@ const initialState = {
   students: '',
   description: '',
   date: '',
-  type: 'template'
+  type: 'basic'
 };
 
 export default createUISlice({

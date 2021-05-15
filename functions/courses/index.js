@@ -10,18 +10,26 @@ const { uploadImage } = require('./images');
 const { initializePurchase } = require('./initializePurchase');
 const stripe = require('../billing/stripe');
 
-const tokenFromCourse = (course, user) => {
+const tokenUpdateFromCourse = (course) => {
   const timestamp = admin.firestore.Timestamp.now();
+
   return {
-    access: 'student',
     courseUid: course.uid,
     created: timestamp,
     creatorUid: course.creatorUid,
     displayName: course.displayName,
+    isPublic: course.isPublic,
     parent: course.parent,
     price: course.price,
+    updated: timestamp
+  }
+};
+
+const tokenFromCourse = (course, user) => {
+  return {
+    ...tokenUpdateFromCourse(course),
+    access: 'student',
     type: 'basic',
-    updated: timestamp,
     user: user.uid,
     userDisplayName: user.displayName
   };
@@ -85,7 +93,7 @@ const createCourse2 = async (data, context) => {
  * Filter out the junk.
  */
 const filterCourseItem = (params) => {
-  const paramNames = ['displayName', 'description', 'type', 'price'];
+  const paramNames = ['displayName', 'description', 'type', 'price', 'isPublic'];
   const courseItem = paramNames.reduce((accum, paramName) => {
     return params.hasOwnProperty(paramName) && params[paramName] !== null && params[paramName] !== undefined
       ? { ...accum, [paramName]: params[paramName ]}
@@ -107,19 +115,17 @@ const updateCourse = async (data, context) => {
     const { auth: { uid } } = context;
     const { uid: courseUid, update } = data;
 
-    const filteredCourseItem = filterCourseItem(update);
-
     // Do we need to find a user?
-    const { student } = filteredCourseItem;
-    let studentUser;
-    if (student) {
-      try {
-        studentUser = await admin.auth().getUserByEmail(student);
-        filteredCourseItem.student = studentUser.uid;
-      } catch (error) {
-        log({ message: `No student ${student}.`, data, context });
-      }
-    }
+    // const { student } = filteredCourseItem;
+    // let studentUser;
+    // if (student) {
+    //   try {
+    //     studentUser = await admin.auth().getUserByEmail(student);
+    //     filteredCourseItem.student = studentUser.uid;
+    //   } catch (error) {
+    //     log({ message: `No student ${student}.`, data, context });
+    //   }
+    // }
 
     await admin.firestore().runTransaction(async (transaction) => {
       const ref = admin.firestore().collection('courses').doc(courseUid);
@@ -127,11 +133,28 @@ const updateCourse = async (data, context) => {
       const course = doc.data();
       if (course.creatorUid !== uid) throw new Error(`User ${uid} cannot update course ${course.uid}.`);
 
+      const filteredCourseItem = filterCourseItem(update);
+
       // We also need to update all descendants.
       // TODO This is not very scalable.
       const childCourses = await transaction.get(
         admin.firestore().collection('courses').where('parent', '==', ref.id)
       );
+
+      // And the tokens. TODO Also not scalable...?
+      const tokens = await transaction.get(
+        admin.firestore().collection('tokens').where('courseUid', '==', course.uid)
+      );
+      console.log('Found parent token', tokens.size);
+
+      const childTokens = await Promise.all(childCourses.docs.map(async childCourseDoc => {
+        const _childTokens = await admin.firestore().collection('tokens')
+          .where('courseUid', '==', childCourseDoc.id);
+        console.log(_childTokens.size);
+        return _childTokens;
+      }));
+
+      console.log(`Found ${childTokens.size} child tokens.`);
 
       if (childCourses.size) {
         console.log(`Updating ${childCourses.size} child courses...`);
@@ -144,6 +167,11 @@ const updateCourse = async (data, context) => {
 
       // Now update the central course.
       await transaction.update(ref, filteredCourseItem);
+
+      // Update the central tokens.
+      await Promise.all(
+        tokens.docs.map(tokenDoc => transaction.update(tokenDoc.ref, tokenUpdateFromCourse(update)))
+      );
     });
 
     log({ message: 'Course successfully updated.', data, context });

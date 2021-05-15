@@ -39,7 +39,7 @@ const load = createAsyncThunk(
           // Load courses.
           unsubscribeCourses = app.firestore().collection('courses')
             .where('creatorUid', '==', coach.uid)
-            .where('type', 'in', ['public', 'template'])
+            .where('isPublic', '==', true)
             .onSnapshot((snapshot) => {
               const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setCourses(courses));
@@ -47,7 +47,7 @@ const load = createAsyncThunk(
 
           unsubscribeTokens = app.firestore().collection('tokens')
             .where('user', '==', coach.uid)
-            .where('type', 'in', ['public', 'template'])
+            .where('isPublic', '==', true)
             .where('access', '==', 'admin')
             .onSnapshot((snapshot) => {
               const tokens = snapshot.docs

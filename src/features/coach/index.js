@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import app from 'firebase/app';
 import { useParams, useHistory } from 'react-router-dom';
 import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
@@ -14,9 +15,10 @@ const Coach = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { isLoading, error, coach } = useSelector(coachSelectors.select);
-  const products = useSelector(coachSelectors.selectProductTokens);
+  const products = useSelector(coachSelectors.selectTokens);
   const update = useSelector(uiSelectors2.editCoach.select);
   const { isOpen, description } = update;
+  const isUser = coach?.uid === app.auth().currentUser?.uid;
 
   useEffect(() => {
     dispatch(coachActions.load({ slug, history }));
@@ -46,7 +48,7 @@ const Coach = () => {
   return (
     <div className="coach-page">
       <Typography variant="h1">{coach.displayName}</Typography>
-      {/*TODO*/}
+      {/* TODO */}
       {isOpen
         ? (
           <TextField
@@ -58,7 +60,11 @@ const Coach = () => {
       {isLoading && <p>Loading...</p>}
       {!!error && <Alert severity="error">{error.message}</Alert>}
       {/*<PublicCatalogList />*/}
-      <BaseCatalogList title="Products" items={products} />
+      <BaseCatalogList
+        title="Products"
+        items={products}
+        emptyMessage={isUser ? 'You have no public products.' : 'This coach has no products.'}
+      />
       {/*{courses.map((course, index) => {*/}
       {/*  return <p key={index}>{course.displayName}</p>*/}
       {/*})}*/}

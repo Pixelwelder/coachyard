@@ -7,7 +7,7 @@ const initialState = {
   description: '',
   image: '',
   price: 0,
-  type: 'invite'
+  isPublic: false
 };
 
 export default createUISlice({ name: 'editCourse', initialState });

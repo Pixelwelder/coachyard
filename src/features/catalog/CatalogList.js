@@ -52,7 +52,12 @@ const CatalogList = ({
 };
 
 const requireBilling = false;
-const ProductCatalogList = ({ title = 'Teaching', courses, showCreate = false }) => {
+const ProductCatalogList = ({
+  title = 'Teaching',
+  emptyMessage = 'You have not created any courses yet.',
+  courses,
+  showCreate = false
+}) => {
   const dispatch = useDispatch();
   const { tier } = useSelector(billingSelectors2.select);
   const history = useHistory();
@@ -77,7 +82,7 @@ const ProductCatalogList = ({ title = 'Teaching', courses, showCreate = false })
         }
       }))}
       items={courses}
-      emptyMessage="You have not created any courses yet."
+      emptyMessage={emptyMessage}
     />
   );
 };
@@ -92,8 +97,8 @@ const NonTemplateCatalogList = () => {
   return <ProductCatalogList title="Teaching" courses={courses} />
 };
 
-const BaseCatalogList = ({ items, title, showCreate }) => {
-  return <ProductCatalogList title={title} courses={items} showCreate={showCreate} />
+const BaseCatalogList = ({ items, title, emptyMessage, showCreate }) => {
+  return <ProductCatalogList title={title} courses={items} showCreate={showCreate} emptyMessage={emptyMessage} />
 };
 
 const LearningCatalogList = ({ title = 'Learning' }) => {
