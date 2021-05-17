@@ -3,7 +3,7 @@ const fs = require('fs');
 const jdenticon = require('jdenticon');
 const { v4: uuid } = require('uuid');
 const Buffer = require('buffer').Buffer;
-const { project_id, service_account } = require('../__config__/firebase.json');
+const { project_id, service_account } = require('../config').firebase;
 
 admin.initializeApp({
   credential: admin.credential.cert(service_account),

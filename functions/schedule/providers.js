@@ -1,4 +1,4 @@
-const { url } = require('../__config__/easy.json');
+const { url } = require('../config').easy;
 const { getServices } = require('./services');
 const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
 

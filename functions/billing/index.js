@@ -7,7 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { setClaims } = require('../util/claims');
 const stripe = require('./stripe');
-const { webhook_secret } = require('../__config__/stripe.json');
+const { webhook_secret } = require('../config').stripe;
 const { unlockCourse } = require('../courses/unlockCourse');
 
 /**

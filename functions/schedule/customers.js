@@ -1,10 +1,9 @@
 const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { url } = require('../__config__/easy.json');
+const { url } = require('../config').easy;
 const { getServices } = require('./services');
 const { createGet, createList, createAdd, createDelete, createClear, createUpdate } = require('./base');
-
 const createCustomer = (overrides) => ({
   id: 97,
   firstName: "John",

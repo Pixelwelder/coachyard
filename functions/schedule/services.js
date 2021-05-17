@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { getEasyHeaders } = require('../util/headers');
 const { METHODS } = require('../util/methods');
-const { url } = require('../__config__/easy.json');
+const { url } = require('../config').easy;
 const { getCategories } = require('./categories');
 
 const createService = (overrides) => ({

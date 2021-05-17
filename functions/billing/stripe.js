@@ -1,5 +1,5 @@
 const { Stripe } = require('stripe');
-const { secret_key } = require('../__config__/stripe.json');
+const { secret_key } = require('../config').stripe;
 
 const stripe = new Stripe(
   secret_key,

@@ -1,6 +1,6 @@
-const { apiKey } = require('../__config__/daily.json');
-const { secret, tokenId } = require('../__config__/mux.json');
-const { user, password } = require('../__config__/easy.json');
+const { apiKey } = require('../config').daily;
+const { secret, tokenId } = require('../config').mux;
+const { user, password } = require('../config').easy;
 
 const getDailyHeaders = () => ({
   'Content-Type': 'application/json',
