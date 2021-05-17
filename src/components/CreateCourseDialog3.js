@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MODES from '../features/ui/Modes';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -6,6 +6,7 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import TextField from '@material-ui/core/TextField';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
+import { selectors as userSelectors } from '../features/app/userSlice';
 import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
@@ -21,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
   const { createCourse: actions } = uiActions2;
+  const { meta } = useSelector(userSelectors.select);
 
   const [lastIsOpen, setLastIsOpen] = useState(MODES.CLOSED);
   const dispatch = useDispatch();

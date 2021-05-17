@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@daily-co/daily-js": "^0.9.995",
+    "@daily-co/daily-js": "^0.9.999",
     "@date-io/luxon": "^1.0.4",
     "@material-ui/core": "^4.11.1",
     "@material-ui/data-grid": "^4.0.0-alpha.10",
@@ -33,7 +33,8 @@
     "react-redux": "^7.1.3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
-    "react-sizeme": "^2.6.12"
+    "react-sizeme": "^2.6.12",
+    "timezones-list": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",

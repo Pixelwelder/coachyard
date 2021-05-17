@@ -196,11 +196,13 @@ const setLocation = createAsyncThunk(
         .where('user', '==', app.auth().currentUser.uid)
         .get();
 
-      if (tokenDocs.size) {
-        if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
-        dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
-        // return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
+      if (!tokenDocs.size) {
+        return abandon('User does not have access to this course.');
       }
+
+      if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
+      dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
+      // return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
     }
 
     console.log('User has access to the course.');

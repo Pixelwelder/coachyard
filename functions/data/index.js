@@ -16,6 +16,7 @@ const newUserMeta = (overrides) => ({
   email: '', // TODO Update this when the authUser updates.
   displayName: '',
   tier: 0,   // Temporary
+  timezone: '',
   ...overrides
 });
 

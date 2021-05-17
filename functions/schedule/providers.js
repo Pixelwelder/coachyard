@@ -21,7 +21,6 @@ const createDay = (overrides) => {
       })
     ]
   };
-  console.log('DAY', day);
   return day;
 };
 
@@ -32,37 +31,36 @@ const createWorkingPlan = () => {
     ...accum,
     [day]: createDay()
   }), {});
-  console.log('WORKING PLAN', workingPlan);
   return workingPlan;
 };
 
 const createSettings = (overrides) => ({
-  username: "zjordan",
+  username: 'zjordan',
   password: 'password',
   notifications: false,
   googleSync: false,
-  googleCalendar: "calendar-id",
-  googleToken: "23897dfasdf7a98gas98d9",
+  googleCalendar: 'calendar-id',
+  googleToken: '23897dfasdf7a98gas98d9',
   syncFutureDays: 10,
   syncPastDays: 10,
-  calendarView: "default",
+  calendarView: 'default',
   working_plan: createWorkingPlan(),
   ...overrides
 });
 
 const createProvider = (overrides) => ({
   id: 143,
-  firstName: "Chloe",
-  lastName: "Doe",
-  email: "zjordan@mailinator.com",
-  mobile: "012345679-0",
-  phone: "0123456789-1",
-  address: "Some Str. 123",
-  city: "Some City",
-  state: "Some State",
-  zip: "12345",
-  timezone: 'UTC', // TODO
-  notes: "Test provider notes.",
+  firstName: 'Chloe',
+  lastName: 'Doe',
+  email: 'zjordan@mailinator.com',
+  mobile: '012345679-0',
+  phone: '0123456789-1',
+  address: 'Some Str. 123',
+  city: 'Some City',
+  state: 'Some State',
+  zip: '12345',
+  timezone: 'America/Chicago', // TODO
+  notes: 'Test provider notes.',
   services: [
     2, 3, 4
   ],
