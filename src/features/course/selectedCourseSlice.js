@@ -181,27 +181,23 @@ const setLocation = createAsyncThunk(
 
     // The course exists, but does this user have access to it?
     const course = parseUnserializables(courseDoc.data());
-    if (course.type !== 'template') {
-      // If the user is not logged in, then check for public.
-      if (!app.auth().currentUser) {
-        if (!course.isPublic) {
-          return abandon('User is not logged in, and this is not a template course.');
+    if (course.type === 'basic') {
+      // Only public and accessible course.
+      if (!course.isPublic) {
+        if (!app.auth().currentUser) abandon('This course is private and the user is not logged in.');
+
+        const tokenDocs = await app.firestore().collection('tokens')
+          .where('courseUid', '==', courseUid)
+          .where('user', '==', app.auth().currentUser.uid)
+          .get();
+
+        if (!tokenDocs.size) {
+          return abandon('User does not have access to this course.');
         }
+
+        if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
+        dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
       }
-
-      // User is logged in. Do they have access?
-      const tokenDocs = await app.firestore().collection('tokens')
-        .where('courseUid', '==', courseUid)
-        .where('user', '==', app.auth().currentUser.uid)
-        .get();
-
-      if (!tokenDocs.size) {
-        return abandon('User does not have access to this course.');
-      }
-
-      if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
-      dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
-      // return abandon(`User ${app.auth().currentUser.uid} does not have access to course ${courseUid}.`);
     }
 
     console.log('User has access to the course.');
