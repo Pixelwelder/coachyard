@@ -43,12 +43,10 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "./node_modules/.bin/eslint",
-    "prep:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
-    "prep:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
-    "deploy:dev": "firebase use dev && npm run prep:dev && npm run build && firebase deploy --except functions",
-    "deploy:prod": "firebase use prod && npm run prep:prod && npm run build && firebase deploy --except functions",
-    "start:dev": "firebase use dev && npm run prep:dev && npm run start",
-    "start:prod": "firebase use prod && npm run prep:prod && npm run start"
+    "deploy:dev": "firebase use dev && npm run build && firebase deploy --except functions",
+    "deploy:prod": "firebase use prod && npm run build && firebase deploy --except functions",
+    "start:dev": "firebase use dev&& npm run start",
+    "start:prod": "firebase use prod && npm run start"
   },
   "eslintConfig": {
     "extends": "react-app"

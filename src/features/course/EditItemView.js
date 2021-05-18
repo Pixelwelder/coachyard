@@ -48,8 +48,8 @@ const EditItemView = ({ requireUpload = false }) => {
       description: selectedItem.description,
       date: selectedItem.date || getDefaultDateTime(),
       file: selectedItem.file,
-      scheduler: selectedItem.date ? 'teacher' : 'student',
-      type: 'basic',
+      scheduler: course.type === 'basic' ? 'teacher' : 'student',
+      type: course.type,
     }));
   };
 
@@ -179,8 +179,8 @@ const EditItemView = ({ requireUpload = false }) => {
           <FormControl component="fieldset" variant="outlined" className="scheduler-control">
             <FormLabel>Scheduled by:</FormLabel>
             <RadioGroup row aria-label="type" name="scheduler" value={scheduler} onChange={onChange}>
-              <FormControlLabel value="teacher" control={<Radio />} label="Me" disabled={course.type !== 'basic'} />
-              <FormControlLabel value="student" control={<Radio />} label="My Student" disabled={course.type !== 'basic'} />
+              <FormControlLabel value="teacher" control={<Radio />} label="Me" disabled />
+              <FormControlLabel value="student" control={<Radio />} label="My Student" disabled />
             </RadioGroup>
           </FormControl>
         )}

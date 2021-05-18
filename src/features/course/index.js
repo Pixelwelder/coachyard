@@ -188,7 +188,7 @@ const Course = () => {
                         color="primary"
                         onClick={onOpen}
                       >
-                        Create New
+                        Add Item
                       </Button>
                       <Menu
                         id="create-new-menu"

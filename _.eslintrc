@@ -2,6 +2,7 @@
   "extends": "airbnb",
   "plugins": ["unused-imports"],
   "rules": {
+    "global-require": "off",
     "comma-dangle": "off",
     "max-len": "off",
     "unused-imports/no-unused-imports": "error",

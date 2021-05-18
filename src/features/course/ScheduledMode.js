@@ -15,7 +15,7 @@ const getDateTime = ({ course, item }) => {
   if (!item.date) {
     return {
       str: course.type === 'template'
-        ? 'This course is a template.'
+        ? 'When this course is purchased, the purchaser will be able to schedule a Live Session.'
         : 'This Live Session has not yet been scheduled.'
     };
   }

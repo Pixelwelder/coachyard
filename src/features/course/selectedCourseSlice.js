@@ -182,9 +182,11 @@ const setLocation = createAsyncThunk(
     // The course exists, but does this user have access to it?
     const course = parseUnserializables(courseDoc.data());
     if (course.type !== 'template') {
-      // If it's not a template, only logged-in users could possibly have access.
+      // If the user is not logged in, then check for public.
       if (!app.auth().currentUser) {
-        return abandon('User is not logged in, and this is not a template course.');
+        if (!course.isPublic) {
+          return abandon('User is not logged in, and this is not a template course.');
+        }
       }
 
       // User is logged in. Do they have access?
