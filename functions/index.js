@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
-const functions = require('firebase-functions');
-const { project_id, service_account } = require('./config').firebase;
+const { firebase } = require('./config');
+// eslint-disable-next-line camelcase
+const { project_id, service_account } = firebase;
 
 console.log('initializing', project_id);
 admin.initializeApp({

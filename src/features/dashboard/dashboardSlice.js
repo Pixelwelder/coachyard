@@ -1,15 +1,14 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { reset, setValue } from '../../util/reduxUtils';
 import app from 'firebase';
+import { reset, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
-import { SIDEBAR_MODES } from '../course/selectedCourseSlice';
 
 export const TABS = {
   COURSES: 0,
   STUDENTS: 1,
   CHATS: 2,
-  SCHEDULE: 3
-}
+  SCHEDULE: 3,
+};
 
 const name = 'dashboard';
 const initialState = {
@@ -18,7 +17,7 @@ const initialState = {
   courses: [], // Created by this user
 
   selectedChatUid: null,
-  selectedChat: []
+  selectedChat: [],
 };
 
 // TODO Lazy load.
@@ -35,7 +34,7 @@ const init = createAsyncThunk(
           .onSnapshot((snapshot) => {
             let tokens = [];
             if (snapshot.size) {
-              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
             }
             dispatch(generatedActions.setTokens(tokens));
           });
@@ -44,15 +43,15 @@ const init = createAsyncThunk(
         unsubscribeCourses = app.firestore().collection('courses')
           .where('creatorUid', '==', authUser.uid)
           .onSnapshot((snapshot) => {
-            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            const courses = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
             dispatch(generatedActions.setCourses(courses));
-          })
+          });
       } else {
         console.log('dashboard.reset');
         dispatch(generatedActions.reset());
       }
-    })
-  }
+    });
+  },
 );
 
 let unsubscribeChat = () => {};
@@ -70,10 +69,10 @@ const setSelectedChat = createAsyncThunk(
       .collection('chat')
       .orderBy('created')
       .onSnapshot((snapshot) => {
-        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const messages = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions._setSelectedChat(messages));
       });
-  }
+  },
 );
 
 const clearChat = createAsyncThunk(
@@ -82,7 +81,7 @@ const clearChat = createAsyncThunk(
     const { selectedChatUid } = select(getState());
     const result = await app.functions().httpsCallable('clearChat')({ courseUid: selectedChatUid });
     console.log('chat cleared');
-  }
+  },
 );
 
 const { reducer, actions: generatedActions } = createSlice({
@@ -94,43 +93,41 @@ const { reducer, actions: generatedActions } = createSlice({
     setCourses: setValue('courses'),
     setSelectedChatUid: setValue('selectedChatUid'),
     _setSelectedChat: setValue('selectedChat'),
-    reset: reset(initialState)
-  }
+    reset: reset(initialState),
+  },
 });
 
 // TODO Duplicate code.
-const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type === type);
-const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
+const createTypeFilter = (type) => ({ tokens }) => tokens.filter((token) => token.type === type);
+const createNegativeTypeFilter = (type) => ({ tokens }) => tokens.filter((token) => token.type !== type);
 
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens }) => tokens);
-const selectStudentTokens = createSelector(selectTokens, tokens => {
-  return Object.values(
-    tokens
-      .filter(token => token.access === 'student')
-      .reduce((accum, token) => {
-        if (!accum[token.user]) accum[token.user] = [];
-        accum[token.user].push(token);
-        return accum;
-      }, {})
-  );
-});
+const selectStudentTokens = createSelector(selectTokens, (tokens) => Object.values(
+  tokens
+    .filter((token) => token.access === 'student')
+    .reduce((accum, token) => {
+      if (!accum[token.user]) accum[token.user] = [];
+      accum[token.user].push(token);
+      return accum;
+    }, {}),
+));
 const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
-const selectNonTemplateTokens = createSelector(select, ({ tokens }) => {
-  return tokens.filter(({ access, type }) => access === 'admin' && type !== 'template');
-});
-const selectTemplateCourses = createSelector(select, ({ courses }) => {
-  return courses.filter(course => course.type === 'template')
-});
-const selectNonTemplateCourses = createSelector(select, ({ courses }) => {
-  return courses.filter(course => course.type !== 'template')
-});
+const selectNonTemplateTokens = createSelector(select, ({ tokens }) => tokens.filter(({ access, type }) => access === 'admin' && type !== 'template'));
+const selectTemplateCourses = createSelector(select, ({ courses }) => courses.filter((course) => course.type === 'template'));
+const selectNonTemplateCourses = createSelector(select, ({ courses }) => courses.filter((course) => course.type !== 'template'));
 const selectors = {
-  select, selectStudentTokens, selectTemplateTokens, selectNonTemplateTokens,
-  selectTemplateCourses, selectNonTemplateCourses
+  select,
+  selectStudentTokens,
+  selectTemplateTokens,
+  selectNonTemplateTokens,
+  selectTemplateCourses,
+  selectNonTemplateCourses,
 };
 
-const actions = { ...generatedActions, init, setSelectedChat, clearChat };
+const actions = {
+  ...generatedActions, init, setSelectedChat, clearChat,
+};
 
 export { selectors, actions };
 export default reducer;

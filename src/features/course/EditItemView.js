@@ -1,21 +1,21 @@
-import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import React, { useEffect, useState } from 'react';
-import { actions as catalogActions } from '../catalog/catalogSlice';
-import MODES from '../ui/Modes';
 import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { Uploader } from './Uploader';
 import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
 import { DateTimePicker } from '@material-ui/pickers';
-import OwnerControls from '../../components/OwnerControls';
 import FormLabel from '@material-ui/core/FormLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import FormControl from '@material-ui/core/FormControl';
+import OwnerControls from '../../components/OwnerControls';
+import { Uploader } from './Uploader';
+import MODES from '../ui/Modes';
+import { actions as catalogActions } from '../catalog/catalogSlice';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const EditItemView = ({ requireUpload = false }) => {
@@ -28,7 +28,9 @@ const EditItemView = ({ requireUpload = false }) => {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
 
-  const { displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes } = editItem;
+  const {
+    displayName, description, date, scheduler, isChangingFile, isLoading, bytesTransferred, totalBytes,
+  } = editItem;
   const percentUploaded = (bytesTransferred / totalBytes) * 100;
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const EditItemView = ({ requireUpload = false }) => {
 
     return () => {
       dispatch(actions.reset());
-    }
+    };
   }, [selectedItem]);
 
   const onEdit = () => {
@@ -46,8 +48,8 @@ const EditItemView = ({ requireUpload = false }) => {
       description: selectedItem.description,
       date: selectedItem.date || getDefaultDateTime(),
       file: selectedItem.file,
-      scheduler: !!selectedItem.date ? 'teacher' : 'student',
-      type: 'basic'
+      scheduler: selectedItem.date ? 'teacher' : 'student',
+      type: 'basic',
     }));
   };
 
@@ -67,7 +69,7 @@ const EditItemView = ({ requireUpload = false }) => {
 
   const onChangeVideo = (value) => {
     dispatch(actions.setValues({ isChangingFile: value }));
-  }
+  };
 
   const onUpload = (files) => {
     if (!files.length) {
@@ -78,49 +80,58 @@ const EditItemView = ({ requireUpload = false }) => {
       setFile(newFile);
       dispatch(actions.setValues({ file: newFile.name }));
     }
-  }
+  };
 
   const onInputUpload = ({ target: { files } }) => {
     onUpload(files);
-  }
+  };
 
   const onSubmit = async (event) => {
     event.preventDefault();
 
     const update = {
-      displayName, description, file, scheduler,
+      displayName,
+      description,
+      file,
+      scheduler,
       date: scheduler === 'teacher' ? date : null,
     };
     dispatch(catalogActions.updateItem({
-      courseUid: course.uid, itemUid: selectedItem.uid, update, file
+      courseUid: course.uid, itemUid: selectedItem.uid, update, file,
     }));
   };
 
   const onDelete = () => {
     dispatch(uiActions2.deleteItem.setValues({
       mode: MODES.OPEN,
-      toDelete: selectedItem
+      toDelete: selectedItem,
     }));
   };
 
-  const isDisabled = () => {
-    return isLoading || totalBytes > 0;
-  }
+  const isDisabled = () => isLoading || totalBytes > 0;
 
   return (
     <div className="edit-view">
       <form className="editing-form" onSubmit={onSubmit}>
         <TextField
           autoFocus
-          id="displayName" name="displayName" label="name" type="text"
+          id="displayName"
+          name="displayName"
+          label="name"
+          type="text"
           variant="outlined"
           disabled={isDisabled()}
           value={displayName}
           onChange={onChange}
         />
         <TextField
-          id="description" name="description" label="description" type="text"
-          multiline rows={4} variant="outlined"
+          id="description"
+          name="description"
+          label="description"
+          type="text"
+          multiline
+          rows={4}
+          variant="outlined"
           disabled={isDisabled()}
           value={description}
           onChange={onChange}
@@ -131,8 +142,8 @@ const EditItemView = ({ requireUpload = false }) => {
               <>
                 {
                   totalBytes > 0
-                    ? <LinearProgress variant="determinate" value={percentUploaded}/>
-                    : <Uploader onChange={onInputUpload} disabled={isDisabled()}/>
+                    ? <LinearProgress variant="determinate" value={percentUploaded} />
+                    : <Uploader onChange={onInputUpload} disabled={isDisabled()} />
                 }
               </>
             )
@@ -146,7 +157,7 @@ const EditItemView = ({ requireUpload = false }) => {
                         width={300}
                         height={200}
                         url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
-                        controls={true}
+                        controls
                       />
                     </>
                   )
@@ -185,12 +196,12 @@ const EditItemView = ({ requireUpload = false }) => {
         )}
       </form>
 
-      <div className="spacer"/>
+      <div className="spacer" />
       <OwnerControls
         onSubmit={onSubmit}
         enableSubmit={!isDisabled() && !(requireUpload && !file)}
         onCancel={onCancelEdit}
-        enableCancel={true}
+        enableCancel
         onDelete={onDelete}
         enableDelete={!isDisabled()}
       />

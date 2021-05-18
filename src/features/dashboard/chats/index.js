@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as dashboardSelectors, actions as dashboardActions } from '../dashboardSlice';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Chip from '@material-ui/core/Chip';
+import { selectors as dashboardSelectors, actions as dashboardActions } from '../dashboardSlice';
 import { BaseChat } from '../../chat';
 
 const ChatTitle = ({ course, isSelected, onClick }) => {
@@ -19,7 +19,7 @@ const ChatTitle = ({ course, isSelected, onClick }) => {
         <Chip label={numChats} color="primary" />
       </Paper>
     </li>
-  )
+  );
 };
 
 const Chats = () => {
@@ -49,7 +49,7 @@ const Chats = () => {
         <BaseChat chat={selectedChat} courseUid={selectedChatUid} />
       </div>
     </div>
-  )
+  );
 };
 
 export default Chats;

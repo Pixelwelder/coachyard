@@ -1,8 +1,7 @@
 import React from 'react';
-import app from 'firebase/app';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as billingSelectors, actions as billingActions } from './billingSlice';
+import { selectors as billingSelectors } from './billingSlice';
 import Subscription from './Subscription';
 
 const Billing = () => {
@@ -24,7 +23,7 @@ const Billing = () => {
         onCancel={onCancel}
       />
     </div>
-  )
+  );
 };
 
 export default Billing;

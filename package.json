@@ -17,6 +17,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@unicef/material-ui-currency-textfield": "^0.8.6",
+    "eslint-plugin-unused-imports": "^1.1.1",
     "firebase": "^8.2.10",
     "firebaseui": "^4.7.3",
     "history": "^5.0.0",
@@ -41,6 +42,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint": "./node_modules/.bin/eslint",
     "prep:dev": "cp src/__config__/firebase-dev.json src/__config__/firebase.json",
     "prep:prod": "cp src/__config__/firebase-prod.json src/__config__/firebase.json",
     "deploy:dev": "firebase use dev && npm run prep:dev && npm run build && firebase deploy --except functions",
@@ -64,6 +66,12 @@
     ]
   },
   "devDependencies": {
+    "eslint": "^7.26.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.23.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react-hooks": "^1.7.0",
     "yargs": "^15.4.1"
   }
 }

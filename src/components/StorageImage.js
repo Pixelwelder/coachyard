@@ -15,7 +15,7 @@ const StorageImage = ({ url, className = '' }) => {
   }, [url]);
 
   return (
-    <img className={className} src={downloadUrl}/>
+    <img className={className} src={downloadUrl} />
   );
 };
 

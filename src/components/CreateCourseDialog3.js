@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import MODES from '../features/ui/Modes';
+import React, { useState } from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import TextField from '@material-ui/core/TextField';
-import { actions as catalogActions } from '../features/catalog/catalogSlice';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
-import { selectors as userSelectors } from '../features/app/userSlice';
 import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
@@ -18,6 +14,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import { useHistory } from 'react-router-dom';
+import { selectors as userSelectors } from '../features/app/userSlice';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
+import { actions as catalogActions } from '../features/catalog/catalogSlice';
+import MODES from '../features/ui/Modes';
 
 const NewCourseDialog = () => {
   const { createCourse: selectors } = uiSelectors2;
@@ -26,7 +26,9 @@ const NewCourseDialog = () => {
 
   const [lastIsOpen, setLastIsOpen] = useState(MODES.CLOSED);
   const dispatch = useDispatch();
-  const { isOpen, displayName, students, description, date, type, isLoading, error } = useSelector(selectors.select);
+  const {
+    isOpen, displayName, students, description, date, type, isLoading, error,
+  } = useSelector(selectors.select);
   const history = useHistory();
 
   const onChange = ({ target }) => {
@@ -48,10 +50,13 @@ const NewCourseDialog = () => {
     // TODO This should be in the action.
     const { payload: course } = await dispatch(
       catalogActions.createNewCourse({
-        displayName, students, description, type,
+        displayName,
+        students,
+        description,
+        type,
         // Don't create a first item on a template.
-        date: type === 'template' ? null : date
-      })
+        date: type === 'template' ? null : date,
+      }),
     );
 
     console.log('created', course);
@@ -62,7 +67,10 @@ const NewCourseDialog = () => {
 
   return (
     <Dialog
-      open={isOpen} onClose={onClose} aria-labelledby="form-dialog-title" fullWidth
+      open={isOpen}
+      onClose={onClose}
+      aria-labelledby="form-dialog-title"
+      fullWidth
     >
       <DialogTitle id="form-dialog-title">Create Live Course</DialogTitle>
       <DialogContent>
@@ -76,8 +84,13 @@ const NewCourseDialog = () => {
               id="course-name"
               fullWidth
               autoFocus
-              variant="outlined" label="Course Name" placeholder={'Ex. "First Steps"'}
-              id="displayName" name="displayName" value={displayName} disabled={isLoading}
+              variant="outlined"
+              label="Course Name"
+              placeholder={'Ex. "First Steps"'}
+              id="displayName"
+              name="displayName"
+              value={displayName}
+              disabled={isLoading}
               onChange={onChange}
             />
           </FormControl>
@@ -88,30 +101,30 @@ const NewCourseDialog = () => {
               <FormControlLabel value="template" control={<Radio />} label="Template" />
             </RadioGroup>
           </FormControl>
-          {/*{(type === 'invite' || type === 'public') && (*/}
-          {/*  <FormControl>*/}
-          {/*    <FormLabel>When is your first live session?</FormLabel>*/}
-          {/*    {*/}
-          {/*      date && (*/}
-          {/*        <DateTimePicker*/}
-          {/*          value={date}*/}
-          {/*          onChange={onChangeDate}*/}
-          {/*          disabled={isLoading}*/}
-          {/*        />*/}
-          {/*      )*/}
-          {/*    }*/}
-          {/*  </FormControl>*/}
-          {/*)}*/}
-          {/*{type === 'invite' && (*/}
-          {/*  <FormControl>*/}
-          {/*    <TextField*/}
-          {/*      fullWidth*/}
-          {/*      variant="outlined" label="Who's Invited?" placeholder="student1@gmail.com, student2@gmail.com, ..."*/}
-          {/*      id="students" name="students" type="email" value={students} disabled={isLoading}*/}
-          {/*      onChange={onChange}*/}
-          {/*    />*/}
-          {/*  </FormControl>*/}
-          {/*)}*/}
+          {/* {(type === 'invite' || type === 'public') && ( */}
+          {/*  <FormControl> */}
+          {/*    <FormLabel>When is your first live session?</FormLabel> */}
+          {/*    { */}
+          {/*      date && ( */}
+          {/*        <DateTimePicker */}
+          {/*          value={date} */}
+          {/*          onChange={onChangeDate} */}
+          {/*          disabled={isLoading} */}
+          {/*        /> */}
+          {/*      ) */}
+          {/*    } */}
+          {/*  </FormControl> */}
+          {/* )} */}
+          {/* {type === 'invite' && ( */}
+          {/*  <FormControl> */}
+          {/*    <TextField */}
+          {/*      fullWidth */}
+          {/*      variant="outlined" label="Who's Invited?" placeholder="student1@gmail.com, student2@gmail.com, ..." */}
+          {/*      id="students" name="students" type="email" value={students} disabled={isLoading} */}
+          {/*      onChange={onChange} */}
+          {/*    /> */}
+          {/*  </FormControl> */}
+          {/* )} */}
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>

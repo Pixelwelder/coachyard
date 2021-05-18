@@ -1,6 +1,6 @@
-import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
-import { loaderReducers, reset, setValue } from '../../util/reduxUtils';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import app from 'firebase/app';
+import { loaderReducers, reset, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
 import { actions as uiActions2 } from '../ui/uiSlice2';
@@ -14,10 +14,10 @@ const initialState = {
   courses: [],
   tokensByUid: {},
   students: [],
-  provider: {}
+  provider: {},
 };
 
-let unsubscribeCoach = () => {}
+let unsubscribeCoach = () => {};
 let unsubscribeCourses = () => {};
 let unsubscribeTokens = () => {};
 const load = createAsyncThunk(
@@ -41,9 +41,9 @@ const load = createAsyncThunk(
             .where('creatorUid', '==', coach.uid)
             .where('isPublic', '==', true)
             .onSnapshot((snapshot) => {
-              const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+              const courses = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
               dispatch(generatedActions.setCourses(courses));
-            })
+            });
 
           unsubscribeTokens = app.firestore().collection('tokens')
             .where('user', '==', coach.uid)
@@ -51,15 +51,15 @@ const load = createAsyncThunk(
             .where('access', '==', 'admin')
             .onSnapshot((snapshot) => {
               const tokens = snapshot.docs
-                .map(doc => parseUnserializables(doc.data()))
+                .map((doc) => parseUnserializables(doc.data()))
                 .reduce((accum, token) => ({ ...accum, [token.uid]: token }), {});
               dispatch(generatedActions.setTokensByUid(tokens));
-            })
+            });
         } else {
           history.push('/dashboard');
         }
       });
-  }
+  },
 );
 
 const update = createAsyncThunk(
@@ -69,7 +69,7 @@ const update = createAsyncThunk(
 
     await app.functions().httpsCallable('updateOwnUser')(update);
     dispatch(uiActions2.editCoach.reset());
-  }
+  },
 );
 
 const init = createAsyncThunk(
@@ -79,8 +79,8 @@ const init = createAsyncThunk(
       if (!authUser) {
         // dispatch(generatedActions.reset());
       }
-    })
-  }
+    });
+  },
 );
 
 const { actions: generatedActions, reducer } = createSlice({
@@ -91,16 +91,18 @@ const { actions: generatedActions, reducer } = createSlice({
     setCourses: setValue('courses'),
     setTokensByUid: setValue('tokensByUid'),
     setProvider: setValue('provider'),
-    reset: reset(initialState)
+    reset: reset(initialState),
   },
-  extraReducers: loaderReducers(name, initialState)
+  extraReducers: loaderReducers(name, initialState),
 });
 
-const actions = { ...generatedActions, load, update, init };
+const actions = {
+  ...generatedActions, load, update, init,
+};
 
 const select = ({ coach }) => coach;
 const selectors = {
-  select, ...createTokenSelectors(select)
+  select, ...createTokenSelectors(select),
 };
 
 export { actions, selectors };

@@ -5,9 +5,7 @@ import { selectors as catalogSelectors } from '../catalog/catalogSlice';
 const selectHasAccessToCurrentCourse = createSelector(
   catalogSelectors.selectTokens,
   selectedCourseSelectors.select,
-  (tokens, { course }) => {
-    return !!course && !!tokens.find(token => token.courseUid === course.uid);
-  }
+  (tokens, { course }) => !!course && !!tokens.find((token) => token.courseUid === course.uid),
 );
 
 export { selectHasAccessToCurrentCourse };

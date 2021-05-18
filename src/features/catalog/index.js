@@ -26,7 +26,7 @@ const Catalog = () => {
       <div className="catalog-content">
         {tab === TABS.TEACHING && (
           <>
-            <BaseCatalogList title="Products" items={products} showCreate={true} />
+            <BaseCatalogList title="Products" items={products} showCreate />
             <BaseCatalogList title="Teaching" items={courses} />
           </>
         )}

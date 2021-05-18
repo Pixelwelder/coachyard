@@ -30,5 +30,5 @@ describe('toDisplay', () => {
 describe('listTimes', () => {
   test('it should generate a list of times', () => {
     console.log(listTimes());
-  })
+  });
 });

@@ -8,7 +8,7 @@ const { createIcon, _createSchedulingUser, createStripeCustomer, createUserMeta 
 /**
  * Performs some maintenance when users are created.
  */
-const users_onCreateUser = functions.auth.user()
+const usersOnCreateUser = functions.auth.user()
   .onCreate(async (_user, context) => {
     const user = await admin.auth().getUser(_user.uid);
     log({ message: 'User was created.', data: user, context });
@@ -72,13 +72,13 @@ const users_onCreateUser = functions.auth.user()
     // })
   });
 
-const users_onDeleteUser = functions.auth.user()
+const usersOnDeleteUser = functions.auth.user()
   .onDelete(async (user, context) => {
     const { uid } = user;
     await admin.firestore().collection('users').doc(uid).delete();
   });
 
-const users_onCreateUserMeta = functions.firestore
+const usersOnCreateUserMeta = functions.firestore
   .document('/users/{docId}')
   .onCreate(async (change, context) => {
     const user = change.data();
@@ -105,7 +105,7 @@ const users_onCreateUserMeta = functions.firestore
   });
 
 module.exports = {
-  users_onCreateUser,
-  users_onDeleteUser,
-  users_onCreateUserMeta
+  usersOnCreateUser,
+  usersOnDeleteUser,
+  usersOnCreateUserMeta
 };

@@ -1,17 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import StudentManager from './StudentManager';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import FormLabel from '@material-ui/core/FormLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
-import FormControl from '@material-ui/core/FormControl';
-import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import Button from '@material-ui/core/Button';
-import { actions as catalogSelectors } from '../catalog/catalogSlice';
 import TextField from '@material-ui/core/TextField';
-import InputMask from 'react-input-mask';
 import Typography from '@material-ui/core/Typography';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import StudentManager from './StudentManager';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 
 const AccessManager = () => {
@@ -35,14 +30,19 @@ const AccessManager = () => {
 
   const onChangePublic = ({ target: { value } }) => {
     dispatch(uiActions2.editCourse.setValues({ isPublic: value === 'true' }));
-  }
+  };
 
   if (!course) return null;
   return (
     <div className="access-manager">
       <Typography className="light-text">Is this course open to the public?</Typography>
       <RadioGroup
-        className="vertical-spacer" row aria-label="type" name="public" value={isPublic.toString()} onChange={onChangePublic}
+        className="vertical-spacer"
+        row
+        aria-label="type"
+        name="public"
+        value={isPublic.toString()}
+        onChange={onChangePublic}
       >
         <FormControlLabel value="false" control={<Radio />} label="Private" />
         <FormControlLabel value="true" control={<Radio />} label="Public" />
@@ -51,17 +51,20 @@ const AccessManager = () => {
       <div className="price-container">
         <Typography className="currency-sign" variant="h6">$</Typography>
         <TextField
-          variant="outlined" label="Price" placeholder="49.95"
-          id="students" name="students"
+          variant="outlined"
+          label="Price"
+          placeholder="49.95"
+          id="students"
+          name="students"
           value={price / 100}
           disabled={isLoading}
           inputProps={{
             type: 'number',
-            step: '0.01'
+            step: '0.01',
           }}
           onChange={({ target: { value } }) => onChange({
             // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
-            price: Math.floor(value * 100)
+            price: Math.floor(value * 100),
           })}
         />
       </div>
@@ -71,4 +74,3 @@ const AccessManager = () => {
 };
 
 export default AccessManager;
-

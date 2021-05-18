@@ -1,4 +1,4 @@
-import { createUISlice } from './createUISlice';
+import createUISlice from './createUISlice';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {
@@ -11,7 +11,7 @@ const initialState = {
 
   isChangingFile: false,
   bytesTransferred: 0,
-  totalBytes: 0
+  totalBytes: 0,
 };
 
 export default createUISlice({
@@ -21,7 +21,7 @@ export default createUISlice({
     open: () => ({
       ...initialState,
       isOpen: true,
-      date: getDefaultDateTime()
-    })
-  }
+      date: getDefaultDateTime(),
+    }),
+  },
 });

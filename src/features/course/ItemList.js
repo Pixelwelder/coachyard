@@ -14,26 +14,24 @@ const ItemList = () => {
 
   return (
     <ul className="item-list">
-      {items.map((item, index) => {
-        return (
-          <Item
-            item={item}
-            key={index}
-            isSelected={item.uid === selectedItemUid}
-            onSelect={() => {
-              if (isRecording) {
-                alert('Please stop the recording before navigating away.');
-              } else {
-                history.push(`/course/${course.uid}/${item.uid}`);
-                dispatch(uiActions2.editItem.reset());
-                // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
-              }
-            }}
-          />
-        );
-      })}
+      {items.map((item, index) => (
+        <Item
+          item={item}
+          key={index}
+          isSelected={item.uid === selectedItemUid}
+          onSelect={() => {
+            if (isRecording) {
+              alert('Please stop the recording before navigating away.');
+            } else {
+              history.push(`/course/${course.uid}/${item.uid}`);
+              dispatch(uiActions2.editItem.reset());
+              // dispatch(selectedCourseActions.setSelectedItemUid(item.uid));
+            }
+          }}
+        />
+      ))}
     </ul>
-  )
+  );
 };
 
 export default ItemList;

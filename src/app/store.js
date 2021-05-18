@@ -24,12 +24,12 @@ export default configureStore({
     schedule: scheduleReducer,
     coach: coachReducer,
     dashboard: dashboardReducer,
-    assets: assetsReducer
+    assets: assetsReducer,
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {
       ignoredActions: ['auth/stateChanged', 'confirmAction/open'],
-      ignoredPaths: ['ui2.confirmAction.onConfirm']
-    }
-  })
+      ignoredPaths: ['ui2.confirmAction.onConfirm'],
+    },
+  }),
 });

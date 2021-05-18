@@ -1,9 +1,9 @@
 import React from 'react';
 import Chip from '@material-ui/core/Chip';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
 import { useHistory } from 'react-router-dom';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 
 const CourseSummary = () => {
   const { course, courseCreator, isRecording } = useSelector(selectedCourseSelectors.select);
@@ -16,7 +16,7 @@ const CourseSummary = () => {
     } else {
       history.push(`/course/${course.uid}`);
     }
-  }
+  };
 
   return (
     <div className="course-summary" onClick={onSelect}>

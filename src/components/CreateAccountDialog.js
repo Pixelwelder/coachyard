@@ -1,6 +1,5 @@
 import React from 'react';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import SESSION_MODES from '../constants/sessionModes';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import TextField from '@material-ui/core/TextField';
@@ -8,11 +7,12 @@ import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import { useDispatch, useSelector } from 'react-redux';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
+import SESSION_MODES from '../constants/sessionModes';
 import { actions as userActions } from '../features/app/userSlice';
 
-const isErrorType = type => error => !!error && error.message.toLowerCase().includes(type);
+const isErrorType = (type) => (error) => !!error && error.message.toLowerCase().includes(type);
 
 const CreateAccountDialog = () => {
   const { createAccount: actions } = uiActions2;
@@ -20,7 +20,9 @@ const CreateAccountDialog = () => {
 
   const dispatch = useDispatch();
 
-  const { displayName, email, password, mode, isOpen, isLoading, error } = useSelector(selectors.select);
+  const {
+    displayName, email, password, mode, isOpen, isLoading, error,
+  } = useSelector(selectors.select);
 
   const onChange = ({ target }) => {
     const { value } = target;
@@ -31,9 +33,9 @@ const CreateAccountDialog = () => {
   const onToggle = () => {
     dispatch(actions.setValues({
       mode: mode === SESSION_MODES.SIGN_IN ? SESSION_MODES.SIGN_UP : SESSION_MODES.SIGN_IN,
-      error: null // TODO Ugly.
+      error: null, // TODO Ugly.
     }));
-  }
+  };
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -44,15 +46,14 @@ const CreateAccountDialog = () => {
     }
   };
 
-  const isDisabled = () => {
-    return mode === SESSION_MODES.SIGN_UP
-      ? (!displayName || !email || !password || isLoading)
-      : (!email || !password || isLoading);
-  };
+  const isDisabled = () => (mode === SESSION_MODES.SIGN_UP
+    ? (!displayName || !email || !password || isLoading)
+    : (!email || !password || isLoading));
 
   return (
     <Dialog
-      className="session" open={isOpen}
+      className="session"
+      open={isOpen}
       aria-labelledby="form-dialog-title"
       fullWidth
     >
@@ -63,38 +64,62 @@ const CreateAccountDialog = () => {
         <DialogContentText>
           {mode === SESSION_MODES.SIGN_IN
             ? 'Welcome back!'
-            : `Come on in, the water's fine!`
-          }
+            : 'Come on in, the water\'s fine!'}
         </DialogContentText>
         <form onSubmit={onSubmit}>
           {mode === SESSION_MODES.SIGN_UP && (
             <TextField
               variant="filled"
-              id="displayName" name="displayName" label="Name"
-              value={displayName} disabled={isLoading} placeholder="Your Name" autoComplete="name"
+              id="displayName"
+              name="displayName"
+              label="Name"
+              value={displayName}
+              disabled={isLoading}
+              placeholder="Your Name"
+              autoComplete="name"
               onChange={onChange}
             />
           )}
           <TextField
             variant="filled"
-            id="email" name="email" label="Email"
+            id="email"
+            name="email"
+            label="Email"
             error={isErrorType('email')(error)}
-            value={email} disabled={isLoading} placeholder="youremail@gmail.com" autoComplete="email"
+            value={email}
+            disabled={isLoading}
+            placeholder="youremail@gmail.com"
+            autoComplete="email"
             onChange={onChange}
           />
           <TextField
             variant="filled"
-            id="password" name="password" label="Password" type="password" autoComplete="current-password"
-            value={password} disabled={isLoading} placeholder="********"
+            id="password"
+            name="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            disabled={isLoading}
+            placeholder="********"
             onChange={onChange}
             error={isErrorType('password')(error)}
           />
         </form>
         {!!error && <Alert severity="error">{error.message}</Alert>}
         {mode === SESSION_MODES.SIGN_IN
-          ? (<p>Need an account? <span className="link" onClick={onToggle}>Sign Up</span></p>)
-          : (<p>Already got an account? <span className="link" onClick={onToggle}>Sign In</span></p>)
-        }
+          ? (
+            <p>
+              Need an account?
+              <span className="link" onClick={onToggle}>Sign Up</span>
+            </p>
+          )
+          : (
+            <p>
+              Already got an account?
+              <span className="link" onClick={onToggle}>Sign In</span>
+            </p>
+          )}
       </DialogContent>
       <DialogActions>
         <Button

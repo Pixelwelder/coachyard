@@ -1,8 +1,8 @@
-import { createUISlice } from './createUISlice';
+import createUISlice from './createUISlice';
 
 const initialState = {};
 
 export default createUISlice({
   name: 'account',
-  initialState
+  initialState,
 });

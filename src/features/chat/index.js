@@ -3,18 +3,18 @@ import app from 'firebase/app';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 import { selectors as selectedCourseSelectors, actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { selectors as assetsSelectors, actions as assetsActions } from '../assets/assetsSlice';
-import { selectors as uiSelectors2, actions as uiActions2 } from '../ui/uiSlice2';
+import { actions as uiActions2 } from '../ui/uiSlice2';
 import { actions as dashboardActions } from '../dashboard/dashboardSlice';
 import './chat.scss';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
-import Typography from '@material-ui/core/Typography';
 
 const EMPTY_MESSAGES = {
   LOCKED: 'Please purchase this course to unlock chat with this coach.',
-  NO_COURSE: 'No course selected.'
-}
+  NO_COURSE: 'No course selected.',
+};
 
 const ChatMessage = ({ message }) => {
   const { images } = useSelector(assetsSelectors.select);
@@ -36,10 +36,12 @@ const ChatMessage = ({ message }) => {
       <img src={imageUrl} className="chat-avatar" />
       <p>{text}</p>
     </li>
-  )
+  );
 };
 
-const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED }) => {
+const Chat = ({
+  messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED,
+}) => {
   const dispatch = useDispatch();
   const dummy = useRef();
   const [message, setMessage] = useState('');
@@ -60,7 +62,7 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
     dispatch(uiActions2.confirmAction.open({
       onConfirm: () => {
         dispatch(dashboardActions.clearChat());
-      }
+      },
     }));
   };
 
@@ -82,15 +84,14 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
             ))}
-            <span ref={dummy}></span>
+            <span ref={dummy} />
           </ul>
         )
         : (
           <div className="chat-main chat-main-locked">
             <Typography>{emptyMessage}</Typography>
           </div>
-        )
-      }
+        )}
       <form className="chat-form" onSubmit={onSubmit}>
         <TextField
           size="small"
@@ -115,15 +116,13 @@ const Chat = ({ messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LO
   );
 };
 
-const BaseChat = ({ chat, courseUid }) => {
-  return <Chat messages={chat} courseUid={courseUid} hasAccess={true} emptyMessage={EMPTY_MESSAGES.NO_COURSE} />
-}
+const BaseChat = ({ chat, courseUid }) => <Chat messages={chat} courseUid={courseUid} hasAccess emptyMessage={EMPTY_MESSAGES.NO_COURSE} />;
 
 const CourseChat = () => {
   const chat = useSelector(selectedCourseSelectors.selectChat);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const { course: { uid } } = useSelector(selectedCourseSelectors.select);
-  return <Chat messages={chat} courseUid={uid} hasAccess={hasAccess} />
-}
+  return <Chat messages={chat} courseUid={uid} hasAccess={hasAccess} />;
+};
 
 export { CourseChat, BaseChat };

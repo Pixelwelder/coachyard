@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/functions';
@@ -21,7 +21,7 @@ import {
   isRejectedAction,
   isThisAction,
   resetValue,
-  setValue
+  setValue,
 } from '../../util/reduxUtils';
 import { EventTypes } from '../../constants/analytics';
 
@@ -34,7 +34,7 @@ const initialState = {
   globalIsLoading: false,
   globalError: null,
   signInAttempted: false,
-  query: {}
+  query: {},
 };
 
 const _init = createAsyncThunk(
@@ -53,7 +53,7 @@ const _init = createAsyncThunk(
     app.analytics();
     app.analytics().setAnalyticsCollectionEnabled(true);
     app.analytics().logEvent(EventTypes.STARTUP);
-  }
+  },
 );
 
 const setupFirebase = createAsyncThunk(
@@ -71,9 +71,9 @@ const setupFirebase = createAsyncThunk(
         } else {
           // app.analytics().logEvent(EventTypes.SIGN_OUT);
         }
-      }
+      },
     );
-  }
+  },
 );
 
 const init = createAsyncThunk(
@@ -92,13 +92,13 @@ const init = createAsyncThunk(
       // Set the query. For some reason the object returned from queryString is non-serializable.
       const query = queryString.parse(window.location.search);
       const queryObj = Object.entries(query)
-        .reduce((accum, [name, val]) => ({ ...accum, [name]: val}), {});
+        .reduce((accum, [name, val]) => ({ ...accum, [name]: val }), {});
       dispatch(generatedActions.setQuery(queryObj));
     } catch (error) {
       console.error(error);
       throw error;
     }
-  }
+  },
 );
 
 const { reducer, actions: generatedActions } = createSlice({
@@ -108,13 +108,13 @@ const { reducer, actions: generatedActions } = createSlice({
     clearError: resetValue('error', initialState.error),
     clearGlobalError: resetValue('globalError', initialState.globalError),
     setQuery: setValue('query'),
-    setSignInAttempted: setValue('signInAttempted')
+    setSignInAttempted: setValue('signInAttempted'),
   },
-  extraReducers: builder => builder
+  extraReducers: (builder) => builder
     .addMatcher(isPendingAction, (state, action) => {
       state.globalIsLoading = true;
       state.globalError = null;
-      state.globalLoadingLevels ++;
+      state.globalLoadingLevels++;
       if (isThisAction(name)) {
         state.isLoading = true;
         state.error = null;
@@ -122,7 +122,7 @@ const { reducer, actions: generatedActions } = createSlice({
     })
     .addMatcher(isRejectedAction, (state, action) => {
       state.globalError = action.error;
-      state.globalLoadingLevels --;
+      state.globalLoadingLevels--;
       if (!state.globalLoadingLevels) state.globalIsLoading = false;
       if (isThisAction(name)) {
         state.isLoading = false;
@@ -131,7 +131,7 @@ const { reducer, actions: generatedActions } = createSlice({
     })
     .addMatcher(isFulfilledAction, (state, action) => {
       state.globalError = null;
-      state.globalLoadingLevels --;
+      state.globalLoadingLevels--;
       if (!state.globalLoadingLevels) state.globalIsLoading = false;
       if (isThisAction(name)) {
         state.isLoading = false;
@@ -139,7 +139,7 @@ const { reducer, actions: generatedActions } = createSlice({
 
         if (action.type === init.fulfilled.toString()) state.isInitialized = true;
       }
-    })
+    }),
 });
 
 const select = ({ app }) => app;

@@ -25,8 +25,8 @@ const Dashboard = () => {
         onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
       >
         <Tab label="Courses" />
-        {isTeacher && <Tab label="Students"/>}
-        {isTeacher && <Tab label="Chats"/>}
+        {isTeacher && <Tab label="Students" />}
+        {isTeacher && <Tab label="Chats" />}
         <Tab label="Schedule" />
       </Tabs>
       <div className="dashboard-content">
@@ -36,7 +36,7 @@ const Dashboard = () => {
         {tab === TABS.CHATS && <Chats />}
       </div>
     </div>
-  )
+  );
 };
 
 export default Dashboard;

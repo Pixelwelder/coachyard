@@ -4,5 +4,5 @@ export default {
   CREATE: 'create',
   CLOSED: 'closed',
   OPEN: 'open',
-  PROCESSING: 'processing'
+  PROCESSING: 'processing',
 };

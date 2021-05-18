@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
-import Button from '@material-ui/core/Button';
-import { selectors as billingSelectors2, actions as billingActions2 } from '../billing2/billingSlice2';
-import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
+import { selectors as billingSelectors2 } from '../billing2/billingSlice2';
 
 const Subscription = () => {
   const sub = useSelector(billingSelectors2.selectSubscription);
@@ -30,10 +28,28 @@ const Subscription = () => {
       )}
       {sub && (
         <>
-          <Typography>{tier.displayName} Plan</Typography>
-          <Typography>{(remaining / 60).toFixed(1)} hours remaining</Typography>
-          {sub.cancel_at_period_end && (<Typography>Ends: {getDate()}</Typography>)}
-          {!sub.cancel_at_period_end && (<Typography>Renews: {getDate()}</Typography>)}
+          <Typography>
+            {tier.displayName}
+            {' '}
+            Plan
+          </Typography>
+          <Typography>
+            {(remaining / 60).toFixed(1)}
+            {' '}
+            hours remaining
+          </Typography>
+          {sub.cancel_at_period_end && (
+          <Typography>
+            Ends:
+            {getDate()}
+          </Typography>
+          )}
+          {!sub.cancel_at_period_end && (
+          <Typography>
+            Renews:
+            {getDate()}
+          </Typography>
+          )}
         </>
       )}
     </div>

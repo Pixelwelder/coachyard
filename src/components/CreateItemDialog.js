@@ -1,5 +1,4 @@
 import React from 'react';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
@@ -11,6 +10,7 @@ import Alert from '@material-ui/lab/Alert';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import { useDispatch, useSelector } from 'react-redux';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui/uiSlice2';
 import { selectors as selectedCourseSelectors } from '../features/course/selectedCourseSlice';
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 
@@ -20,7 +20,9 @@ const CreateItemDialog = () => {
 
   const dispatch = useDispatch();
   const { course } = useSelector(selectedCourseSelectors.select);
-  const { displayName, description, date, isLoading, isOpen, error } = useSelector(selectors.select);
+  const {
+    displayName, description, date, isLoading, isOpen, error,
+  } = useSelector(selectors.select);
 
   const onCancel = () => {
     dispatch(actions.reset());
@@ -41,13 +43,13 @@ const CreateItemDialog = () => {
 
     dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName, description, date, file: '' }
+      item: {
+        displayName, description, date, file: '',
+      },
     }));
   };
 
-  const isDisabled = () => {
-    return !displayName || isLoading || !isOpen;
-  };
+  const isDisabled = () => !displayName || isLoading || !isOpen;
 
   return (
     <Dialog
@@ -61,19 +63,27 @@ const CreateItemDialog = () => {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`Schedule a new Live Session.`}
+          Schedule a new Live Session.
         </DialogContentText>
         <form onSubmit={onSubmit}>
           <TextField
             autoFocus
-            id="displayName" name="displayName" label="name" type="text"
+            id="displayName"
+            name="displayName"
+            label="name"
+            type="text"
             variant="outlined"
             value={displayName}
             onChange={onChange}
           />
           <TextField
-            id="description" name="description" label="description" type="text"
-            multiline rows={4} variant="outlined"
+            id="description"
+            name="description"
+            label="description"
+            type="text"
+            multiline
+            rows={4}
+            variant="outlined"
             value={description}
             onChange={onChange}
           />

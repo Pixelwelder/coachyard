@@ -12,8 +12,8 @@ const initialState = {
 
   ui: {
     showConfirmCancel: false,
-    isLoading: false
-  }
+    isLoading: false,
+  },
 };
 
 /**
@@ -31,24 +31,24 @@ const _startDataListeners = createAsyncThunk(
     unsubscribePaymentMethods = userDoc
       .collection('payment_methods')
       .onSnapshot((snapshot) => {
-        const paymentMethods = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const paymentMethods = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPaymentMethods(paymentMethods));
       });
 
     unsubscribePayments = userDoc
       .collection('payments')
       .onSnapshot((snapshot) => {
-        const payments = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const payments = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPayments(payments));
       });
 
     unsubscribeSubscriptions = userDoc
       .collection('subscriptions')
       .onSnapshot((snapshot) => {
-        const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const subscriptions = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions.setSubscriptions(subscriptions));
       });
-  }
+  },
 );
 
 const createSubscription = createAsyncThunk(
@@ -57,7 +57,7 @@ const createSubscription = createAsyncThunk(
     // First create a payment method with the provided card.
     const paymentMethodResult = await stripe.createPaymentMethod({
       type: 'card',
-      card
+      card,
     });
 
     if (paymentMethodResult.error) {
@@ -74,7 +74,7 @@ const createSubscription = createAsyncThunk(
       .collection('payment_methods')
       .doc(paymentMethod.id)
       .set({ id: paymentMethod.id });
-  }
+  },
 );
 
 const cancelSubscription = createAsyncThunk(
@@ -96,7 +96,7 @@ const cancelSubscription = createAsyncThunk(
     //   .update({ pending_action: 'cancel' });
 
     dispatch(generatedActions.resetUI());
-  }
+  },
 );
 
 const init = createAsyncThunk(
@@ -120,17 +120,17 @@ const init = createAsyncThunk(
               dispatch(generatedActions.setCustomerData(parseUnserializables(customerData)));
               dispatch(_startDataListeners());
             }
-          })
+          });
       }
     });
-  }
+  },
 );
 
-const setValue = name => (state, action) => {
+const setValue = (name) => (state, action) => {
   state[name] = action.payload;
 };
 
-const mergeValue = name => (state, action) => {
+const mergeValue = (name) => (state, action) => {
   state[name] = { ...state[name], ...action.payload };
 };
 
@@ -144,11 +144,13 @@ const { reducer, actions: generatedActions } = createSlice({
     setPayments: setValue('payments'),
     setUI: mergeValue('ui'),
     resetUI: (state) => { state.ui = initialState.ui; },
-    reset: reset(initialState)
-  }
+    reset: reset(initialState),
+  },
 });
 
-const actions = { ...generatedActions, init, createSubscription, cancelSubscription };
+const actions = {
+  ...generatedActions, init, createSubscription, cancelSubscription,
+};
 
 const select = ({ billing }) => billing;
 /**

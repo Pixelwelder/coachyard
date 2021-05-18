@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import app from 'firebase/app';
 import { reset, setError, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
-import app from 'firebase/app';
 import { EventTypes } from '../../constants/analytics';
 
 const name = 'user';
@@ -10,7 +10,7 @@ const initialState = {
   error: null,
   meta: {},
   claims: {},
-  image: ''
+  image: '',
 };
 
 let unsubscribeUser = null;
@@ -38,7 +38,7 @@ const init = createAsyncThunk(
                 const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
                 dispatch(generatedActions.setImage(url));
               } catch (error) {
-                console.warn(`userSlice: avatar doesn't exist yet.`);
+                console.warn('userSlice: avatar doesn\'t exist yet.');
               }
 
               // Check the subscription separately.
@@ -59,7 +59,7 @@ const init = createAsyncThunk(
         dispatch(generatedActions.reset());
       }
     });
-  }
+  },
 );
 
 // let unsubscribeImage;
@@ -97,7 +97,7 @@ const signUp = createAsyncThunk(
     //
     // if (unsubscribeImage) unsubscribeImage();
     // unsubscribeImage = app.storage().ref(`avatars/${result.user.id}.png`).
-  }
+  },
 );
 
 const signIn = createAsyncThunk(
@@ -105,7 +105,7 @@ const signIn = createAsyncThunk(
   async ({ email, password }) => {
     // app.analytics().logEvent(EventTypes.SIGN_IN_ATTEMPTED);
     // await app.auth().signInWithEmailAndPassword(email, password);
-  }
+  },
 );
 
 const signOut = createAsyncThunk(
@@ -113,7 +113,7 @@ const signOut = createAsyncThunk(
   async () => {
     app.analytics().logEvent(EventTypes.SIGN_OUT);
     await app.auth().signOut();
-  }
+  },
 );
 
 const { actions: generatedActions, reducer } = createSlice({
@@ -124,19 +124,21 @@ const { actions: generatedActions, reducer } = createSlice({
     setMeta: setValue('meta'),
     setClaims: setValue('claims'),
     setImage: setValue('image'),
-    reset: reset(initialState)
+    reset: reset(initialState),
   },
   extraReducers: {
     [signUp.rejected]: setError,
     [signIn.rejected]: setError,
-    [signOut.rejected]: setError
-  }
+    [signOut.rejected]: setError,
+  },
 });
 
 const select = ({ user }) => user;
 const selectors = { select };
 
-const actions = { ...generatedActions, init, signUp, signIn, signOut };
+const actions = {
+  ...generatedActions, init, signUp, signIn, signOut,
+};
 
 export { selectors, actions };
 export default reducer;

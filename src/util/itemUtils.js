@@ -6,7 +6,9 @@ import { DateTime } from 'luxon';
  */
 export const getDefaultDateTime = () => {
   const hours = DateTime.local().hour + 2;
-  const date = DateTime.local().set({ hours, minutes: 0, seconds: 0, milliseconds: 0 }).toUTC().toString();
+  const date = DateTime.local().set({
+    hours, minutes: 0, seconds: 0, milliseconds: 0,
+  }).toUTC().toString();
 
   return date;
-}
+};

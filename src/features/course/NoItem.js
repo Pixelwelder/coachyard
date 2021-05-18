@@ -1,9 +1,7 @@
 import React from 'react';
 
-const NoItem = () => {
-  return (
-    <p>No item.</p>
-  );
-};
+const NoItem = () => (
+  <p>No item.</p>
+);
 
 export default NoItem;

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
-import { actions as assetsActions, selectors as assetsSelectors } from '../features/assets/assetsSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { actions as assetsActions, selectors as assetsSelectors } from '../features/assets/assetsSlice';
 
 const Participant = ({ token }) => {
   const { images } = useSelector(assetsSelectors.select);
@@ -12,7 +12,7 @@ const Participant = ({ token }) => {
 
   useEffect(() => {
     if (!imageUrl) {
-      dispatch(assetsActions.getAsset({ path }))
+      dispatch(assetsActions.getAsset({ path }));
     }
   }, [imageUrl]);
 
@@ -22,18 +22,14 @@ const Participant = ({ token }) => {
       <Typography variant="h6">{token.userDisplayName}</Typography>
     </li>
   );
-}
-
-const ParticipantList = ({ tokens }) => {
-  return (
-    <ul className="participant-images">
-      {
-        tokens.map((token, index) => {
-          return <Participant token={token} key={index} />;
-        })
-      }
-    </ul>
-  );
 };
+
+const ParticipantList = ({ tokens }) => (
+  <ul className="participant-images">
+    {
+        tokens.map((token, index) => <Participant token={token} key={index} />)
+      }
+  </ul>
+);
 
 export default ParticipantList;

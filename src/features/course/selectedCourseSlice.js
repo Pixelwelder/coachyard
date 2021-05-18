@@ -7,7 +7,7 @@ import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 export const SIDEBAR_MODES = {
   TOC: 0,
-  CHAT: 1
+  CHAT: 1,
 };
 
 export const STUDENT_MANAGER_MODE = {
@@ -15,12 +15,12 @@ export const STUDENT_MANAGER_MODE = {
   ADD: 1,
   DELETE: 2,
   VIEW_USER: 3,
-  EDIT_INVITE: 4
+  EDIT_INVITE: 4,
 };
 
 export const EDIT_MODE = {
   DETAILS: 0,
-  ACCESS: 1
+  ACCESS: 1,
 };
 
 const name = 'selectedCourse';
@@ -64,7 +64,7 @@ const initialState = {
   sessions: [],
 
   // Descendants
-  descendantTokens: []
+  descendantTokens: [],
 };
 
 /**
@@ -76,7 +76,7 @@ const initialState = {
 const parseItems = (snapshot) => {
   if (!snapshot.size) return {};
   return snapshot.docs
-    .map(item => parseUnserializables(item.data()))
+    .map((item) => parseUnserializables(item.data()))
     .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
 };
 
@@ -105,12 +105,12 @@ const unsubscribe = () => {
 
 const _loadCourse = createAsyncThunk(
   `${name}/_loadCourse`,
-  async () => {}
+  async () => {},
 );
 
 const _loadCourseDependents = createAsyncThunk(
   `${name}/_loadCourseDependents`,
-  async () => {}
+  async () => {},
 );
 
 const setLocation = createAsyncThunk(
@@ -151,21 +151,18 @@ const setLocation = createAsyncThunk(
             // This is valid. Go ahead and set it.
             console.log('END | itemUid is valid: setting');
             return dispatch(generatedActions.setSelectedItemUid(itemUid));
-          } else {
-            // This is invalid. Call setLocation again, but with a null itemUid.
-            console.log('itemUid is invalid - navigating to bare course');
-            return history.push(`/course/${courseUid}`);
           }
-        } else {
-          console.log('No itemUid. Stop here.')
-          return dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
+          // This is invalid. Call setLocation again, but with a null itemUid.
+          console.log('itemUid is invalid - navigating to bare course');
+          return history.push(`/course/${courseUid}`);
         }
-      } else {
-        // Load the course.
-        console.log('Different course loaded.');
-        // Clear all subscriptions.
-        // Proceed.
+        console.log('No itemUid. Stop here.');
+        return dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
       }
+      // Load the course.
+      console.log('Different course loaded.');
+      // Clear all subscriptions.
+      // Proceed.
     } else {
       console.log('No course loaded. Proceeding.');
     }
@@ -271,7 +268,7 @@ const setLocation = createAsyncThunk(
     unsubscribeChat = courseRef.collection('chat')
       .orderBy('created')
       .onSnapshot((snapshot) => {
-        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const messages = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions.setChat(messages));
         // TODO Outstanding messages.
       });
@@ -281,7 +278,7 @@ const setLocation = createAsyncThunk(
     unsubscribeStudentTokens = app.firestore().collection('tokens')
       .where('courseUid', '==', course.uid)
       .onSnapshot((snapshot) => {
-        const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+        const tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
         dispatch(generatedActions.setTokens(tokens));
       });
 
@@ -299,12 +296,13 @@ const setLocation = createAsyncThunk(
 
     unsubscribeSessions = app.firestore()
       .collection('stripe_customers').doc(app.auth().currentUser.uid)
-      .collection('sessions').doc(courseUid)
+      .collection('sessions')
+      .doc(courseUid)
       .collection('sessions')
       .onSnapshot((snapshot) => {
         console.log('sessions', snapshot.docs.length);
         if (snapshot.size) {
-          const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+          const sessions = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
           dispatch(generatedActions.setSessions(sessions));
         }
       });
@@ -315,11 +313,11 @@ const setLocation = createAsyncThunk(
       .where('access', '==', 'student')
       .onSnapshot((snapshot) => {
         if (snapshot.size) {
-          const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+          const tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
           dispatch(generatedActions.setDescendantTokens(tokens));
         }
       });
-  }
+  },
 );
 
 const update = createAsyncThunk(
@@ -330,7 +328,7 @@ const update = createAsyncThunk(
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
     const result = await callable({ uid, update });
     app.analytics().logEvent(EventTypes.UPDATE_COURSE);
-  }
+  },
 );
 
 const submitChatMessage = createAsyncThunk(
@@ -348,14 +346,14 @@ const submitChatMessage = createAsyncThunk(
         .set({
           sender: uid,
           text: message,
-          created: app.firestore.Timestamp.now()
+          created: app.firestore.Timestamp.now(),
         });
 
       // await app.firestore().collection('courses').doc(course.uid).update({ numChats: })
     } catch (error) {
       console.error(error);
     }
-  }
+  },
 );
 
 const searchForEmail = createAsyncThunk(
@@ -382,8 +380,8 @@ const searchForEmail = createAsyncThunk(
     } else {
       dispatch(generatedActions.setEmailResult(email));
     }
-    dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.VIEW_USER))
-  }
+    dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.VIEW_USER));
+  },
 );
 
 const addUser = createAsyncThunk(
@@ -399,7 +397,7 @@ const addUser = createAsyncThunk(
     const result = await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
     dispatch(generatedActions.resetEmailResult());
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
-  }
+  },
 );
 
 // TODO Duplicate
@@ -409,10 +407,10 @@ const purchaseCourse = createAsyncThunk(
     const { course: { uid: courseUid } } = select(getState());
     const { data: newCourse } = await app.functions().httpsCallable('purchaseCourse')({
       courseUid,
-      studentUid: app.auth().currentUser.uid
+      studentUid: app.auth().currentUser.uid,
     });
     return newCourse;
-  }
+  },
 );
 
 const removeUser = createAsyncThunk(
@@ -425,7 +423,7 @@ const removeUser = createAsyncThunk(
 
     const result = await app.functions().httpsCallable('removeUser')({ tokenUid });
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
-  }
+  },
 );
 
 const init = createAsyncThunk(
@@ -433,11 +431,11 @@ const init = createAsyncThunk(
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
       dispatch(generatedActions.reset());
-    })
-  }
+    });
+  },
 );
 
-const setValue = name => (state, action) => {
+const setValue = (name) => (state, action) => {
   state[name] = action.payload;
 };
 
@@ -463,7 +461,7 @@ const { actions: generatedActions, reducer } = createSlice({
     },
     setChat: setValue('chat'),
     addChatMessage: (state, action) => {
-      state.chat = [ ...state.chat, action.payload ]
+      state.chat = [...state.chat, action.payload];
     },
     setChatMessage: setValue('chatMessage'),
     setNumOutstandingChats: setValue('numOutstandingChats'),
@@ -491,44 +489,45 @@ const { actions: generatedActions, reducer } = createSlice({
     resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove),
 
     setSessions: setValue('sessions'),
-    setDescendantTokens: setValue('descendantTokens')
+    setDescendantTokens: setValue('descendantTokens'),
   },
-  extraReducers: loaderReducers(name, initialState)
+  extraReducers: loaderReducers(name, initialState),
 });
 
 const actions = {
-  ...generatedActions, init, update,
+  ...generatedActions,
+  init,
+  update,
   setLocation,
   submitChatMessage,
   searchForEmail,
-  addUser, removeUser,
-  purchaseCourse
+  addUser,
+  removeUser,
+  purchaseCourse,
 };
 
 const select = ({ selectedCourse }) => selectedCourse;
 const selectOwnsCourse = createSelector(
   select,
   ({ course }) => {
-    const currentUser = app.auth().currentUser;
+    const { currentUser } = app.auth();
     return !!(course && currentUser && (currentUser.uid === course.creatorUid));
-  }
+  },
 );
 const selectHasAccess = createSelector(
   select,
-  () => {}
+  () => {},
 );
-const selectIsCreator = createSelector(select, ({ course }) => {
-  return (app.auth().currentUser && course)
-    ? app.auth().currentUser.uid === course.creatorUid
-    : false;
-})
+const selectIsCreator = createSelector(select, ({ course }) => ((app.auth().currentUser && course)
+  ? app.auth().currentUser.uid === course.creatorUid
+  : false));
 const selectAdminTokens = createSelector(
   select,
-  ({ tokens }) => tokens.filter(({ access }) => access === 'admin')
+  ({ tokens }) => tokens.filter(({ access }) => access === 'admin'),
 );
 const selectStudentTokens = createSelector(
   select,
-  ({ tokens }) => tokens.filter(({ access }) => access === 'student')
+  ({ tokens }) => tokens.filter(({ access }) => access === 'student'),
 );
 const selectChat = createSelector(select, ({ chat }) => chat);
 
@@ -536,9 +535,7 @@ const selectChat = createSelector(select, ({ chat }) => chat);
 const selectParentItems = createSelector(select, ({ parentCourse, parentItems, items }) => {
   // Returns all parent items in an ordered array.
   if (!parentCourse) return [];
-  return parentCourse.itemOrder.map((uid) => {
-    return parentItems[uid];
-  }).filter(item => !!item);
+  return parentCourse.itemOrder.map((uid) => parentItems[uid]).filter((item) => !!item);
 });
 
 // This only gets local items.
@@ -548,58 +545,64 @@ const selectItems = createSelector(select, ({ items, parentItems, course }) => {
 
   return [...itemOrder, ...localItemOrder]
     .map((uid) => items[uid])
-    .filter(item => !!item)
-    // .sort((a, b) => {});
+    .filter((item) => !!item);
+  // .sort((a, b) => {});
 });
 
 // This gets all items.
 const selectAllItems = createSelector(
   selectParentItems,
   selectItems,
-  (parentItems, items) => {
-    return [
-      ...parentItems, ...items
-    ];
-  }
+  (parentItems, items) => [
+    ...parentItems, ...items,
+  ],
 );
 
 // This gets the actual combination of local and parent items that makes up the course.
 const selectCourseItems = createSelector(
   selectItems,
   selectParentItems,
-  () => ([])
+  () => ([]),
 );
 
 const selectSelectedItem = createSelector(
   select,
-  ({ items, parentItems, selectedItemUid }) => {
-    return items[selectedItemUid] || parentItems[selectedItemUid];
-  }
+  ({ items, parentItems, selectedItemUid }) => items[selectedItemUid] || parentItems[selectedItemUid],
 );
 
 // TODO This could result in double billing, but that's probably better than no billing.
 const selectIsBeingPurchased = createSelector(
   select,
-  ({ sessions }) => {
-    return false;//sessions.find(session => session.session.payment_status === 'unpaid');
-  }
+  ({ sessions }) => false, // sessions.find(session => session.session.payment_status === 'unpaid');
+
 );
 
 const selectOwnsDescendant = createSelector(
   select,
-  ({ descendantTokens }) => !!descendantTokens.length
+  ({ descendantTokens }) => !!descendantTokens.length,
 );
 
 const selectOwnedDescendant = createSelector(
   select,
-  ({ descendantTokens }) => descendantTokens.length ? descendantTokens[0] : null
+  ({ descendantTokens }) => (descendantTokens.length ? descendantTokens[0] : null),
 );
 
 const selectors = {
-  select, selectOwnsCourse, selectHasAccess, selectAdminTokens, selectStudentTokens, selectChat,
+  select,
+  selectOwnsCourse,
+  selectHasAccess,
+  selectAdminTokens,
+  selectStudentTokens,
+  selectChat,
   selectIsCreator,
-  selectItems, selectParentItems, selectAllItems, selectCourseItems, selectSelectedItem,
-  selectIsBeingPurchased, selectOwnsDescendant, selectOwnedDescendant
+  selectItems,
+  selectParentItems,
+  selectAllItems,
+  selectCourseItems,
+  selectSelectedItem,
+  selectIsBeingPurchased,
+  selectOwnsDescendant,
+  selectOwnedDescendant,
 };
 
 export { actions, selectors };

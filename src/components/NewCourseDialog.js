@@ -8,8 +8,8 @@ import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 import Alert from '@material-ui/lab/Alert';
+import { selectors as teacherSelectors, actions as teacherActions } from '../features/teacher/teacherSlice';
 
 const NewCourseDialog = ({ open, onClose }) => {
   const [displayName, setDisplayName] = useState('');
@@ -30,8 +30,12 @@ const NewCourseDialog = ({ open, onClose }) => {
         <form>
           <TextField
             fullWidth
-            variant="filled" label="Course Name" placeholder="Course Name"
-            id="displayName" value={displayName} disabled={isLoading}
+            variant="filled"
+            label="Course Name"
+            placeholder="Course Name"
+            id="displayName"
+            value={displayName}
+            disabled={isLoading}
             onChange={({ target: { value } }) => setDisplayName(value)}
           />
         </form>

@@ -6,14 +6,16 @@ import DialogContentText from '@material-ui/core/DialogContentText/DialogContent
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
-import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
-import MODES from '../features/ui/Modes';
 import { useDispatch, useSelector } from 'react-redux';
 import Alert from '@material-ui/lab/Alert';
+import { selectors as uiSelectors, actions as uiActions } from '../features/ui/uiSlice';
+import MODES from '../features/ui/Modes';
 
 const DeleteDialog = () => {
   const { deleteDialog } = useSelector(uiSelectors.select);
-  const { mode, item, onConfirm, error } = deleteDialog;
+  const {
+    mode, item, onConfirm, error,
+  } = deleteDialog;
 
   const dispatch = useDispatch();
 
@@ -41,23 +43,23 @@ const DeleteDialog = () => {
         )}
         {!!error && <Alert severity="error">{error.message}</Alert>}
       </DialogContent>
-        {mode === MODES.VIEW && item && (
-          <DialogActions>
-            <Button
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => dispatch(onConfirm(item))}
-              color="primary"
-            >
-              Confirm
-            </Button>
-          </DialogActions>
-        )}
+      {mode === MODES.VIEW && item && (
+      <DialogActions>
+        <Button
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={() => dispatch(onConfirm(item))}
+          color="primary"
+        >
+          Confirm
+        </Button>
+      </DialogActions>
+      )}
     </Dialog>
-  )
+  );
 };
 
 export default DeleteDialog;

@@ -1,3 +1,1 @@
-export const toDollars = (cents = 0) => {
-  return `$${(cents / 100).toFixed(2)}`;
-};
+export const toDollars = (cents = 0) => `$${(cents / 100).toFixed(2)}`;

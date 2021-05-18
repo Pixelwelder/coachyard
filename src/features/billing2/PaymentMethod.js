@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { CardElement, useElements } from '@stripe/react-stripe-js';
 import Button from '@material-ui/core/Button';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import { Typography } from '@material-ui/core';
-import capitalize from '@material-ui/core/utils/capitalize';
 
 const PaymentMethod = ({ paymentMethods, onSubmit }) => {
-  console.log('PaymentMethod', paymentMethods)
+  console.log('PaymentMethod', paymentMethods);
   const elements = useElements();
   const [isComplete, setIsComplete] = useState(false);
   const paymentMethod = paymentMethods.length ? paymentMethods[0] : null;
@@ -21,17 +17,15 @@ const PaymentMethod = ({ paymentMethods, onSubmit }) => {
     onSubmit({ card });
   };
 
-  const isDisabled = () => {
-    return !!paymentMethod ? true : !isComplete;
-  }
+  const isDisabled = () => (paymentMethod ? true : !isComplete);
 
   return (
     <form onSubmit={onSubmit} className="payment-method">
-      {/*{paymentMethod && (*/}
-      {/*  <div className="payment-method">*/}
-      {/*    <Typography>{capitalize(paymentMethod.card.brand)} {paymentMethod.card.last4}</Typography>*/}
-      {/*  </div>*/}
-      {/*)}*/}
+      {/* {paymentMethod && ( */}
+      {/*  <div className="payment-method"> */}
+      {/*    <Typography>{capitalize(paymentMethod.card.brand)} {paymentMethod.card.last4}</Typography> */}
+      {/*  </div> */}
+      {/* )} */}
 
       {!paymentMethod && (
         <CardElement

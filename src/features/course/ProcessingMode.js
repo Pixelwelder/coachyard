@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import Button from '@material-ui/core/Button';
+import EditItemView from './EditItemView';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 
 /**
@@ -24,7 +24,7 @@ const ProcessingMode = ({ status }) => {
         : (
           <>
             {isOpen && (
-              <EditItemView/>
+              <EditItemView />
             )}
             {!isOpen && (
               <>
@@ -52,8 +52,7 @@ const ProcessingMode = ({ status }) => {
               </>
             )}
           </>
-        )
-      }
+        )}
     </div>
   );
 };

@@ -32,9 +32,9 @@ const CALLABLE_FUNCTIONS = {
 
   STRIPE_CANCEL_SUBSCRIPTION: 'cancelSubscription',
 
-  GET_ALL_COURSES: 'getAllCourses'
+  GET_ALL_COURSES: 'getAllCourses',
 };
 
 export {
-  CALLABLE_FUNCTIONS
+  CALLABLE_FUNCTIONS,
 };

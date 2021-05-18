@@ -20,7 +20,7 @@ export default combineReducers({
   deleteItem: deleteItemSlice.reducer,
   editCoach: editCoachSlice.reducer,
   account: accountSlice.reducer,
-  confirmAction: confirmActionSlice.reducer
+  confirmAction: confirmActionSlice.reducer,
 });
 
 const select = ({ ui2 }) => ui2;
@@ -45,7 +45,7 @@ const selectors = {
   deleteItem: { select: selectDeleteItem },
   editCoach: { select: selectEditCoach },
   account: { select: selectAccount },
-  confirmAction: { select: selectConfirmAction }
+  confirmAction: { select: selectConfirmAction },
 };
 
 const actions = {
@@ -58,7 +58,7 @@ const actions = {
   deleteItem: deleteItemSlice.actions,
   editCoach: editCoachSlice.actions,
   account: accountSlice.actions,
-  confirmAction: confirmActionSlice.actions
+  confirmAction: confirmActionSlice.actions,
 };
 
 export { selectors, actions };

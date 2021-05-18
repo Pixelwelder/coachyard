@@ -1,10 +1,10 @@
-import { createUISlice } from './createUISlice';
+import createUISlice from './createUISlice';
 
 const initialState = {
   isEditing: false,
 
   description: '',
-  slug: ''
+  slug: '',
 };
 
 export default createUISlice({ name: 'editCoach', initialState });

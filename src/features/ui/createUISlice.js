@@ -1,25 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { setValue, setValues, reset, isThisAction } from '../../util/reduxUtils';
-import MODES from './Modes';
-import { isFulfilledAction, isPendingAction, isRejectedAction } from '../../util/reduxUtils';
+import {
+  setValue, setValues, reset, isThisAction,
+  isFulfilledAction, isPendingAction, isRejectedAction
+} from '../../util/reduxUtils';
 
 /**
  * @param name - the name of this piece of state
  * @param initialState
- * @returns {Slice<unknown, {setValues: setValues, setIsEditing: (function(*, *): void), reset: (function(): *), open: reducers.open}, string>}
+ * @returns slice
  */
-export const createUISlice = ({
+export default ({
   name,
   extraNames = [],
   initialState: _initialState,
   reducers = {},
-  builderFunc
+  builderFunc,
 }) => {
   const initialState = {
     error: null,
     isOpen: false,
     isLoading: false,
-    ..._initialState
+    ..._initialState,
   };
 
   return createSlice({
@@ -28,21 +29,20 @@ export const createUISlice = ({
     reducers: {
       open: (state, action) => {
         const { payload = {} } = action;
-        console.log('PAYLOAD', Object.keys(initialState));
         const newState = Object.keys(initialState).reduce((accum, key) => ({
-          ...accum, [key]: payload[key] || state[key]
+          ...accum, [key]: payload[key] || state[key],
         }), {});
         return { ...newState, isOpen: true };
       },
       reset: reset(initialState),
       setValues,
       setIsEditing: setValue('isEditing'),
-      ...reducers
+      ...reducers,
     },
     extraReducers: (builder) => {
-      [name, ...extraNames].forEach((name) => {
+      [name, ...extraNames].forEach((_name) => {
         builder
-          .addMatcher(isThisAction(name), (state, action) => {
+          .addMatcher(isThisAction(_name), (state, action) => {
             if (isPendingAction(action)) {
               state.isLoading = true;
               state.error = initialState.error;
@@ -52,8 +52,10 @@ export const createUISlice = ({
             } else if (isFulfilledAction(action)) {
               return initialState;
             }
-          })
-      })
+
+            return state;
+          });
+      });
 
       // builder
       //   .addMatcher(isThisAction(name), (state, action) => {
@@ -83,6 +85,6 @@ export const createUISlice = ({
       if (builderFunc) {
         builderFunc(builder);
       }
-    }
-  })
+    },
+  });
 };

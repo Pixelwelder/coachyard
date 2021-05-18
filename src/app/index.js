@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Route, Link, Redirect } from 'react-router-dom';
-import { actions as appActions, selectors as appSelectors } from '../features/app/appSlice';
+import {
+  Switch, Route, Redirect,
+} from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { actions as appActions, selectors as appSelectors } from '../features/app/appSlice';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Account from '../features/account';
@@ -31,9 +33,9 @@ const App = () => {
   useEffect(() => {
     const handler = (event) => {
       // console.log('??', event.data);
-    }
+    };
     window.addEventListener('message', handler, false);
-  }, [])
+  }, []);
 
   const { isInitialized } = useSelector(appSelectors.select);
   // console.log(query);
@@ -55,7 +57,7 @@ const App = () => {
       <div className="content-container">
         <Switch>
           <Route path="/dashboard" component={Dashboard} />
-          {/*<Route path="/course/:uid" component={Course} />*/}
+          {/* <Route path="/course/:uid" component={Course} /> */}
           <Route path="/course/:courseUid/:itemUid?" component={Course} />
           <Route path="/barebones" component={Barebones} />
           <Route path="/billing" component={Billing} />
@@ -73,7 +75,7 @@ const App = () => {
       {/* User account. */}
       {/* TODO FirebaseSignIn always signs out. */}
       <FirebaseSignIn />
-      {/*<CreateAccountDialog />*/}
+      {/* <CreateAccountDialog /> */}
       <Account />
 
       {/* DIALOGS */}
@@ -87,28 +89,26 @@ const App = () => {
       <UnlockDialog />
       <ConfirmationDialog />
 
-      {/*<Iframe*/}
-      {/*  id="schedule"*/}
-      {/*  url="http://localhost:8000/index.php/user/login"*/}
-      {/*  width="800px"*/}
-      {/*  height="900px"*/}
-      {/*  display="block"*/}
-      {/*  position="absolute"*/}
-      {/*  style={{ width: '900px', height: '50px', zIndex: 10 }}*/}
-      {/*/>*/}
+      {/* <Iframe */}
+      {/*  id="schedule" */}
+      {/*  url="http://localhost:8000/index.php/user/login" */}
+      {/*  width="800px" */}
+      {/*  height="900px" */}
+      {/*  display="block" */}
+      {/*  position="absolute" */}
+      {/*  style={{ width: '900px', height: '50px', zIndex: 10 }} */}
+      {/* /> */}
 
-      {/*<iframe*/}
-      {/*  style={{ position: 'absolute', height: '100%', border: 'none' }}*/}
-      {/*  url="http://localhost:8000/index.php/appointments"*/}
-      {/*/>*/}
+      {/* <iframe */}
+      {/*  style={{ position: 'absolute', height: '100%', border: 'none' }} */}
+      {/*  url="http://localhost:8000/index.php/appointments" */}
+      {/* /> */}
 
-      {/*<Nav />*/}
+      {/* <Nav /> */}
 
-      {/*<div className="page-section body">*/}
+      {/* <div className="page-section body"> */}
 
-      {/*</div>*/}
-
-
+      {/* </div> */}
 
     </div>
   );

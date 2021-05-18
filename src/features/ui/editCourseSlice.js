@@ -1,4 +1,4 @@
-import { createUISlice } from './createUISlice';
+import createUISlice from './createUISlice';
 
 const initialState = {
   isEditing: false,
@@ -7,7 +7,7 @@ const initialState = {
   description: '',
   image: '',
   price: 0,
-  isPublic: false
+  isPublic: false,
 };
 
 export default createUISlice({ name: 'editCourse', initialState });

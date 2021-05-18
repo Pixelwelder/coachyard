@@ -3,14 +3,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText/DialogContentText';
 import Dialog from '@material-ui/core/Dialog';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { useElements, useStripe } from '@stripe/react-stripe-js';
 import Button from '@material-ui/core/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
-import { toDollars } from '../../util/currency';
-import { actions as billingActions2, selectors as billingSelectors2 } from './billingSlice2';
-import PaymentMethod from './PaymentMethod';
 import { useHistory } from 'react-router-dom';
+import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
+import { actions as billingActions2, selectors as billingSelectors2 } from './billingSlice2';
 
 const UnlockDialog = () => {
   const history = useHistory();
@@ -37,7 +35,9 @@ const UnlockDialog = () => {
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">
-        Unlock "{course.displayName}"
+        Unlock "
+        {course.displayName}
+        "
       </DialogTitle>
       <DialogContent className="unlock-dialog-content">
         <DialogContentText>
@@ -47,10 +47,10 @@ const UnlockDialog = () => {
           <Button className="cancel-button" variant="contained" color="default" onClick={onCancel}>Cancel</Button>
           <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>
         </div>
-        {/*{!!paymentMethods.length*/}
-        {/*  ? <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button>*/}
-        {/*  : <PaymentMethod paymentMethods={paymentMethods} onSubmit={onUnlock} />*/}
-        {/*}*/}
+        {/* {!!paymentMethods.length */}
+        {/*  ? <Button variant="contained" color="primary" onClick={onUnlock}>Unlock</Button> */}
+        {/*  : <PaymentMethod paymentMethods={paymentMethods} onSubmit={onUnlock} /> */}
+        {/* } */}
       </DialogContent>
     </Dialog>
   );

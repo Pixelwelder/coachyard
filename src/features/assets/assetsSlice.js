@@ -3,7 +3,7 @@ import app from 'firebase';
 import { loaderReducers } from '../../util/reduxUtils';
 
 const initialState = {
-  images: {}
+  images: {},
 };
 const name = 'assets';
 
@@ -14,7 +14,7 @@ const getAsset = createAsyncThunk(
     if (images[path]) return images[path];
     const downloadUrl = await app.storage().ref(path).getDownloadURL();
     dispatch(generatedActions.addUrl({ [path]: downloadUrl }));
-  }
+  },
 );
 
 const { actions: generatedActions, reducer } = createSlice({
@@ -23,9 +23,9 @@ const { actions: generatedActions, reducer } = createSlice({
   reducers: {
     addUrl: (state, action) => {
       state.images = { ...state.images, ...action.payload };
-    }
+    },
   },
-  extraReducers: loaderReducers(name, initialState)
+  extraReducers: loaderReducers(name, initialState),
 });
 
 const actions = { ...generatedActions, getAsset };

@@ -1,4 +1,4 @@
-import { createUISlice } from './createUISlice';
+import createUISlice from './createUISlice';
 import { getDefaultDateTime } from '../../util/itemUtils';
 
 const initialState = {
@@ -6,7 +6,7 @@ const initialState = {
   students: '',
   description: '',
   date: '',
-  type: 'basic'
+  type: 'basic',
 };
 
 export default createUISlice({
@@ -16,7 +16,7 @@ export default createUISlice({
     open: () => ({
       ...initialState,
       isOpen: true,
-      date: getDefaultDateTime()
-    })
-  }
+      date: getDefaultDateTime(),
+    }),
+  },
 });

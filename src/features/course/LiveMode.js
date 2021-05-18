@@ -1,12 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import React, { useEffect, useState } from 'react';
 import DailyIframe from '@daily-co/daily-js';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import { actions as catalogActions } from '../catalog/catalogSlice';
-import Typography from '@material-ui/core/Typography';
-import ParticipantList from '../../components/ParticipantList';
+import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import ItemInfo from './ItemInfo';
 
 const LiveMode = ({ size }) => {
@@ -32,15 +30,15 @@ const LiveMode = ({ size }) => {
           // position: 'absolute',
           border: '1px solid black',
           'background-color': 'white',
-          width: '100%', //`${window.innerWidth - 32}px`,
-          height: '100%', //`${window.innerHeight - 20}px`,
+          width: '100%', // `${window.innerWidth - 32}px`,
+          height: '100%', // `${window.innerHeight - 20}px`,
           // left: '16px',
           // right: '16px',
           top: 0,
           // right: '1em',
           // bottom: '1em'
-        }
-      }
+        },
+      },
     );
 
     _callFrame.on('recording-started', () => {
@@ -58,7 +56,7 @@ const LiveMode = ({ size }) => {
           await callFrame.destroy();
           setCallFrame(null);
         }
-      }
+      };
 
       execute();
     };
@@ -85,9 +83,7 @@ const LiveMode = ({ size }) => {
     dispatch(catalogActions.endItem({ courseUid: course.uid, itemUid: selectedItem.uid }));
   };
 
-  const shouldShowWarning = () => {
-    return ownsCourse && !hasRecorded && !isRecording;
-  };
+  const shouldShowWarning = () => ownsCourse && !hasRecorded && !isRecording;
 
   // useEffect(() => {
   //   const go = async () => {
@@ -117,7 +113,7 @@ const LiveMode = ({ size }) => {
     if (!inSession) classes = `out-of-session ${classes}`;
 
     return classes;
-  }
+  };
 
   const tokens = ownsCourse ? studentTokens : adminTokens;
 
@@ -129,7 +125,8 @@ const LiveMode = ({ size }) => {
         <div className="owner-controls">
           <div className="spacer" />
           <Button
-            color="secondary" variant="contained"
+            color="secondary"
+            variant="contained"
             onClick={onEnd}
             disabled={hasRecorded && isRecording}
           >
@@ -137,41 +134,41 @@ const LiveMode = ({ size }) => {
           </Button>
         </div>
       );
-    } else {
-      // In session, both see the same thing.
-      return (
-        <div className="owner-controls">
-          {shouldShowWarning()
-            ? <Alert className="recording-warning" severity="error">Not recording!</Alert>
-            : <div className="spacer" />
-          }
-          <Button
-            color="primary" variant="contained"
-            onClick={onLeave}
-            disabled={hasRecorded && isRecording}
-          >
-            Leave
-          </Button>
-        </div>
-      );
     }
+    // In session, both see the same thing.
+    return (
+      <div className="owner-controls">
+        {shouldShowWarning()
+          ? <Alert className="recording-warning" severity="error">Not recording!</Alert>
+          : <div className="spacer" />}
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={onLeave}
+          disabled={hasRecorded && isRecording}
+        >
+          Leave
+        </Button>
+      </div>
+    );
   };
 
   return (
     <div className="item-mode live-mode">
       <div id="live-mode-target" className={getSessionClasses()}>
-        {/*<Button*/}
-        {/*  className="full-screen-button" variant="contained" color="primary"*/}
-        {/*  onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))}*/}
-        {/*>*/}
-        {/*  {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>}*/}
-        {/*</Button>*/}
+        {/* <Button */}
+        {/*  className="full-screen-button" variant="contained" color="primary" */}
+        {/*  onClick={() => dispatch(selectedCourseActions.setIsFullscreen(!isFullscreen))} */}
+        {/* > */}
+        {/*  {!isFullscreen ? <FullscreenIcon/> : <FullscreenExitIcon/>} */}
+        {/* </Button> */}
       </div>
       {!inSession && (
         <div className="out-of-session-container mode-inner">
-          <ItemInfo item={selectedItem} status={'This session is currently live.'} tokens={tokens} />
+          <ItemInfo item={selectedItem} status="This session is currently live." tokens={tokens} />
           <Button
-            color="primary" variant="contained"
+            color="primary"
+            variant="contained"
             onClick={onJoin}
             disabled={hasRecorded && isRecording}
           >

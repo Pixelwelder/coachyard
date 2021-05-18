@@ -5,7 +5,7 @@ function preserveQueryParameters(history, preserve, location) {
   const currentQuery = queryString.parse(history.location.search);
   if (currentQuery) {
     const preservedQuery = {};
-    for (let p of preserve) {
+    for (const p of preserve) {
       const v = currentQuery[p];
       if (v) {
         preservedQuery[p] = v;
@@ -26,7 +26,8 @@ function createLocationDescriptorObject(location, state) {
 function createPreserveQueryHistory(createHistory, queryParameters) {
   return (options) => {
     const history = createHistory(options);
-    const oldPush = history.push, oldReplace = history.replace;
+    const oldPush = history.push; const
+      oldReplace = history.replace;
     history.push = (path, state) => oldPush.apply(history, [preserveQueryParameters(history, queryParameters, createLocationDescriptorObject(path, state))]);
     history.replace = (path, state) => oldReplace.apply(history, [preserveQueryParameters(history, queryParameters, createLocationDescriptorObject(path, state))]);
     return history;
