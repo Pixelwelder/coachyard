@@ -1,6 +1,4 @@
 import React from 'react';
-import Iframe from 'react-iframe';
-import { url } from '../../__config__/easy.local.json';
 import Button from '@material-ui/core/Button';
 import { actions as scheduleActions } from './scheduleSlice';
 import { useDispatch } from 'react-redux';
