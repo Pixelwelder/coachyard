@@ -1,138 +1,9 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const jdenticon = require('jdenticon');
-const { v4: uuid } = require('uuid');
+
 const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
-const { newUserMeta, newStripeCustomer } = require('../data');
-const { setClaims } = require('../util/claims');
-const { toKebab } = require('../util/string');
-const stripe = require('../billing/stripe');
-const generatePassword = require('password-generator');
-const { addProvider } = require('../schedule/providers');
-const { addCustomer } = require('../schedule/customers');
-
-const _createIcon = async ({ uid }) => {
-  // Create icon.
-  const png = jdenticon.toPng(uid, 200);
-  const buffer = Buffer.from(png);
-
-  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, {
-    metadata: {
-      fileType: 'image/png',
-      metadata: {
-        // Allows us to see the image in Firebase Admin UI
-        firebaseStorageDownloadTokens: uuid(),
-        cacheControl: 'public,max-age=4000'
-      }
-    }
-  });
-
-  await admin.firestore().collection('users').doc(uid).update({ image: `${uid}.png`});
-};
-
-/**
- * Converts a data object to a new schema.
- * @param item
- * @param factoryFunc
- */
-const _convert = ({ item, factoryFunc }) => {
-  const template = factoryFunc();
-  const newItem = Object.keys(template).reduce((accum, key) => {
-    const newAccum = { ...accum };
-    if (item.hasOwnProperty(key)) newAccum[key] = item[key];
-    return newAccum;
-  }, template);
-
-  return newItem;
-};
-
-/**
- * Updates a user object to the current schema plus adds an image.
- * @param uid
- */
-const _updateMeta = async ({ uid }) => {
-  const result = await admin.firestore().runTransaction(async (transaction) => {
-    const ref = admin.firestore().collection('users').doc(uid);
-    const doc = await transaction.get(ref);
-
-    if (doc.exists) {
-      const newItem = _convert({ item: doc.data(), factoryFunc: newUserMeta });
-      await transaction.set(ref, newItem);
-    }
-  });
-};
-
-const updateUserToCurrent = async (data, context) => {
-  try {
-    log({ message: 'Updating user meta to current schema.', data, context });
-    const { auth: { uid } } = context;
-    await _createIcon({ uid });
-    await _updateMeta({ uid });
-    log({ message: 'User meta updated.', data, context });
-  } catch (error) {
-    console.error(error);
-    throw new functions.https.HttpsError('internal', error.message, error);
-  }
-};
-
-const _createStripeCustomer = async (user, timestamp) => {
-  // Create billing for user.
-  const stripeCustomer = await stripe.customers.create({
-    name: user.displayName,
-    email: user.email,
-    metadata: { uid: user.uid }
-  });
-  // TODO Do we actually want to do this?
-  const stripeIntent = await stripe.setupIntents.create({ customer: stripeCustomer.id });
-
-  const fbCustomer = newStripeCustomer({
-    uid: user.uid,
-    created: timestamp,
-    updated: timestamp,
-    customer_id: stripeCustomer.id,
-    setup_secret: stripeIntent.client_secret
-  });
-
-  return fbCustomer;
-}
-
-const _createUserMeta = ({ uid, email, displayName }, timestamp, slug) => ({
-  uid,
-  email,
-  displayName,
-  description: `${displayName} is a coach with a passion for all things coaching.`,
-  slug,
-  created: timestamp,
-  updated: timestamp
-});
-
-const _createSchedulingUser = async ({ uid, email }) => {
-  let schedulingProvider = null;
-  let schedulingCustomer = null;
-
-  try {
-    const password = generatePassword(20, false);
-    schedulingProvider = await addProvider({ uid, email, password });
-    schedulingCustomer = await addCustomer({ uid, email });
-
-    // For the love of FSM change this as soon as possible.
-    console.log('add scheduling user', schedulingProvider)
-    const cachedProvider = { ...schedulingProvider, uid, settings: { ...schedulingProvider.settings, password } };
-    const providerRef = admin.firestore().collection('easy_providers').doc(uid);
-    await providerRef.set(cachedProvider);
-    console.log('add scheduling user complete')
-
-    console.log('add scheduling customer');
-    const cachedSchedulingCustomer = { ...schedulingCustomer, uid };
-    const schedulingCustomerRef = admin.firestore().collection('easy_customers').doc(uid);
-    await schedulingCustomerRef.set(cachedSchedulingCustomer);
-    console.log('add scheduling customer complete')
-
-  } catch (error) {
-    log({ message: error.message, data: error, context: { uid, email }, level: 'warning' });
-  }
-};
+const { _createSchedulingUser, filterUserUpdate } = require('./utils');
 
 const createSchedulingUser = async (data, context) => {
   const { auth: { uid } } = context;
@@ -140,167 +11,6 @@ const createSchedulingUser = async (data, context) => {
   const user = doc.data();
   await _createSchedulingUser(user);
 };
-
-// const onCreateUser = functions.https.onCall(async (data, context) => {
-//   try {
-//     const user = await admin.auth().getUser(data.uid);
-//     log({ message: 'User was created.', data: user, context });
-//     const timestamp = admin.firestore.Timestamp.now();
-//     const { uid, email, displayName } = user;
-//
-//     const billingCustomer = await _createStripeCustomer(user, timestamp);
-//     const password = generatePassword(20, false);
-//
-//     const { schedulingProvider, schedulingCustomer } = await _createSchedulingUser(user, password)
-//
-//     // Create user meta.
-//     await admin.firestore().runTransaction(async (transaction) => {
-//       // Create the slug.
-//       let slug = toKebab(displayName);
-//       const existingRef = admin.firestore()
-//         .collection('users')
-//         .where('slug', '==', slug);
-//       const existingDocs = await transaction.get(existingRef);
-//       if (existingDocs.size) slug = `${slug}-${existingDocs.size}`;
-//       const userMeta = _createUserMeta(user, timestamp, slug);
-//
-//       // Add items to database.
-//       console.log('add user')
-//       const metaRef = admin.firestore().collection('users').doc(uid);
-//       await transaction.set(metaRef, userMeta);
-//       console.log('add user complete')
-//
-//       console.log('add billing customer')
-//       const billingCustomerRef = admin.firestore().collection('stripe_customers').doc(user.uid);
-//       await transaction.set(billingCustomerRef, billingCustomer);
-//       console.log('add billing customer complete')
-//
-//       // For the love of FSM change this as soon as possible.
-//       if (schedulingProvider) {
-//         console.log('add scheduling user', schedulingProvider, '?')
-//         const cachedProvider = { ...schedulingProvider, settings: { ...schedulingProvider.settings, password } }
-//         const providerRef = admin.firestore().collection('easy_providers').doc(uid);
-//         await transaction.set(providerRef, cachedProvider);
-//         console.log('add scheduling user complete')
-//       }
-//
-//       if (schedulingCustomer) {
-//         console.log('add scheduling customer', schedulingCustomer)
-//         const schedulingCustomerRef = admin.firestore().collection('easy_customers').doc(uid);
-//         await transaction.set(schedulingCustomerRef, schedulingCustomer);
-//         console.log('add scheduling customer complete')
-//       }
-//     });
-//
-//     // Set up scheduling separately.
-//
-//
-//     // Create icon.
-//     console.log('create icon');
-//     await _createIcon({ uid });
-//     console.log('create icon complete');
-//
-//     // Create claims.
-//     console.log('set claims');
-//     await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
-//     console.log('set claims complete');
-//
-//     // await admin.firestore().runTransaction(async (transaction) => {
-//     //   // Update all tokens that mention this user.
-//     //   const tokensRef = admin.firestore()
-//     //     .collection('tokens')
-//     //     .where('user', '==', email)
-//     //     .select();
-//     //
-//     //   // Update tokens that should belong to this user.
-//     //   const result = await transaction.get(tokensRef);
-//     //   log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
-//     //   const promises = result.docs.map((doc) => {
-//     //     return transaction.update(doc.ref, { user: uid });
-//     //   })
-//     //
-//     //   await Promise.all(promises).catch(error => {
-//     //     log({ message: error.message, data: error, context, level: 'error' });
-//     //   });
-//     // })
-//   } catch (error) {
-//     log({ message: error.message, data: error, context, level: 'error' });
-//     throw new functions.https.HttpsError('internal', error.message, error);
-//   }
-// });
-
-/**
- * Performs some maintenance when users are created.
- */
-const users_onCreateUser = functions.auth.user()
-  .onCreate(async (_user, context) => {
-    const user = await admin.auth().getUser(_user.uid);
-    log({ message: 'User was created.', data: user, context });
-    const timestamp = admin.firestore.Timestamp.now();
-    const { uid, email, displayName } = user;
-
-    const billingCustomer = await _createStripeCustomer(user, timestamp);
-
-    await _createSchedulingUser(user);
-
-    // Create user meta.
-    await admin.firestore().runTransaction(async (transaction) => {
-      // Create the slug.
-      let slug = toKebab(displayName);
-      const existingRef = admin.firestore()
-        .collection('users')
-        .where('slug', '==', slug);
-      const existingDocs = await transaction.get(existingRef);
-      if (existingDocs.size) slug = `${slug}-${existingDocs.size}`;
-      const userMeta = _createUserMeta(user, timestamp, slug);
-
-      // Add items to database.
-      console.log('add user')
-      const metaRef = admin.firestore().collection('users').doc(uid);
-      await transaction.set(metaRef, userMeta);
-      console.log('add user complete')
-
-      console.log('add billing customer')
-      const billingCustomerRef = admin.firestore().collection('stripe_customers').doc(user.uid);
-      await transaction.set(billingCustomerRef, billingCustomer);
-      console.log('add billing customer complete')
-    });
-
-    // Create icon.
-    console.log('create icon');
-    await _createIcon({ uid });
-    console.log('create icon complete');
-
-    // Create claims.
-    console.log('set claims');
-    await setClaims({ uid, claims: { tier: 0, subscribed: false, remaining: 0 } });
-    console.log('set claims complete');
-
-    // await admin.firestore().runTransaction(async (transaction) => {
-    //   // Update all tokens that mention this user.
-    //   const tokensRef = admin.firestore()
-    //     .collection('tokens')
-    //     .where('user', '==', email)
-    //     .select();
-    //
-    //   // Update tokens that should belong to this user.
-    //   const result = await transaction.get(tokensRef);
-    //   log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
-    //   const promises = result.docs.map((doc) => {
-    //     return transaction.update(doc.ref, { user: uid });
-    //   })
-    //
-    //   await Promise.all(promises).catch(error => {
-    //     log({ message: error.message, data: error, context, level: 'error' });
-    //   });
-    // })
-  });
-
-const users_onDeleteUser = functions.auth.user()
-  .onDelete(async (user, context) => {
-    const { uid } = user;
-    await admin.firestore().collection('users').doc(uid).delete();
-  });
 
 /**
  * Returns the metadata for the currently logged-in user.
@@ -322,40 +32,31 @@ const getUser = async (data, context) => {
   }
 };
 
-const users_onCreateUserMeta = functions.firestore
-  .document('/users/{docId}')
-  .onCreate(async (change, context) => {
-    const user = change.data();
-    const { uid, email, displayName } = user;
+/**
+ * Allows a user to update their own user profile.
+ *
+ * @param data
+ * @param context
+ * @returns {Promise<void>}
+ */
+const updateOwnUser = async (data, context) => {
+  try {
+    log({ message: 'Getting user...', data, context });
+    checkAuth(context);
 
-    await admin.firestore().runTransaction(async (transaction) => {
-      // Update all tokens that mention this user.
-      const tokensRef = admin.firestore()
-        .collection('tokens')
-        .where('user', '==', email)
-        .select();
+    const { uid } = context.auth;
+    const userRef = admin.firestore().collection('users').doc(uid);
+    await userRef.update(filterUserUpdate(data));
 
-      // Update tokens that should belong to this user.
-      const result = await transaction.get(tokensRef);
-      log({ message: `Found ${result.size} tokens referring to this new user.`, data: user, context });
-      const promises = result.docs.map((doc) => {
-        return transaction.update(doc.ref, { user: uid, userDisplayName: displayName });
-      })
-
-      await Promise.all(promises).catch(error => {
-        log({ message: error.message, data: error, context, level: 'error' });
-      });
-    })
-  });
+  } catch (error) {
+    log({ message: error.message, data: error, context, level: 'error' });
+    throw new functions.https.HttpsError('internal', error.message, error);
+  }
+};
 
 module.exports = {
-  // createUser: functions.https.onCall(createUser),
   getUser: functions.https.onCall(getUser),
-  updateUserToCurrent: functions.https.onCall(updateUserToCurrent),
   createSchedulingUser: functions.https.onCall(createSchedulingUser),
-  users_onCreateUser,
-  users_onDeleteUser,
-  users_onCreateUserMeta,
-  // onCreateUser
-  // onUpdateUserMeta
+  updateOwnUser: functions.https.onCall(updateOwnUser),
+  ...require('./handlers')
 };

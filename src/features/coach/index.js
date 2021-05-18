@@ -14,7 +14,7 @@ const Coach = () => {
   const history = useHistory();
   const { slug } = useParams();
   const dispatch = useDispatch();
-  const { isLoading, error, coach } = useSelector(coachSelectors.select);
+  const { isLoading, coach } = useSelector(coachSelectors.select);
   const products = useSelector(coachSelectors.selectTokens);
   const update = useSelector(uiSelectors2.editCoach.select);
   const { isOpen, description } = update;
@@ -58,7 +58,6 @@ const Coach = () => {
         : (<Typography style={{ marginBottom: 32 }}>{coach?.description || ''}</Typography>)
       }
       {isLoading && <p>Loading...</p>}
-      {!!error && <Alert severity="error">{error.message}</Alert>}
       {/*<PublicCatalogList />*/}
       <BaseCatalogList
         title="Products"
@@ -71,7 +70,7 @@ const Coach = () => {
       <div className="spacer" />
 
       <div className="coach-edit-controls">
-        {!isOpen && (
+        {!isOpen && coach.uid === app.auth().currentUser?.uid && (
           <Button className="coach-edit-button" onClick={onEdit} disabled={isLoading} variant="contained">
             Edit
           </Button>

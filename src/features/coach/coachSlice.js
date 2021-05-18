@@ -64,16 +64,10 @@ const load = createAsyncThunk(
 
 const update = createAsyncThunk(
   `${name}/update`,
-  async ({ description }, { dispatch }) => {
+  async (update, { dispatch }) => {
     app.analytics().logEvent(EventTypes.UPDATE_USER);
 
-    await app.firestore()
-      .collection('users')
-      .doc(app.auth().currentUser.uid)
-      .update({
-        description
-      });
-
+    await app.functions().httpsCallable('updateOwnUser')(update);
     dispatch(uiActions2.editCoach.reset());
   }
 );
@@ -82,7 +76,6 @@ const init = createAsyncThunk(
   `${name}/init`,
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
-      console.log('LOGGED OUT');
       if (!authUser) {
         // dispatch(generatedActions.reset());
       }
