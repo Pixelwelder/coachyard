@@ -1,4 +1,4 @@
-export default {
+const Modes = {
   VIEW: 'view',
   EDIT: 'edit',
   CREATE: 'create',
@@ -6,3 +6,5 @@ export default {
   OPEN: 'open',
   PROCESSING: 'processing',
 };
+
+export default Modes;

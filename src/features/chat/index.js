@@ -40,7 +40,7 @@ const ChatMessage = ({ message }) => {
 };
 
 const Chat = ({
-  messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED,
+  messages, hasAccess, courseUid, emptyMessage = EMPTY_MESSAGES.LOCKED, showClear = false
 }) => {
   const dispatch = useDispatch();
   const dummy = useRef();
@@ -69,7 +69,6 @@ const Chat = ({
   const isDisabled = !hasAccess || !courseUid;
 
   useEffect(() => {
-    console.log('SCROLL');
     if (dummy.current) {
       dummy.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -77,14 +76,14 @@ const Chat = ({
 
   return (
     <>
-      <Button onClick={onClear} disabled={isDisabled || !messages.length}>Clear</Button>
+      {showClear && <Button onClick={onClear} disabled={isDisabled || !messages.length}>Clear</Button>}
       {hasAccess && !!courseUid
         ? (
           <ul className="chat-main">
             {messages.map((message, index) => (
-              <ChatMessage key={index} message={message} />
+              <ChatMessage key={index} message={message}/>
             ))}
-            <span ref={dummy} />
+            <span ref={dummy}/>
           </ul>
         )
         : (
@@ -116,7 +115,9 @@ const Chat = ({
   );
 };
 
-const BaseChat = ({ chat, courseUid }) => <Chat messages={chat} courseUid={courseUid} hasAccess emptyMessage={EMPTY_MESSAGES.NO_COURSE} />;
+const BaseChat = ({ chat, courseUid, showClear }) => (
+  <Chat messages={chat} courseUid={courseUid} hasAccess showClear={showClear} emptyMessage={EMPTY_MESSAGES.NO_COURSE} />
+);
 
 const CourseChat = () => {
   const chat = useSelector(selectedCourseSelectors.selectChat);

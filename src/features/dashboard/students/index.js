@@ -6,7 +6,6 @@ import { selectors as dashboardSelectors } from '../dashboardSlice';
 import { actions as assetsActions, selectors as assetsSelectors } from '../../assets/assetsSlice';
 
 const StudentItem = ({ tokens }) => {
-  console.log('student item', tokens);
   const [token] = tokens; // Grab first one for user/image
   const { userDisplayName, user } = token;
   const path = `/avatars/${user}.png`;
@@ -20,11 +19,11 @@ const StudentItem = ({ tokens }) => {
 
   return (
     <div className="student-item">
-      <img src={imageUrl} className="student-item-image" />
+      <img src={imageUrl} className="student-item-image" alt="student-item" />
       <Typography className="student-name" variant="h6">{ userDisplayName }</Typography>
       <ul>
         {
-          tokens.map(({ courseUid, displayName }, index) => (
+          tokens.map(({ courseUid, displayName }) => (
             <li>
               <Typography className="course-link">
                 <Link to={`/course/${courseUid}`}>{displayName}</Link>
@@ -43,7 +42,7 @@ const Students = () => {
   return (
     <div className="dashboard-page">
       <ul className="student-list">
-        {tokens.map((tokens, index) => <StudentItem tokens={tokens} key={index} />)}
+        {tokens.map((_tokens, index) => <StudentItem tokens={_tokens} key={index} />)}
       </ul>
     </div>
   );

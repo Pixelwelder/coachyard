@@ -9,7 +9,7 @@ import {
  * @param initialState
  * @returns slice
  */
-export default ({
+const slice = ({
   name,
   extraNames = [],
   initialState: _initialState,
@@ -88,3 +88,5 @@ export default ({
     },
   });
 };
+
+export default slice;

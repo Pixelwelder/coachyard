@@ -1,12 +1,12 @@
 import React from 'react';
-import { selectors as scheduleSelectors, actions as scheduleActions } from './scheduleSlice';
-import './schedule.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
+import { selectors as scheduleSelectors, actions as scheduleActions } from './scheduleSlice';
+import './schedule.scss';
 
 const Schedule = () => {
   const dispatch = useDispatch();
-  const { tab, isLoading } = useSelector(scheduleSelectors.select);
+  const { isLoading } = useSelector(scheduleSelectors.select);
 
   return (
     <div className="schedule">
@@ -20,18 +20,6 @@ const Schedule = () => {
       >
         Open Calendar
       </Button>
-      {/* <Tabs */}
-      {/*  value={tab} */}
-      {/*  onChange={(event, newValue) => dispatch(scheduleActions.setTab(newValue))} */}
-      {/* > */}
-      {/*  <Tab label="Calendar" /> */}
-      {/*  <Tab label="Availability" /> */}
-      {/*  /!*<Tab label="Breaks" />*!/ */}
-      {/*  /!*<Tab label="Exceptions" />*!/ */}
-      {/* </Tabs> */}
-
-      {/* {tab === TABS.CALENDAR && <Calendar />} */}
-      {/* {tab === TABS.WORKING_PLAN && <WorkingPlan />} */}
     </div>
   );
 };

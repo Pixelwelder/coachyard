@@ -2,7 +2,7 @@ import app from 'firebase/app';
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import { parseUnserializables } from '../../util/firestoreUtils';
 import { EventTypes } from '../../constants/analytics';
-import { loaderReducers, resetValue } from '../../util/reduxUtils';
+import { loaderReducers, resetValue, setValue } from '../../util/reduxUtils';
 import { CALLABLE_FUNCTIONS } from '../../app/callableFunctions';
 
 export const SIDEBAR_MODES = {
@@ -67,6 +67,160 @@ const initialState = {
   descendantTokens: [],
 };
 
+const select = ({ selectedCourse }) => selectedCourse;
+const selectOwnsCourse = createSelector(
+  select,
+  ({ course }) => {
+    const { currentUser } = app.auth();
+    return !!(course && currentUser && (currentUser.uid === course.creatorUid));
+  },
+);
+const selectHasAccess = createSelector(
+  select,
+  () => {},
+);
+const selectIsCreator = createSelector(select, ({ course }) => ((app.auth().currentUser && course)
+  ? app.auth().currentUser.uid === course.creatorUid
+  : false));
+const selectAdminTokens = createSelector(
+  select,
+  ({ tokens }) => tokens.filter(({ access }) => access === 'admin'),
+);
+const selectStudentTokens = createSelector(
+  select,
+  ({ tokens }) => tokens.filter(({ access }) => access === 'student'),
+);
+const selectChat = createSelector(select, ({ chat }) => chat);
+
+// This only gets parent items, but replaces them with local items when they exist.
+const selectParentItems = createSelector(select, ({ parentCourse, parentItems }) => {
+  // Returns all parent items in an ordered array.
+  if (!parentCourse) return [];
+  return parentCourse.itemOrder.map(uid => parentItems[uid]).filter(item => !!item);
+});
+
+// This only gets local items.
+const selectItems = createSelector(select, ({ items, course }) => {
+  if (!course) return [];
+  const { itemOrder, localItemOrder } = course;
+
+  return [...itemOrder, ...localItemOrder]
+    .map(uid => items[uid])
+    .filter(item => !!item);
+  // .sort((a, b) => {});
+});
+
+// This gets all items.
+const selectAllItems = createSelector(
+  selectParentItems,
+  selectItems,
+  (parentItems, items) => [
+    ...parentItems, ...items,
+  ],
+);
+
+// This gets the actual combination of local and parent items that makes up the course.
+const selectCourseItems = createSelector(
+  selectItems,
+  selectParentItems,
+  () => ([]),
+);
+
+const selectSelectedItem = createSelector(
+  select,
+  ({ items, parentItems, selectedItemUid }) => items[selectedItemUid] || parentItems[selectedItemUid],
+);
+
+// TODO This could result in double billing, but that's probably better than no billing.
+const selectIsBeingPurchased = createSelector(
+  select,
+  // ({ sessions }) => sessions.find(session => session.session.payment_status === 'unpaid')
+  () => false
+);
+
+const selectOwnsDescendant = createSelector(
+  select,
+  ({ descendantTokens }) => !!descendantTokens.length,
+);
+
+const selectOwnedDescendant = createSelector(
+  select,
+  ({ descendantTokens }) => (descendantTokens.length ? descendantTokens[0] : null),
+);
+
+const selectors = {
+  select,
+  selectOwnsCourse,
+  selectHasAccess,
+  selectAdminTokens,
+  selectStudentTokens,
+  selectChat,
+  selectIsCreator,
+  selectItems,
+  selectParentItems,
+  selectAllItems,
+  selectCourseItems,
+  selectSelectedItem,
+  selectIsBeingPurchased,
+  selectOwnsDescendant,
+  selectOwnedDescendant,
+};
+
+const { actions: generatedActions, reducer } = createSlice({
+  name: 'selectedCourse',
+  initialState,
+  reducers: {
+    // _setUid: setValue('uid'),
+    setToken: setValue('token'),
+    setTokens: setValue('tokens'),
+    setCourse: setValue('course'),
+    setCourseCreator: setValue('courseCreator'),
+    setCourseCreatorProvider: setValue('courseCreatorProvider'),
+    setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
+    setStudent: setValue('student'),
+    setItems: setValue('items'),
+    setSelectedItemUid: setValue('selectedItemUid'),
+    setIsRecording: setValue('isRecording'),
+    setIsFullscreen: setValue('isFullscreen'),
+    setSidebarMode: (state, action) => {
+      state.sidebarMode = action.payload;
+      state.numOutstandingChats = 0;
+    },
+    setChat: setValue('chat'),
+    addChatMessage: (state, action) => {
+      state.chat = [...state.chat, action.payload];
+    },
+    setChatMessage: setValue('chatMessage'),
+    setNumOutstandingChats: setValue('numOutstandingChats'),
+    addImageUrls: (state, action) => {
+      state.imageUrls = { ...state.imageUrls, ...action.payload };
+    },
+    setParentCourse: setValue('parentCourse'),
+    setParentItems: setValue('parentItems'),
+
+    setAdminImageUrl: setValue('adminImageUrl'),
+    reset: () => initialState,
+
+    setEditMode: (state, action) => {
+      state.editMode = action.payload;
+      state.studentManagerMode = initialState.studentManagerMode;
+      state.error = initialState.error;
+    },
+    setStudentManagerMode: (state, action) => {
+      state.studentManagerMode = action.payload;
+      state.error = initialState.error;
+    },
+    setEmailResult: setValue('emailResult'),
+    resetEmailResult: resetValue('emailResult', initialState.emailResult),
+    setCurrentToken: setValue('tokenToRemove'),
+    resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove),
+
+    setSessions: setValue('sessions'),
+    setDescendantTokens: setValue('descendantTokens'),
+  },
+  extraReducers: loaderReducers(name, initialState),
+});
+
 /**
  * Parses a snapshot full of items into an object keyed by item uid.
  *
@@ -101,17 +255,8 @@ const unsubscribe = () => {
   unsubscribeStudentTokens();
   unsubscribeChat();
   unsubscribeSessions();
+  unsubscribeDescendants();
 };
-
-const _loadCourse = createAsyncThunk(
-  `${name}/_loadCourse`,
-  async () => {},
-);
-
-const _loadCourseDependents = createAsyncThunk(
-  `${name}/_loadCourseDependents`,
-  async () => {},
-);
 
 const setLocation = createAsyncThunk(
   `${name}/setLocation`,
@@ -119,18 +264,17 @@ const setLocation = createAsyncThunk(
     app.analytics().logEvent(EventTypes.SELECT_COURSE_AND_ITEM, { courseUid, itemUid });
 
     const reset = () => {
-      console.log('resetting');
       dispatch(generatedActions.reset());
       unsubscribe();
     };
 
     const abandon = (message) => {
+      // eslint-disable-next-line no-console
       if (message) console.error(message);
       reset();
       history.push('/dashboard');
     };
 
-    console.log('setLocation', courseUid, itemUid);
     if (!courseUid) abandon('No courseUid.');
 
     const state = select(getState());
@@ -141,34 +285,24 @@ const setLocation = createAsyncThunk(
       // We have a course. Is it the same one?
       if (currentCourse.uid === courseUid) {
         // Do not load; just set the selected item.
-        console.log('Same course. Not loading ANYTHING.');
-
         if (itemUid) {
-          console.log('setting itemUid:', itemUid);
           // That means the item should exist.
           const { items, parentItems } = state;
           if (items[itemUid] || parentItems[itemUid]) {
             // This is valid. Go ahead and set it.
-            console.log('END | itemUid is valid: setting');
-            return dispatch(generatedActions.setSelectedItemUid(itemUid));
+            dispatch(generatedActions.setSelectedItemUid(itemUid));
+            return;
           }
           // This is invalid. Call setLocation again, but with a null itemUid.
-          console.log('itemUid is invalid - navigating to bare course');
-          return history.push(`/course/${courseUid}`);
+          history.push(`/course/${courseUid}`);
+          return;
         }
-        console.log('No itemUid. Stop here.');
-        return dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
+        dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
+        return;
       }
-      // Load the course.
-      console.log('Different course loaded.');
-      // Clear all subscriptions.
-      // Proceed.
-    } else {
-      console.log('No course loaded. Proceeding.');
     }
 
     // Proceed.
-    console.log('Nuking everything and loading course.');
     reset();
 
     // If we've made it this far, we are definitely loading a course OR returning to dashboard.
@@ -176,7 +310,8 @@ const setLocation = createAsyncThunk(
     const courseRef = app.firestore().collection('courses').doc(courseUid);
     const courseDoc = await courseRef.get();
     if (!courseDoc.exists) {
-      return abandon(`Course ${courseUid} doesn't exist.`);
+      abandon(`Course ${courseUid} doesn't exist.`);
+      return;
     }
 
     // The course exists, but does this user have access to it?
@@ -192,15 +327,14 @@ const setLocation = createAsyncThunk(
           .get();
 
         if (!tokenDocs.size) {
-          return abandon('User does not have access to this course.');
+          abandon('User does not have access to this course.');
+          return;
         }
 
         if (tokenDocs.size > 1) throw new Error(`${tokenDocs.size} tokens found for course.`);
         dispatch(generatedActions.setToken(parseUnserializables(tokenDocs.docs[0].data())));
       }
     }
-
-    console.log('User has access to the course.');
 
     // Go ahead and set the course, even though we'll be listening to it later.
     dispatch(generatedActions.setCourse(course));
@@ -221,7 +355,6 @@ const setLocation = createAsyncThunk(
     // Grab the items.
     unsubscribeLocalItems = courseRef.collection('items')
       .onSnapshot((snapshot) => {
-        console.log(`setting ${snapshot.size} items`);
         localItems = parseItems(snapshot);
         checkItemUid(itemUid);
         dispatch(generatedActions.setItems(localItems));
@@ -232,17 +365,15 @@ const setLocation = createAsyncThunk(
       const parentRef = app.firestore().collection('courses').doc(course.parent);
       unsubscribeParentCourse = parentRef.onSnapshot((snapshot) => {
         if (snapshot.exists) {
-          console.log('setting parent course');
           const parent = parseUnserializables(snapshot.data());
           dispatch(generatedActions.setParentCourse(parent));
         } else {
-          return abandon(`Course ${courseUid}'s parent ${course.parent} does not exist.`);
+          abandon(`Course ${courseUid}'s parent ${course.parent} does not exist.`);
         }
       });
 
       // ...and _its_ items.
       unsubscribeParentItems = parentRef.collection('items').onSnapshot((snapshot) => {
-        console.log(`setting ${snapshot.size} parent items`);
         parentItems = parseItems(snapshot);
         checkItemUid(itemUid);
         dispatch(generatedActions.setParentItems(parentItems));
@@ -285,10 +416,10 @@ const setLocation = createAsyncThunk(
       .onSnapshot(async (snapshot) => {
         if (snapshot.exists) {
           // This course exists.
-          const course = parseUnserializables(snapshot.data());
-          dispatch(generatedActions.setCourse(course));
+          const newCourse = parseUnserializables(snapshot.data());
+          dispatch(generatedActions.setCourse(newCourse));
         } else {
-          return abandon(`Course ${courseUid} no longer exists.`);
+          abandon(`Course ${courseUid} no longer exists.`);
         }
       });
 
@@ -298,7 +429,6 @@ const setLocation = createAsyncThunk(
       .doc(courseUid)
       .collection('sessions')
       .onSnapshot((snapshot) => {
-        console.log('sessions', snapshot.docs.length);
         if (snapshot.size) {
           const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
           dispatch(generatedActions.setSessions(sessions));
@@ -320,38 +450,32 @@ const setLocation = createAsyncThunk(
 
 const update = createAsyncThunk(
   `${name}/update`,
-  async (update, { dispatch, getState }) => {
+  async (_update, { getState }) => {
     const { course: { uid } } = select(getState());
     app.analytics().logEvent(EventTypes.UPDATE_COURSE_ATTEMPTED);
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
-    const result = await callable({ uid, update });
+    await callable({ uid, update: _update });
     app.analytics().logEvent(EventTypes.UPDATE_COURSE);
   },
 );
 
 const submitChatMessage = createAsyncThunk(
   `${name}/submitChatMessage`,
-  async ({ courseUid, message }, { getState, dispatch }) => {
-    try {
-      const { uid } = app.auth().currentUser;
-      // const state = getState();
-      // const { course } = select(state);
-      dispatch(generatedActions.setChatMessage(''));
-      await app.firestore().collection('courses')
-        .doc(courseUid)
-        .collection('chat')
-        .doc()
-        .set({
-          sender: uid,
-          text: message,
-          created: app.firestore.Timestamp.now(),
-        });
-
-      // await app.firestore().collection('courses').doc(course.uid).update({ numChats: })
-    } catch (error) {
-      console.error(error);
-    }
-  },
+  async ({ courseUid, message }, { dispatch }) => {
+    const { uid } = app.auth().currentUser;
+    // const state = getState();
+    // const { course } = select(state);
+    dispatch(generatedActions.setChatMessage(''));
+    await app.firestore().collection('courses')
+      .doc(courseUid)
+      .collection('chat')
+      .doc()
+      .set({
+        sender: uid,
+        text: message,
+        created: app.firestore.Timestamp.now(),
+      });
+  }
 );
 
 const searchForEmail = createAsyncThunk(
@@ -392,7 +516,7 @@ const addUser = createAsyncThunk(
     const studentEmail = typeof emailResult === 'object' ? emailResult.email : emailResult;
     const { uid: courseUid } = course;
 
-    const result = await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
+    await app.functions().httpsCallable('addUser')({ studentEmail, courseUid });
     dispatch(generatedActions.resetEmailResult());
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   },
@@ -419,7 +543,7 @@ const removeUser = createAsyncThunk(
 
     const { uid: tokenUid } = tokenToRemove;
 
-    const result = await app.functions().httpsCallable('removeUser')({ tokenUid });
+    await app.functions().httpsCallable('removeUser')({ tokenUid });
     dispatch(generatedActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
   },
 );
@@ -427,70 +551,11 @@ const removeUser = createAsyncThunk(
 const init = createAsyncThunk(
   `${name}/initSelectedCourse`,
   async (_, { dispatch }) => {
-    app.auth().onAuthStateChanged((authUser) => {
+    app.auth().onAuthStateChanged(() => {
       dispatch(generatedActions.reset());
     });
   },
 );
-
-const setValue = name => (state, action) => {
-  state[name] = action.payload;
-};
-
-const { actions: generatedActions, reducer } = createSlice({
-  name: 'selectedCourse',
-  initialState,
-  reducers: {
-    // _setUid: setValue('uid'),
-    setToken: setValue('token'),
-    setTokens: setValue('tokens'),
-    setCourse: setValue('course'),
-    setCourseCreator: setValue('courseCreator'),
-    setCourseCreatorProvider: setValue('courseCreatorProvider'),
-    setCourseCreatorImageUrl: setValue('courseCreatorImageUrl'),
-    setStudent: setValue('student'),
-    setItems: setValue('items'),
-    setSelectedItemUid: setValue('selectedItemUid'),
-    setIsRecording: setValue('isRecording'),
-    setIsFullscreen: setValue('isFullscreen'),
-    setSidebarMode: (state, action) => {
-      state.sidebarMode = action.payload;
-      state.numOutstandingChats = 0;
-    },
-    setChat: setValue('chat'),
-    addChatMessage: (state, action) => {
-      state.chat = [...state.chat, action.payload];
-    },
-    setChatMessage: setValue('chatMessage'),
-    setNumOutstandingChats: setValue('numOutstandingChats'),
-    addImageUrls: (state, action) => {
-      state.imageUrls = { ...state.imageUrls, ...action.payload };
-    },
-    setParentCourse: setValue('parentCourse'),
-    setParentItems: setValue('parentItems'),
-
-    setAdminImageUrl: setValue('adminImageUrl'),
-    reset: (state, action) => initialState,
-
-    setEditMode: (state, action) => {
-      state.editMode = action.payload;
-      state.studentManagerMode = initialState.studentManagerMode;
-      state.error = initialState.error;
-    },
-    setStudentManagerMode: (state, action) => {
-      state.studentManagerMode = action.payload;
-      state.error = initialState.error;
-    },
-    setEmailResult: setValue('emailResult'),
-    resetEmailResult: resetValue('emailResult', initialState.emailResult),
-    setCurrentToken: setValue('tokenToRemove'),
-    resetCurrentToken: resetValue('tokenToRemove', initialState.studentToRemove),
-
-    setSessions: setValue('sessions'),
-    setDescendantTokens: setValue('descendantTokens'),
-  },
-  extraReducers: loaderReducers(name, initialState),
-});
 
 const actions = {
   ...generatedActions,
@@ -501,106 +566,7 @@ const actions = {
   searchForEmail,
   addUser,
   removeUser,
-  purchaseCourse,
-};
-
-const select = ({ selectedCourse }) => selectedCourse;
-const selectOwnsCourse = createSelector(
-  select,
-  ({ course }) => {
-    const { currentUser } = app.auth();
-    return !!(course && currentUser && (currentUser.uid === course.creatorUid));
-  },
-);
-const selectHasAccess = createSelector(
-  select,
-  () => {},
-);
-const selectIsCreator = createSelector(select, ({ course }) => ((app.auth().currentUser && course)
-  ? app.auth().currentUser.uid === course.creatorUid
-  : false));
-const selectAdminTokens = createSelector(
-  select,
-  ({ tokens }) => tokens.filter(({ access }) => access === 'admin'),
-);
-const selectStudentTokens = createSelector(
-  select,
-  ({ tokens }) => tokens.filter(({ access }) => access === 'student'),
-);
-const selectChat = createSelector(select, ({ chat }) => chat);
-
-// This only gets parent items, but replaces them with local items when they exist.
-const selectParentItems = createSelector(select, ({ parentCourse, parentItems, items }) => {
-  // Returns all parent items in an ordered array.
-  if (!parentCourse) return [];
-  return parentCourse.itemOrder.map(uid => parentItems[uid]).filter(item => !!item);
-});
-
-// This only gets local items.
-const selectItems = createSelector(select, ({ items, parentItems, course }) => {
-  if (!course) return [];
-  const { itemOrder, localItemOrder } = course;
-
-  return [...itemOrder, ...localItemOrder]
-    .map(uid => items[uid])
-    .filter(item => !!item);
-  // .sort((a, b) => {});
-});
-
-// This gets all items.
-const selectAllItems = createSelector(
-  selectParentItems,
-  selectItems,
-  (parentItems, items) => [
-    ...parentItems, ...items,
-  ],
-);
-
-// This gets the actual combination of local and parent items that makes up the course.
-const selectCourseItems = createSelector(
-  selectItems,
-  selectParentItems,
-  () => ([]),
-);
-
-const selectSelectedItem = createSelector(
-  select,
-  ({ items, parentItems, selectedItemUid }) => items[selectedItemUid] || parentItems[selectedItemUid],
-);
-
-// TODO This could result in double billing, but that's probably better than no billing.
-const selectIsBeingPurchased = createSelector(
-  select,
-  ({ sessions }) => false, // sessions.find(session => session.session.payment_status === 'unpaid');
-
-);
-
-const selectOwnsDescendant = createSelector(
-  select,
-  ({ descendantTokens }) => !!descendantTokens.length,
-);
-
-const selectOwnedDescendant = createSelector(
-  select,
-  ({ descendantTokens }) => (descendantTokens.length ? descendantTokens[0] : null),
-);
-
-const selectors = {
-  select,
-  selectOwnsCourse,
-  selectHasAccess,
-  selectAdminTokens,
-  selectStudentTokens,
-  selectChat,
-  selectIsCreator,
-  selectItems,
-  selectParentItems,
-  selectAllItems,
-  selectCourseItems,
-  selectSelectedItem,
-  selectIsBeingPurchased,
-  selectOwnsDescendant,
-  selectOwnedDescendant,
+  purchaseCourse
 };
 
 export { actions, selectors };

@@ -46,7 +46,7 @@ const Chats = () => {
         }
       </ul>
       <div className="chat-container">
-        <BaseChat chat={selectedChat} courseUid={selectedChatUid} />
+        <BaseChat chat={selectedChat} courseUid={selectedChatUid} showClear />
       </div>
     </div>
   );

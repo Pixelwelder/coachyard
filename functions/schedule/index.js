@@ -1,8 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const generatePassword = require('password-generator');
-const { addProvider, deleteProvider, updateProvider, getProvider: _getProvider } = require('./providers');
-const { addCustomer, deleteCustomer, updateCustomer } = require('./customers');
+const { deleteProvider, getProvider: _getProvider } = require('./providers');
+const { deleteCustomer } = require('./customers');
 const { getServices: _getServices } = require('./services');
 const { checkAuth } = require('../util/auth');
 const { log } = require('../logging');
@@ -34,8 +33,8 @@ const { schedule } = require('./webhooks');
 
 // TODO We can easily end up with orphaned providers and customers here.
 // TODO Consider hanging stuff on user, in subcollections.
-const scheduling_onDeleteUser = functions.auth.user()
-  .onDelete(async (user, context) => {
+const schedulingOnDeleteUser = functions.auth.user()
+  .onDelete(async (user) => {
     const { uid } = user;
     const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
     if (providerDoc.exists) {
@@ -52,37 +51,15 @@ const scheduling_onDeleteUser = functions.auth.user()
     }
   });
 
-const scheduling_onUpdateUser = functions.firestore
-  .document('/users/{docId}')
-  .onUpdate(async (change, context) => {
-    // console.log('-------------------------')
-    // console.log('UPDATE');
-    // console.log(change.before.data());
-    // console.log(change.after.data());
-    // console.log('-------------------------')
-    // const { params: { docId: uid } } = context;
-    // const { displayName } = change.after.data();
-    //
-    // const providerDoc = await admin.firestore().collection('easy_providers').doc(uid).get();
-    // if (providerDoc.exists) {
-    //   const { id, settings } = providerDoc.data()
-    //   const result = await updateProvider({ id, data: { firstName: displayName, lastName: '', settings } });
-    // }
-    //
-    // const customerDoc = await admin.firestore().collection('easy_customers').doc(uid).get();
-    // if (customerDoc.exists) {
-    //   const { id } = customerDoc.data();
-    //   await updateCustomer({ id, data: { firstName: displayName, lastName: '' } });
-    // }
-  });
-
 const getServices = functions.https.onCall(async (data, context) => {
   try {
     checkAuth(context);
     const services = await _getServices();
     return services;
   } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
+    log({
+      message: error.message, data: error, context, level: 'error'
+    });
     throw new functions.https.HttpsError('internal', error.message, error);
   }
 });
@@ -98,38 +75,17 @@ const getProvider = functions.https.onCall(async (data, context) => {
     const { id } = providerDoc.data();
     const provider = await _getProvider({ id });
     return provider;
-
   } catch (error) {
-    log({ message: error.message, data: error, context, level: 'error' });
+    log({
+      message: error.message, data: error, context, level: 'error'
+    });
     throw new functions.https.HttpsError('internal', error.message, error);
   }
-})
-
-// const scheduling_onUpdateUser = functions.firestore
-//   .document('/users/{docId}')
-//   .onUpdate(async (change, context) => {
-//     const { before: _before, after: _after } = change;
-//     const before = _before.data();
-//     const after = _after.data();
-//     console.log(after);
-//     if (!after.claims || !after.claims.tier) return;
-//     if (after.claims.tier === before.claims.tier) return;
-//     // If we've reached this point, the user's tier has changed.
-//
-//     // The user is no longer a provider.
-//     if (after.claims.tier === 0) {
-//
-//     }
-//
-//     await addProvider(after);
-//   });
+});
 
 module.exports = {
-  // scheduling_onCreateUser,
-  scheduling_onUpdateUser,
-  scheduling_onDeleteUser,
+  schedulingOnDeleteUser,
   getServices,
   getProvider,
   schedule
-  // scheduling_onUpdateUser
 };
