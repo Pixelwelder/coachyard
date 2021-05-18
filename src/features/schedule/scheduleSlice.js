@@ -1,7 +1,7 @@
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 import app from 'firebase/app';
 import { loaderReducers, reset, setValue } from '../../util/reduxUtils';
-import { url } from '../../__config__/easy.local.json';
+import { easy } from '../../config';
 import { selectors as selectedCourseSelectors } from '../course/selectedCourseSlice';
 
 export const TABS = {
@@ -39,7 +39,7 @@ const init = createAsyncThunk(
       unsubscribeProviders();
       if (authUser) {
         const schedule = document.getElementById('schedule')
-        if (schedule) schedule.src = `${url}/index.php/user/login?admin`;
+        if (schedule) schedule.src = `${easy.url}/index.php/user/login?admin`;
 
         unsubscribeProviders = app.firestore()
           .collection('easy_providers')
@@ -147,7 +147,7 @@ const openCalendar = createAsyncThunk(
     // const doLogout = () => {
     //   const schedule = document.getElementById('schedule');
     //   if (schedule) {
-    //     document.getElementById('schedule').src = `${url}/index.php/user/logout`
+    //     document.getElementById('schedule').src = `${easy.url}/index.php/user/logout`
     //   } else {
     //     console.log('No schedule iframe');
     //   }
@@ -179,7 +179,7 @@ const openCalendar = createAsyncThunk(
 
           case 'scheduler-login-logged-in': {
             // const schedule = document.getElementById('schedule');
-            // schedule.src = `${url}/index.php/backend`;
+            // schedule.src = `${easy.url}/index.php/backend`;
             // dispatch(generatedActions.setIsLoggedIn(value));
             break;
           }
@@ -192,7 +192,7 @@ const openCalendar = createAsyncThunk(
     };
 
     window.addEventListener('message', onMessage);
-    newWindow = window.open(`${url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600')
+    newWindow = window.open(`${easy.url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600')
   }
 );
 
@@ -209,7 +209,7 @@ const openScheduler = createAsyncThunk(
       const { id } = providerDoc.data();
 
       const newWindow = window.open(
-        `${url}/index.php?provider=${id}&course=${course.uid}&item=${selectedItem.uid}`,
+        `${easy.url}/index.php?provider=${id}&course=${course.uid}&item=${selectedItem.uid}`,
         'calendar',
         'left=100,right=100,width=800,height=800'
       );

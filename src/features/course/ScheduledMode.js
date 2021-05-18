@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import React, { useEffect, useState } from 'react';
 import Iframe from 'react-iframe';
-import { url } from '../../__config__/easy.local.json';
+import { easy } from '../../config';
 import ItemInfo from './ItemInfo';
 
 const getDateTime = ({ course, item }) => {
@@ -76,7 +76,7 @@ const Student = () => {
         <Iframe
           id="schedule"
           // url={`http://localhost:8000?provider=${providerId}`}
-          url={`${url}/index.php/user/login?admin`}
+          url={`${easy.url}/index.php/user/login?admin`}
           width="800px"
           height="900px"
           display="block"

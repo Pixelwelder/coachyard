@@ -7,7 +7,7 @@ import 'firebase/firestore';
 import 'firebase/analytics';
 import queryString from 'query-string';
 
-import firebaseConfig from '../../__config__/firebase.json';
+import { firebase as firebaseConfig } from '../../config';
 import { actions as catalogActions } from '../catalog/catalogSlice';
 import { actions as selectedCourseActions } from '../course/selectedCourseSlice';
 import { actions as userActions } from './userSlice';
