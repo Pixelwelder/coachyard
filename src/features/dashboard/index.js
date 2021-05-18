@@ -19,16 +19,18 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <Typography variant="h2" component="h2">Dashboard</Typography>
-      <Tabs
-        variant="fullWidth"
-        value={tab}
-        onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
-      >
-        <Tab label="Courses" />
-        {isTeacher && <Tab label="Students" />}
-        {isTeacher && <Tab label="Chats" />}
-        <Tab label="Schedule" />
-      </Tabs>
+      {isTeacher && (
+        <Tabs
+          variant="fullWidth"
+          value={tab}
+          onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
+        >
+          <Tab label="Courses" />
+          <Tab label="Students" />
+          <Tab label="Chats" />
+          <Tab label="Schedule" />
+        </Tabs>
+      )}
       <div className="dashboard-content">
         {tab === TABS.COURSES && <Catalog />}
         {tab === TABS.SCHEDULE && <Schedule />}
