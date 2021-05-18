@@ -5,6 +5,7 @@ function preserveQueryParameters(history, preserve, location) {
   const currentQuery = queryString.parse(history.location.search);
   if (currentQuery) {
     const preservedQuery = {};
+    // eslint-disable-next-line no-restricted-syntax
     for (const p of preserve) {
       const v = currentQuery[p];
       if (v) {

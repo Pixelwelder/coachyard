@@ -4,6 +4,7 @@ const padNum = (str, padTo = 2) => {
 };
 
 const to12Hour = (time) => {
+  // eslint-disable-next-line prefer-const
   let [hours, minutes] = time.split(':').map((str) => Number(str));
   const ending = hours < 13 ? 'AM' : 'PM';
   if (hours > 12) hours -= 12;
@@ -13,7 +14,7 @@ const to12Hour = (time) => {
 const times = [];
 const listTimes = ({ increment = 15 } = {}) => {
   if (!times.length) {
-    for (let i = 0; i < (24 * (60 / increment)); i++) {
+    for (let i = 0; i < (24 * (60 / increment)); i += 1) {
       const all = i * increment;
       const hours = Math.floor(all / 60);
       const minutes = hours ? (all % (hours * 60)) : all;

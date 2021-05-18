@@ -3,6 +3,7 @@
   "plugins": ["unused-imports"],
   "rules": {
     "comma-dangle": "off",
+    "max-len": "off",
     "unused-imports/no-unused-imports": "error",
     "no-param-reassign": ["error", { "props": false }],
     "unused-imports/no-unused-vars": [
@@ -13,6 +14,11 @@
         "args": "after-used",
         "argsIgnorePattern": "^_"
       }
-    ]
+    ],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+  },
+  "env": {
+    "jest": true,
+    "browser": true
   }
 }

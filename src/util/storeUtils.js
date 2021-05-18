@@ -1,12 +1,16 @@
 import { createSelector } from '@reduxjs/toolkit';
 
+// eslint-disable-next-line import/prefer-default-export
 export const createTokenSelectors = (rootSelector) => {
   const createTypeFilter = (param, types) => (tokens) => tokens
     .filter(({ [param]: value }) => types.includes(value));
   const createNegativeTypeFilter = (param, types) => (tokens) => tokens
     .filter(({ [param]: value }) => !types.includes(value));
 
-  const selectTokens = createSelector(rootSelector, ({ tokensByUid }) => Object.values(tokensByUid));
+  const selectTokens = createSelector(
+    rootSelector,
+    ({ tokensByUid }) => Object.values(tokensByUid)
+  );
   const selectPublicTokens = createSelector(selectTokens, createTypeFilter('type', ['public']));
   const selectTemplateTokens = createSelector(selectTokens, createTypeFilter('type', ['template']));
   const selectNonTemplateTokens = createSelector(selectTokens, createNegativeTypeFilter('type', ['template']));
