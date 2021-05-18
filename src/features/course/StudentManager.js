@@ -4,21 +4,20 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import NonMemberIcon from '@material-ui/icons/Help';
-import MemberIcon from '@material-ui/icons/Done';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 
-import {
-  selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
-} from './selectedCourseSlice';
 import app from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
 import Alert from '@material-ui/lab/Alert';
+import {
+  selectors as selectedCourseSelectors, actions as selectedCourseActions, STUDENT_MANAGER_MODE
+} from './selectedCourseSlice';
 
 const tokenIsClaimed = token => token.user !== token.userDisplayName;
-const isMember = (user) => (user !== null) && (typeof user === 'object');
-const getName = (user, propName) => isMember(user) ? user[propName] : user;
+const isMember = user => (user !== null) && (typeof user === 'object');
+const getName = (user, propName) => (isMember(user) ? user[propName] : user);
 
-const _StudentImage = ({ uid, cName = "student-view-thumb" }) => {
+const _StudentImage = ({ uid, cName = 'student-view-thumb' }) => {
   const { imageUrls } = useSelector(selectedCourseSelectors.select);
   const [imageUrl, setImageUrl] = useState('');
 
@@ -30,7 +29,7 @@ const _StudentImage = ({ uid, cName = "student-view-thumb" }) => {
       } catch (error) {
         // Ignore.
       }
-    }
+    };
 
     if (imageUrls[uid]) {
       setImageUrl(imageUrls[uid]);
@@ -47,37 +46,36 @@ const _StudentImage = ({ uid, cName = "student-view-thumb" }) => {
           <div className={`${cName} no-student`}>
             <NonMemberIcon />
           </div>
-        )
-      }
+        )}
     </>
   );
-}
+};
 
 const StudentView = ({ token }) => {
   const dispatch = useDispatch();
-  const { isLoading } = useSelector(selectedCourseSelectors.select)
+  const { isLoading } = useSelector(selectedCourseSelectors.select);
 
   const onDelete = () => {
     dispatch(selectedCourseActions.setCurrentToken(token));
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.DELETE));
-  }
+  };
 
   const onEdit = () => {
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.EDIT_INVITE));
-  }
+  };
 
   return (
     <div className="student-view">
       <_StudentImage uid={token.user} />
       <Typography className="student-name">{token.userDisplayName}</Typography>
-      {/*{tokenIsClaimed(token) && (*/}
-      {/*  <MemberIcon />*/}
-      {/*)}*/}
-      {/*{tokenIsUnclaimed(token) && (*/}
-      {/*  <Button onClick={onEdit}>*/}
-      {/*    Invite...*/}
-      {/*  </Button>*/}
-      {/*)}*/}
+      {/* {tokenIsClaimed(token) && ( */}
+      {/*  <MemberIcon /> */}
+      {/* )} */}
+      {/* {tokenIsUnclaimed(token) && ( */}
+      {/*  <Button onClick={onEdit}> */}
+      {/*    Invite... */}
+      {/*  </Button> */}
+      {/* )} */}
       <div className="spacer" />
       <Button onClick={onDelete} disabled={isLoading}>
         <DeleteIcon />
@@ -93,7 +91,7 @@ const List = () => {
 
   const onAdd = () => {
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.ADD));
-  }
+  };
 
   return (
     <div className="student-manager-page access-student-list">
@@ -162,26 +160,28 @@ const Add = () => {
         >
           Cancel
         </Button>
-        {/*<Button className="student-confirm" variant="contained" color="primary" onClick={() => {}}>Confirm</Button>*/}
+        {/* <Button className="student-confirm" variant="contained" color="primary" onClick={() => {}}>Confirm</Button> */}
       </div>
     </div>
-  )
+  );
 };
 
 const Delete = () => {
-  const { tokenToRemove, imageUrls, error, isLoading } = useSelector(selectedCourseSelectors.select);
+  const {
+    tokenToRemove, imageUrls, error, isLoading
+  } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
   const imageUrl = imageUrls[tokenToRemove.user];
 
   const onRemove = () => {
     dispatch(selectedCourseActions.removeUser());
-  }
+  };
 
   const onCancel = () => {
     dispatch(selectedCourseActions.resetCurrentToken());
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.LIST));
-  }
+  };
 
   return (
     <div className="student-manager-page student-delete">
@@ -198,7 +198,7 @@ const Delete = () => {
         </Button>
       </div>
     </div>
-  )
+  );
 };
 
 const _UserView = ({ user, token }) => {
@@ -211,12 +211,12 @@ const _UserView = ({ user, token }) => {
       <Typography variant="h6" className="light-text">
         {name}
       </Typography>
-      {/*{!isMember(user) && (*/}
-      {/*  <Typography>This person is not a current Coachyard user.</Typography>*/}
-      {/*)}*/}
+      {/* {!isMember(user) && ( */}
+      {/*  <Typography>This person is not a current Coachyard user.</Typography> */}
+      {/* )} */}
     </div>
   );
-}
+};
 
 const ViewUser = () => {
   const { emailResult, error, isLoading } = useSelector(selectedCourseSelectors.select);
@@ -224,11 +224,11 @@ const ViewUser = () => {
 
   const onCancel = () => {
     dispatch(selectedCourseActions.setStudentManagerMode(STUDENT_MANAGER_MODE.ADD));
-  }
+  };
 
   const onSubmit = () => {
     dispatch(selectedCourseActions.addUser());
-  }
+  };
 
   return (
     <div className="student-manager-page view-user">
@@ -253,7 +253,7 @@ const EditInvite = () => {
   return (
     <div className="student-manager-page student-edit-invite">
       <div className="student-manager-content">
-        {/*<_UserView />*/}
+        {/* <_UserView /> */}
       </div>
       <div className="student-manager-controls">
         <Button
@@ -266,7 +266,7 @@ const EditInvite = () => {
       </div>
     </div>
   );
-}
+};
 
 const StudentManager = () => {
   const { studentManagerMode, error, course } = useSelector(selectedCourseSelectors.select);

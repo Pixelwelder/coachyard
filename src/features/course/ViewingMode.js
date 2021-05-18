@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import EditItemView from './EditItemView';
 import Typography from '@material-ui/core/Typography';
 import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
 import React, { useState } from 'react';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
+import EditItemView from './EditItemView';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import ItemTitle from './ItemTitle';
 
 const ViewingMode = ({ size }) => {
@@ -22,7 +22,7 @@ const ViewingMode = ({ size }) => {
     <div className="item-mode viewing-mode">
       {
         isOpen
-          ? <EditItemView/>
+          ? <EditItemView />
           : (
             <>
               <ItemTitle item={selectedItem} />
@@ -39,10 +39,10 @@ const ViewingMode = ({ size }) => {
                   {selectedItem?.playbackId && (
                     <div className="player-wrapper">
                       <ReactPlayer
-                        width={'100%'}
-                        height={'100%'}
+                        width="100%"
+                        height="100%"
                         url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
-                        controls={true}
+                        controls
                       />
                     </div>
                   )}
@@ -55,7 +55,7 @@ const ViewingMode = ({ size }) => {
 
               {ownsCourse && (
                 <>
-                  <div className="spacer"/>
+                  <div className="spacer" />
                   <div className="owner-controls">
                     <Button
                       variant="contained"

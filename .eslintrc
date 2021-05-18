@@ -6,6 +6,8 @@
     "max-len": "off",
     "unused-imports/no-unused-imports": "error",
     "no-param-reassign": ["error", { "props": false }],
+    "arrow-parens": [2, "as-needed", { "requireForBlockBody":  true }],
+    "import/no-extraneous-dependencies": "off",
     "unused-imports/no-unused-vars": [
       "warn",
       {
@@ -16,6 +18,9 @@
       }
     ],
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+  },
+  "parserOptions": {
+    "ecmaVersion": 12
   },
   "env": {
     "jest": true,

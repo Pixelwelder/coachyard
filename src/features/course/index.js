@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
 import {
   actions as selectedCourseActions,
   selectors as selectedCourseSelectors,
@@ -11,22 +17,17 @@ import { actions as uiActions2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
 import './course.scss';
 import ItemList from './ItemList';
-import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
 import CourseSummary from './CourseSummary';
 import ItemView from './ItemView';
 import CourseView from './CourseView';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import { CourseChat } from '../chat';
-import { actions as catalogActions } from '../catalog/catalogSlice';
-import { actions as billingActions2, selectors as billingSelectors2 } from '../billing2/billingSlice2';
+import { actions as catalogActions, selectors as catalogSelectors } from '../catalog/catalogSlice';
+import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
+import {
+  Dialog, DialogActions, DialogContent, DialogTitle
+} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import { selectors as catalogSelectors } from '../catalog/catalogSlice';
 
 const Course = () => {
   const { courseUid, itemUid } = useParams();
@@ -49,7 +50,7 @@ const Course = () => {
       await dispatch(selectedCourseActions.setLocation({ courseUid, itemUid, history }));
       // await dispatch(selectedCourseActions.setUid({ uid, history }));
       // await dispatch(selectedCourseActions.setSelectedItemUid({ courseUid: uid, itemUid, history }));
-    }
+    };
 
     if (isSignedIn) {
       go();
@@ -87,7 +88,9 @@ const Course = () => {
     onClose();
     const { payload } = await dispatch(catalogActions.createItem({
       courseUid: course.uid,
-      item: { displayName: 'New Item', description: '', date: null, file: '', status: name, type },
+      item: {
+        displayName: 'New Item', description: '', date: null, file: '', status: name, type
+      },
       ui: { delay: 500 }
     }));
     if (payload?.uid) {
@@ -118,22 +121,22 @@ const Course = () => {
         </DialogContent>
       </Dialog>
       <div className="course-header">
-        {/*<Typography variant="h6" component="h2">*/}
-        {/*  <Link*/}
-        {/*    to="/dashboard"*/}
-        {/*    onClick={(event) => {*/}
-        {/*      if (isRecording) {*/}
-        {/*        event.preventDefault();*/}
-        {/*        alert('Please stop the recording before navigating away.');*/}
-        {/*      }*/}
-        {/*    }}*/}
-        {/*  >*/}
-        {/*      Dashboard*/}
-        {/*  </Link> > {course?.displayName || ''}*/}
-        {/*</Typography>*/}
-        {/*<Typography variant="body1">*/}
-        {/*  {courseCreator?.displayName || ''}*/}
-        {/*</Typography>*/}
+        {/* <Typography variant="h6" component="h2"> */}
+        {/*  <Link */}
+        {/*    to="/dashboard" */}
+        {/*    onClick={(event) => { */}
+        {/*      if (isRecording) { */}
+        {/*        event.preventDefault(); */}
+        {/*        alert('Please stop the recording before navigating away.'); */}
+        {/*      } */}
+        {/*    }} */}
+        {/*  > */}
+        {/*      Dashboard */}
+        {/*  </Link> > {course?.displayName || ''} */}
+        {/* </Typography> */}
+        {/* <Typography variant="body1"> */}
+        {/*  {courseCreator?.displayName || ''} */}
+        {/* </Typography> */}
       </div>
       <Grid
         container
@@ -147,8 +150,8 @@ const Course = () => {
         >
           {
             selectedItem
-            ? <ItemView />
-            : <CourseView />
+              ? <ItemView />
+              : <CourseView />
           }
         </Grid>
 
@@ -169,7 +172,7 @@ const Course = () => {
             >
               <Tab label="Content" />
               <Tab
-                label={'Chat' + (numOutstandingChats > 0 ? ` (${numOutstandingChats})` : '')}
+                label={`Chat${numOutstandingChats > 0 ? ` (${numOutstandingChats})` : ''}`}
                 disabled={course?.type === 'template'}
               />
             </Tabs>
@@ -224,7 +227,9 @@ const Course = () => {
                       color="primary"
                       onClick={onUnlock}
                     >
-                      Unlock for {(course.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      Unlock for
+                      {' '}
+                      {(course.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     </Button>
                   )}
                 </div>

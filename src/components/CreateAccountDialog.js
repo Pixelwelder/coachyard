@@ -12,7 +12,7 @@ import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui
 import SESSION_MODES from '../constants/sessionModes';
 import { actions as userActions } from '../features/app/userSlice';
 
-const isErrorType = (type) => (error) => !!error && error.message.toLowerCase().includes(type);
+const isErrorType = type => error => !!error && error.message.toLowerCase().includes(type);
 
 const CreateAccountDialog = () => {
   const { createAccount: actions } = uiActions2;

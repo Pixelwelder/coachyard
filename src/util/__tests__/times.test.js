@@ -1,4 +1,4 @@
-const { padNum, to12Hour, listTimes } = require('../times');
+const { padNum, to12Hour } = require('../times');
 
 describe('padNum', () => {
   test('it should leave some numbers alone', () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import app from 'firebase/app';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -6,12 +6,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
-import { useHistory, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
+import Typography from '@material-ui/core/Typography';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { selectors as userSelectors } from '../app/userSlice';
 import Billing from '../billing';
-import Typography from '@material-ui/core/Typography';
 
 const Account = () => {
   const { account: selectors } = uiSelectors2;
@@ -28,7 +28,6 @@ const Account = () => {
 
   const onDetails = () => {
     onClose();
-
   };
 
   return (

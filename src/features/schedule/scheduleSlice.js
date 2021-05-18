@@ -26,70 +26,37 @@ const initialState = {
   tab: TABS.WORKING_PLAN
 };
 
-let unsubscribeProviders = () => {};
-const init = createAsyncThunk(
-  `${name}/init`,
-  async (_, { dispatch, getState }) => {
-    const { isInitialized } = select(getState());
-    if (isInitialized) return;
+const select = ({ schedule }) => schedule;
+const selectWorkingPlan = createSelector(
+  select,
+  ({ provider }) => {
+    const workingPlanObj = provider?.settings?.workingPlan;
+    if (!workingPlanObj) return [];
 
-    dispatch(generatedActions.setIsLoading(true));
-
-    app.auth().onAuthStateChanged((authUser) => {
-      unsubscribeProviders();
-      if (authUser) {
-        const schedule = document.getElementById('schedule')
-        if (schedule) schedule.src = `${easy.url}/index.php/user/login?admin`;
-
-        unsubscribeProviders = app.firestore()
-          .collection('easy_providers')
-          .doc(authUser.uid)
-          .onSnapshot(async (snapshot) => {
-            if (snapshot.exists) {
-              // We have credentials.
-              // Is the scheduler ready?
-              const { isLoggedIn } = select(getState());
-              if (!isLoggedIn) {
-                console.log('schedule: credentials received');
-                const data = snapshot.data();
-                const { settings: { username, password } } = data;
-                dispatch(generatedActions.setCredentials({ username: authUser.uid, password }));
-                dispatch(generatedActions.setProvider(data));
-
-                const { scheduleOpenCalendar } = getState();
-                if (scheduleOpenCalendar) {
-                  dispatch(openCalendar());
-                }
-              } else {
-                console.log('scheduler: already logged in');
-              }
-            }
-          });
-      } else {
-        console.log('LOGGED OUT');
-        dispatch(generatedActions.reset());
-      }
-    });
-    dispatch(generatedActions.setIsInitialized(true));
+    return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      .map(dayName => ({ ...workingPlanObj[dayName], name: dayName }));
   }
 );
+const selectors = { select, selectWorkingPlan };
 
-const getServices = createAsyncThunk(
-  `${name}/getServices`,
-  async (_, { dispatch }) => {
-    const result = await app.functions().httpsCallable('getServices')();
-    dispatch(generatedActions.setServices(result))
-  }
-);
-
-const getProvider = createAsyncThunk(
-  `${name}/getWorkingPlan`,
-  async (_, { dispatch }) => {
-    const { data } = await app.functions().httpsCallable('getProvider')();
-    console.log('result', data);
-    dispatch(generatedActions.setProvider(data));
-  }
-);
+const { reducer, actions: generatedActions } = createSlice({
+  name,
+  initialState,
+  reducers: {
+    setIsInitialized: setValue('isInitialized'),
+    setIsReadyForLogin: setValue('isReadyForLogin'),
+    setIsLoggedIn: setValue('isLoggedIn'),
+    setNumFailedLogins: setValue('numFailedLogins'),
+    setIsLoading: setValue('isLoading'),
+    setCredentials: setValue('credentials'),
+    setServices: setValue('services'),
+    setProvider: setValue('provider'),
+    setTab: setValue('tab'),
+    setScheduleOpenCalendar: setValue('scheduleOpenCalendar'),
+    reset: reset(initialState)
+  },
+  extraReducers: loaderReducers(name, initialState)
+});
 
 const openCalendar = createAsyncThunk(
   `${name}/openCalendar`,
@@ -103,10 +70,8 @@ const openCalendar = createAsyncThunk(
         dispatch(generatedActions.setScheduleOpenCalendar(true));
       } catch (error) {
         // Didn't work.
-      } finally {
-        console.log('RETURNING');
-        return;
       }
+      return;
     }
 
     if (scheduleOpenCalendar) {
@@ -115,20 +80,16 @@ const openCalendar = createAsyncThunk(
 
     let newWindow;
     const doLogin = () => {
-      console.log('doLogin');
       const { credentials, isReadyForLogin } = select(getState());
       if (!isReadyForLogin) {
-        console.log('Form is not ready for login');
         return;
       }
 
       if (!credentials) {
-        console.log('No credentials.');
         return;
       }
 
       const { username, password } = credentials;
-      console.log('LOGGING IN', username, password);
       newWindow.postMessage({ type: 'login', username, password }, '*');
 
       // const schedule = document.getElementById('schedule');
@@ -192,66 +153,95 @@ const openCalendar = createAsyncThunk(
     };
 
     window.addEventListener('message', onMessage);
-    newWindow = window.open(`${easy.url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600')
+    newWindow = window.open(`${easy.url}/index.php/user/login`, 'calendar', 'left=100,right=100,width=900,height=600');
+  }
+);
+
+let unsubscribeProviders = () => {};
+const init = createAsyncThunk(
+  `${name}/init`,
+  async (_, { dispatch, getState }) => {
+    const { isInitialized } = select(getState());
+    if (isInitialized) return;
+
+    dispatch(generatedActions.setIsLoading(true));
+
+    app.auth().onAuthStateChanged((authUser) => {
+      unsubscribeProviders();
+      if (authUser) {
+        const schedule = document.getElementById('schedule');
+        if (schedule) schedule.src = `${easy.url}/index.php/user/login?admin`;
+
+        unsubscribeProviders = app.firestore()
+          .collection('easy_providers')
+          .doc(authUser.uid)
+          .onSnapshot(async (snapshot) => {
+            if (snapshot.exists) {
+              // We have credentials.
+              // Is the scheduler ready?
+              const { isLoggedIn } = select(getState());
+              if (!isLoggedIn) {
+                const data = snapshot.data();
+                const { settings: { password } } = data;
+                dispatch(generatedActions.setCredentials({ username: authUser.uid, password }));
+                dispatch(generatedActions.setProvider(data));
+
+                const { scheduleOpenCalendar } = getState();
+                if (scheduleOpenCalendar) {
+                  dispatch(openCalendar());
+                }
+              } else {
+                // Already logged in.
+              }
+            }
+          });
+      } else {
+        console.log('LOGGED OUT');
+        dispatch(generatedActions.reset());
+      }
+    });
+    dispatch(generatedActions.setIsInitialized(true));
+  }
+);
+
+const getServices = createAsyncThunk(
+  `${name}/getServices`,
+  async (_, { dispatch }) => {
+    const result = await app.functions().httpsCallable('getServices')();
+    dispatch(generatedActions.setServices(result));
+  }
+);
+
+const getProvider = createAsyncThunk(
+  `${name}/getWorkingPlan`,
+  async (_, { dispatch }) => {
+    const { data } = await app.functions().httpsCallable('getProvider')();
+    console.log('result', data);
+    dispatch(generatedActions.setProvider(data));
   }
 );
 
 const openScheduler = createAsyncThunk(
   `${name}/openScheduler`,
   async (_, { getState }) => {
-    console.log('openScheduler');
-    try {
-      const state = getState();
-      const { course } = selectedCourseSelectors.select(state);
-      const selectedItem = selectedCourseSelectors.selectSelectedItem(state);
-      const { creatorUid } = course;
-      const providerDoc = await app.firestore().collection('easy_providers').doc(creatorUid).get();
-      const { id } = providerDoc.data();
+    const state = getState();
+    const { course } = selectedCourseSelectors.select(state);
+    const selectedItem = selectedCourseSelectors.selectSelectedItem(state);
+    const { creatorUid } = course;
+    const providerDoc = await app.firestore().collection('easy_providers').doc(creatorUid).get();
+    const { id } = providerDoc.data();
 
-      const newWindow = window.open(
-        `${easy.url}/index.php?provider=${id}&course=${course.uid}&item=${selectedItem.uid}`,
-        'calendar',
-        'left=100,right=100,width=800,height=800'
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    window.open(
+      `${easy.url}/index.php?provider=${id}&course=${course.uid}&item=${selectedItem.uid}`,
+      'calendar',
+      'left=100,right=100,width=800,height=800'
+    );
   }
 );
 
-const { reducer, actions: generatedActions } = createSlice({
-  name,
-  initialState,
-  reducers: {
-    setIsInitialized: setValue('isInitialized'),
-    setIsReadyForLogin: setValue('isReadyForLogin'),
-    setIsLoggedIn: setValue('isLoggedIn'),
-    setNumFailedLogins: setValue('numFailedLogins'),
-    setIsLoading: setValue('isLoading'),
-    setCredentials: setValue('credentials'),
-    setServices: setValue('services'),
-    setProvider: setValue('provider'),
-    setTab: setValue('tab'),
-    setScheduleOpenCalendar: setValue('scheduleOpenCalendar'),
-    reset: reset(initialState)
-  },
-  extraReducers: loaderReducers(name, initialState)
-});
-
-const actions = { ...generatedActions, init, getServices, getProvider, openCalendar, openScheduler };
-
-const select = ({ schedule }) => schedule;
-const selectWorkingPlan = createSelector(
-  select,
-  ({ provider }) => {
-    const workingPlanObj = provider?.settings?.workingPlan;
-    if (!workingPlanObj) return [];
-
-    return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-      .map(dayName => ({ ...workingPlanObj[dayName], name: dayName }));
-  }
-);
-const selectors = { select, selectWorkingPlan };
+const actions = {
+  ...generatedActions, init, getServices, getProvider, openCalendar, openScheduler
+};
 
 export { actions, selectors };
 export default reducer;

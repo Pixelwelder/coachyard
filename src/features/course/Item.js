@@ -5,23 +5,21 @@ import LockIcon from '@material-ui/icons/Lock';
 import Chip from '@material-ui/core/Chip';
 import { useSelector } from 'react-redux';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
-import capitalize from '@material-ui/core/utils/capitalize';
 
-const getDurationString = (seconds) => {
-  // const d = Duration.fromMillis(seconds * 1000);
-  // console.log('getDurationString', seconds, d.hours, d.minutes, d.seconds);
-  // let str = '';
-  // if (d.hours) str = `${d.hours}h`;
-  // if (d.minutes || d.hours) str = `${str} ${d.minutes}m`;
-  // str = `${str} ${d.seconds}s`;
-  // console.log('getDurationString results', str);
-  //
-  // return str.trim();
+const getDurationString = seconds =>
+// const d = Duration.fromMillis(seconds * 1000);
+// console.log('getDurationString', seconds, d.hours, d.minutes, d.seconds);
+// let str = '';
+// if (d.hours) str = `${d.hours}h`;
+// if (d.minutes || d.hours) str = `${str} ${d.minutes}m`;
+// str = `${str} ${d.seconds}s`;
+// console.log('getDurationString results', str);
+//
+// return str.trim();
 
-  return seconds
+  (seconds
     ? Duration.fromMillis(seconds * 1000).toFormat('hh:mm:ss')
-    : '-';
-}
+    : '-');
 
 const Item = ({ item, isSelected, onSelect }) => {
   const formattedTime = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
@@ -45,9 +43,17 @@ const Item = ({ item, isSelected, onSelect }) => {
         {item.status === 'scheduled' && (
           <Typography>
             {formattedTime.indexOf('Invalid') === -1
-              ? <>{formattedTime} (in {timeRemaining})</>
-              : <>Unscheduled</>
-            }
+              ? (
+                <>
+                  {formattedTime}
+                  {' '}
+                  (in
+                  {' '}
+                  {timeRemaining}
+                  )
+                </>
+              )
+              : <>Unscheduled</>}
           </Typography>
         )}
         {item.status === 'live' && (
@@ -62,7 +68,7 @@ const Item = ({ item, isSelected, onSelect }) => {
         )}
       </span>
     </li>
-  )
+  );
 };
 
 export default Item;

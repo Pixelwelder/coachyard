@@ -35,8 +35,8 @@ const initialState = {
   tab: TABS.LEARNING
 };
 
-let userListener = () => {};
-let metaListener = () => {};
+const userListener = () => {};
+const metaListener = () => {};
 let courseListener = () => {};
 const init = createAsyncThunk(
   'initCatalog',
@@ -96,7 +96,7 @@ const deleteCourse = createAsyncThunk(
   async ({ uid }, { dispatch, getState }) => {
     dispatch(uiActions.resetDialog('deleteDialog'));
     const { deleteDialog } = uiSelectors.select(getState());
-    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
+    dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING } }));
 
     try {
       app.analytics().logEvent(EventTypes.DELETE_COURSE_ATTEMPTED);
@@ -106,7 +106,7 @@ const deleteCourse = createAsyncThunk(
       dispatch(uiActions.resetUI('deleteDialog'));
     } catch (error) {
       // TODO Analytics
-      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEW }}));
+      dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, error, mode: MODES.VIEW } }));
     }
   }
 );
@@ -135,7 +135,7 @@ const _uploadItem = createAsyncThunk(
   async ({ uid, file }, { dispatch, getState }) => new Promise((resolve, reject) => {
     app.analytics().logEvent(EventTypes.UPLOAD_ITEM_ATTEMPTED);
     // Upload the file to Firebase Storage.
-    const storageRef = app.storage().ref(`raw`);
+    const storageRef = app.storage().ref('raw');
     const fileRef = storageRef.child(uid);
     const uploadTask = fileRef.put(file);
 
@@ -143,7 +143,7 @@ const _uploadItem = createAsyncThunk(
     uploadTask.on('state_changed',
       (snapshot) => {
         const { bytesTransferred, totalBytes } = snapshot;
-        dispatch({ type: 'upload/progress', payload: { bytesTransferred, totalBytes }});
+        dispatch({ type: 'upload/progress', payload: { bytesTransferred, totalBytes } });
       },
       (error) => {
         console.error(error.message);
@@ -157,8 +157,7 @@ const _uploadItem = createAsyncThunk(
         dispatch({ type: 'upload/complete' });
         app.analytics().logEvent(EventTypes.UPLOAD_ITEM);
         return resolve(fileRef.getDownloadURL());
-      }
-    );
+      });
   })
 );
 
@@ -187,7 +186,9 @@ const _sendToStreamingService = createAsyncThunk(
  */
 const createItem = createAsyncThunk(
   'createItem',
-  async ({ courseUid, item, file, onComplete, ui }, { dispatch, getState }) => {
+  async ({
+    courseUid, item, file, onComplete, ui
+  }, { dispatch, getState }) => {
     try {
       app.analytics().logEvent(EventTypes.CREATE_ITEM_ATTEMPTED);
       // Create the data object.
@@ -231,7 +232,9 @@ const createItem = createAsyncThunk(
 
 const updateItem = createAsyncThunk(
   'updateItem',
-  async ({ courseUid, itemUid, update, file }, { dispatch }) => {
+  async ({
+    courseUid, itemUid, update, file
+  }, { dispatch }) => {
     // Upload new file.
     if (file) {
       const { payload: downloadUrl, error } = await dispatch(_uploadItem({ uid: itemUid, file }));
@@ -261,12 +264,12 @@ const deleteItem = createAsyncThunk(
     // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.PROCESSING }}));
 
     // try {
-      const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
-      const result = await callable({ courseUid, itemUid });
-      // dispatch(uiActions.resetDialog('deleteDialog'));
+    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.DELETE_ITEM);
+    const result = await callable({ courseUid, itemUid });
+    // dispatch(uiActions.resetDialog('deleteDialog'));
     app.analytics().logEvent(EventTypes.DELETE_ITEM);
     // } catch (error) {
-      // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
+    // dispatch(uiActions.setUI({ deleteDialog: { ...deleteDialog, mode: MODES.VIEW, error } }));
     // }
   }
 );
@@ -279,13 +282,15 @@ const launchItem = createAsyncThunk(
     const itemData = (
       await app.firestore()
         .collection('courses').doc(courseUid)
-        .collection('items').doc(itemUid)
+        .collection('items')
+        .doc(itemUid)
         .get()
     ).data();
     if (itemData.status !== 'scheduled') throw new Error(`Can't launch ${itemUid}: status is ${itemData.status}.`);
     await app.firestore()
       .collection('courses').doc(courseUid)
-      .collection('items').doc(itemUid)
+      .collection('items')
+      .doc(itemUid)
       .update({ status: 'initializing' });
 
     app.analytics().logEvent(EventTypes.LAUNCH_ITEM);
@@ -302,7 +307,8 @@ const endItem = createAsyncThunk(
     app.analytics().logEvent(EventTypes.END_ITEM_ATTEMPTED);
     const ref = app.firestore()
       .collection('courses').doc(courseUid)
-      .collection('items').doc(itemUid);
+      .collection('items')
+      .doc(itemUid);
 
     const itemData = (await ref.get()).data();
     if (itemData.status !== 'live') throw new Error(`Can't end ${itemUid}: status is ${itemData.status}.`);
@@ -371,8 +377,15 @@ const { actions: generatedActions, reducer } = createSlice({
 const actions = {
   ...generatedActions,
   init,
-  createNewCourse, updateCourse, deleteCourse, purchaseCourse,
-  createItem, updateItem, deleteItem, launchItem, endItem
+  createNewCourse,
+  updateCourse,
+  deleteCourse,
+  purchaseCourse,
+  createItem,
+  updateItem,
+  deleteItem,
+  launchItem,
+  endItem
 };
 
 const select = ({ catalog }) => catalog;

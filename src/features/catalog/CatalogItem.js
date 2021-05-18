@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import CardActionArea  from '@material-ui/core/CardActionArea';
+import CardActionArea from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
-import { selectors as catalogSelectors } from './catalogSlice';
 import { useSelector } from 'react-redux';
-import capitalize from '@material-ui/core/utils/capitalize';
+import { selectors as catalogSelectors } from './catalogSlice';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const tokensByParentUid = useSelector(catalogSelectors.selectTokensByParentUid);
@@ -28,7 +27,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
         const url = await app.storage().ref(`/avatars/${user}.png`).getDownloadURL();
         setImageUrl(url);
       } catch (error) {}
-    }
+    };
 
     if (item) go();
   }, [item]);
@@ -46,7 +45,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           className="catalog-item-image"
           title={displayName}
           // image={imageUrl || '/images/generic-teacher-cropped.png'}
-          image={'/images/generic-teacher-cropped.png'}
+          image="/images/generic-teacher-cropped.png"
         >
           {isCreator && (
             <Typography className="catalog-item-type item-type">{item.isPublic ? 'published' : 'unpublished'}</Typography>
@@ -64,13 +63,13 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           )}
         </CardContent>
       </CardActionArea>
-      {/*<CardActions>*/}
-      {/*  {onDelete && (*/}
-      {/*    <Button onClick={() => onDelete(item)}>*/}
-      {/*      <DeleteIcon />*/}
-      {/*    </Button>*/}
-      {/*  )}*/}
-      {/*</CardActions>*/}
+      {/* <CardActions> */}
+      {/*  {onDelete && ( */}
+      {/*    <Button onClick={() => onDelete(item)}> */}
+      {/*      <DeleteIcon /> */}
+      {/*    </Button> */}
+      {/*  )} */}
+      {/* </CardActions> */}
     </Card>
   );
 };

@@ -61,7 +61,7 @@ const { actions, reducer } = createSlice({
       };
 
       // Special cases.
-      if (subState.hasOwnProperty('date')) {
+      if (Object.prototype.hasOwnProperty.call(subState, 'date')) {
         // Choose a nice date in the near future.
         const hours = DateTime.local().hour + 2;
         state[name].date = DateTime.local().set({

@@ -34,7 +34,7 @@ const init = createAsyncThunk(
           .onSnapshot((snapshot) => {
             let tokens = [];
             if (snapshot.size) {
-              tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
             }
             dispatch(generatedActions.setTokens(tokens));
           });
@@ -43,7 +43,7 @@ const init = createAsyncThunk(
         unsubscribeCourses = app.firestore().collection('courses')
           .where('creatorUid', '==', authUser.uid)
           .onSnapshot((snapshot) => {
-            const courses = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+            const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
             dispatch(generatedActions.setCourses(courses));
           });
       } else {
@@ -69,7 +69,7 @@ const setSelectedChat = createAsyncThunk(
       .collection('chat')
       .orderBy('created')
       .onSnapshot((snapshot) => {
-        const messages = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions._setSelectedChat(messages));
       });
   },
@@ -98,14 +98,14 @@ const { reducer, actions: generatedActions } = createSlice({
 });
 
 // TODO Duplicate code.
-const createTypeFilter = (type) => ({ tokens }) => tokens.filter((token) => token.type === type);
-const createNegativeTypeFilter = (type) => ({ tokens }) => tokens.filter((token) => token.type !== type);
+const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type === type);
+const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
 
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens }) => tokens);
-const selectStudentTokens = createSelector(selectTokens, (tokens) => Object.values(
+const selectStudentTokens = createSelector(selectTokens, tokens => Object.values(
   tokens
-    .filter((token) => token.access === 'student')
+    .filter(token => token.access === 'student')
     .reduce((accum, token) => {
       if (!accum[token.user]) accum[token.user] = [];
       accum[token.user].push(token);
@@ -114,8 +114,8 @@ const selectStudentTokens = createSelector(selectTokens, (tokens) => Object.valu
 ));
 const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
 const selectNonTemplateTokens = createSelector(select, ({ tokens }) => tokens.filter(({ access, type }) => access === 'admin' && type !== 'template'));
-const selectTemplateCourses = createSelector(select, ({ courses }) => courses.filter((course) => course.type === 'template'));
-const selectNonTemplateCourses = createSelector(select, ({ courses }) => courses.filter((course) => course.type !== 'template'));
+const selectTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type === 'template'));
+const selectNonTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type !== 'template'));
 const selectors = {
   select,
   selectStudentTokens,

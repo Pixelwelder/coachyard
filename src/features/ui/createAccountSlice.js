@@ -15,7 +15,7 @@ export default createUISlice({
   initialState,
   builderFunc: (builder) => {
     builder.addMatcher(
-      (action) => action.type === 'auth/stateChanged',
+      action => action.type === 'auth/stateChanged',
       (state, action) => {
         state.isOpen = !action.payload;
       },

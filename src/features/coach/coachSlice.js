@@ -41,7 +41,7 @@ const load = createAsyncThunk(
             .where('creatorUid', '==', coach.uid)
             .where('isPublic', '==', true)
             .onSnapshot((snapshot) => {
-              const courses = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+              const courses = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setCourses(courses));
             });
 
@@ -51,7 +51,7 @@ const load = createAsyncThunk(
             .where('access', '==', 'admin')
             .onSnapshot((snapshot) => {
               const tokens = snapshot.docs
-                .map((doc) => parseUnserializables(doc.data()))
+                .map(doc => parseUnserializables(doc.data()))
                 .reduce((accum, token) => ({ ...accum, [token.uid]: token }), {});
               dispatch(generatedActions.setTokensByUid(tokens));
             });

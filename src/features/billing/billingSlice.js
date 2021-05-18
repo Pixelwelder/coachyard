@@ -31,21 +31,21 @@ const _startDataListeners = createAsyncThunk(
     unsubscribePaymentMethods = userDoc
       .collection('payment_methods')
       .onSnapshot((snapshot) => {
-        const paymentMethods = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const paymentMethods = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPaymentMethods(paymentMethods));
       });
 
     unsubscribePayments = userDoc
       .collection('payments')
       .onSnapshot((snapshot) => {
-        const payments = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const payments = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setPayments(payments));
       });
 
     unsubscribeSubscriptions = userDoc
       .collection('subscriptions')
       .onSnapshot((snapshot) => {
-        const subscriptions = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setSubscriptions(subscriptions));
       });
   },
@@ -126,11 +126,11 @@ const init = createAsyncThunk(
   },
 );
 
-const setValue = (name) => (state, action) => {
+const setValue = name => (state, action) => {
   state[name] = action.payload;
 };
 
-const mergeValue = (name) => (state, action) => {
+const mergeValue = name => (state, action) => {
   state[name] = { ...state[name], ...action.payload };
 };
 

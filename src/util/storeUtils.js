@@ -2,9 +2,9 @@ import { createSelector } from '@reduxjs/toolkit';
 
 // eslint-disable-next-line import/prefer-default-export
 export const createTokenSelectors = (rootSelector) => {
-  const createTypeFilter = (param, types) => (tokens) => tokens
+  const createTypeFilter = (param, types) => tokens => tokens
     .filter(({ [param]: value }) => types.includes(value));
-  const createNegativeTypeFilter = (param, types) => (tokens) => tokens
+  const createNegativeTypeFilter = (param, types) => tokens => tokens
     .filter(({ [param]: value }) => !types.includes(value));
 
   const selectTokens = createSelector(
@@ -17,9 +17,9 @@ export const createTokenSelectors = (rootSelector) => {
   const selectProductTokens = createSelector(selectTokens, createTypeFilter('type', ['template', 'public']));
   const selectTeachingTokens = createSelector(selectTokens, createTypeFilter('access', ['admin']));
   const selectLearningTokens = createSelector(selectTokens, createTypeFilter('access', ['student']));
-  const selectTokensByCourseUid = createSelector(selectTokens, (tokens) => tokens
+  const selectTokensByCourseUid = createSelector(selectTokens, tokens => tokens
     .reduce((accum, token) => ({ ...accum, [token.courseUid]: token }), {}));
-  const selectTokensByParentUid = createSelector(selectTokens, (tokens) => tokens
+  const selectTokensByParentUid = createSelector(selectTokens, tokens => tokens
     .reduce((accum, token) => (token.parent ? { ...accum, [token.parent]: token } : accum), {}));
 
   const selectAccessibleTokensByCourseUid = createSelector(

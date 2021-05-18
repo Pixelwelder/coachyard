@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import { actions as scheduleActions, selectors as scheduleSelectors } from '../schedule/scheduleSlice';
 import { DateTime } from 'luxon';
-import EditItemView from './EditItemView';
 import Button from '@material-ui/core/Button';
-import { actions as catalogActions } from '../catalog/catalogSlice';
 import React, { useEffect, useState } from 'react';
 import Iframe from 'react-iframe';
+import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
+import { actions as scheduleActions } from '../schedule/scheduleSlice';
+import EditItemView from './EditItemView';
+import { actions as catalogActions } from '../catalog/catalogSlice';
 import { easy } from '../../config';
 import ItemInfo from './ItemInfo';
 
@@ -17,7 +17,7 @@ const getDateTime = ({ course, item }) => {
       str: course.type === 'template'
         ? 'This course is a template.'
         : 'This Live Session has not yet been scheduled.'
-    }
+    };
   }
 
   const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
@@ -25,7 +25,7 @@ const getDateTime = ({ course, item }) => {
   console.log(diff.as('days'));
 
   let str = `Scheduled for ${formattedDate}`;
-  if (diff.as('days') < 1) str = `${str} (in ${diff.toFormat('hh:mm:ss')})`
+  if (diff.as('days') < 1) str = `${str} (in ${diff.toFormat('hh:mm:ss')})`;
 
   return { diff, str };
 };
@@ -46,7 +46,7 @@ const Student = () => {
     const clear = () => clearInterval(interval);
 
     clear();
-    if (selectedItem) interval = setInterval(() => setUpdate(value => value + 1), 1000)
+    if (selectedItem) interval = setInterval(() => setUpdate(value => value + 1), 1000);
 
     return clear;
   }, [selectedItem, setUpdate]);
@@ -63,13 +63,17 @@ const Student = () => {
     <div className="mode-inner">
       <ItemInfo item={selectedItem} status={str} tokens={adminTokens} />
       {
-        !!selectedItem.date
-          ? <Button variant="contained" color="primary" onClick={onJoin} disabled={selectedItem.status !== 'live'}>
-            Join
-          </Button>
-          : <Button variant="contained" color="primary" onClick={onSchedule}>
-            Schedule
-          </Button>
+        selectedItem.date
+          ? (
+            <Button variant="contained" color="primary" onClick={onJoin} disabled={selectedItem.status !== 'live'}>
+              Join
+            </Button>
+          )
+          : (
+            <Button variant="contained" color="primary" onClick={onSchedule}>
+              Schedule
+            </Button>
+          )
       }
 
       {providerId && false && (
@@ -107,29 +111,29 @@ const Teacher = () => {
     const clear = () => clearInterval(interval);
 
     clear();
-    if (selectedItem?.date) interval = setInterval(() => setUpdate(value => value + 1), 1000)
+    if (selectedItem?.date) interval = setInterval(() => setUpdate(value => value + 1), 1000);
 
     return clear;
   }, [selectedItem, setUpdate]);
 
-  const canLaunch = () => {
-    return course.type !== 'template' // Can't launch a template.
+  const canLaunch = () => course.type !== 'template' // Can't launch a template.
       && !!selectedItem.date // Can't launch unscheduled.
       && (diff && diff.as('minutes') < 10) // Can't launch if more than 10 minutes away.
-  };
+  ;
 
   return (
     <>
       {
         isOpen
-          ? <EditItemView/>
+          ? <EditItemView />
           : (
             <>
               <div className="mode-inner">
                 <ItemInfo tokens={tokens} status={str} item={selectedItem} />
                 {course.type !== 'template' && (
                   <Button
-                    color="primary" variant="contained"
+                    color="primary"
+                    variant="contained"
                     onClick={() => dispatch(
                       catalogActions.launchItem({ courseUid: course.uid, itemUid: selectedItem.uid })
                     )}
@@ -162,8 +166,8 @@ const ScheduledMode = () => {
     <div className="item-mode scheduled-mode">
       {
         ownsCourse
-          ? <Teacher/>
-          : <Student/>
+          ? <Teacher />
+          : <Student />
       }
     </div>
   );

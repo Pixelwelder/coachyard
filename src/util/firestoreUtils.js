@@ -3,7 +3,7 @@
  * @param timestamp
  * @returns an object
  */
-const parseTimestamp = (timestamp) => Object.entries(timestamp).reduce((accum, [name, value]) => ({ ...accum, [name]: value }), {});
+const parseTimestamp = timestamp => Object.entries(timestamp).reduce((accum, [name, value]) => ({ ...accum, [name]: value }), {});
 
 /**
  * Parses anything that's not serializable. Yes, it's kinda gross.

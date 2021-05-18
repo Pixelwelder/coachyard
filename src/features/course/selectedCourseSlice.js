@@ -76,7 +76,7 @@ const initialState = {
 const parseItems = (snapshot) => {
   if (!snapshot.size) return {};
   return snapshot.docs
-    .map((item) => parseUnserializables(item.data()))
+    .map(item => parseUnserializables(item.data()))
     .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
 };
 
@@ -268,7 +268,7 @@ const setLocation = createAsyncThunk(
     unsubscribeChat = courseRef.collection('chat')
       .orderBy('created')
       .onSnapshot((snapshot) => {
-        const messages = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const messages = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setChat(messages));
         // TODO Outstanding messages.
       });
@@ -278,7 +278,7 @@ const setLocation = createAsyncThunk(
     unsubscribeStudentTokens = app.firestore().collection('tokens')
       .where('courseUid', '==', course.uid)
       .onSnapshot((snapshot) => {
-        const tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+        const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
         dispatch(generatedActions.setTokens(tokens));
       });
 
@@ -302,7 +302,7 @@ const setLocation = createAsyncThunk(
       .onSnapshot((snapshot) => {
         console.log('sessions', snapshot.docs.length);
         if (snapshot.size) {
-          const sessions = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+          const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
           dispatch(generatedActions.setSessions(sessions));
         }
       });
@@ -313,7 +313,7 @@ const setLocation = createAsyncThunk(
       .where('access', '==', 'student')
       .onSnapshot((snapshot) => {
         if (snapshot.size) {
-          const tokens = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+          const tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
           dispatch(generatedActions.setDescendantTokens(tokens));
         }
       });
@@ -435,7 +435,7 @@ const init = createAsyncThunk(
   },
 );
 
-const setValue = (name) => (state, action) => {
+const setValue = name => (state, action) => {
   state[name] = action.payload;
 };
 
@@ -535,7 +535,7 @@ const selectChat = createSelector(select, ({ chat }) => chat);
 const selectParentItems = createSelector(select, ({ parentCourse, parentItems, items }) => {
   // Returns all parent items in an ordered array.
   if (!parentCourse) return [];
-  return parentCourse.itemOrder.map((uid) => parentItems[uid]).filter((item) => !!item);
+  return parentCourse.itemOrder.map(uid => parentItems[uid]).filter(item => !!item);
 });
 
 // This only gets local items.
@@ -544,8 +544,8 @@ const selectItems = createSelector(select, ({ items, parentItems, course }) => {
   const { itemOrder, localItemOrder } = course;
 
   return [...itemOrder, ...localItemOrder]
-    .map((uid) => items[uid])
-    .filter((item) => !!item);
+    .map(uid => items[uid])
+    .filter(item => !!item);
   // .sort((a, b) => {});
 });
 

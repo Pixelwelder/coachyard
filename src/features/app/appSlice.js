@@ -110,7 +110,7 @@ const { reducer, actions: generatedActions } = createSlice({
     setQuery: setValue('query'),
     setSignInAttempted: setValue('signInAttempted'),
   },
-  extraReducers: (builder) => builder
+  extraReducers: builder => builder
     .addMatcher(isPendingAction, (state, action) => {
       state.globalIsLoading = true;
       state.globalError = null;

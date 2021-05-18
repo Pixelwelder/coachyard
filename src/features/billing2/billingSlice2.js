@@ -59,21 +59,21 @@ const _startDataListeners = createAsyncThunk(
           unsubscribePaymentMethods = stripeUserDoc
             .collection('payment_methods')
             .onSnapshot((snapshot) => {
-              const paymentMethods = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+              const paymentMethods = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setPaymentMethods(paymentMethods));
             });
 
           unsubscribePayments = stripeUserDoc
             .collection('payments')
             .onSnapshot((snapshot) => {
-              const payments = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+              const payments = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setPayments(payments));
             });
 
           unsubscribeSubscriptions = stripeUserDoc
             .collection('subscriptions')
             .onSnapshot((snapshot) => {
-              const subscriptions = snapshot.docs.map((doc) => parseUnserializables(doc.data()));
+              const subscriptions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
               dispatch(generatedActions.setSubscriptions(subscriptions));
             });
 
@@ -96,7 +96,7 @@ const _startDataListeners = createAsyncThunk(
           unsubscribeUnlocked = stripeUserDoc
             .collection('unlocked')
             .onSnapshot((snapshot) => {
-              const unlocked = snapshot.docs.map((doc) => parseUnserializables());
+              const unlocked = snapshot.docs.map(doc => parseUnserializables());
             });
         }
       });

@@ -1,14 +1,14 @@
 import React from 'react';
-import MODES from '../features/ui/Modes';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
-import { selectors as uiSelectors2, actions as uiActions2 } from '../features/ui/uiSlice2';
-import { selectors as catalogSelectors, actions as catalogActions } from '../features/catalog/catalogSlice';
-import { selectors as selectedCourseSelectors } from '../features/course/selectedCourseSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectors as uiSelectors2, actions as uiActions2 } from '../features/ui/uiSlice2';
+import { actions as catalogActions } from '../features/catalog/catalogSlice';
+import { selectors as selectedCourseSelectors } from '../features/course/selectedCourseSlice';
+import MODES from '../features/ui/Modes';
 
 const DeleteDialog = ({ selector, uiActions, onConfirm }) => {
   const { mode, toDelete } = useSelector(selector);
@@ -22,7 +22,7 @@ const DeleteDialog = ({ selector, uiActions, onConfirm }) => {
     onConfirm(toDelete);
     // TODO TODO TODO Error handling.
     dispatch(uiActions.reset());
-  }
+  };
 
   return (
     <Dialog
@@ -32,7 +32,11 @@ const DeleteDialog = ({ selector, uiActions, onConfirm }) => {
     >
       <DialogTitle>Delete</DialogTitle>
       <DialogContent>
-        Are you sure you want to delete {toDelete?.displayName || 'this'} and everything associated with it?
+        Are you sure you want to delete
+        {' '}
+        {toDelete?.displayName || 'this'}
+        {' '}
+        and everything associated with it?
       </DialogContent>
       <DialogActions>
         <Button
@@ -51,17 +55,15 @@ const DeleteDialog = ({ selector, uiActions, onConfirm }) => {
   );
 };
 
-const DeleteCourseDialog = () => {
-  return (
-    <DeleteDialog
-      selector={uiSelectors2.deleteCourse.select}
-      uiActions={uiActions2.deleteCourse}
-      onConfirm={() => {
-        console.log('confirming...');
-      }}
-    />
-  );
-};
+const DeleteCourseDialog = () => (
+  <DeleteDialog
+    selector={uiSelectors2.deleteCourse.select}
+    uiActions={uiActions2.deleteCourse}
+    onConfirm={() => {
+      console.log('confirming...');
+    }}
+  />
+);
 
 const DeleteItemDialog = () => {
   const dispatch = useDispatch();

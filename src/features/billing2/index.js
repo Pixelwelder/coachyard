@@ -1,27 +1,34 @@
 import React from 'react';
-import { selectors as billingSelectors2, actions as billingActions2 } from './billingSlice2';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { DateTime } from 'luxon';
 import { Link } from 'react-router-dom';
+import { selectors as billingSelectors2, actions as billingActions2 } from './billingSlice2';
 import PaymentMethod from './PaymentMethod';
 
-const Tier = ({ tier, selected, subscribed, onClick }) => {
-  return (
-    <li className={`tier-item${selected ? ' selected' : ''}${subscribed ? ' subscribed' : ''}`} onClick={onClick}>
-      <div className="tier-item-container">
-        <Typography className="tier-item-title" variant="h4" component="h2">{tier.displayName}</Typography>
-        <Typography className="tier-item-units">{tier.unitsAmount} {tier.unitsName}</Typography>
-        <Typography className="tier-item-price">${tier.price}</Typography>
-        <Typography className="tier-item-period">{tier.period}</Typography>
-        <div className="spacer" />
-        <Typography className="tier-item-subscribed">Currently Subscribed</Typography>
-      </div>
-    </li>
-  );
-};
+const Tier = ({
+  tier, selected, subscribed, onClick
+}) => (
+  <li className={`tier-item${selected ? ' selected' : ''}${subscribed ? ' subscribed' : ''}`} onClick={onClick}>
+    <div className="tier-item-container">
+      <Typography className="tier-item-title" variant="h4" component="h2">{tier.displayName}</Typography>
+      <Typography className="tier-item-units">
+        {tier.unitsAmount}
+        {' '}
+        {tier.unitsName}
+      </Typography>
+      <Typography className="tier-item-price">
+        $
+        {tier.price}
+      </Typography>
+      <Typography className="tier-item-period">{tier.period}</Typography>
+      <div className="spacer" />
+      <Typography className="tier-item-subscribed">Currently Subscribed</Typography>
+    </div>
+  </li>
+);
 
 const Billing = () => {
   const {
@@ -40,39 +47,25 @@ const Billing = () => {
     dispatch(billingActions2.createSubscription({ stripe, card }));
   };
 
-  const isDisabled = () => {
-    return (actualTierId === selectedTierId)
+  const isDisabled = () => (actualTierId === selectedTierId)
       || !stripe
       || isLoading;
-  };
 
-  const exists = () => {
-    return !!subscription;
-  }
+  const exists = () => !!subscription;
 
-  const isCanceled = () => {
-    return subscription?.cancel_at_period_end
-  }
+  const isCanceled = () => subscription?.cancel_at_period_end;
 
-  const shouldShowBilling = () => {
-    return showBilling;
-  };
+  const shouldShowBilling = () => showBilling;
 
-  const shouldShowGetStarted = () => {
-    return (actualTierId === 0 && selectedTierId !== 0)
+  const shouldShowGetStarted = () => (actualTierId === 0 && selectedTierId !== 0)
       && !showBilling;
-  };
 
   // TODO Show this when in canceled-but-still-running mode.
-  const shouldShowUpdate = () => {
-    return ((actualTierId !== 0) && (selectedTierId !== actualTierId) && !shouldShowBilling())
+  const shouldShowUpdate = () => ((actualTierId !== 0) && (selectedTierId !== actualTierId) && !shouldShowBilling())
       || (exists() && isCanceled());
-  }
 
-  const shouldShowCancel = () => {
-    return actualTierId !== 0
+  const shouldShowCancel = () => actualTierId !== 0
       && (!isCanceled());
-  };
 
   const onGetStarted = () => {
     dispatch(billingActions2.setUI({ showBilling: true }));
@@ -82,7 +75,7 @@ const Billing = () => {
   const onUpdatePlan = () => {
     const card = elements.getElement(CardElement);
     dispatch(billingActions2.updateSubscription({ stripe, card }));
-  }
+  };
 
   return (
     <div className="billing page">

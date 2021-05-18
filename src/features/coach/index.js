@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
 import app from 'firebase/app';
 import { useParams, useHistory } from 'react-router-dom';
-import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
-import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { useDispatch, useSelector } from 'react-redux';
-import { PublicCatalogList, TemplateCatalogList, BaseCatalogList } from '../catalog/CatalogList';
-import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import { BaseCatalogList } from '../catalog/CatalogList';
+import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
+import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
 
 const Coach = () => {
   const history = useHistory();
@@ -52,21 +51,25 @@ const Coach = () => {
       {isOpen
         ? (
           <TextField
-            value={description} onChange={onChange} name="description" variant="outlined" multiline rows="4"
+            value={description}
+            onChange={onChange}
+            name="description"
+            variant="outlined"
+            multiline
+            rows="4"
           />
         )
-        : (<Typography style={{ marginBottom: 32 }}>{coach?.description || ''}</Typography>)
-      }
+        : (<Typography style={{ marginBottom: 32 }}>{coach?.description || ''}</Typography>)}
       {isLoading && <p>Loading...</p>}
-      {/*<PublicCatalogList />*/}
+      {/* <PublicCatalogList /> */}
       <BaseCatalogList
         title="Products"
         items={products}
         emptyMessage={isUser ? 'You have no public products.' : 'This coach has no products.'}
       />
-      {/*{courses.map((course, index) => {*/}
-      {/*  return <p key={index}>{course.displayName}</p>*/}
-      {/*})}*/}
+      {/* {courses.map((course, index) => { */}
+      {/*  return <p key={index}>{course.displayName}</p> */}
+      {/* })} */}
       <div className="spacer" />
 
       <div className="coach-edit-controls">
@@ -79,12 +82,19 @@ const Coach = () => {
         {isOpen && (
           <>
             <Button
-              className="coach-cancel-button" onClick={onCancel} variant="contained" color="default"
+              className="coach-cancel-button"
+              onClick={onCancel}
+              variant="contained"
+              color="default"
             >
               Cancel
             </Button>
             <Button
-              className="coach-save-button" onClick={onSave} disabled={isLoading} variant="contained" color="primary"
+              className="coach-save-button"
+              onClick={onSave}
+              disabled={isLoading}
+              variant="contained"
+              color="primary"
             >
               Save
             </Button>

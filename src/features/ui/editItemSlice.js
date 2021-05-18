@@ -13,7 +13,7 @@ const initialState = {
   file: '',
 };
 
-const isUploadProgress = (action) => action.type === 'upload/progress';
+const isUploadProgress = action => action.type === 'upload/progress';
 
 export default createUISlice({
   name: 'updateItem',
@@ -24,13 +24,13 @@ export default createUISlice({
         // state.isLoading = true;
         state.bytesTransferred = action.payload.bytesTransferred;
         state.totalBytes = action.payload.totalBytes;
-      })
-      .addMatcher(
-        (action) => action.type === '_uploadItem/pending',
-        (state, action) => {
-
-        },
-      );
+      });
+    // .addMatcher(
+    //   (action) => action.type === '_uploadItem/pending',
+    //   (state, action) => {
+    //
+    //   },
+    // );
     // .addMatcher(isUploadError, (state, action) => {
     //   // state.isLoading = false;
     // })

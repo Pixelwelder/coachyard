@@ -30,7 +30,7 @@ const Period = ({
     <TimePicker
       minutesStep={15}
       value={toComponentTime(start)}
-      onChange={(value) => console.log('value', toServerTime(value))}
+      onChange={value => console.log('value', toServerTime(value))}
     />
     {end && (
     <>
@@ -55,7 +55,7 @@ const toComponentTime = (timeString) => {
   const [hour, minute] = timeString.split(':');
   return DateTime.fromObject({ hour, minute, zone: 'utc' }).toLocal().toString();
 };
-const toServerTime = (dateTime) => dateTime.toUTC().toLocaleString(DateTime.TIME_24_SIMPLE);
+const toServerTime = dateTime => dateTime.toUTC().toLocaleString(DateTime.TIME_24_SIMPLE);
 
 const Day = ({ day }) => {
   const [isOpen, setIsOpen] = useState(false);

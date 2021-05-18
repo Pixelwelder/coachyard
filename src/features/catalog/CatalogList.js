@@ -1,14 +1,14 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { actions as uiActions } from '../ui/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import Typography from '@material-ui/core/Typography';
+import { useHistory } from 'react-router-dom';
+import { actions as uiActions } from '../ui/uiSlice';
 import { selectors as catalogSelectors, actions as catalogActions } from './catalogSlice';
 import { selectors as coachSelectors } from '../coach/coachSlice';
 import { actions as uiActions2 } from '../ui/uiSlice2';
-import Typography from '@material-ui/core/Typography';
 import CatalogItem from './CatalogItem';
 import { selectors as billingSelectors2 } from '../billing2/billingSlice2';
-import { useHistory } from 'react-router-dom';
 
 const CatalogList = ({
   title, onCreate, onDelete, items, emptyMessage
@@ -66,7 +66,7 @@ const ProductCatalogList = ({
     if (requireBilling && !tier) {
       history.push('/billing');
     } else {
-      dispatch(uiActions2.createCourse.open())
+      dispatch(uiActions2.createCourse.open());
     }
   };
 
@@ -74,7 +74,7 @@ const ProductCatalogList = ({
     <CatalogList
       title={title}
       onCreate={showCreate ? onCreate : null}
-      onDelete={(item) => dispatch(uiActions.openDialog({
+      onDelete={item => dispatch(uiActions.openDialog({
         name: 'deleteDialog',
         params: {
           item,
@@ -89,17 +89,17 @@ const ProductCatalogList = ({
 
 const TemplateCatalogList = () => {
   const tokens = useSelector(coachSelectors.selectTemplateTokens);
-  return <ProductCatalogList title="Products" courses={tokens} showCreate={true} />
+  return <ProductCatalogList title="Products" courses={tokens} showCreate />;
 };
 
 const NonTemplateCatalogList = () => {
   const courses = useSelector(coachSelectors.selectNonTemplateTokens);
-  return <ProductCatalogList title="Teaching" courses={courses} />
+  return <ProductCatalogList title="Teaching" courses={courses} />;
 };
 
-const BaseCatalogList = ({ items, title, emptyMessage, showCreate }) => {
-  return <ProductCatalogList title={title} courses={items} showCreate={showCreate} emptyMessage={emptyMessage} />
-};
+const BaseCatalogList = ({
+  items, title, emptyMessage, showCreate
+}) => <ProductCatalogList title={title} courses={items} showCreate={showCreate} emptyMessage={emptyMessage} />;
 
 const LearningCatalogList = ({ title = 'Learning' }) => {
   const courses = useSelector(catalogSelectors.selectLearningTokens);

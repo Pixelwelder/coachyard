@@ -5,7 +5,7 @@ const padNum = (str, padTo = 2) => {
 
 const to12Hour = (time) => {
   // eslint-disable-next-line prefer-const
-  let [hours, minutes] = time.split(':').map((str) => Number(str));
+  let [hours, minutes] = time.split(':').map(str => Number(str));
   const ending = hours < 13 ? 'AM' : 'PM';
   if (hours > 12) hours -= 12;
   return `${hours}:${padNum(minutes)} ${ending}`;

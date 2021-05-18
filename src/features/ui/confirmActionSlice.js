@@ -9,14 +9,14 @@ const initialState = {
   onConfirm: () => {},
 };
 
+const slice = createUISlice({ name, initialState });
+
 const getConfirmation = createAsyncThunk(
   `${name}/getConfirmation`,
-  async ({ params = initialState } = {}, { dispatch, getState }) => {
+  async ({ params = initialState } = {}, { dispatch }) => {
     dispatch(slice.actions.open(params));
   },
 );
-
-const slice = createUISlice({ name, initialState });
 
 export { getConfirmation };
 export default slice;
