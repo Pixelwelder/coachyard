@@ -22,7 +22,6 @@ const getDateTime = ({ course, item }) => {
 
   const formattedDate = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
   const diff = DateTime.fromISO(item.date).toLocal().diff(DateTime.local());
-  console.log(diff.as('days'));
 
   let str = `Scheduled for ${formattedDate}`;
   if (diff.as('days') < 1) str = `${str} (in ${diff.toFormat('hh:mm:ss')})`;

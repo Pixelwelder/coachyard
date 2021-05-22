@@ -100,7 +100,7 @@ const _createSchedulingUser = async ({ uid, email }) => {
     schedulingCustomer = await addCustomer({ uid, email });
 
     // For the love of FSM change this as soon as possible.
-    console.log('add scheduling user', schedulingProvider)
+    console.log('add scheduling provider', schedulingProvider.settings.workingPlan)
     const cachedProvider = { ...schedulingProvider, uid, settings: { ...schedulingProvider.settings, password } };
     const providerRef = admin.firestore().collection('easy_providers').doc(uid);
     await providerRef.set(cachedProvider);

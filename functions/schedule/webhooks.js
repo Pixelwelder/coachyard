@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { DateTime } = require('luxon');
 const { log } = require('../logging');
 
 const webhooks = express();
@@ -14,9 +15,9 @@ webhooks.post('/webhooks', async (request, response) => {
     const {
       id_users_provider, id_users_customer, start_datetime, end_datetime, course: courseUid, item: itemUid
     } = request.body;
-    const start = new Date(start_datetime).toISOString();
-    const end = new Date(end_datetime).toISOString();
-    console.log(id_users_provider, id_users_customer, courseUid, itemUid, start, end);
+    const start = DateTime.fromFormat(start_datetime, 'yyyy-MM-dd hh:mm:ss').toISO();
+    const end = DateTime.fromFormat(end_datetime, 'yyyy-MM-dd hh:mm:ss').toISO();
+    console.log(id_users_provider, id_users_customer, courseUid, itemUid, start_datetime, start, end_datetime, end);
 
     // Grab the existing item and update it with a date.
     await admin.firestore().runTransaction(async (transaction) => {

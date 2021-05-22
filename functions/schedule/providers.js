@@ -11,13 +11,13 @@ const createDuration = (overrides) => ({
 const createDay = (overrides) => {
   const day = {
     ...createDuration({
-      start: "08:00",
-      end: "18:00"
+      start: "02:30",
+      end: "12:30"
     }),
     breaks: [
       createDuration({
-        start: "12:00",
-        end: "13:00"
+        start: "04:00",
+        end: "04:30"
       })
     ]
   };
@@ -44,7 +44,7 @@ const createSettings = (overrides) => ({
   syncFutureDays: 10,
   syncPastDays: 10,
   calendarView: 'default',
-  working_plan: createWorkingPlan(),
+  workingPlan: createWorkingPlan(),
   ...overrides
 });
 
@@ -59,7 +59,7 @@ const createProvider = (overrides) => ({
   city: 'Some City',
   state: 'Some State',
   zip: '12345',
-  timezone: 'America/Chicago', // TODO
+  timezone: 'UTC', //'America/Chicago', // TODO
   notes: 'Test provider notes.',
   services: [
     2, 3, 4
@@ -85,6 +85,9 @@ const addProvider = async ({ uid, email, password }) => {
     settings
   });
   const result = await _addProvider({ data: provider });
+  console.log('result', result.settings);
+  // const result2 = await updateProvider({ id: result.id, data: { settings } });
+  // console.log('result2', result2.settings);
   return result;
 };
 

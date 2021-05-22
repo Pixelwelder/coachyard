@@ -354,7 +354,6 @@ const setLocation = createAsyncThunk(
 
     // Grab the items.
     unsubscribeLocalItems = courseRef.collection('items')
-      .orderBy('created')
       .onSnapshot((snapshot) => {
         localItems = parseItems(snapshot);
         checkItemUid(itemUid);

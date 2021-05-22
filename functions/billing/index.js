@@ -525,7 +525,6 @@ stripe_webhooks.post(
             .collection('sessions').doc(courseUid)
             .collection('sessions').doc(object.id)
             .delete();
-          console.log('DELETED');
 
           /*
           await admin.firestore().runTransaction(async (transaction) => {
