@@ -76,6 +76,9 @@ const CourseView = () => {
     }));
   };
 
+  // Even creators can't delete purchased course clones.
+  const canDelete = !(course?.type === 'basic' && !!course?.parent);
+
   return (
     <Paper className="item-mode edit-course-mode" variant="outlined">
       {course && (
@@ -131,7 +134,12 @@ const CourseView = () => {
                   )}
 
                   {!!error && <Alert severity="error">{error.message}</Alert>}
-                  <OwnerControls onCancel={onCancelEdit} onSubmit={onSubmit} onDelete={onDelete} />
+                  <OwnerControls
+                    onCancel={onCancelEdit}
+                    onSubmit={onSubmit}
+                    onDelete={onDelete}
+                    enableDelete={canDelete}
+                  />
                 </>
               )
 

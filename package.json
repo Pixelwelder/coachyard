@@ -21,7 +21,7 @@
     "firebase": "^8.2.10",
     "firebaseui": "^4.7.3",
     "history": "^5.0.0",
-    "luxon": "^1.25.0",
+    "luxon": "^1.27.0",
     "material-ui-dropzone": "^3.5.0",
     "node-sass": "^4.14.1",
     "query-string": "^6.13.8",

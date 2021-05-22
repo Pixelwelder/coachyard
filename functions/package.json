@@ -29,6 +29,7 @@
     "firebase-functions": "^3.13.2",
     "fluent-ffmpeg": "^2.1.2",
     "jdenticon": "^3.1.0",
+    "luxon": "^1.27.0",
     "node-fetch": "^2.6.1",
     "password-generator": "^2.3.2",
     "stripe": "^8.129.0",

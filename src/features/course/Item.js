@@ -22,8 +22,10 @@ const getDurationString = seconds =>
     : '-');
 
 const Item = ({ item, isSelected, onSelect }) => {
-  const formattedTime = DateTime.fromISO(item.date).toLocal().toLocaleString(DateTime.DATETIME_SHORT);
-  const timeRemaining = DateTime.fromISO(item.date).toLocal().diff(DateTime.local()).toFormat('h:mm');
+  const localTime = DateTime.fromISO(item.date).toLocal();
+  const isFuture = localTime > Date.now();
+  const formattedTime = localTime.toLocaleString(DateTime.DATETIME_SHORT);
+  const timeRemaining = localTime.diff(DateTime.local()).toFormat('h:mm');
   const duration = getDurationString(item?.streamingInfo?.data?.duration || 0);
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
 
@@ -49,7 +51,7 @@ const Item = ({ item, isSelected, onSelect }) => {
                   {' '}
                   (in
                   {' '}
-                  {timeRemaining}
+                  {isFuture ? timeRemaining : '00:00'}
                   )
                 </>
               )

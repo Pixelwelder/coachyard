@@ -23,6 +23,8 @@ import { GlobalError } from './Error';
 import LoadingModal from '../components/LoadingModal';
 import UnlockDialog from '../features/billing2/UnlockDialog';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import PrivacyPolicy from '../features/pages/PrivacyPolicy';
+import TermsAndConditions from '../features/pages/TermsAndConditions';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -62,6 +64,8 @@ const App = () => {
           <Route path="/barebones" component={Barebones} />
           <Route path="/billing" component={Billing} />
           <Route path="/coach/:slug" component={Coach} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-and-conditions" component={TermsAndConditions} />
           <Route path="/" render={() => <Redirect to="/dashboard" />} />
         </Switch>
       </div>

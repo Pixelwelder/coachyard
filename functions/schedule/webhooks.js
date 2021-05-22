@@ -32,6 +32,22 @@ webhooks.post('/webhooks', async (request, response) => {
   return response.status(200).end();
 });
 
+const calendsoWebhooks = express();
+calendsoWebhooks.get('/', async (request, response) => {
+  console.log('GET request received');
+  response.status(200).end();
+});
+
+calendsoWebhooks.post('/', async (request, response) => {
+  try {
+    console.log('webhook received', request.body);
+  } catch (error) {
+
+  }
+
+  return response.status(200).end();
+});
+
 webhooks.get('/webhooks', (request, response) => {
   console.log('schedule webhook!');
 });

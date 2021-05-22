@@ -42,13 +42,15 @@ const EditItemView = ({ requireUpload = false }) => {
   }, [selectedItem]);
 
   const onEdit = () => {
+    let _scheduler = 'student';
+    if (course.type === 'basic' && !course.parent) _scheduler = 'teacher';
     dispatch(actions.open());
     dispatch(actions.setValues({
       displayName: selectedItem.displayName,
       description: selectedItem.description,
       date: selectedItem.date || getDefaultDateTime(),
       file: selectedItem.file,
-      scheduler: course.type === 'basic' ? 'teacher' : 'student',
+      scheduler: _scheduler,
       type: course.type,
     }));
   };

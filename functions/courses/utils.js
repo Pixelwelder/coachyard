@@ -13,7 +13,7 @@ const cloneCourseData = (original) => {
     itemOrder: [], // The clone will look to its parent for these.
 
     // TODO TEMP
-    displayName: `${original.displayName} Copy`
+    displayName: `${original.displayName}`
   };
 
   return { ref, data };
