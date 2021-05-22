@@ -54,13 +54,13 @@ const AccessManager = () => {
           variant="outlined"
           label="Price"
           placeholder="49.95"
-          id="students"
-          name="students"
+          id="price"
+          name="price"
           value={price / 100}
           disabled={isLoading}
           inputProps={{
             type: 'number',
-            step: '0.01',
+            step: '1',
           }}
           onChange={({ target: { value } }) => onChange({
             // price: String(value * 1000).replace(/[^0-9.-]+/g,"")
