@@ -112,7 +112,11 @@ const updateCourse = async (data, context) => {
 
       // Update the central tokens.
       await Promise.all(
-        tokens.docs.map(tokenDoc => transaction.update(tokenDoc.ref, tokenUpdateFromCourse(update)))
+        tokens.docs.map(tokenDoc => {
+          const tokenUpdate = tokenUpdateFromCourse(update);
+          delete tokenUpdate.type; // Don't want to overwrite.
+          return transaction.update(tokenDoc.ref, tokenUpdate)
+        })
       );
     });
 
