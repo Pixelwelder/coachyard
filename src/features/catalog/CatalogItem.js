@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
 import { useSelector } from 'react-redux';
 import { selectors as catalogSelectors } from './catalogSlice';
+import { getPriceString } from '../../util/currency';
 
 const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
   const tokensByParentUid = useSelector(catalogSelectors.selectTokensByParentUid);
@@ -58,7 +59,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           <Typography>{displayName}</Typography>
           {(!hasAccess || isCreator) && (
             <Typography variant="body2">
-              {(price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+              {getPriceString(item)}
             </Typography>
           )}
         </CardContent>

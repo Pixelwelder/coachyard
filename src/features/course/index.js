@@ -28,6 +28,7 @@ import {
   Dialog, DialogActions, DialogContent, DialogTitle
 } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
+import { getPriceString } from '../../util/currency';
 
 const Course = () => {
   const { courseUid, itemUid } = useParams();
@@ -227,9 +228,7 @@ const Course = () => {
                       color="primary"
                       onClick={onUnlock}
                     >
-                      Unlock for
-                      {' '}
-                      {(course.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      Unlock for {getPriceString(course)}
                     </Button>
                   )}
                 </div>

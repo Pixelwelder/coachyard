@@ -37,7 +37,7 @@ const initializePurchase = async (data, context) => {
     const course = courseDoc.data();
     const customer = customerDoc.data();
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionData = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -51,7 +51,7 @@ const initializePurchase = async (data, context) => {
           quantity: 1,
         },
       ],
-      mode: 'payment',
+      mode: course.priceFrequency === 'one-time' ? 'payment' : 'subscription',
       // success_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/success',
       success_url: url,
       // cancel_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/cancel',
@@ -64,16 +64,18 @@ const initializePurchase = async (data, context) => {
       customer: customer.id,
       customer_email: email,
 
-      payment_intent_data: {
-        // Attach payment method to the customer.
-        setup_future_usage: 'off_session'
-      },
+      // payment_intent_data: {
+      //   // Attach payment method to the customer.
+      //   setup_future_usage: 'off_session'
+      // },
 
       metadata: {
         studentUid: uid,
         courseUid
       }
-    });
+    };
+
+    const session = await stripe.checkout.sessions.create(sessionData);
 
     console.log('Session created', session.id);
     console.log('session saved');
@@ -90,4 +92,6 @@ const initializePurchase = async (data, context) => {
   }
 };
 
-module.exports = { initializePurchase };
+module.exports = {
+  initializePurchase: functions.https.onCall(initializePurchase),
+};

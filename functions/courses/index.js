@@ -5,7 +5,6 @@ const { checkAuth } = require('../util/auth');
 const { tokenUpdateFromCourse, tokenFromCourse2, getChildCourseUpdate, filterCourseItem } = require('./utils');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
 const { uploadImage } = require('./images');
-const { initializePurchase } = require('./initializePurchase');
 
 /**
  * A simpler createCourse.
@@ -173,7 +172,6 @@ module.exports = {
   createCourse2: functions.https.onCall(createCourse2),
   updateCourse: functions.https.onCall(updateCourse),
   deleteCourse: functions.https.onCall(deleteCourse),
-  initializePurchase: functions.https.onCall(initializePurchase),
   ...require('./users'),
   ...require('./handlers')
 };
