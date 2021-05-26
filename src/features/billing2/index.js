@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -42,6 +42,12 @@ const Billing = () => {
   const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
+
+  useEffect(() => {
+    if (!tiers.length) {
+      dispatch(billingActions2.getTiers());
+    }
+  }, [tiers])
 
   const onSubmit = ({ card }) => {
     dispatch(billingActions2.createSubscription({ stripe, card }));

@@ -23,9 +23,9 @@ const Subscription = () => {
 
   return (
     <div>
-      {!sub && (
-        <Typography>createStripeCustomer</Typography>
-      )}
+      {/*{!sub && (*/}
+      {/*  <Typography>createStripeCustomer</Typography>*/}
+      {/*)}*/}
       {sub && (
         <>
           <Typography>

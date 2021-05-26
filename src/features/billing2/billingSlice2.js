@@ -77,22 +77,6 @@ const _startDataListeners = createAsyncThunk(
               dispatch(generatedActions.setSubscriptions(subscriptions));
             });
 
-          // console.log('unsubscribeSessions');
-          // const { course } = selectedCourseSelectors.select(getState());
-          // unsubscribeSessions = stripeUserDoc
-          //   .collection('sessions')
-          //   .onSnapshot((snapshot) => {
-          //     console.log('sessions', snapshot.docs);
-          //     snapshot.docChanges().forEach((change) => {
-          //       if (change.type === 'modified') {
-          //         // Here we go.
-          //
-          //       }
-          //     })
-          //     const sessions = snapshot.docs.map(doc => parseUnserializables(doc.data()));
-          //     dispatch(generatedActions.setSessions(sessions));
-          //   });
-
           unsubscribeUnlocked = stripeUserDoc
             .collection('unlocked')
             .onSnapshot((snapshot) => {
@@ -262,15 +246,20 @@ const init = createAsyncThunk(
           });
 
         dispatch(_startDataListeners());
-
-        // TODO This should probably go elsewhere. Preferably in Firestore so we get updates.
-        const { data: tiers = [] } = await app.functions().httpsCallable('getTiers')();
-        dispatch(generatedActions.setTiers(tiers));
       } else {
         dispatch(generatedActions.resetAll());
       }
     });
   },
+);
+
+const getTiers = createAsyncThunk(
+  `${name}/getTiers`,
+  async (_, { dispatch }) => {
+    // TODO This should probably go elsewhere. Preferably in Firestore so we get updates.
+    const { data: tiers = [] } = await app.functions().httpsCallable('getTiers')();
+    dispatch(generatedActions.setTiers(tiers));
+  }
 );
 
 const { actions: generatedActions, reducer } = createSlice({
@@ -311,6 +300,7 @@ const actions = {
   updateSubscription,
   cancelSubscription,
   unlockCourse,
+  getTiers
 };
 
 const select = ({ billing }) => billing;
@@ -337,7 +327,7 @@ const selectSessionsByCourseUid = createSelector(
   },
 );
 const selectors = {
-  select, selectSubscription, selectTier, selectSessionsByCourseUid,
+  select, selectSubscription, selectTier, selectSessionsByCourseUid
 };
 
 export { actions, selectors };
