@@ -7,7 +7,7 @@ const initialState = {
   description: '',
   image: '',
   price: 0,
-  priceFrequency: 'one-time', // one-time, monthly
+  priceFrequency: 'one-time', // one-time, month
   isPublic: false,
 };
 

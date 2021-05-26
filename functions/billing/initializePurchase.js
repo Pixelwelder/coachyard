@@ -37,43 +37,64 @@ const initializePurchase = async (data, context) => {
     const course = courseDoc.data();
     const customer = customerDoc.data();
 
-    const sessionData = {
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Unlock: ${course.displayName}`,
-            },
-            unit_amount: course.price,
-          },
-          quantity: 1,
+    const baseLineItem = {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: `Unlock: ${course.displayName}`,
+          description: course.description || course.displayName
         },
-      ],
-      mode: course.priceFrequency === 'one-time' ? 'payment' : 'subscription',
-      // success_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/success',
-      success_url: url,
-      // cancel_url: 'http://coachyard.ngrok.io/coachyard-dev/us-central1/purchase/cancel',
-      cancel_url: url,
+        unit_amount: course.price,
+      },
+      quantity: 1
+    };
 
-      // Optional stuff.
-      // client_reference_id: uid,
+    let sessionData = {
+      payment_method_types: ['card'],
+      success_url: url,
+      cancel_url: url,
 
       // Pass this so it will attach to existing customer.
       customer: customer.id,
       customer_email: email,
-
-      // payment_intent_data: {
-      //   // Attach payment method to the customer.
-      //   setup_future_usage: 'off_session'
-      // },
 
       metadata: {
         studentUid: uid,
         courseUid
       }
     };
+
+    switch (course.priceFrequency) {
+      case 'one-time': {
+        sessionData = {
+          ...sessionData,
+          mode: 'payment',
+          payment_intent_data: {
+            // Attach payment method to the customer.
+            setup_future_usage: 'off_session'
+          },
+          line_items: [baseLineItem]
+        };
+        break;
+      }
+      case 'month': {
+        sessionData = {
+          ...sessionData,
+          mode: 'subscription',
+          line_items: [{
+            ...baseLineItem,
+            price_data: {
+              ...baseLineItem.price_data,
+              recurring: { interval: 'month' }
+            }
+          }],
+        };
+        break;
+      }
+      default: {
+        throw new Error(`Unhandled priceFrequency "${course.priceFrequency}".`);
+      }
+    }
 
     const session = await stripe.checkout.sessions.create(sessionData);
 

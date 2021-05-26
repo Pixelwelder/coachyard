@@ -66,7 +66,7 @@ const newCourse = (overrides) => ({
   // Once this is cloned for a user, it becomes basic.
   type: 'basic', // template, basic
   price: 4995, // in cents
-  priceFrequency: 'one-time', // one-time, monthly
+  priceFrequency: 'one-time', // one-time, month
   parent: '',
   numChats: 0,
   numChatsUnseen: 0,

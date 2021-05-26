@@ -80,7 +80,7 @@ const AccessManager = () => {
           onChange={onChangePaymentType}
         >
           <FormControlLabel value="one-time" control={<Radio />} label="One-Time" />
-          <FormControlLabel value="monthly" control={<Radio />} label="Subscription (Monthly)" />
+          <FormControlLabel value="month" control={<Radio />} label="Subscription (Monthly)" />
         </RadioGroup>
       </div>
       <StudentManager />
