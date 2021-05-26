@@ -39,6 +39,7 @@ const tokenUpdateFromCourse = (course) => {
     isPublic: course.isPublic,
     parent: course.parent,
     price: course.price,
+    priceFrequency: course.priceFrequency,
     type: 'basic',
     updated: timestamp,
   }
@@ -69,7 +70,7 @@ const getChildCourseUpdate = ({ displayName = '', description = '' } = {}) => ({
  * Filter out the junk.
  */
 const filterCourseItem = (params) => {
-  const paramNames = ['displayName', 'description', 'type', 'price', 'isPublic'];
+  const paramNames = ['displayName', 'description', 'type', 'price', 'priceFrequency', 'isPublic'];
   const courseItem = paramNames.reduce((accum, paramName) => {
     return params.hasOwnProperty(paramName) && params[paramName] !== null && params[paramName] !== undefined
       ? { ...accum, [paramName]: params[paramName ]}

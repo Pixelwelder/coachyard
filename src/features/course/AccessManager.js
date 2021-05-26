@@ -13,7 +13,7 @@ const AccessManager = () => {
   const editCourse = useSelector(uiSelectors2.editCourse.select);
   const { course, isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
-  const { price, type, isPublic } = editCourse;
+  const { price, priceFrequency, isPublic } = editCourse;
 
   // useEffect(() => {
   //   dispatch(uiActions2.editCourse.setValues(course));
@@ -31,6 +31,10 @@ const AccessManager = () => {
   const onChangePublic = ({ target: { value } }) => {
     dispatch(uiActions2.editCourse.setValues({ isPublic: value === 'true' }));
   };
+
+  const onChangePaymentType = ({ target: { value } }) => {
+    dispatch(uiActions2.editCourse.setValues({ priceFrequency: value }));
+  }
 
   if (!course) return null;
   return (
@@ -51,6 +55,7 @@ const AccessManager = () => {
       <div className="price-container">
         <Typography className="currency-sign" variant="h6">$</Typography>
         <TextField
+          className="horizontal-spacer"
           variant="outlined"
           label="Price"
           placeholder="49.95"
@@ -67,6 +72,16 @@ const AccessManager = () => {
             price: Math.floor(value * 100),
           })}
         />
+        <RadioGroup
+          row
+          aria-label="type"
+          name="price-type"
+          value={priceFrequency}
+          onChange={onChangePaymentType}
+        >
+          <FormControlLabel value="one-time" control={<Radio />} label="One-Time" />
+          <FormControlLabel value="monthly" control={<Radio />} label="Subscription (Monthly)" />
+        </RadioGroup>
       </div>
       <StudentManager />
     </div>

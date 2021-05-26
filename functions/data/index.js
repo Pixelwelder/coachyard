@@ -66,6 +66,7 @@ const newCourse = (overrides) => ({
   // Once this is cloned for a user, it becomes basic.
   type: 'basic', // template, basic
   price: 4995, // in cents
+  priceFrequency: 'one-time', // one-time, monthly
   parent: '',
   numChats: 0,
   numChatsUnseen: 0,
@@ -112,6 +113,7 @@ const newCourseToken = (overrides) => ({
   userDisplayName: '',
   courseUid: '',
   price: 0,
+  priceFrequency: '', // @see course
   access: 'student', // 'student' | 'editor' | 'admin'
 
   // Abbreviated Course
