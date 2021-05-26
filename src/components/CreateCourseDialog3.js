@@ -97,9 +97,11 @@ const NewCourseDialog = () => {
           <FormControl component="fieldset">
             <FormLabel component="legend">This course is:</FormLabel>
             <RadioGroup row aria-label="type" name="type" value={type} onChange={onChange}>
-              <FormControlLabel value="basic" control={<Radio />} label="Basic" />
-              <FormControlLabel value="template" control={<Radio />} label="Template" />
+              <FormControlLabel value="template" control={<Radio />} label="One-to-One" />
+              <FormControlLabel value="basic" control={<Radio />} label="One-to-Many" />
             </RadioGroup>
+            {type === 'basic' && (<div>A one-to-many course allows you to coach as many people as you would like, but all members can see all content--including each other.</div>)}
+            {type === 'template' && (<div>A one-to-one course is intended to make a connection between you and a single other person.</div>)}
           </FormControl>
           {/* {(type === 'invite' || type === 'public') && ( */}
           {/*  <FormControl> */}
