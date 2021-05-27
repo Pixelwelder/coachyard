@@ -67,7 +67,7 @@ const NewCourseDialog = () => {
     // TODO This should be in the action.
     const { payload: course } = await dispatch(
       catalogActions.createNewCourse({
-        displayName: 'New Course',
+        displayName: 'New Channel',
         type: selection === 2 ? 'template' : 'basic'
       }),
     );
