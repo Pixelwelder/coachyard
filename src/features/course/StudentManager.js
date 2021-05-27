@@ -273,9 +273,9 @@ const StudentManager = () => {
 
   return (
     <div className="student-manager">
-      {course.type === 'template' && (
-        <Typography>This channel is available to anyone who purchases access.</Typography>
-      )}
+      {/*{course.type === 'template' && (*/}
+      {/*  <Typography>This channel is available to anyone who purchases access.</Typography>*/}
+      {/*)}*/}
 
       {course.type !== 'template' && (
         <>

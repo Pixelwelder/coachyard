@@ -13,7 +13,11 @@ import OwnerControls from '../../components/OwnerControls';
 import { actions as uiActions } from '../ui/uiSlice';
 import { actions as catalogActions, actions as catalogSelectors } from '../catalog/catalogSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
-import { actions as selectedCourseActions, selectors as selectedCourseSelectors } from './selectedCourseSlice';
+import {
+  actions as selectedCourseActions,
+  EDIT_MODE,
+  selectors as selectedCourseSelectors
+} from './selectedCourseSlice';
 import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 
 /**
@@ -145,6 +149,23 @@ const CourseView = () => {
 
               : (
                 <>
+                  {!course.isPublic && (
+                    <Alert
+                      severity="warning"
+                      action={
+                        <Button
+                          onClick={() => {
+                            onEdit();
+                            dispatch(selectedCourseActions.setEditMode(EDIT_MODE.ACCESS));
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      }
+                    >
+                      This course has not been published. Your customers will not be able to see it.
+                    </Alert>
+                  )}
                   <div className="course-details">
                     <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
                     <img className="course-large-image" src={imageUrl} />
