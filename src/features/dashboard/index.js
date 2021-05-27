@@ -25,7 +25,7 @@ const Dashboard = () => {
           value={tab}
           onChange={(event, newValue) => dispatch(dashboardActions.setTab(newValue))}
         >
-          <Tab label="Courses" />
+          <Tab label="Channels" />
           <Tab label="Students" />
           <Tab label="Chats" />
           <Tab label="Schedule" />

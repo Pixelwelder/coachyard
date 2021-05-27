@@ -113,9 +113,9 @@ const Course = () => {
   return (
     <div className="app-content">
       <Dialog open={ownsDescendant} fullWidth>
-        <DialogTitle>Course Owned</DialogTitle>
+        <DialogTitle>Channel Unlocked</DialogTitle>
         <DialogContent>
-          <Typography>You own this course!</Typography>
+          <Typography>You are subscribed to this channel!</Typography>
           <DialogActions>
             <Button variant="contained" color="primary" onClick={goToDescendant}>Go!</Button>
           </DialogActions>

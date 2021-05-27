@@ -109,6 +109,27 @@ a {
   margin-right: 4px;
 }
 
+.channel-group {
+  display: flex;
+}
+
+.channel-item {
+
+  &.selected {
+    .channel-item-card {
+      border: 1px solid #3f51b5;
+    }
+  }
+}
+
+.channel-description {
+  margin-top: 16px;
+}
+
+.channel-item-media {
+  height: 192px;
+  background-size: contain !important;
+}
 
 // ===================== FILE DROP =====================
 /* Demo.css */

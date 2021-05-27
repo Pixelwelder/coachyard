@@ -319,7 +319,7 @@ const setLocation = createAsyncThunk(
     if (course.type === 'basic') {
       // Only public and accessible course.
       if (!course.isPublic) {
-        if (!app.auth().currentUser) abandon('This course is private and the user is not logged in.');
+        if (!app.auth().currentUser) abandon('This channel is private and the user is not logged in.');
 
         const tokenDocs = await app.firestore().collection('tokens')
           .where('courseUid', '==', courseUid)

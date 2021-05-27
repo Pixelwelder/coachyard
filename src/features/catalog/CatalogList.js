@@ -113,7 +113,7 @@ const LearningCatalogList = ({ title = 'Learning' }) => {
   );
 };
 
-const PublicCatalogList = ({ title = 'Group Courses' }) => {
+const PublicCatalogList = ({ title = 'Group Channels' }) => {
   const { coach } = useSelector(coachSelectors.select);
   const tokens = useSelector(coachSelectors.selectPublicTokens);
 

@@ -7,6 +7,8 @@ const initialState = {
   description: '',
   date: '',
   type: 'template',
+
+  selection: 0
 };
 
 export default createUISlice({
