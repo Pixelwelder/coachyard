@@ -7,23 +7,14 @@ const generatePassword = require('password-generator');
 const stripe = require('../billing/stripe');
 const { addProvider } = require('../schedule/providers');
 const { addCustomer } = require('../schedule/customers');
+const { getImageData } = require('../util/images');
 
 const createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
   const buffer = Buffer.from(png);
 
-  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, {
-    metadata: {
-      fileType: 'image/png',
-      metadata: {
-        // Allows us to see the image in Firebase Admin UI
-        firebaseStorageDownloadTokens: uuid(),
-        cacheControl: 'public,max-age=4000'
-      }
-    }
-  });
-
+  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, getImageData());
   await admin.firestore().collection('users').doc(uid).update({ image: `${uid}.png`});
 };
 

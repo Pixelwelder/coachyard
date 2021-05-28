@@ -596,6 +596,29 @@ $billing-width: 400px;
   margin-bottom: 16px;
 }
 
+$avatar-size: 100px;
+.coach-banner {
+  border: 1px solid lightgray;
+  flex: 1;
+  background-size: cover;
+  background-position: center center;
+  min-height: 200px;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-end;
+  padding-left: 16px;
+  margin-bottom: $avatar-size / 2;
+}
+
+.coach-avatar {
+  background: white;
+  width: $avatar-size !important;
+  height: $avatar-size !important;
+  border: 1px solid lightgray;
+  margin-right: 16px;
+  margin-bottom: -$avatar-size / 2;
+}
+
 // ------------------------------------ Dialogs ------------------------------------ //
 .unlock-dialog-content {
   display: flex;

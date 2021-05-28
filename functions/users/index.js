@@ -5,6 +5,7 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { _createSchedulingUser, filterUserUpdate } = require('./utils');
 
+// TODO Get this out of here.
 const createSchedulingUser = async (data, context) => {
   const { auth: { uid } } = context;
   const doc = await admin.firestore().collection('users').doc(uid).get();

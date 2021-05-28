@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { tokenFromCourse, tokenFromCourse2 } = require('../util/course');
-const { uploadImage } = require('../courses/images');
+const { uploadImage } = require('../util/images');
 const { checkAuth } = require('../util/auth');
 
 const _unlockCourse = async (data, context) => {

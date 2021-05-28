@@ -1,4 +1,4 @@
-const target = 'local'; // local | dev | prod
+const target = 'dev'; // local | dev | prod
 
 module.exports = {
   firebase: require('./__config__/firebase.json')[target],

@@ -99,8 +99,8 @@ const NewCourseDialog = () => {
           container
           spacing={1}
         >
-          {[0, 1, 2].map(id => (
-              <ChannelItem id={id} isSelected={selection === id} onClick={() => onSetSelection(id)} />
+          {[0, 1, 2].map((id) => (
+              <ChannelItem id={id} key={id} isSelected={selection === id} onClick={() => onSetSelection(id)} />
           ))}
         </Grid>
         <DialogContentText>

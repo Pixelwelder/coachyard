@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import app from 'firebase/app';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Avatar from '@material-ui/core/Avatar';
 import { BaseCatalogList } from '../catalog/CatalogList';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
+import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 
 const Coach = () => {
+  const { images } = useSelector(assetsSelectors.select);
   const history = useHistory();
   const { slug } = useParams();
   const dispatch = useDispatch();
@@ -22,6 +25,17 @@ const Coach = () => {
   useEffect(() => {
     dispatch(coachActions.load({ slug, history }));
   }, [slug, history, dispatch]);
+
+  const bannerPath = `/banners/${app.auth().currentUser?.uid}.png`;
+  const { [bannerPath]: bannerUrl } = images;
+  const avatarPath = `/avatars/${app.auth().currentUser?.uid}.png`;
+  const { [avatarPath]: avatarUrl } = images;
+  useEffect(() => {
+    if (app.auth().currentUser) {
+      if (!bannerUrl) dispatch(assetsActions.getAsset({ path: bannerPath }));
+      if (!avatarUrl) dispatch(assetsActions.getAsset({ path: avatarPath }));
+    }
+  }, [bannerUrl, bannerPath, avatarPath, avatarUrl]);
 
   const onEdit = () => {
     dispatch(uiActions2.editCoach.open({
@@ -46,7 +60,11 @@ const Coach = () => {
   if (!coach) return null;
   return (
     <div className="coach-page">
-      <Typography variant="h1">{coach.displayName}</Typography>
+      <div className="coach-banner" style={{ backgroundImage: `url("${bannerUrl}")` }}>
+        <Avatar variant="circle" className="coach-avatar" src={avatarUrl} />
+      </div>
+      <Typography variant="h4">{coach.displayName}</Typography>
+
       {/* TODO */}
       {isOpen
         ? (

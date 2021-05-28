@@ -3,6 +3,7 @@ const functions = require('firebase-functions');
 const { log } = require('../logging');
 const { toKebab } = require('../util/string');
 const { setClaims } = require('../util/claims');
+const { uploadImage } = require('../util/images');
 const { createIcon, _createSchedulingUser, createStripeCustomer, createUserMeta } = require('./utils');
 
 /**
@@ -46,6 +47,12 @@ const usersOnCreateUser = functions.auth.user()
     console.log('create icon');
     await createIcon({ uid });
     console.log('create icon complete');
+
+    // Create banner image.
+    await uploadImage({
+      path: './users/images/coach-banner.jpeg',
+      destination: `banners/${uid}.png`
+    });
 
     // Create claims.
     console.log('set claims');

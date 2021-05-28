@@ -4,7 +4,7 @@ const { log } = require('../logging');
 const { checkAuth } = require('../util/auth');
 const { tokenUpdateFromCourse, tokenFromCourse2, getChildCourseUpdate, filterCourseItem } = require('./utils');
 const { newCourse, newCourseItem, newCourseToken } = require('../data');
-const { uploadImage } = require('./images');
+const { uploadImage } = require('../util/images');
 
 /**
  * A simpler createCourse.
