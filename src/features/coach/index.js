@@ -29,16 +29,16 @@ const Coach = () => {
     dispatch(coachActions.load({ slug, history }));
   }, [slug, history, dispatch]);
 
-  const bannerPath = `/banners/${app.auth().currentUser?.uid}`;
+  const bannerPath = `/banners/${coach?.uid}`;
   const { [bannerPath]: bannerUrl } = images;
-  const avatarPath = `/avatars/${app.auth().currentUser?.uid}`;
+  const avatarPath = `/avatars/${coach?.uid}`;
   const { [avatarPath]: avatarUrl } = images;
   useEffect(() => {
-    if (app.auth().currentUser) {
+    if (coach) {
       if (!bannerUrl) dispatch(assetsActions.getAsset({ path: bannerPath }));
       if (!avatarUrl) dispatch(assetsActions.getAsset({ path: avatarPath }));
     }
-  }, [bannerUrl, bannerPath, avatarPath, avatarUrl]);
+  }, [bannerUrl, bannerPath, avatarPath, avatarUrl, coach]);
 
   const onEdit = () => {
     dispatch(uiActions2.editCoach.open({
