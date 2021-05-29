@@ -25,6 +25,7 @@ import UnlockDialog from '../features/billing2/UnlockDialog';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import PrivacyPolicy from '../features/pages/PrivacyPolicy';
 import TermsAndConditions from '../features/pages/TermsAndConditions';
+import Landing from '../features/landing';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -66,7 +67,8 @@ const App = () => {
           <Route path="/coach/:slug" component={Coach} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-and-conditions" component={TermsAndConditions} />
-          <Route path="/" render={() => <Redirect to="/dashboard" />} />
+          <Route path="/" component={Landing} />
+          {/*<Route path="/" render={() => <Redirect to="/dashboard" />} />*/}
         </Switch>
       </div>
 

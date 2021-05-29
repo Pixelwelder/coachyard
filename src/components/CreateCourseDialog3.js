@@ -14,13 +14,15 @@ import { actions as uiActions2, selectors as uiSelectors2 } from '../features/ui
 import { actions as catalogActions } from '../features/catalog/catalogSlice';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
+import { Typography } from '@material-ui/core';
 
-const ChannelItem = ({ id, isSelected = false, onClick }) => {
+const ChannelItem = ({ id, isSelected = false, onClick, title }) => {
   let classes = 'channel-item';
   if (isSelected) classes = `${classes} selected`;
 
   return (
     <Grid item xs={4} className={classes} onClick={onClick}>
+      {/*<Typography className="channel-item-title">{title}</Typography>*/}
       <Card variant="outlined" className="channel-item-card">
         <CardMedia image={`/images/creation/channel${id}.png`} className="channel-item-media" />
       </Card>
@@ -73,15 +75,21 @@ const NewCourseDialog = () => {
           container
           spacing={1}
         >
-          {[0, 1, 2].map((id) => (
-              <ChannelItem id={id} key={id} isSelected={selection === id} onClick={() => onSetSelection(id)} />
+          {['Single Channel', 'Multi Channel', 'Channel Template'].map((title, index) => (
+              <ChannelItem
+                id={index}
+                key={index}
+                isSelected={selection === index}
+                onClick={() => onSetSelection(index)}
+                title={title}
+              />
           ))}
         </Grid>
         <DialogContentText>
           <p className="channel-description">
             {selection === 0 && (<>Create a single channel between you and someone you will personally invite.</>)}
-            {selection === 1 && (<>Create a single channel between you and one or more people who will purchase access.</>)}
-            {selection === 2 && (<>Create a channel template. Purchasers will unlock their own one-on-one copies.</>)}
+            {selection === 1 && (<>Create a single channel between you and one or more people who will purchase access. Each user will be able to communicate with all the others.</>)}
+            {selection === 2 && (<>Create a channel template. Purchasers will unlock their own private one-on-one copies.</>)}
           </p>
         </DialogContentText>
         {!!error && <Alert severity="error">{error.message}</Alert>}

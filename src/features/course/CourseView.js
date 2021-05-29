@@ -115,8 +115,8 @@ const CourseView = () => {
                         fullWidth
                         autoFocus
                         variant="outlined"
-                        label="Course Name"
-                        placeholder="Course Name"
+                        label="Channel Name"
+                        placeholder="Channel Name"
                         id="displayName"
                         value={displayName}
                         disabled={isLoading}

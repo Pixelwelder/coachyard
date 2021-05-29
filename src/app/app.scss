@@ -25,6 +25,7 @@ a {
   min-height: 400px;
   padding: $outer-padding;
   justify-content: center;
+  background-color: #ffffff;
 
   @media (min-width: $breakpoint-mobile) {
     padding: $outer-padding-lg;
@@ -124,6 +125,10 @@ a {
       border: 1px solid #3f51b5;
     }
   }
+}
+
+.channel-item-title {
+  text-align: center;
 }
 
 .channel-description {
@@ -673,4 +678,16 @@ $avatar-size: 100px;
   //transform: translate(-50%, -50%);
   //position: absolute;
   outline: none;
+}
+
+.landing-page {
+  flex: 1;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 }

@@ -31,8 +31,8 @@ const NewCourseDialog = ({ open, onClose }) => {
           <TextField
             fullWidth
             variant="filled"
-            label="Course Name"
-            placeholder="Course Name"
+            label="Channel Name"
+            placeholder="Channel Name"
             id="displayName"
             value={displayName}
             disabled={isLoading}
