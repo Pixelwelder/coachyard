@@ -7,7 +7,7 @@ const Participant = ({ token }) => {
   const { images } = useSelector(assetsSelectors.select);
   const dispatch = useDispatch();
 
-  const path = `/avatars/${token.user}.png`;
+  const path = `/avatars/${token.user}`;
   const { [path]: imageUrl } = images;
 
   useEffect(() => {

@@ -50,8 +50,9 @@ const usersOnCreateUser = functions.auth.user()
 
     // Create banner image.
     await uploadImage({
-      path: './users/images/coach-banner.jpeg',
-      destination: `banners/${uid}.png`
+      path: './users/images/coach-banner.jpg',
+      destination: `banners/${uid}`,
+      type: 'jpg'
     });
 
     // Create claims.

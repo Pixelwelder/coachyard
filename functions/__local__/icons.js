@@ -18,11 +18,11 @@ const _createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
   const pathRoot = isLive ? '/temp/' : './';
-  const path = `${pathRoot}${uid}.png`;
+  const path = `${pathRoot}${uid}`;
   const buffer = Buffer.from(png);
   // fs.writeFileSync(path, png);
 
-  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, {
+  await admin.storage().bucket().file(`avatars/${uid}`).save(buffer, {
     metadata: {
       fileType: 'image/png',
       metadata: {
@@ -49,7 +49,7 @@ const _createIcon = async ({ uid }) => {
   //   console.error(error);
   // }
 
-  console.log(`uploaded ${uid}.png`);
+  console.log(`uploaded ${uid}`);
 };
 
 _createIcon({ uid: `000-temp-${Math.random()}` });

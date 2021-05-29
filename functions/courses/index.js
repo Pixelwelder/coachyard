@@ -51,7 +51,7 @@ const createCourse2 = async (data, context) => {
     // Don't really need to wait for this.
     await uploadImage({
       path: './courses/generic-teacher-cropped.png',
-      destination: `courses/${course.uid}.png`
+      destination: `courses/${course.uid}`
     });
 
     return course;

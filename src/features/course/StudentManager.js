@@ -24,7 +24,7 @@ const _StudentImage = ({ uid, cName = 'student-view-thumb' }) => {
   useEffect(() => {
     const go = async () => {
       try {
-        const url = await app.storage().ref(`/avatars/${uid}.png`).getDownloadURL();
+        const url = await app.storage().ref(`/avatars/${uid}`).getDownloadURL();
         setImageUrl(url);
       } catch (error) {
         // Ignore.

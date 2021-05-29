@@ -21,7 +21,7 @@ const ChatMessage = ({ message }) => {
   const dispatch = useDispatch();
   const authUser = app.auth().currentUser;
   const { text, sender } = message;
-  const path = `/avatars/${sender}.png`;
+  const path = `/avatars/${sender}`;
   const { [path]: imageUrl } = images;
   const messageClass = sender === authUser.uid ? 'sent' : 'received';
 

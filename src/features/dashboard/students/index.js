@@ -8,7 +8,7 @@ import { actions as assetsActions, selectors as assetsSelectors } from '../../as
 const StudentItem = ({ tokens }) => {
   const [token] = tokens; // Grab first one for user/image
   const { userDisplayName, user } = token;
-  const path = `/avatars/${user}.png`;
+  const path = `/avatars/${user}`;
   const { images } = useSelector(assetsSelectors.select);
   const { [path]: imageUrl = '/images/generic-avatar-2.png' } = images;
 

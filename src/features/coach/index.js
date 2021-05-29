@@ -6,19 +6,22 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
+import EditIcon from '@material-ui/icons/Edit';
 import { BaseCatalogList } from '../catalog/CatalogList';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { actions as coachActions, selectors as coachSelectors } from './coachSlice';
 import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
+import UploaderDialog from '../../components/UploaderDialog';
 
 const Coach = () => {
-  const { images } = useSelector(assetsSelectors.select);
+  const { images, dirtyFlags } = useSelector(assetsSelectors.select);
   const history = useHistory();
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { isLoading, coach } = useSelector(coachSelectors.select);
   const products = useSelector(coachSelectors.selectTokens);
   const update = useSelector(uiSelectors2.editCoach.select);
+  const [upload, setUpload] = useState('');
   const { isOpen, description } = update;
   const isUser = coach?.uid === app.auth().currentUser?.uid;
 
@@ -26,9 +29,9 @@ const Coach = () => {
     dispatch(coachActions.load({ slug, history }));
   }, [slug, history, dispatch]);
 
-  const bannerPath = `/banners/${app.auth().currentUser?.uid}.png`;
+  const bannerPath = `/banners/${app.auth().currentUser?.uid}`;
   const { [bannerPath]: bannerUrl } = images;
-  const avatarPath = `/avatars/${app.auth().currentUser?.uid}.png`;
+  const avatarPath = `/avatars/${app.auth().currentUser?.uid}`;
   const { [avatarPath]: avatarUrl } = images;
   useEffect(() => {
     if (app.auth().currentUser) {
@@ -60,8 +63,25 @@ const Coach = () => {
   if (!coach) return null;
   return (
     <div className="coach-page">
-      <div className="coach-banner" style={{ backgroundImage: `url("${bannerUrl}")` }}>
-        <Avatar variant="circle" className="coach-avatar" src={avatarUrl} />
+      <UploaderDialog
+        type={upload}
+        filename={app.auth().currentUser?.uid}
+        onClose={() => setUpload('')}
+      />
+      <div className="coach-banner" style={{ backgroundImage: `url("${bannerUrl}?m=${dirtyFlags[bannerPath]}")` }}>
+        <div className="coach-avatar" style={{ backgroundImage: `url("${avatarUrl}?m=${dirtyFlags[avatarPath]}")` }}>
+          <Button variant="contained" size="small" onClick={() => setUpload('avatars')}>
+            <EditIcon />
+          </Button>
+        </div>
+
+        {isOpen && (
+          <Button
+            className="coach-banner-edit" variant="contained" size="small" onClick={() => setUpload('banners')}
+          >
+            <EditIcon />
+          </Button>
+        )}
       </div>
       <Typography variant="h4">{coach.displayName}</Typography>
 

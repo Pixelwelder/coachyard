@@ -14,8 +14,8 @@ const createIcon = async ({ uid }) => {
   const png = jdenticon.toPng(uid, 200);
   const buffer = Buffer.from(png);
 
-  await admin.storage().bucket().file(`avatars/${uid}.png`).save(buffer, getImageData());
-  await admin.firestore().collection('users').doc(uid).update({ image: `${uid}.png`});
+  await admin.storage().bucket().file(`avatars/${uid}`).save(buffer, getImageData());
+  await admin.firestore().collection('users').doc(uid).update({ image: `${uid}`});
 };
 
 /**

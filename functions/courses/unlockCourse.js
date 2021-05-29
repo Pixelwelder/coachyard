@@ -75,7 +75,7 @@ const _cloneCourse2 = async ({ courseDoc, studentUid }) => {
   // Add a course image.
   await uploadImage({
     path: './courses/generic-teacher-cropped.png',
-    destination: `courses/${clonedCourse.uid}.png`
+    destination: `courses/${clonedCourse.uid}`
   });
 
   console.log('cloning complete');

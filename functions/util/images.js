@@ -12,7 +12,7 @@ const getImageData = () => ({
   }
 });
 
-const uploadImage = async ({ destination, path = 'generic-teacher-cropped.png' }) => {
+const uploadImage = async ({ destination, path = 'generic-teacher-cropped.png', type = 'png' }) => {
   const bucket = admin.storage().bucket();
   await bucket.upload(
     path,
@@ -21,7 +21,7 @@ const uploadImage = async ({ destination, path = 'generic-teacher-cropped.png' }
       gzip: true,
       // TODO Combine with getImageData()
       metadata: {
-        contentType: 'image/png',
+        contentType: `image/${type}`,
         metadata: {
           // Allows us to see the image in Firebase Admin UI
           firebaseStorageDownloadTokens: uuid(),

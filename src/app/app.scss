@@ -604,19 +604,30 @@ $avatar-size: 100px;
   background-position: center center;
   min-height: 200px;
   display: flex;
-  flex-flow: column;
-  justify-content: flex-end;
-  padding-left: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 4px 4px 16px;
   margin-bottom: $avatar-size / 2;
 }
 
 .coach-avatar {
+  margin-right: 16px;
+  margin-bottom: -$avatar-size / 2;
   background: white;
+  background-size: cover;
+  background-position: center center;
   width: $avatar-size !important;
   height: $avatar-size !important;
   border: 1px solid lightgray;
-  margin-right: 16px;
-  margin-bottom: -$avatar-size / 2;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 4px;
+}
+
+.coach-banner-edit {
+  justify-self: flex-end;
 }
 
 // ------------------------------------ Dialogs ------------------------------------ //
@@ -644,6 +655,12 @@ $avatar-size: 100px;
     }
   }
 }
+
+//.MuiDropzoneArea-root {
+//  display: flex;
+//  justify-content: center;
+//  align-items: center;
+//}
 
 // ---
 .loading-indicator {

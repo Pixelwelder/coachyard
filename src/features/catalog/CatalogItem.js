@@ -25,7 +25,7 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
     const go = async () => {
       try {
         // TODO Load item image.
-        const url = await app.storage().ref(`/avatars/${user}.png`).getDownloadURL();
+        const url = await app.storage().ref(`/avatars/${user}`).getDownloadURL();
         setImageUrl(url);
       } catch (error) {}
     };

@@ -105,7 +105,7 @@ const _cloneCourse2 = async (data, context) => {
   // Add a course image.
   await uploadImage({
     path: './courses/generic-teacher-cropped.png',
-    destination: `courses/${course.uid}.png`
+    destination: `courses/${course.uid}`
   });
 
   // Return the new course to the front end.

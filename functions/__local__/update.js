@@ -14,11 +14,11 @@ admin.initializeApp({
 const _createIcon = async ({ uid }) => {
   // Create icon.
   const png = jdenticon.toPng(uid, 200);
-  const path = `/tmp/${uid}.png`;
+  const path = `/tmp/${uid}`;
   fs.writeFileSync(path, png);
 
   await admin.storage().bucket().upload(path, {
-    destination: `avatars/${uid}.png`,
+    destination: `avatars/${uid}`,
     metadata: {
       fileType: 'image/png',
       metadata: {

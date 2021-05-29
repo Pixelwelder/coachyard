@@ -36,7 +36,7 @@ const CourseView = () => {
   const isLoading = false;
   const error = null;
 
-  const path = course ? `/courses/${course.uid}.png` : '';
+  const path = course ? `/courses/${course.uid}` : '';
   const { [path]: imageUrl } = images;
 
   useEffect(() => () => {
