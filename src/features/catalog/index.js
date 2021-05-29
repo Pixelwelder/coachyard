@@ -26,8 +26,8 @@ const Catalog = () => {
       <div className="catalog-content">
         {tab === TABS.TEACHING && (
           <>
-            <BaseCatalogList title="Products" items={products} showCreate />
-            <BaseCatalogList title="Teaching" items={courses} />
+            <BaseCatalogList title="Templates" items={products} showCreate />
+            <BaseCatalogList title="Active Channels" items={courses} />
           </>
         )}
         {tab === TABS.LEARNING && (<LearningCatalogList />)}

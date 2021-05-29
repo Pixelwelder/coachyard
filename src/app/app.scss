@@ -17,6 +17,11 @@
 
 a {
   text-decoration: none;
+  color: rgba(0, 0, 0, 0.87);
+
+  &:visited { color: rgba(0, 0, 0, 0.87); }
+  &:hover { color: #3f51b5 }
+  &:active { color: #3f51b5 }
 }
 
 #root {
@@ -607,7 +612,7 @@ $billing-width: 400px;
 
 $avatar-size: 100px;
 .coach-banner {
-  border: 1px solid lightgray;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   flex: 1;
   background-size: cover;
   background-position: center center;
@@ -617,6 +622,7 @@ $avatar-size: 100px;
   align-items: flex-end;
   padding: 0 4px 4px 16px;
   margin-bottom: $avatar-size / 2;
+  border-radius: 4px;
 }
 
 .coach-avatar {
@@ -627,7 +633,8 @@ $avatar-size: 100px;
   background-position: center center;
   width: $avatar-size !important;
   height: $avatar-size !important;
-  border: 1px solid lightgray;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
 
   display: flex;
   justify-content: flex-end;
@@ -690,4 +697,29 @@ $avatar-size: 100px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+.page-title-container {
+  flex: 1;
+}
+
+.page-title-link {
+
+}
+
+.page-title-text {
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.page-title-user {
+  flex: 0;
 }
