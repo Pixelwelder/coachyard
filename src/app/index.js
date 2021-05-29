@@ -79,7 +79,6 @@ const App = () => {
       {/* Are we logged in? */}
 
       {/* User account. */}
-      {/* TODO FirebaseSignIn always signs out. */}
       <FirebaseSignIn />
       {/* <CreateAccountDialog /> */}
       <Account />
