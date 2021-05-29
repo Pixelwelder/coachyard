@@ -70,9 +70,11 @@ const Coach = () => {
       />
       <div className="coach-banner" style={{ backgroundImage: `url("${bannerUrl}?m=${dirtyFlags[bannerPath]}")` }}>
         <div className="coach-avatar" style={{ backgroundImage: `url("${avatarUrl}?m=${dirtyFlags[avatarPath]}")` }}>
-          <Button variant="contained" size="small" onClick={() => setUpload('avatars')}>
-            <EditIcon />
-          </Button>
+          {isOpen && (
+            <Button variant="contained" size="small" onClick={() => setUpload('avatars')}>
+              <EditIcon />
+            </Button>
+          )}
         </div>
 
         {isOpen && (
