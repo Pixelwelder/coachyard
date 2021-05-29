@@ -188,7 +188,7 @@ const Delete = () => {
       <Typography className="light-text">Remove Student</Typography>
       <div className="student-manager-content">
         <_UserView token={tokenToRemove} propName="userDisplayName" />
-        <Typography>{`This course will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</Typography>
+        <Typography>{`This channel will no longer be available to ${tokenToRemove?.userDisplayName}. Proceed?`}</Typography>
       </div>
       {!!error && <Alert severity="error">{error.message}</Alert>}
       <div className="student-manager-controls">

@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
@@ -19,6 +19,9 @@ import {
   selectors as selectedCourseSelectors
 } from './selectedCourseSlice';
 import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
+import EditIcon from '@material-ui/icons/Edit';
+import app from 'firebase';
+import UploaderDialog from '../../components/UploaderDialog';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -27,8 +30,9 @@ const CourseView = () => {
   const { course, courseCreator, editMode } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const editCourse = useSelector(uiSelectors2.editCourse.select);
-  const { images } = useSelector(assetsSelectors.select);
+  const { images, dirtyFlags } = useSelector(assetsSelectors.select);
   const dispatch = useDispatch();
+  const [upload, setUpload] = useState('');
 
   const {
     displayName, description, image, isEditing
@@ -91,6 +95,11 @@ const CourseView = () => {
             isEditing
               ? (
                 <>
+                  <UploaderDialog
+                    type={upload}
+                    filename={course.uid}
+                    onClose={() => setUpload('')}
+                  />
                   <Tabs
                     className="edit-course-tabs"
                     onChange={(event, newValue) => dispatch(selectedCourseActions.setEditMode(newValue))}
@@ -114,7 +123,11 @@ const CourseView = () => {
                         onChange={({ target: { value } }) => onChange({ displayName: value })}
                       />
 
-                      <img className="course-small-image" src={imageUrl} />
+                      <div className="course-small-image" style={{ backgroundImage: `url("${imageUrl}?m=${dirtyFlags[path]}")` }}>
+                        <Button variant="contained" size="small" onClick={() => setUpload('courses')}>
+                          <EditIcon />
+                        </Button>
+                      </div>
 
                       <TextField
                         fullWidth
@@ -163,7 +176,7 @@ const CourseView = () => {
                         </Button>
                       }
                     >
-                      This course has not been published. Your customers will not be able to see it.
+                      This channel has not been published. Your customers will not be able to see it.
                     </Alert>
                   )}
                   <div className="course-details">

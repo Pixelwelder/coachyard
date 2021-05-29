@@ -222,8 +222,13 @@ form {
   .course-small-image {
     width: 75px;
     height: 100px;
-    object-fit: cover;
+    background-position: center center;
+    background-size: cover;
     margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 4px;
   }
 }
 
