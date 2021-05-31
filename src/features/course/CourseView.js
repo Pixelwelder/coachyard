@@ -20,7 +20,6 @@ import {
 } from './selectedCourseSlice';
 import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 import EditIcon from '@material-ui/icons/Edit';
-import app from 'firebase';
 import UploaderDialog from '../../components/UploaderDialog';
 
 /**
@@ -44,6 +43,7 @@ const CourseView = () => {
   const { [path]: imageUrl } = images;
 
   useEffect(() => () => {
+    // Reset on close.
     dispatch(uiActions2.editCourse.reset());
   }, []);
 

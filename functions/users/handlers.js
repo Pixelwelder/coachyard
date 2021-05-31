@@ -16,9 +16,17 @@ const usersOnCreateUser = functions.auth.user()
     const timestamp = admin.firestore.Timestamp.now();
     const { uid, email, displayName } = user;
 
+    console.log('add billing customer')
     const billingCustomer = await createStripeCustomer(user, timestamp);
+    const billingCustomerRef = admin.firestore().collection('stripe_customers').doc(user.uid);
+    await billingCustomerRef.set(billingCustomer);
+    console.log('add billing customer complete')
 
-    await _createSchedulingUser(user);
+    try {
+      await _createSchedulingUser(user);
+    } catch (error) {
+      console.warn(error);
+    }
 
     // Create user meta.
     await admin.firestore().runTransaction(async (transaction) => {
@@ -36,11 +44,6 @@ const usersOnCreateUser = functions.auth.user()
       const metaRef = admin.firestore().collection('users').doc(uid);
       await transaction.set(metaRef, userMeta);
       console.log('add user complete')
-
-      console.log('add billing customer')
-      const billingCustomerRef = admin.firestore().collection('stripe_customers').doc(user.uid);
-      await transaction.set(billingCustomerRef, billingCustomer);
-      console.log('add billing customer complete')
     });
 
     // Create icon.

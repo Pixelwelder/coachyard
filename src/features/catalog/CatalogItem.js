@@ -5,33 +5,43 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 import app from 'firebase/app';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectors as catalogSelectors } from './catalogSlice';
+import { selectors as dashboardSelectors } from '../dashboard/dashboardSlice';
 import { getPriceString } from '../../util/currency';
+import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 
-const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
+const CatalogItem = ({ item = {}, onSelect }) => {
   const tokensByParentUid = useSelector(catalogSelectors.selectTokensByParentUid);
   const tokensByCourseUid = useSelector(catalogSelectors.selectTokensByCourseUid);
-  const accessibleTokensByCourseUid = useSelector(catalogSelectors.selectAccessibleTokensByCourseUid);
   const isCreator = item.creatorUid === app.auth().currentUser?.uid;
   const hasAccessToChild = !!tokensByParentUid[item.courseUid];
   const hasAccessToPublic = !!tokensByCourseUid[item.courseUid];
   const hasAccess = hasAccessToChild || hasAccessToPublic;
+  const { images, dirtyFlags } = useSelector(assetsSelectors.select);
+  const { studentTokensByAdminTokenUid } = useSelector(dashboardSelectors.select);
+  const dispatch = useDispatch();
 
-  const { displayName = '', user, price } = item;
-  const [imageUrl, setImageUrl] = useState('');
+  const { displayName = '', user, price, uid } = item;
 
+  const getCreatorString = () => {
+    const { [uid]: studentTokens = [] } = studentTokensByAdminTokenUid;
+    if (studentTokens.length) {
+      let str = studentTokens[0].userDisplayName;
+      if (studentTokens.length > 1) str += ' (...)'
+      return str;
+    } else {
+      return ('No Students')
+    }
+    // return item.type === 'template' ? 'template' : 'channel';
+  };
+
+  // '/images/generic-teacher-cropped.png'
+  const path = `/courses/${item.courseUid || item.uid}`;
+  const { [path]: imageUrl } = images;
   useEffect(() => {
-    const go = async () => {
-      try {
-        // TODO Load item image.
-        const url = await app.storage().ref(`/avatars/${user}`).getDownloadURL();
-        setImageUrl(url);
-      } catch (error) {}
-    };
-
-    if (item) go();
-  }, [item]);
+    if (!imageUrl) dispatch(assetsActions.getAsset({ path }));
+  }, [imageUrl]);
 
   return (
     <Card
@@ -46,10 +56,11 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           className="catalog-item-image"
           title={displayName}
           // image={imageUrl || '/images/generic-teacher-cropped.png'}
-          image="/images/generic-teacher-cropped.png"
+          // image="/images/generic-teacher-cropped.png"
+          image={imageUrl}
         >
           {isCreator && (
-            <Typography className="catalog-item-type item-type">{item.type === 'template' ? 'template' : 'channel'}</Typography>
+            <Typography className="catalog-item-type item-type">{getCreatorString()}</Typography>
           )}
           {!isCreator && hasAccess && (
             <Typography className="catalog-item-type item-owned">Owned</Typography>
@@ -64,13 +75,6 @@ const CatalogItem = ({ item = {}, onDelete, onSelect }) => {
           )}
         </CardContent>
       </CardActionArea>
-      {/* <CardActions> */}
-      {/*  {onDelete && ( */}
-      {/*    <Button onClick={() => onDelete(item)}> */}
-      {/*      <DeleteIcon /> */}
-      {/*    </Button> */}
-      {/*  )} */}
-      {/* </CardActions> */}
     </Card>
   );
 };

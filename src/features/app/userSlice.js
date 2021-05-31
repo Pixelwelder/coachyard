@@ -31,7 +31,6 @@ const init = createAsyncThunk(
           .onSnapshot(async (snapshot) => {
             if (snapshot.exists) {
               const meta = parseUnserializables(snapshot.data());
-              console.log('META', meta);
               dispatch(generatedActions.setMeta(meta));
 
               try {

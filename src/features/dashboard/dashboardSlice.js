@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSelector, createSlice } from '@reduxjs/toolkit';
 import app from 'firebase/app';
-import { reset, setValue } from '../../util/reduxUtils';
+import { mergeValue, reset, resetValue, setValue } from '../../util/reduxUtils';
 import { parseUnserializables } from '../../util/firestoreUtils';
 
 export const TABS = {
@@ -14,6 +14,7 @@ const name = 'dashboard';
 const initialState = {
   tab: TABS.COURSES,
   tokens: [],
+  studentTokensByAdminTokenUid: {},
   courses: [], // Created by this user
 
   selectedChatUid: null,
@@ -27,14 +28,28 @@ const init = createAsyncThunk(
   `${name}/init`,
   async (_, { dispatch }) => {
     app.auth().onAuthStateChanged((authUser) => {
+      dispatch(generatedActions.clearStudentTokens());
       if (authUser) {
         unsubscribeTokens();
         unsubscribeTokens = app.firestore().collection('tokens')
           .where('creatorUid', '==', authUser.uid)
-          .onSnapshot((snapshot) => {
+          .where('access', '==', 'admin') // necessary because creatorUid is on all
+          .onSnapshot(async (snapshot) => {
             let tokens = [];
             if (snapshot.size) {
               tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+
+              // Now go through all tokens and get up to two student tokens.
+              const promises = tokens.map(async (token) => {
+                const docRefs = await app.firestore().collection('tokens')
+                  .where('access', '==', 'student')
+                  .limit(2)
+                  .get();
+                const studentTokens = docRefs.docs.map(doc => parseUnserializables(doc.data()));
+                dispatch(generatedActions.addStudentTokens({ [token.uid]: studentTokens }));
+              });
+
+              await Promise.all(promises);
             }
             dispatch(generatedActions.setTokens(tokens));
           });
@@ -90,6 +105,9 @@ const { reducer, actions: generatedActions } = createSlice({
   reducers: {
     setTab: setValue('tab'),
     setTokens: setValue('tokens'),
+    setStudentTokensByAdminTokenUid: setValue('studentTokensByAdminTokenUid'),
+    addStudentTokens: mergeValue('studentTokensByAdminTokenUid'),
+    clearStudentTokens: resetValue('studentTokensByAdminTokenUid', initialState.studentTokensByAdminTokenUid),
     setCourses: setValue('courses'),
     setSelectedChatUid: setValue('selectedChatUid'),
     _setSelectedChat: setValue('selectedChat'),
