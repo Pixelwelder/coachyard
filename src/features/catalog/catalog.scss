@@ -67,6 +67,9 @@
     color: white;
     text-align: center;
     padding: 4px 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 
     &.item-type {
       background: #3f51b5; // Material
@@ -81,4 +84,9 @@
   &.placeholder {
     opacity: 0.5;
   }
+}
+
+.catalog-controls {
+  margin-top: 16px;
+  display: flex;
 }

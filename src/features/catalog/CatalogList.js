@@ -89,7 +89,7 @@ const ProductCatalogList = ({
 
 const TemplateCatalogList = () => {
   const tokens = useSelector(coachSelectors.selectTemplateTokens);
-  return <ProductCatalogList title="Products" courses={tokens} showCreate />;
+  return <ProductCatalogList title="Products" courses={tokens} />;
 };
 
 const NonTemplateCatalogList = () => {
