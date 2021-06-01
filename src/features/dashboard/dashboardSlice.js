@@ -137,6 +137,7 @@ const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => 
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens, studentTokens }) => ([ ...tokens, ...studentTokens ]));
 // TODO This is real dumb but I still don't know what the original was trying to accomplish.
+// TODO OHHHH This is because one student can have more than one course. FIX FIX FIX.
 const selectStudentTokens = createSelector(
   select,
   ({ studentTokens }) => studentTokens.map(student => ([student]))
