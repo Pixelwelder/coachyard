@@ -85,7 +85,7 @@ const StudentView = ({ token }) => {
 };
 
 const List = () => {
-  const tokens = useSelector(selectedCourseSelectors.selectStudentTokens);
+  const studentTokens = useSelector(selectedCourseSelectors.selectStudentTokens);
   const { isLoading } = useSelector(selectedCourseSelectors.select);
   const dispatch = useDispatch();
 
@@ -98,7 +98,7 @@ const List = () => {
       <Typography className="light-text">Who has access to this course?</Typography>
       <div className="student-manager-content">
         <ul>
-          {tokens.map((token, index) => (
+          {studentTokens.map((token, index) => (
             <StudentView key={index} token={token} />
           ))}
         </ul>

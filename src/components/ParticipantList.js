@@ -27,8 +27,8 @@ const Participant = ({ token }) => {
 const ParticipantList = ({ tokens }) => (
   <ul className="participant-images">
     {
-        tokens.map((token, index) => <Participant token={token} key={index} />)
-      }
+      tokens.map((token, index) => <Participant token={token} key={index} />)
+    }
   </ul>
 );
 

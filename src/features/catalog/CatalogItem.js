@@ -19,7 +19,7 @@ const CatalogItem = ({ item = {}, onSelect }) => {
   const hasAccessToPublic = !!tokensByCourseUid[item.courseUid];
   const hasAccess = hasAccessToChild || hasAccessToPublic;
   const { images, dirtyFlags } = useSelector(assetsSelectors.select);
-  const { studentTokensByAdminTokenUid } = useSelector(dashboardSelectors.select);
+  const studentTokensByAdminTokenUid = useSelector(dashboardSelectors.selectStudentTokensByAdminTokenUid);
   const dispatch = useDispatch();
 
   const { displayName = '', user, price, uid } = item;

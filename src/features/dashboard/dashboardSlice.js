@@ -14,6 +14,7 @@ const name = 'dashboard';
 const initialState = {
   tab: TABS.COURSES,
   tokens: [],
+  studentTokens: [],
   studentTokensByAdminTokenUid: {},
   courses: [], // Created by this user
 
@@ -23,6 +24,7 @@ const initialState = {
 
 // TODO Lazy load.
 let unsubscribeTokens = () => {};
+let unsubscribeStudentTokens = () => {};
 let unsubscribeCourses = () => {};
 const init = createAsyncThunk(
   `${name}/init`,
@@ -52,6 +54,18 @@ const init = createAsyncThunk(
               await Promise.all(promises);
             }
             dispatch(generatedActions.setTokens(tokens));
+          });
+
+        unsubscribeStudentTokens();
+        unsubscribeStudentTokens = app.firestore().collection('tokens')
+          .where('creatorUid', '==', authUser.uid)
+          .where('access', '==', 'student')
+          .onSnapshot(async (snapshot) => {
+            let tokens = [];
+            if (snapshot.size) {
+              tokens = snapshot.docs.map(doc => parseUnserializables(doc.data()));
+            }
+            dispatch(generatedActions.setStudentTokens(tokens));
           });
 
         unsubscribeCourses();
@@ -105,6 +119,7 @@ const { reducer, actions: generatedActions } = createSlice({
   reducers: {
     setTab: setValue('tab'),
     setTokens: setValue('tokens'),
+    setStudentTokens: setValue('studentTokens'),
     setStudentTokensByAdminTokenUid: setValue('studentTokensByAdminTokenUid'),
     addStudentTokens: mergeValue('studentTokensByAdminTokenUid'),
     clearStudentTokens: resetValue('studentTokensByAdminTokenUid', initialState.studentTokensByAdminTokenUid),
@@ -120,20 +135,27 @@ const createTypeFilter = type => ({ tokens }) => tokens.filter(token => token.ty
 const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => token.type !== type);
 
 const select = ({ dashboard }) => dashboard;
-const selectTokens = createSelector(select, ({ tokens }) => tokens);
-const selectStudentTokens = createSelector(selectTokens, tokens => Object.values(
-  tokens
-    .filter(token => token.access === 'student')
-    .reduce((accum, token) => {
-      if (!accum[token.user]) accum[token.user] = [];
-      accum[token.user].push(token);
-      return accum;
-    }, {}),
-));
+const selectTokens = createSelector(select, ({ tokens, studentTokens }) => ([ ...tokens, ...studentTokens ]));
+// TODO This is real dumb but I still don't know what the original was trying to accomplish.
+const selectStudentTokens = createSelector(
+  select,
+  ({ studentTokens }) => studentTokens.map(student => ([student]))
+);
 const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
 const selectNonTemplateTokens = createSelector(select, ({ tokens }) => tokens.filter(({ access, type }) => access === 'admin' && type !== 'template'));
 const selectTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type === 'template'));
 const selectNonTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type !== 'template'));
+const selectStudentTokensByAdminTokenUid = createSelector(
+  select,
+  ({ studentTokens }) => {
+    const studentTokensByAdminTokenUid = studentTokens.reduce((accum, token) => {
+      if (!accum[token.courseUid]) accum[token.courseUid] = [];
+      accum[token.courseUid].push(token);
+      return accum;
+    }, {});
+    return studentTokensByAdminTokenUid;
+  }
+);
 const selectors = {
   select,
   selectStudentTokens,
@@ -141,6 +163,7 @@ const selectors = {
   selectNonTemplateTokens,
   selectTemplateCourses,
   selectNonTemplateCourses,
+  selectStudentTokensByAdminTokenUid
 };
 
 const actions = {
