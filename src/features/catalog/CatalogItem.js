@@ -22,10 +22,10 @@ const CatalogItem = ({ item = {}, onSelect }) => {
   const studentTokensByCourseUid = useSelector(dashboardSelectors.selectStudentTokensByCourseUid);
   const dispatch = useDispatch();
 
-  const { displayName = '', user, price, uid } = item;
+  const { displayName = '', user, price, uid, courseUid } = item;
 
   const getCreatorString = () => {
-    const { [uid]: studentTokens = [] } = studentTokensByCourseUid;
+    const { [courseUid || uid]: studentTokens = [] } = studentTokensByCourseUid;
     if (studentTokens.length) {
       let str = studentTokens[0].userDisplayName;
       if (studentTokens.length > 1) str += ' (...)'
