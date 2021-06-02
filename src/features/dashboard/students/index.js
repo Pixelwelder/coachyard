@@ -37,13 +37,14 @@ const StudentItem = ({ tokens }) => {
 };
 
 const Students = () => {
-  const studentTokens = useSelector(dashboardSelectors.selectStudentTokens);
+  const studentTokens = useSelector(dashboardSelectors.selectStudentTokensByStudentUid);
+  const studentTokensArr = Object.values(studentTokens);
   console.log('STUDENTS', studentTokens);
 
   return (
     <div className="dashboard-page">
       <ul className="student-list">
-        {studentTokens.map((_tokens, index) => <StudentItem tokens={_tokens} key={index} />)}
+        {studentTokensArr.map((_tokens, index) => <StudentItem tokens={_tokens} key={index} />)}
       </ul>
     </div>
   );

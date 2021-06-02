@@ -15,7 +15,6 @@ const initialState = {
   tab: TABS.COURSES,
   tokens: [],
   studentTokens: [],
-  studentTokensByAdminTokenUid: {},
   courses: [], // Created by this user
 
   selectedChatUid: null,
@@ -120,9 +119,8 @@ const { reducer, actions: generatedActions } = createSlice({
     setTab: setValue('tab'),
     setTokens: setValue('tokens'),
     setStudentTokens: setValue('studentTokens'),
-    setStudentTokensByAdminTokenUid: setValue('studentTokensByAdminTokenUid'),
-    addStudentTokens: mergeValue('studentTokensByAdminTokenUid'),
-    clearStudentTokens: resetValue('studentTokensByAdminTokenUid', initialState.studentTokensByAdminTokenUid),
+    addStudentTokens: mergeValue('studentTokensByCourseUid'),
+    clearStudentTokens: resetValue('studentTokensByCourseUid', initialState.studentTokensByCourseUid),
     setCourses: setValue('courses'),
     setSelectedChatUid: setValue('selectedChatUid'),
     _setSelectedChat: setValue('selectedChat'),
@@ -136,35 +134,39 @@ const createNegativeTypeFilter = type => ({ tokens }) => tokens.filter(token => 
 
 const select = ({ dashboard }) => dashboard;
 const selectTokens = createSelector(select, ({ tokens, studentTokens }) => ([ ...tokens, ...studentTokens ]));
-// TODO This is real dumb but I still don't know what the original was trying to accomplish.
-// TODO OHHHH This is because one student can have more than one course. FIX FIX FIX.
-const selectStudentTokens = createSelector(
-  select,
-  ({ studentTokens }) => studentTokens.map(student => ([student]))
-);
 const selectTemplateTokens = createSelector(select, createTypeFilter('template'));
 const selectNonTemplateTokens = createSelector(select, ({ tokens }) => tokens.filter(({ access, type }) => access === 'admin' && type !== 'template'));
 const selectTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type === 'template'));
 const selectNonTemplateCourses = createSelector(select, ({ courses }) => courses.filter(course => course.type !== 'template'));
-const selectStudentTokensByAdminTokenUid = createSelector(
+const selectStudentTokensByCourseUid = createSelector(
   select,
-  ({ studentTokens }) => {
-    const studentTokensByAdminTokenUid = studentTokens.reduce((accum, token) => {
-      if (!accum[token.courseUid]) accum[token.courseUid] = [];
-      accum[token.courseUid].push(token);
-      return accum;
-    }, {});
-    return studentTokensByAdminTokenUid;
-  }
+  ({ studentTokens }) => studentTokens.reduce((accum, token) => {
+    if (!accum[token.courseUid]) accum[token.courseUid] = [];
+    accum[token.courseUid].push(token);
+    return accum;
+  }, {})
 );
+const selectStudentTokensByStudentUid = createSelector(
+  select,
+  ({ studentTokens }) => studentTokens.reduce((accum, studentToken) => {
+    if (!accum[studentToken.user]) accum[studentToken.user] = [];
+    accum[studentToken.user].push(studentToken);
+    accum[studentToken.user].sort((a, b) => {
+      if (a.displayName < b.displayName) return -1;
+      if (a.displayName > b.displayName) return 1;
+      return 0;
+    });
+    return accum;
+  }, {})
+)
 const selectors = {
   select,
-  selectStudentTokens,
+  selectStudentTokensByCourseUid,
+  selectStudentTokensByStudentUid,
   selectTemplateTokens,
   selectNonTemplateTokens,
   selectTemplateCourses,
   selectNonTemplateCourses,
-  selectStudentTokensByAdminTokenUid
 };
 
 const actions = {
