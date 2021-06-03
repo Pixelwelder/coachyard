@@ -8,18 +8,16 @@ const WysiwygEditor = ({
 }) => {
   return (
     <div className="wysiwyg-editor">
-      {value && (
-        <HtmlEditor
-          schema={schema}
-          plugins={plugins}
-          value={value}
-          handleChange={onSave}
-          debounce={250}
-        >
-          <Toolbar toolbar={toolbar} />
-          <Editor autoFocus />
-        </HtmlEditor>
-      )}
+      <HtmlEditor
+        schema={schema}
+        plugins={plugins}
+        value={value || `<p>${value}</p>`}
+        handleChange={onSave}
+        debounce={250}
+      >
+        <Toolbar toolbar={toolbar} />
+        <Editor autoFocus />
+      </HtmlEditor>
     </div>
   );
 };
