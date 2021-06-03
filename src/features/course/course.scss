@@ -146,9 +146,15 @@
 }
 
 .editing-form {
+  flex: 1;
+
   .upload-input {
     margin-bottom: 16px;
   }
+}
+
+.wysiwyg-editor {
+  flex: 1;
 }
 
 form {
@@ -291,4 +297,20 @@ form {
   .title-text {
     margin-right: 16px;
   }
+}
+
+.item-description {
+  flex: 1;
+  overflow: auto;
+}
+
+.no-video {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
 }

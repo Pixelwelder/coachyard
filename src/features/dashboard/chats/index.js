@@ -7,7 +7,7 @@ import { selectors as dashboardSelectors, actions as dashboardActions } from '..
 import { BaseChat } from '../../chat';
 
 const ChatTitle = ({ course, isSelected, onClick }) => {
-  const { displayName, numChats, numChatsUnseen } = course;
+  const { displayName, numChats, /* numChatsUnseen */ } = course;
 
   console.log(course);
   return (

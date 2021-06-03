@@ -17,6 +17,8 @@ import { actions as catalogActions } from '../catalog/catalogSlice';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import { actions as uiActions2, selectors as uiSelectors2 } from '../ui/uiSlice2';
 import { getDefaultDateTime } from '../../util/itemUtils';
+import WysiwygEditor from '../../components/WysiwygEditor';
+import Typography from '@material-ui/core/Typography';
 
 const EditItemView = ({ requireUpload = false }) => {
   const { editItem: selectors } = uiSelectors2;
@@ -63,6 +65,11 @@ const EditItemView = ({ requireUpload = false }) => {
     const { value } = target;
     const name = target.getAttribute('name');
     dispatch(actions.setValues({ [name]: value }));
+  };
+
+  const onChangeDescription = (value) => {
+    console.log('onChangeDescription', value);
+    dispatch(actions.setValues({ description: value }));
   };
 
   const onChangeDate = (value) => {
@@ -126,22 +133,17 @@ const EditItemView = ({ requireUpload = false }) => {
           value={displayName}
           onChange={onChange}
         />
-        <TextField
-          id="description"
-          name="description"
-          label="description"
-          type="text"
-          multiline
-          rows={4}
-          variant="outlined"
-          disabled={isDisabled()}
+        <Typography variant="h5">Description</Typography>
+        <WysiwygEditor
           value={description}
-          onChange={onChange}
+          disabled={isDisabled()}
+          onSave={onChangeDescription}
         />
         {
           (selectedItem.status !== 'scheduled' && (isChangingFile || !selectedItem.streamingId))
             ? (
               <>
+                <Typography variant="h5">Video File</Typography>
                 {
                   totalBytes > 0
                     ? <LinearProgress variant="determinate" value={percentUploaded} />
@@ -151,19 +153,17 @@ const EditItemView = ({ requireUpload = false }) => {
             )
             : (
               <>
-                {
-                  selectedItem.streamingId && (
-                    <>
-                      <ReactPlayer
-                        className="edit-player"
-                        width={300}
-                        height={200}
-                        url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
-                        controls
-                      />
-                    </>
-                  )
-                }
+                {selectedItem.streamingId && (
+                  <>
+                    <ReactPlayer
+                      className="edit-player"
+                      width={300}
+                      height={200}
+                      url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
+                      controls
+                    />
+                  </>
+                )}
               </>
             )
         }
@@ -198,7 +198,6 @@ const EditItemView = ({ requireUpload = false }) => {
         )}
       </form>
 
-      <div className="spacer" />
       <OwnerControls
         onSubmit={onSubmit}
         enableSubmit={!isDisabled() && !(requireUpload && !file)}
