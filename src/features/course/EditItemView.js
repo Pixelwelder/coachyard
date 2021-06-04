@@ -137,7 +137,7 @@ const EditItemView = ({ requireUpload = false }) => {
         <WysiwygEditor
           value={description}
           disabled={isDisabled()}
-          onSave={onChangeDescription}
+          onChange={onChangeDescription}
         />
         {
           (selectedItem.status !== 'scheduled' && (isChangingFile || !selectedItem.streamingId))

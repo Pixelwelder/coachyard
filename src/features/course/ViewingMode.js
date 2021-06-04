@@ -73,7 +73,7 @@ const ViewingMode = ({ size }) => {
                     <div className="spacer" />
                     <Button
                       variant="contained"
-                      onClick={() => dispatch(uiActions2.editItem.open())}
+                      onClick={() => dispatch(uiActions2.editItem.open(selectedItem))}
                     >
                       Edit
                     </Button>

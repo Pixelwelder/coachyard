@@ -3,8 +3,8 @@ import { plugins, schema, toolbar } from '@aeaton/react-prosemirror-config-defau
 
 const WysiwygEditor = ({
   value = '',
-  onSave,
-  disabled
+  onChange,
+  disabled = false
 }) => {
   return (
     <div className="wysiwyg-editor">
@@ -12,7 +12,7 @@ const WysiwygEditor = ({
         schema={schema}
         plugins={plugins}
         value={value || `<p>${value}</p>`}
-        handleChange={onSave}
+        handleChange={onChange}
         debounce={250}
       >
         <Toolbar toolbar={toolbar} />

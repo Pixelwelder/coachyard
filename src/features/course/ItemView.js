@@ -13,10 +13,13 @@ import InitializingMode from './InitializingMode';
 import ScheduledMode from './ScheduledMode';
 import NoItem from './NoItem';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
+import ReactHtmlParser from 'react-html-parser';
 
-const Locked = () => (
-  <div className="centered-mode">
-    <Typography>Purchase this course to unlock this item.</Typography>
+const Locked = ({ item }) => (
+  <div className="locked-item">
+    <Typography variant="h4">{item.displayName}</Typography>
+    <div className="item-description">{ ReactHtmlParser(item?.description || '') }</div>
+    <Typography className="purchase-instruction">Purchase this course to unlock this item.</Typography>
   </div>
 );
 
@@ -67,7 +70,7 @@ const ItemView = () => {
                   </>
                 )
                 : (
-                  <Locked />
+                  <Locked item={selectedItem} />
                 )
             }
           </div>

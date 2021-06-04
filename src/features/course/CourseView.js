@@ -21,6 +21,8 @@ import {
 import { actions as assetsActions, selectors as assetsSelectors } from '../assets/assetsSlice';
 import EditIcon from '@material-ui/icons/Edit';
 import UploaderDialog from '../../components/UploaderDialog';
+import WysiwygEditor from '../../components/WysiwygEditor';
+import ReactHtmlParser from 'react-html-parser';
 
 /**
  * This component is similar to ItemView but displays Courses instead of Items.
@@ -129,18 +131,23 @@ const CourseView = () => {
                         </Button>
                       </div>
 
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={10}
-                        variant="outlined"
-                        label="Course Description"
-                        placeholder="This is a short description of the course."
-                        id="description"
+                      <WysiwygEditor
                         value={description}
-                        disabled={isLoading}
-                        onChange={({ target: { value } }) => onChange({ description: value })}
+                        onChange={value => onChange({ description: value })}
                       />
+
+                      {/*<TextField*/}
+                      {/*  fullWidth*/}
+                      {/*  multiline*/}
+                      {/*  rows={10}*/}
+                      {/*  variant="outlined"*/}
+                      {/*  label="Course Description"*/}
+                      {/*  placeholder="This is a short description of the course."*/}
+                      {/*  id="description"*/}
+                      {/*  value={description}*/}
+                      {/*  disabled={isLoading}*/}
+                      {/*  onChange={({ target: { value } }) => onChange({ description: value })}*/}
+                      {/*/>*/}
 
                       <div className="spacer" />
                     </form>
@@ -180,10 +187,10 @@ const CourseView = () => {
                     </Alert>
                   )}
                   <div className="course-details">
-                    <Typography variant="h5" component="h3">{course?.displayName || ''}</Typography>
+                    <Typography variant="h5" component="h3" className="course-name">{course?.displayName || ''}</Typography>
                     <img className="course-large-image" src={imageUrl} />
 
-                    <Typography variant="h6" component="h4">
+                    <Typography variant="h6" component="h4" className="creator-name">
                       Coach:
                       {' '}
                       <Link to={`/coach/${courseCreator?.slug || 'dashboard'}`}>
@@ -191,7 +198,7 @@ const CourseView = () => {
                       </Link>
                     </Typography>
 
-                    <Typography className="course-description">{course.description}</Typography>
+                    <div className="item-description">{ ReactHtmlParser(course.description || '') }</div>
 
                   </div>
                   {ownsCourse && (
