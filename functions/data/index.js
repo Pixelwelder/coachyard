@@ -1,6 +1,8 @@
+const version = 5;
+
 // TODO Factory method that handles timestamps.
 const newBaseItem = (overrides) => ({
-  version: 0,
+  version,
   uid: '', // Always store the uid when created.
   created: '',
   updated: '',
@@ -12,7 +14,6 @@ const newBaseItem = (overrides) => ({
  */
 const newUserMeta = (overrides) => ({
   ...newBaseItem(),
-  version: 3,
   email: '', // TODO Update this when the authUser updates.
   displayName: '',
   tier: 0,   // Temporary
@@ -35,27 +36,6 @@ const newStripePayment = (overrides) => ({
   off_session: false,
   confirm: true,
   confirmation_method: 'manual'
-});
-
-// TODO - Remove.
-const newStudent = (overrides) => ({
-  ...newBaseItem(),
-  email: '',
-  ...overrides
-});
-
-// TODO - Remove.
-const newInvite = (overrides) => ({
-  ...newBaseItem(),
-  creatorUid: '',
-  creatorDisplayName: '',
-  email: '',
-  displayName: '',
-  date: '',
-  accepted: false,
-  completed: false,
-  inProgress: false,
-  ...overrides
 });
 
 const newCourse = (overrides) => ({
@@ -126,12 +106,25 @@ const newCourseToken = (overrides) => ({
   ...overrides
 });
 
+const unitConverter = item => item;
+
+// Maps types (collections) to constructors.
+const constructorMap = {
+  courses: newCourse,
+  easy_customers: unitConverter,
+  easy_providers: unitConverter,
+  items: newCourseItem(),
+  stripe_customers: newStripeCustomer,
+  stripe_events: unitConverter,
+  tokens: newCourseToken,
+  users: newUserMeta
+};
+
 module.exports = {
+  version,
   newUserMeta,
   newStripeCustomer,
   newStripePayment,
-  newStudent,
-  newInvite,
   newCourse,
   newCourseItem,
   newCourseToken

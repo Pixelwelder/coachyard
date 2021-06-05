@@ -24,7 +24,7 @@ export default configureStore({
     schedule: scheduleReducer,
     coach: coachReducer,
     dashboard: dashboardReducer,
-    assets: assetsReducer,
+    assets: assetsReducer
   },
   middleware: getDefaultMiddleware({
     serializableCheck: {
