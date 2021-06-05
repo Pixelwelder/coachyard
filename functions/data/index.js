@@ -18,6 +18,11 @@ const newUserMeta = (overrides) => ({
   displayName: '',
   tier: 0,   // Temporary
   timezone: '',
+  claims: {
+    remaining: 0,
+    subscribed: false,
+    tier: 0
+  },
   ...overrides
 });
 
@@ -122,6 +127,7 @@ const constructorMap = {
 
 module.exports = {
   version,
+  constructorMap,
   newUserMeta,
   newStripeCustomer,
   newStripePayment,
