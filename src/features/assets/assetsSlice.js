@@ -13,11 +13,16 @@ const getAsset = createAsyncThunk(
   async ({ path }, { dispatch, getState }) => {
     const { images, dirtyFlags } = select(getState());
     if (images[path]) return images[path];
-    const downloadUrl = await app.storage().ref(path).getDownloadURL();
-    dispatch(generatedActions.addUrl({ [path]: downloadUrl }));
+    try {
+      const downloadUrl = await app.storage().ref(path).getDownloadURL();
+      dispatch(generatedActions.addUrl({ [path]: downloadUrl }));
 
-    const { [path]: dirtyFlag = 0 } = dirtyFlags;
-    dispatch(generatedActions.setDirtyFlags({ [path]: dirtyFlag +1 }));
+      const { [path]: dirtyFlag = 0 } = dirtyFlags;
+      dispatch(generatedActions.setDirtyFlags({ [path]: dirtyFlag + 1 }));
+    } catch (error) {
+      // Don't show these.
+      console.error(error);
+    }
   },
 );
 

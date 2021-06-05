@@ -84,6 +84,7 @@ const addProvider = async ({ uid, email, password }) => {
     services,
     settings
   });
+  console.log('adding provider', uid, email, url)
   const result = await _addProvider({ data: provider });
   console.log('result', result.settings);
   // const result2 = await updateProvider({ id: result.id, data: { settings } });

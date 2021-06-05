@@ -19,7 +19,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "firebase": "^8.2.10",
-    "firebaseui": "^4.7.3",
+    "firebaseui": "^4.8.0",
     "history": "^5.0.0",
     "luxon": "^1.27.0",
     "material-ui-dropzone": "^3.5.0",
