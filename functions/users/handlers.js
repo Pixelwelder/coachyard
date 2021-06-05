@@ -6,6 +6,7 @@ const { setClaims } = require('../util/claims');
 const { uploadImage } = require('../util/images');
 const { createIcon, _createSchedulingUser, createStripeCustomer } = require('./utils');
 const { newUserMeta } = require('../data');
+const { createSlug } = require('../util/firestore');
 
 /**
  * Performs some maintenance when users are created.
@@ -33,15 +34,11 @@ const usersOnCreateUser = functions.auth.user()
       console.warn(error);
     }
 
+    // Create the slug.
+    const slug = await createSlug({ displayName });
+
     // Create user meta.
     await admin.firestore().runTransaction(async (transaction) => {
-      // Create the slug.
-      let slug = toKebab(displayName);
-      const existingRef = admin.firestore()
-        .collection('users')
-        .where('slug', '==', slug);
-      const existingDocs = await transaction.get(existingRef);
-      if (existingDocs.size) slug = `${slug}-${existingDocs.size}`;
       const userMeta = newUserMeta({
         uid: user.uid,
         email: user.email,
@@ -53,7 +50,7 @@ const usersOnCreateUser = functions.auth.user()
       });
 
       // Add items to database.
-      console.log('add user')
+      console.log('add user', userMeta)
       const metaRef = admin.firestore().collection('users').doc(uid);
       await transaction.set(metaRef, userMeta);
       console.log('add user complete')

@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 const { project_id, service_account } = require('../config').firebase;
-const { constructorMap } = require('../data');
+const { newUserMeta } = require('../data');
+const { createSlug } = require('../util/firestore');
 
 admin.initializeApp({
   credential: admin.credential.cert(service_account),
@@ -62,13 +63,16 @@ const migrateUsers = async () => {
   // Migrates from v0 to v5.
   console.log('migrate users');
   const docs = await admin.firestore().collection('users').get();
-  await Promise.all(docs.docs.map((doc) => {
-    const data = doc.data();
+  await Promise.all(docs.docs.map(async (doc) => {
+    const oldItem = doc.data();
 
-    // v0: { created, displayName, email, uid, updated }
-    // v5: { created, displayName, email, uid, updated, version, tier
-    const newData = { ...data };
-    return doc.ref.set(newData);
+    // v0: { uid, created, updated, displayName, email }
+    // v5: { uid, created, updated, displayName, email, description, slug, claims }
+
+    // Nobody has a slug, but there could still be collisions.
+    const slug = await createSlug(oldItem);
+    const newItem = newUserMeta({ ...oldItem, slug });
+    await doc.ref.set(newItem);
   }));
 };
 
