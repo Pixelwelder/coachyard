@@ -45,6 +45,7 @@ const backUpCollection = async ({
 // First, we back up everything.
 const backUp = async () => {
   const dateString = new Date().toJSON();//.split('T')[0];
+  console.log(`--- BACKING UP ${dateString} ---`);
 
   await Promise.all(
     ['courses', 'easy_customers', 'easy_providers', 'stripe_customers', 'stripe_events', 'tokens', 'users']
@@ -54,26 +55,32 @@ const backUp = async () => {
       }))
   );
 
-  // stripe_customers, courses
-
-  // tokens from old schema to new
-
-  // const backupPath = `__backups__/${dateString}/${path}`;
-  // await admin.firestore().doc(backupPath).set(item);
   console.log('backed up');
 };
 
-const migrateItem = async ({ path, constructor }) => {
-  const ref = admin.firestore().doc(path);
-  const doc = await ref.get()
-  const item = doc.data();
+const migrateUsers = async () => {
+  // Migrates from v0 to v5.
+  console.log('migrate users');
+  const docs = await admin.firestore().collection('users').get();
+  await Promise.all(docs.docs.map((doc) => {
+    const data = doc.data();
 
+    // v0: { created, displayName, email, uid, updated }
+    // v5: { created, displayName, email, uid, updated, version, tier
+    const newData = { ...data };
+    return doc.ref.set(newData);
+  }));
+};
 
-  // console.log(item);
+const migrate = async () => {
+  console.log('--- MIGRATING ---');
+  // Gotta do these one at a time.
+  await migrateUsers();
 };
 
 const go = async () => {
-  await backUp();
+  // await backUp(); // We have a good backup now.
+  await migrate();
   // await migrateItem({ path: 'users/638AWSJHkkV77Fn8xgSqo8qKqSP2', type: 'users' })
 };
 

@@ -16,13 +16,15 @@ const newUserMeta = (overrides) => ({
   ...newBaseItem(),
   email: '', // TODO Update this when the authUser updates.
   displayName: '',
-  tier: 0,   // Temporary
-  timezone: '',
+  description: '',
+  slug: '',
+
   claims: {
     remaining: 0,
     subscribed: false,
     tier: 0
   },
+
   ...overrides
 });
 

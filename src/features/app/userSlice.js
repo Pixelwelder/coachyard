@@ -34,7 +34,7 @@ const init = createAsyncThunk(
               dispatch(generatedActions.setMeta(meta));
 
               try {
-                const url = await app.storage().ref(`/avatars/${meta.image}`).getDownloadURL();
+                const url = await app.storage().ref(`/avatars/${meta.uid}`).getDownloadURL();
                 dispatch(generatedActions.setImage(url));
               } catch (error) {
                 console.warn('userSlice: avatar doesn\'t exist yet.');

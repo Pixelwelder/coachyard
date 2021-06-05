@@ -15,7 +15,7 @@ const createIcon = async ({ uid }) => {
   const buffer = Buffer.from(png);
 
   await admin.storage().bucket().file(`avatars/${uid}`).save(buffer, getImageData());
-  await admin.firestore().collection('users').doc(uid).update({ image: `${uid}`});
+  // await admin.firestore().collection('users').doc(uid).update({ image: `${uid}`});
 };
 
 /**
@@ -71,16 +71,6 @@ const createStripeCustomer = async (user, timestamp) => {
   return fbCustomer;
 }
 
-const createUserMeta = ({ uid, email, displayName }, timestamp, slug) => ({
-  uid,
-  email,
-  displayName,
-  description: `${displayName} is a coach with a passion for all things coaching.`,
-  slug,
-  created: timestamp,
-  updated: timestamp
-});
-
 const _createSchedulingUser = async ({ uid, email }) => {
   let schedulingProvider = null;
   let schedulingCustomer = null;
@@ -121,7 +111,6 @@ module.exports = {
   convert,
   createIcon,
   updateMeta,
-  createUserMeta,
   createStripeCustomer,
   _createSchedulingUser,
   filterUserUpdate

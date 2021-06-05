@@ -4,7 +4,8 @@ const { log } = require('../logging');
 const { toKebab } = require('../util/string');
 const { setClaims } = require('../util/claims');
 const { uploadImage } = require('../util/images');
-const { createIcon, _createSchedulingUser, createStripeCustomer, createUserMeta } = require('./utils');
+const { createIcon, _createSchedulingUser, createStripeCustomer } = require('./utils');
+const { newUserMeta } = require('../data');
 
 /**
  * Performs some maintenance when users are created.
@@ -41,7 +42,15 @@ const usersOnCreateUser = functions.auth.user()
         .where('slug', '==', slug);
       const existingDocs = await transaction.get(existingRef);
       if (existingDocs.size) slug = `${slug}-${existingDocs.size}`;
-      const userMeta = createUserMeta(user, timestamp, slug);
+      const userMeta = newUserMeta({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        created: timestamp,
+        updated: timestamp,
+        description: `${user.displayName} is a coach with a passion for all things coaching.`,
+        slug
+      });
 
       // Add items to database.
       console.log('add user')
