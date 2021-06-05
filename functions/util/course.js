@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-const tokenFromCourse = (course, user) => {
+const tokenFromCourse = (course, user = {}) => {
   const timestamp = admin.firestore.Timestamp.now();
   return {
     access: 'student',
