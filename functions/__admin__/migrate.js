@@ -121,6 +121,12 @@ const migrateCourses = async () => {
       isPublic: true // old behavior
     });
 
+    console.log('uploading course image');
+    uploadImage({
+      path: './courses/generic-teacher-cropped.png',
+      destination: `courses/${newItem.uid}`
+    });
+
     return courseDoc.ref.set(newItem);
   }));
   console.log('migrated', courseDocs.size, 'courses');
@@ -179,11 +185,11 @@ const migrateStripeCustomers = async () => {
 const migrate = async () => {
   console.log('--- MIGRATING ---');
   // Gotta do these one at a time.
-  await migrateUsers();
+  // await migrateUsers();
   await migrateCourses();
-  await migrateItems();
-  await migrateTokens();
-  await migrateStripeCustomers();
+  // await migrateItems();
+  // await migrateTokens();
+  // await migrateStripeCustomers();
 };
 
 

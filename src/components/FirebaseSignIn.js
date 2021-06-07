@@ -22,6 +22,8 @@ const uiConfig = {
     app.auth.GoogleAuthProvider.PROVIDER_ID,
     app.auth.EmailAuthProvider.PROVIDER_ID,
   ],
+  tosUrl: 'https://coachyard.io/terms-and-conditions',
+  privacyPolicyUrl: 'https://coachyard.io/privacy-policy'
 };
 
 const FirebaseSignIn = () => {

@@ -42,7 +42,8 @@ const initializePurchase = async (data, context) => {
         currency: 'usd',
         product_data: {
           name: `Unlock: ${course.displayName}`,
-          description: course.description || course.displayName
+          // Course description is now html.
+          description: /*course.description ||*/ course.displayName
         },
         unit_amount: course.price,
       },
