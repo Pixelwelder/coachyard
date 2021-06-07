@@ -3,6 +3,8 @@ const { project_id, service_account } = require('../config').firebase;
 const { newUserMeta, newCourseToken, newCourse, newCourseItem, version } = require('../data');
 const { createSlug } = require('../util/firestore');
 const { tokenFromCourse } = require('../util/course');
+const { uploadImage } = require('../util/images');
+const { _createSchedulingUser, createIcon } = require('../users/utils');
 
 admin.initializeApp({
   credential: admin.credential.cert(service_account),
@@ -14,8 +16,8 @@ admin.initializeApp({
 const migrateUsers = async () => {
   // Migrates from v0 to v5.
   console.log('migrate users');
-  const docs = await admin.firestore().collection('users').get();
-  await Promise.all(docs.docs.map(async (doc) => {
+  const userDocs = await admin.firestore().collection('users').get();
+  await Promise.all(userDocs.docs.map(async (doc) => {
     const oldItem = doc.data();
 
     // v0: { uid, created, updated, displayName, email }
@@ -27,6 +29,20 @@ const migrateUsers = async () => {
       ...oldItem, slug, updated: admin.firestore.Timestamp.now()
     });
     await doc.ref.set(newItem);
+
+    // Create icon.
+    console.log('create icon');
+    await createIcon({ uid: newItem.uid });
+    console.log('create icon complete');
+
+    // Create banner image.
+    console.log('create banner');
+    await uploadImage({
+      path: './users/images/coach-banner.jpg',
+      destination: `banners/${newItem.uid}`,
+      type: 'jpg'
+    });
+    console.log('create banner complete');
   }));
 };
 
@@ -82,18 +98,18 @@ const migrateCourses = async () => {
 
   const courseDocs = await admin.firestore().collection('courses').get();
   await Promise.all(courseDocs.docs.map((courseDoc) => {
-    const oldCourse = courseDoc.data();
-    const newCourse = newCourse({
+    const oldItem = courseDoc.data();
+    const newItem = newCourse({
       // version
-      uid: oldCourse.uid,
-      created: oldCourse.created,
+      uid: oldItem.uid,
+      created: oldItem.created,
       updated: admin.firestore.Timestamp.now(),
 
       // image - removed
 
-      creatorUid: oldCourse.creatorUid,
-      displayName: oldCourse.displayName,
-      description: oldCourse.description,
+      creatorUid: oldItem.creatorUid,
+      displayName: oldItem.displayName,
+      description: oldItem.description,
       // type - default
       // price - default
       // priceFrequency - default
@@ -105,13 +121,15 @@ const migrateCourses = async () => {
       isPublic: true // old behavior
     });
 
-    return courseDoc.ref.set(newCourse);
+    return courseDoc.ref.set(newItem);
   }));
+  console.log('migrated', courseDocs.size, 'courses');
 };
 
 // To migrate tokens, we have to get courses.
 const migrateTokens = async () => {
   // v0 to v5
+  console.log('migrating tokens');
   const docs = await admin.firestore().collection('tokens').get();
 
   // v0: { version, uid, created, updated } { access, courseUid, description, displayName, image, user }
@@ -139,11 +157,13 @@ const migrateTokens = async () => {
 
     await doc.ref.set(newItem);
   }));
+  console.log(`migrated ${docs.size} tokens`)
 
   // user, userDisplayName, courseUid, price, priceFrequency, access, displayName, parent, creatorUid, type, isPublic
 };
 
 const migrateStripeCustomers = async () => {
+  console.log('migrating stripe customers');
   const docs = await admin.firestore().collection('stripe_customers').get();
   Promise.all(docs.docs.map((doc) => {
     const oldItem = doc.data();
@@ -153,15 +173,16 @@ const migrateStripeCustomers = async () => {
       version
     })
   }));
+  console.log(`migrated ${docs.size} stripe customers`);
 };
 
 const migrate = async () => {
   console.log('--- MIGRATING ---');
   // Gotta do these one at a time.
-  // await migrateUsers(); // TODO Gotta create the other users from this (for Easy)
-  // await migrateCourses();
-  // await migrateItems();
-  // await migrateTokens();
+  await migrateUsers();
+  await migrateCourses();
+  await migrateItems();
+  await migrateTokens();
   await migrateStripeCustomers();
 };
 
