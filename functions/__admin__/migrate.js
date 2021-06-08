@@ -186,9 +186,9 @@ const migrate = async () => {
   console.log('--- MIGRATING ---');
   // Gotta do these one at a time.
   // await migrateUsers();
-  await migrateCourses();
+  // await migrateCourses();
   // await migrateItems();
-  // await migrateTokens();
+  await migrateTokens();
   // await migrateStripeCustomers();
 };
 
