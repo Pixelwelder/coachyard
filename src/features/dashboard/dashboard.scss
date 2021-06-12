@@ -27,6 +27,7 @@ dashboard-page {
   flex-direction: column;
   align-items: center;
   margin-right: 32px;
+  flex: 1 1 150px;
 
   ul {
     border: none;
@@ -44,10 +45,20 @@ $student-image-size: 100px;
 
 .student-name {
   margin-right: 8px !important;
+  text-align: center;
+
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .course-link {
+  text-align: center;
 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chats {
