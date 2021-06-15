@@ -42,7 +42,6 @@ const Course = () => {
   const isPurchasing = useSelector(selectedCourseSelectors.selectIsBeingPurchased);
   const ownsDescendant = useSelector(selectedCourseSelectors.selectOwnsDescendant);
   const ownedDescendant = useSelector(selectedCourseSelectors.selectOwnedDescendant);
-  const isTeacher = useSelector(catalogSelectors.selectIsTeacher);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -182,7 +181,7 @@ const Course = () => {
               <>
                 <ItemList />
                 <div className="toc-footer">
-                  {hasAccess && isTeacher && (
+                  {hasAccess && isCreator && (
                     <>
                       <Button
                         variant="contained"

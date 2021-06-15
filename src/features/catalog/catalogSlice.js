@@ -389,6 +389,7 @@ const actions = {
 };
 
 const select = ({ catalog }) => catalog;
+/** Selector to find out if this user is A TEACHER (not a teacher of a specific course). **/
 const selectTokens = createSelector(select, ({ tokensByUid }) => Object.values(tokensByUid));
 const selectIsTeacher = createSelector(
   selectTokens, tokens => !!tokens.find(({ access }) => access === 'admin')

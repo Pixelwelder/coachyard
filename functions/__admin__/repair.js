@@ -70,9 +70,24 @@ const repairTokens = async () => {
   }));
 };
 
+const repairCourses = async () => {
+  console.log('repairing courses...')
+  const courseDocs = await admin.firestore().collection('courses').get();
+  await Promise.all(courseDocs.docs.map(async (courseDoc) => {
+    const itemDocs = await courseDoc.ref.collection('items')
+      .orderBy('created')
+      .get();
+    const itemOrder = itemDocs.docs.map(itemDoc => itemDoc.id);
+    await courseDoc.ref.update({ itemOrder });
+    console.log('itemOrder', itemOrder);
+  }));
+  console.log('courses repaired');
+};
+
 const repair = async () => {
   // await repairUsers();
-  await repairTokens();
+  // await repairTokens();
+  await repairCourses();
 };
 
 const go = () => {

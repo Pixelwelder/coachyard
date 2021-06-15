@@ -44,11 +44,11 @@ const _init = createAsyncThunk(
     if (isInitialized) throw new Error('Firebase is already initialized.');
 
     await app.initializeApp(firebaseConfig);
-    // if (window.location.hostname === 'localhost') {
-    //   app.auth().useEmulator('http://localhost:9099/');
-    //   app.functions().useEmulator('localhost', 5001);
-    //   app.firestore().useEmulator('localhost', 8082);
-    // }
+    if (window.location.hostname === 'localhost') {
+      app.auth().useEmulator('http://localhost:9099/');
+      app.functions().useEmulator('localhost', 5001);
+      app.firestore().useEmulator('localhost', 8082);
+    }
 
     app.analytics();
     app.analytics().setAnalyticsCollectionEnabled(true);
