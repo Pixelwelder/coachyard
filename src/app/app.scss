@@ -412,8 +412,16 @@ $billing-width: 400px;
 
 .participant-images {
   padding: 0;
+  margin-bottom: 0;
   display: flex;
   list-style: none;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.participant-image {
+  width: 100px;
+  height: 100px;
 }
 
 // ------------------------------------ COURSE ------------------------------------ //

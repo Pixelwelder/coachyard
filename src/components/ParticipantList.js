@@ -18,18 +18,26 @@ const Participant = ({ token }) => {
 
   return (
     <li className="token-item">
-      <img src={imageUrl || '/images/generic-avatar-2.png'} className="item-info-image" />
+      <img src={imageUrl || '/images/generic-avatar-2.png'} className="participant-image" />
       <Typography variant="h6">{token.userDisplayName}</Typography>
     </li>
   );
 };
 
+const numDisplayed = 5
 const ParticipantList = ({ tokens }) => (
-  <ul className="participant-images">
-    {
-      tokens.map((token, index) => <Participant token={token} key={index} />)
-    }
-  </ul>
+  <>
+    <ul className="participant-images">
+      {
+        tokens
+          .slice(0, numDisplayed)
+          .map((token, index) => <Participant token={token} key={index} />)
+      }
+    </ul>
+    {tokens.length > numDisplayed && (
+      <p>...and {tokens.length - numDisplayed} more</p>
+    )}
+  </>
 );
 
 export default ParticipantList;

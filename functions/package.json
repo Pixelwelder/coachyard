@@ -32,7 +32,7 @@
     "luxon": "^1.27.0",
     "node-fetch": "^2.6.1",
     "password-generator": "^2.3.2",
-    "stripe": "^8.129.0",
+    "stripe": "^8.168.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "winston-loggly-bulk": "^3.1.1"
