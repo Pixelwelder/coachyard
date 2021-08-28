@@ -8,8 +8,9 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js/pure';
 import store from './app/store';
 import App from './app';
+import { stripe } from './config'
 
-const stripePromise = loadStripe('pk_test_51I1CdRISeRywORkaq77pnFumuqJSFrt3iS7MpQrklwFmMnGWTQvulNSdMCWDyNAva3DpXTyi6wMdYNe9cDMNHAA500upm6uPsE');
+const stripePromise = loadStripe(stripe.publishable_key);
 
 ReactDOM.render(
   <React.StrictMode>
