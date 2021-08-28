@@ -341,25 +341,22 @@ form {
 }
 
 .attachment-list {
-  border: 1px solid green;
   align-self: stretch;
   padding: 0;
 }
 
 .attachment {
   display: flex;
-  border: 1px solid gray;
+  border: 1px solid #eeeeee;
+  border-radius: 4px;
   padding: 8px;
-
-  &.editing {
-
-  }
 }
 
 .attachment-image {
   width: 75px;
   height: 100px;
   border: 1px solid lightgray;
+  border-radius: 4px;
   margin-right: 16px;
   display: flex;
   justify-content: center;
