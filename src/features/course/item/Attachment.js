@@ -84,69 +84,79 @@ const Attachment = ({ attachment: _attachment, onEdit, onStopEdit, isEditing }) 
 
   return (
     <li className="attachment">
-      <div className="attachment-image" onClick={onDownload}>
-        <FileIcon fontSize="large" color="primary" />
-      </div>
-      <div className="attachment-info">
-        {!isEditing && (
-          <>
-            <Typography className="attachment-title" variant="h6">{localAttachment.displayName}</Typography>
-            <Typography>{localAttachment.description}</Typography>
-            <Button className="attachment-download" size="small" variant="contained" color="primary" onClick={onDownload}>
-              <DownloadIcon fontSize="small" />
-            </Button>
-          </>
-        )}
-
-        {isEditing && (
-          <>
-            <TextField
-              value={localAttachment.displayName} name="displayName" title="Name" variant="outlined"
-              onChange={onChange}
-              autoFocus
-            />
-            <TextField
-              value={localAttachment.description} name="description" title="Description" variant="outlined" multiline rows={2}
-              onChange={onChange}
-            />
-            <DropzoneArea
-              filesLimit={1}
-              onChange={onSetFiles}
-              onClose={() => {}}
-              dropzoneText={`Drag your attachment here or click to select`}
-            />
-          </>
-        )}
-      </div>
-      {ownsCourse && (
-        <div className="attachment-buttons">
+      {!_attachment && (
+        <div className="attachment-title">
+          <Typography variant="h6">New Attachment</Typography>
+        </div>
+      )}
+      <div className="attachment-body">
+        <div className="attachment-image" onClick={onDownload}>
+          <FileIcon fontSize="large" color="primary" />
+        </div>
+        <div className="attachment-info">
           {!isEditing && (
             <>
-              <Button size="small" variant="contained" onClick={onEdit}>
-                <EditIcon fontSize="small" />
+              <Typography className="attachment-title" variant="h6">{localAttachment.displayName}</Typography>
+              <Typography>{localAttachment.description}</Typography>
+              <Button className="attachment-download" size="small" variant="contained" color="primary" onClick={onDownload}>
+                <DownloadIcon fontSize="small" />
               </Button>
             </>
           )}
+
           {isEditing && (
             <>
-              {!!_attachment && (
-                <Button size="small" variant="contained" color="secondary" onClick={onDelete}>
-                  <DeleteIcon fontSize="small" />
-                </Button>
-              )}
-              <Button size="small" variant="contained" color="primary" onClick={onSave} disabled={!canSubmit()}>
-                <CheckIcon fontSize="small" />
-              </Button>
-              <Button size="small" variant="contained" color="default" onClick={onStopEdit}>
-                <CancelIcon fontSize="small" />
-              </Button>
-              {/*<Button size="small" variant="contained">*/}
-              {/*  <CancelIcon fontSize="small" onClick={onStopEdit} />*/}
-              {/*</Button>*/}
+              <TextField
+                value={localAttachment.displayName} name="displayName" title="Name" variant="outlined"
+                placeholder="Name"
+                onChange={onChange}
+                autoFocus
+              />
+              <TextField
+                value={localAttachment.description} name="description" title="Description" variant="outlined"
+                placeholder="Description"
+                multiline rows={2}
+                onChange={onChange}
+              />
+              <DropzoneArea
+                filesLimit={1}
+                onChange={onSetFiles}
+                onClose={() => {}}
+                dropzoneText={`Drag your attachment here or click to select`}
+              />
             </>
           )}
         </div>
-      )}
+        {ownsCourse && (
+          <div className="attachment-buttons">
+            {!isEditing && (
+              <>
+                <Button size="small" variant="contained" onClick={onEdit}>
+                  <EditIcon fontSize="small" />
+                </Button>
+              </>
+            )}
+            {isEditing && (
+              <>
+                {!!_attachment && (
+                  <Button size="small" variant="contained" color="secondary" onClick={onDelete}>
+                    <DeleteIcon fontSize="small" />
+                  </Button>
+                )}
+                <Button size="small" variant="contained" color="primary" onClick={onSave} disabled={!canSubmit()}>
+                  <CheckIcon fontSize="small" />
+                </Button>
+                <Button size="small" variant="contained" color="default" onClick={onStopEdit}>
+                  <CancelIcon fontSize="small" />
+                </Button>
+                {/*<Button size="small" variant="contained">*/}
+                {/*  <CancelIcon fontSize="small" onClick={onStopEdit} />*/}
+                {/*</Button>*/}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </li>
   )
 };

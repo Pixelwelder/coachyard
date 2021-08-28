@@ -20,8 +20,8 @@ const Attachments = () => {
   return (
     <div className="attachments">
       <ul className="attachment-list">
-        {!attachments.length && (
-          <li>
+        {!attachments.length && !isCreating && (
+          <li className="no-attachments">
             <Typography>This item has no attachments.</Typography>
           </li>
         )}
@@ -46,9 +46,9 @@ const Attachments = () => {
           )
         }
         {ownsCourse && !isCreating && (
-          <li>
+          <li className="add-attachment-btn">
             <Button
-              variant="contained" color="primary" size="small"onClick={onCreate}
+              variant="contained" color="default" size="small"onClick={onCreate}
             >
               <AddIcon />
             </Button>

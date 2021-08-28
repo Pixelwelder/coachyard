@@ -28,49 +28,24 @@ const ViewingMode = ({ size }) => {
           ? <EditItemView />
           : (
             <>
-              <ItemTitle item={selectedItem} />
-              <Tabs
-                className="edit-course-tabs"
-                onChange={(event, newValue) => setTab(newValue)}
-                value={tab}
-              >
-                <Tab label="Video" />
-                <Tab label="Description" />
-                <Tab label="Attachments" />
-              </Tabs>
-              {tab === 0 && (
+              {selectedItem?.playbackId && (
                 <>
-                  {selectedItem?.playbackId && (
-                    <>
-                      <div className="player-wrapper">
-                        <ReactPlayer
-                          width="100%"
-                          height="100%"
-                          url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
-                          controls
-                        />
-                      </div>
-                      <div className="spacer" />
-                    </>
-                  )}
-                  {!selectedItem.streamingId && (
-                    <div className="no-video">
-                      <NoVideoIcon />
-                      <Typography>No video uploaded</Typography>
-                    </div>
-                  )}
+                  <div className="player-wrapper">
+                    <ReactPlayer
+                      width="100%"
+                      height="100%"
+                      url={`https://stream.mux.com/${selectedItem.playbackId}.m3u8`}
+                      controls
+                    />
+                  </div>
+                  <div className="spacer" />
                 </>
               )}
-
-              {tab === 1 && (
-                <>
-                  <Typography variant="h4">{selectedItem?.displayName || 'No Item Selected'}</Typography>
-                  <div className="item-description">{ ReactHtmlParser(selectedItem?.description || '') }</div>
-                </>
-              )}
-
-              {tab === 2 && (
-                <Attachments />
+              {!selectedItem.streamingId && (
+                <div className="no-video">
+                  <NoVideoIcon />
+                  <Typography>No video uploaded</Typography>
+                </div>
               )}
 
               {ownsCourse && (

@@ -24,9 +24,10 @@ import { CourseChat } from '../chat';
 import { actions as catalogActions, selectors as catalogSelectors } from '../catalog/catalogSlice';
 import { actions as billingActions2 } from '../billing2/billingSlice2';
 import { selectHasAccessToCurrentCourse } from '../app/comboSelectors';
-import {
-  Dialog, DialogActions, DialogContent, DialogTitle
-} from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import { getPriceString } from '../../util/currency';
 

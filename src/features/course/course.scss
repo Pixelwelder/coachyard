@@ -116,6 +116,16 @@
   }
 }
 
+.item-view-header {
+  display: flex;
+  align-items: center;
+}
+
+.item-view-title {
+  flex: 1;
+  padding-left: 16px;
+}
+
 .item-mode {
   flex: 1;
   display: flex;
@@ -214,7 +224,6 @@ form {
   justify-content: center;
   align-items: center;
   text-align: center;
-  border: 1px solid red;
 }
 
 .participant-name {
@@ -237,6 +246,10 @@ form {
     align-items: flex-end;
     padding: 4px;
   }
+}
+
+.edit-course-tabs {
+  margin: 0;
 }
 
 .course-large-image {
@@ -324,8 +337,17 @@ form {
 }
 
 .item-description {
-  flex: 1;
-  overflow: auto;
+  padding: 16px;
+  flex: 1 1 auto;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column;
+}
+
+.wysiwyg-editor {
+  //border: 1px solid lightgray;
+  //border-radius: 4px;
+  //padding: 8px;
 }
 
 .purchase-instruction {
@@ -338,22 +360,41 @@ form {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
+  padding: 16px;
 }
 
 .attachment-list {
   align-self: stretch;
   padding: 0;
+  margin: 0;
   list-style: none;
   height: 100px;
   flex: 1 1 auto;
   overflow: auto;
 }
 
+.no-attachments {
+
+}
+
+.add-attachment-btn {
+  margin-top: 8px;
+}
+
 .attachment {
   display: flex;
+  flex-flow: column nowrap;
   border: 1px solid #eeeeee;
   border-radius: 4px;
   padding: 8px;
+}
+
+.attachment-title {
+  margin-bottom: 8px;
+}
+
+.attachment-body {
+  display: flex;
 }
 
 .attachment-image {
