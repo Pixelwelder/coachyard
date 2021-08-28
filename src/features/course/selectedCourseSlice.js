@@ -579,10 +579,33 @@ const removeUser = createAsyncThunk(
   },
 );
 
-const addAttachment = createAsyncThunk(
-  `${name}/addAttachment`,
-  async ({ itemUid, displayName, description, file }) => {
+const createAttachment = createAsyncThunk(
+  `${name}/createAttachment`,
+  async ({ attachment: _attachment, file }, { getState }) => {
+    try {
+      const { course, selectedItemUid } = select(getState());
 
+      const doc = app.firestore()
+        .collection('courses').doc(course.uid)
+        .collection('items').doc(selectedItemUid)
+        .collection('attachments').doc();
+
+      const attachment = {
+        ..._attachment,
+        uid: doc.id,
+        created: app.firestore.Timestamp.now(),
+        updated: app.firestore.Timestamp.now()
+      };
+
+      console.log('creating attachment', attachment.uid, file);
+      const ref = app.storage().ref().child(`/attachments/${attachment.uid}`);
+      await ref.put(file);
+      console.log('attachment created');
+
+      await doc.set(attachment);
+    } catch (error) {
+      console.error(error);
+    }
   }
 )
 
@@ -590,18 +613,42 @@ const updateAttachment = createAsyncThunk(
   `${name}/updateAttachment`,
   async ({ attachment, file }, { getState }) => {
     const { course, selectedItemUid } = select(getState());
-    const result = await app.firestore()
+
+    if (file) {
+      const ref = app.storage().ref().child(`/attachments/${attachment.uid}`);
+      await ref.put(file);
+    }
+
+    await app.firestore()
       .collection('courses').doc(course.uid)
       .collection('items').doc(selectedItemUid)
       .collection('attachments').doc(attachment.uid)
-      .update(attachment);
-
-    console.log('uploading attachment', file)
-    const ref = app.storage().ref().child(`/attachments/${attachment.uid}`);
-    await ref.put(file);
-    console.log('attachment uploaded');
+      .set(attachment);
   }
-)
+);
+
+const deleteAttachment = createAsyncThunk(
+  `${name}/deleteAttachment`,
+  async (attachment, { getState }) => {
+    const { uid } = attachment;
+    const { course, selectedItemUid } = select(getState());
+
+    try {
+      console.log('deleting file');
+      const ref = app.storage().ref().child(`/attachments/${uid}`);
+      await ref.delete();
+      console.log('file deleted');
+    } catch (error) {
+      console.error(error);
+    }
+
+    await app.firestore()
+      .collection('courses').doc(course.uid)
+      .collection('items').doc(selectedItemUid)
+      .collection('attachments').doc(uid)
+      .delete();
+  }
+);
 
 const init = createAsyncThunk(
   `${name}/initSelectedCourse`,
@@ -622,7 +669,9 @@ const actions = {
   addUser,
   removeUser,
   purchaseCourse,
-  updateAttachment
+  createAttachment,
+  updateAttachment,
+  deleteAttachment
 };
 
 export { actions, selectors };

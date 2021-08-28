@@ -5,30 +5,21 @@ import { selectors as selectedCourseSelectors, actions as selectedCourseActions 
 import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
 import Attachment from './Attachment';
-import UploadAttachmentDialog from '../../../components/UploadAttachmentDialog';
+import { newAttachment } from '../../../data';
 
 const Attachments = () => {
   const { attachments } = useSelector(selectedCourseSelectors.select);
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
-  const selectedItem = useSelector(selectedCourseSelectors.selectSelectedItem);
-  const [upload, setUpload] = useState('');
-  const [editing, setEditing] = useState(-1);
+  const [isEditing, setIsEditing] = useState(-1);
+  const [isCreating, setIsCreating] = useState(null);
 
-  console.log('attachments', attachments)
-
-  const onChange = ({ target }) => {
-    const { value } = target;
-    const name = target.getAttribute('name');
-    // dispatch(actions.setValues({ [name]: value }));
+  const onCreate = () => {
+    setIsCreating(true);
+    setIsEditing(true);
   };
 
   return (
     <div className="attachments">
-      <UploadAttachmentDialog
-        type={upload}
-        filename={attachments.length}
-        onClose={() => setUpload('')}
-      />
       {!!attachments.length && (
         <ul className="attachment-list">
           {
@@ -36,20 +27,29 @@ const Attachments = () => {
               <Attachment
                 key={index}
                 attachment={attachment}
-                onEdit={() => setEditing(index)}
-                onStopEdit={() => setEditing(-1)}
-                isEditing={editing === index}
+                onEdit={() => setIsEditing(index)}
+                onStopEdit={() => setIsEditing(-1)}
+                isEditing={isEditing === index}
               />
             ))
+          }
+          {
+            isCreating && (
+              <Attachment
+                attachment={null}
+                onStopEdit={() => setIsCreating(false)}
+                isEditing
+              />
+            )
           }
         </ul>
       )}
       {!attachments.length && (
         <Typography>This item has no attachments.</Typography>
       )}
-      {ownsCourse && (
+      {ownsCourse && !isCreating && (
         <Button
-          variant="contained" color="primary" size="small"onClick={() => setUpload('attachments')}
+          variant="contained" color="primary" size="small"onClick={onCreate}
         >
           <AddIcon />
         </Button>

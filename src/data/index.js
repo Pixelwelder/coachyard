@@ -1,3 +1,4 @@
+// TODO Copy of backend version.
 const version = 5;
 
 // TODO Factory method that handles timestamps.

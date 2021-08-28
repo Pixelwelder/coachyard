@@ -382,6 +382,7 @@ form {
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-end;
+  margin-left: 16px;
 
   button:not(:last-child) {
     margin-bottom: 8px;
