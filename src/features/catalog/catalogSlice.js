@@ -76,6 +76,7 @@ const createNewCourse = createAsyncThunk(
   async (params, { dispatch, getState }) => {
     app.analytics().logEvent(EventTypes.CREATE_COURSE_ATTEMPTED);
     const { data: course } = await app.functions().httpsCallable('createCourse2')(params);
+    console.log('createNewCourse complete', course)
     app.analytics().logEvent(EventTypes.CREATE_COURSE);
     return course;
   }

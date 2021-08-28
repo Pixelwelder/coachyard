@@ -14,12 +14,10 @@ import { DropzoneArea } from 'material-ui-dropzone';
 import { actions as selectedCourseActions } from '../selectedCourseSlice';
 import app from 'firebase';
 import downloadFile from '../../../util/downloadFile';
-import { newAttachment } from '../../../data';
 import { actions as uiActions2 } from '../../ui/uiSlice2';
-import { actions as dashboardActions } from '../../dashboard/dashboardSlice';
 
 const Attachment = ({ attachment: _attachment, onEdit, onStopEdit, isEditing }) => {
-  const attachment = _attachment ? _attachment : newAttachment();
+  const attachment = _attachment ? _attachment : { displayName: '', description: '' };
   const ownsCourse = useSelector(selectedCourseSelectors.selectOwnsCourse);
   const [localAttachment, setLocalAttachment] = useState({ ...attachment });
   const [file, setFile] = useState(null)
@@ -85,7 +83,7 @@ const Attachment = ({ attachment: _attachment, onEdit, onStopEdit, isEditing }) 
   }, [isEditing])
 
   return (
-    <div className="attachment">
+    <li className="attachment">
       <div className="attachment-image" onClick={onDownload}>
         <FileIcon fontSize="large" color="primary" />
       </div>
@@ -149,7 +147,7 @@ const Attachment = ({ attachment: _attachment, onEdit, onStopEdit, isEditing }) 
           )}
         </div>
       )}
-    </div>
+    </li>
   )
 };
 

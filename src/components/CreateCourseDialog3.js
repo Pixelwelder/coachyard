@@ -54,6 +54,7 @@ const NewCourseDialog = () => {
       }),
     );
 
+    console.log('onSubmit', course);
     dispatch(uiActions2.editCourse.setValues(course));
     dispatch(uiActions2.editCourse.setIsEditing(true));
     history.push(`/course/${course.uid}`);

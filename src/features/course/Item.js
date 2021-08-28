@@ -40,7 +40,7 @@ const Item = ({ item, isSelected, onSelect }) => {
             {item.displayName}
             {!hasAccess && <LockIcon className="item-name-icon" color="disabled" />}
           </Typography>
-          <Chip className="item-name-type" label={item.type} color="primary" size="small" />
+          {/*<Chip className="item-name-type" label={item.type} color="primary" size="small" />*/}
         </div>
         {item.status === 'scheduled' && (
           <Typography>

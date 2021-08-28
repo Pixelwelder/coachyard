@@ -14,7 +14,7 @@ const { createSlug } = require('../util/firestore');
 const usersOnCreateUser = functions.auth.user()
   .onCreate(async (_user, context) => {
     // Wait for a moment to let Firebase get its sh*t together
-    console.log('usersOnCreateUser: waiting...')
+    console.log(`usersOnCreateUser (${_user.uid}): waiting...`)
     await new Promise(resolve => setTimeout(resolve, 1000));
     console.log('usersOnCreateUser: wait complete')
     const user = await admin.auth().getUser(_user.uid);

@@ -343,6 +343,10 @@ form {
 .attachment-list {
   align-self: stretch;
   padding: 0;
+  list-style: none;
+  height: 100px;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 .attachment {
