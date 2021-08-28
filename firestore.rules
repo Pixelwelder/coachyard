@@ -43,6 +43,11 @@ service cloud.firestore {
       match /items/{uid} {
         // TODO
         allow read, write: if true;
+
+        match /attachments/{uid} {
+          // TODO
+          allow read, write: if true;
+        }
       }
     }
 

@@ -11,6 +11,7 @@ import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
 import ItemTitle from './ItemTitle';
 import ReactHtmlParser from 'react-html-parser';
 import NoVideoIcon from '@material-ui/icons/NotInterested';
+import Attachments from './item/Attachments';
 
 const ViewingMode = ({ size }) => {
   const { course } = useSelector(selectedCourseSelectors.select);
@@ -35,6 +36,7 @@ const ViewingMode = ({ size }) => {
               >
                 <Tab label="Video" />
                 <Tab label="Description" />
+                <Tab label="Attachments" />
               </Tabs>
               {tab === 0 && (
                 <>
@@ -65,6 +67,10 @@ const ViewingMode = ({ size }) => {
                   <Typography variant="h4">{selectedItem?.displayName || 'No Item Selected'}</Typography>
                   <div className="item-description">{ ReactHtmlParser(selectedItem?.description || '') }</div>
                 </>
+              )}
+
+              {tab === 2 && (
+                <Attachments />
               )}
 
               {ownsCourse && (

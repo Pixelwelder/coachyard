@@ -86,6 +86,9 @@ const newCourseItem = (overrides) => ({
   playbackId: '',
   streamingInfo: false,
 
+  // Attached assets
+  attachments: [],
+
   ...overrides
 });
 
@@ -113,6 +116,13 @@ const newCourseToken = (overrides) => ({
   ...overrides
 });
 
+const newAsset = (overrides) => ({
+  ...newBaseItem(),
+  displayName: '',
+  description: '',
+  ...overrides
+});
+
 const unitConverter = item => item;
 
 // Maps types (collections) to constructors.
@@ -135,5 +145,6 @@ module.exports = {
   newStripePayment,
   newCourse,
   newCourseItem,
-  newCourseToken
+  newCourseToken,
+  newAsset
 };

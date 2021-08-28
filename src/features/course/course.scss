@@ -332,3 +332,58 @@ form {
   font-size: 12px !important;
   font-style: italic;
 }
+
+.attachments {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+}
+
+.attachment-list {
+  border: 1px solid green;
+  align-self: stretch;
+  padding: 0;
+}
+
+.attachment {
+  display: flex;
+  border: 1px solid gray;
+  padding: 8px;
+
+  &.editing {
+
+  }
+}
+
+.attachment-image {
+  width: 75px;
+  height: 100px;
+  border: 1px solid lightgray;
+  margin-right: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.attachment-info {
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1;
+  //align-items: flex-start;
+}
+
+.attachment-download {
+  align-self: flex-start;
+}
+
+.attachment-buttons {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+
+  button:not(:last-child) {
+    margin-bottom: 8px;
+  }
+}

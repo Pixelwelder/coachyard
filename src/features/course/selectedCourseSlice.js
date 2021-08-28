@@ -44,6 +44,7 @@ const initialState = {
   parentItems: {},
 
   selectedItemUid: null,
+  attachments: [],
 
   chat: [],
   chatMessage: '',
@@ -180,6 +181,7 @@ const { actions: generatedActions, reducer } = createSlice({
     setStudent: setValue('student'),
     setItems: setValue('items'),
     setSelectedItemUid: setValue('selectedItemUid'),
+    setAttachments: setValue('attachments'),
     setIsRecording: setValue('isRecording'),
     setIsFullscreen: setValue('isFullscreen'),
     setSidebarMode: (state, action) => {
@@ -234,6 +236,14 @@ const parseItems = (snapshot) => {
     .reduce((accum, item) => ({ ...accum, [item.uid]: item }), {});
 };
 
+/**
+ * Parses a snapshot of items into an equivalent array in the same order.
+ *
+ * @param snapshot
+ * @returns the items in an array
+ */
+const parseItemsArr = (snapshot) => snapshot.docs.map(item => parseUnserializables(item.data()))
+
 let unsubscribeCourse = () => {};
 let unsubscribeLocalItems = () => {};
 let unsubscribeParentCourse = () => {};
@@ -244,6 +254,7 @@ let unsubscribeStudentTokens = () => {};
 let unsubscribeChat = () => {};
 let unsubscribeSessions = () => {};
 let unsubscribeDescendants = () => {};
+let unsubscribeAttachments = () => {};
 
 const unsubscribe = () => {
   unsubscribeCourse();
@@ -256,7 +267,27 @@ const unsubscribe = () => {
   unsubscribeChat();
   unsubscribeSessions();
   unsubscribeDescendants();
+  unsubscribeAttachments();
 };
+
+const setSelectedItemUid = createAsyncThunk(
+  `${name}/setSelectedItemUid`,
+  async (itemUid, { dispatch, getState }) => {
+    const { course } = select(getState());
+
+    console.log('setSelectedItemUid', itemUid, course.uid);
+    dispatch(generatedActions.setSelectedItemUid(itemUid));
+    unsubscribeAttachments();
+    unsubscribeAttachments = app.firestore()
+      .collection('courses').doc(course.uid)
+      .collection('items').doc(itemUid)
+      .collection('attachments')
+      .onSnapshot((snapshot) => {
+        const attachments = parseItemsArr(snapshot);
+        dispatch(generatedActions.setAttachments(attachments));
+      });
+  }
+);
 
 const setLocation = createAsyncThunk(
   `${name}/setLocation`,
@@ -290,14 +321,14 @@ const setLocation = createAsyncThunk(
           const { items, parentItems } = state;
           if (items[itemUid] || parentItems[itemUid]) {
             // This is valid. Go ahead and set it.
-            dispatch(generatedActions.setSelectedItemUid(itemUid));
+            dispatch(setSelectedItemUid(itemUid));
             return;
           }
           // This is invalid. Call setLocation again, but with a null itemUid.
           history.push(`/course/${courseUid}`);
           return;
         }
-        dispatch(generatedActions.setSelectedItemUid(initialState.selectedItemUid));
+        dispatch(setSelectedItemUid(initialState.selectedItemUid));
         return;
       }
     }
@@ -340,7 +371,7 @@ const setLocation = createAsyncThunk(
     dispatch(generatedActions.setCourse(course));
 
     // We can also set the itemUid, though a later load failure will still abandon us to the dashboard.
-    dispatch(generatedActions.setSelectedItemUid(itemUid));
+    dispatch(setSelectedItemUid(itemUid));
 
     // Now grab all items. TODO This could be more elegant.
     // This will run twice: once after each item collection load.
@@ -548,6 +579,30 @@ const removeUser = createAsyncThunk(
   },
 );
 
+const addAttachment = createAsyncThunk(
+  `${name}/addAttachment`,
+  async ({ itemUid, displayName, description, file }) => {
+
+  }
+)
+
+const updateAttachment = createAsyncThunk(
+  `${name}/updateAttachment`,
+  async ({ attachment, file }, { getState }) => {
+    const { course, selectedItemUid } = select(getState());
+    const result = await app.firestore()
+      .collection('courses').doc(course.uid)
+      .collection('items').doc(selectedItemUid)
+      .collection('attachments').doc(attachment.uid)
+      .update(attachment);
+
+    console.log('uploading attachment', file)
+    const ref = app.storage().ref().child(`/attachments/${attachment.uid}`);
+    await ref.put(file);
+    console.log('attachment uploaded');
+  }
+)
+
 const init = createAsyncThunk(
   `${name}/initSelectedCourse`,
   async (_, { dispatch }) => {
@@ -566,7 +621,8 @@ const actions = {
   searchForEmail,
   addUser,
   removeUser,
-  purchaseCourse
+  purchaseCourse,
+  updateAttachment
 };
 
 export { actions, selectors };

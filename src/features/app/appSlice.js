@@ -48,6 +48,7 @@ const _init = createAsyncThunk(
       app.auth().useEmulator('http://localhost:9099/');
       app.functions().useEmulator('localhost', 5001);
       app.firestore().useEmulator('localhost', 8082);
+      app.storage().useEmulator('localhost', 9199);
     }
 
     app.analytics();

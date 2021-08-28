@@ -37,7 +37,7 @@ const uploadAssets = createAsyncThunk(
       dispatch(generatedActions.setDirtyFlags({ [path]: dirtyFlag + 1 }));
     });
 
-    await Promise.all(uploads);
+    const result = await Promise.all(uploads);
     console.log('uploaded');
   }
 );
