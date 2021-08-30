@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import { Redirect, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { SizeMe } from 'react-sizeme';
 import Typography from '@material-ui/core/Typography';
 import { selectors as selectedCourseSelectors } from './selectedCourseSlice';
@@ -18,8 +18,10 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Attachments from './item/Attachments';
 import ItemDescription from './item/ItemDescription';
+import EditIcon from '@material-ui/icons/Edit';
 import Button from '@material-ui/core/Button';
-import { actions as uiActions2 } from '../ui/uiSlice2';
+import ItemTitle from './item/ItemTitle';
+import { actions as catalogActions } from '../catalog/catalogSlice';
 
 const Locked = ({ item }) => (
   <div className="locked-item">
@@ -37,10 +39,17 @@ const ItemView = () => {
   const hasAccess = useSelector(selectHasAccessToCurrentCourse);
   const { barebones } = query;
   const [tab, setTab] = useState(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // dispatch(uiActions2.editItem.reset());
   }, [selectedItem]);
+
+  const updateItemTitle = async (title) => {
+    await dispatch(catalogActions.updateItem({
+      courseUid: selectedItem.courseUid, itemUid: selectedItem.uid, update: { displayName: title }
+    }));
+  };
 
   return (
     <Paper className="item-view" variant="outlined">
@@ -52,7 +61,7 @@ const ItemView = () => {
         {({ size }) => (
           <>
             <div className="item-view-header">
-              <Typography className="item-view-title" variant="h6">{selectedItem?.displayName || ''}</Typography>
+              <ItemTitle item={selectedItem} onSubmit={updateItemTitle} />
               <Tabs
                 className="edit-course-tabs"
                 onChange={(event, newValue) => setTab(newValue)}

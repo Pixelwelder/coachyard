@@ -487,7 +487,7 @@ const update = createAsyncThunk(
     const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_COURSE);
     await callable({ uid, update: _update });
     app.analytics().logEvent(EventTypes.UPDATE_COURSE);
-  },
+  }
 );
 
 const submitChatMessage = createAsyncThunk(

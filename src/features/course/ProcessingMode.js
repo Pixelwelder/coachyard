@@ -31,24 +31,24 @@ const ProcessingMode = ({ status }) => {
                 <div className="mode-inner">
                   <div className="item-info">
                     <Typography className="participant-name" variant="h6" component="p">
-                      Live Session complete!
+                      Video Processing
                     </Typography>
-                    <Typography>Our server elves are processing your video. It will be available shortly.</Typography>
+                    <Typography>Our server elves are processing this video. It will be available shortly.</Typography>
                   </div>
                 </div>
-                {ownsCourse && (
-                  <>
-                    <div className="owner-controls">
-                      <div className="spacer" />
-                      <Button
-                        variant="contained"
-                        onClick={() => dispatch(uiActions2.editItem.open())}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  </>
-                )}
+                {/*{ownsCourse && (*/}
+                {/*  <>*/}
+                {/*    <div className="owner-controls">*/}
+                {/*      <div className="spacer" />*/}
+                {/*      <Button*/}
+                {/*        variant="contained"*/}
+                {/*        onClick={() => dispatch(uiActions2.editItem.open())}*/}
+                {/*      >*/}
+                {/*        Edit*/}
+                {/*      </Button>*/}
+                {/*    </div>*/}
+                {/*  </>*/}
+                {/*)}*/}
               </>
             )}
           </>

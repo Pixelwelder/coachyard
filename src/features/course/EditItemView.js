@@ -4,7 +4,7 @@ import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import ReactPlayer from 'react-player';
 import Button from '@material-ui/core/Button';
-import DateTimePicker from '@material-ui/pickers/DateTimePicker';
+import { DateTimePicker } from '@material-ui/pickers';
 import FormLabel from '@material-ui/core/FormLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -68,7 +68,6 @@ const EditItemView = ({ requireUpload = false }) => {
   };
 
   const onChangeDescription = (value) => {
-    console.log('onChangeDescription', value);
     dispatch(actions.setValues({ description: value }));
   };
 

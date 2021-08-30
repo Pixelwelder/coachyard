@@ -236,6 +236,7 @@ const updateItem = createAsyncThunk(
   async ({
     courseUid, itemUid, update, file
   }, { dispatch }) => {
+    console.log('updateItem', courseUid, itemUid, update);
     // Upload new file.
     if (file) {
       const { payload: downloadUrl, error } = await dispatch(_uploadItem({ uid: itemUid, file }));
@@ -248,11 +249,13 @@ const updateItem = createAsyncThunk(
     }
 
     // Update data object.
-    app.analytics().logEvent(EventTypes.UPDATE_ITEM_ATTEMPTED);
-    const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
-    const updateResult = await callable({ courseUid, itemUid, update });
+    if (update) {
+      app.analytics().logEvent(EventTypes.UPDATE_ITEM_ATTEMPTED);
+      const callable = app.functions().httpsCallable(CALLABLE_FUNCTIONS.UPDATE_ITEM);
+      const updateResult = await callable({ courseUid, itemUid, update });
 
-    app.analytics().logEvent(EventTypes.UPDATE_ITEM);
+      app.analytics().logEvent(EventTypes.UPDATE_ITEM);
+    }
   }
 );
 

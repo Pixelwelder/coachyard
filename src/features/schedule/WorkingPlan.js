@@ -69,7 +69,6 @@ const Day = ({ day }) => {
   if (!localDay) return null;
 
   const onChange = ({ target: { name, value } }) => {
-    console.log('onChange', name, value);
     setLocalDay({
       ...localDay,
 

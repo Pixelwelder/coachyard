@@ -84,6 +84,17 @@
   }
 }
 
+.item-title-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding-left: 16px;
+
+  &.is-editing {
+    align-items: stretch;
+  }
+}
+
 .selected-item {
   background: #eeeeee;
 }
@@ -122,7 +133,6 @@
 }
 
 .item-view-title {
-  flex: 1;
   padding-left: 16px;
 }
 
@@ -327,6 +337,36 @@ form {
   justify-content: center;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.no-video-message {
+  margin-bottom: 8px !important;
+}
+
+.video-uploader {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.video-upload-container {
+  display: flex;
+}
+
+.upload-video-button {
+
+}
+
+.video-upload-input {
+  margin-bottom: 16px;
+}
+
+.video-upload-submit {
+  margin-bottom: 8px !important;
+}
+
+.video-upload-cancel {
+
 }
 
 .locked-item {
